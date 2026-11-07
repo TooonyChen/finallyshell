@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 )
@@ -43,10 +44,41 @@ func TestLoadNoFile(t *testing.T) {
 func TestLoadBadFile(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("FINALSHELLY_DIR", dir)
-	os.WriteFile(filepath.Join(dir, "hosts.json"), []byte(`{"hosts": 3}`), 0o600)
+	at := time.Date(2026, 11, 7, 9, 5, 3, 0, time.Local)
+	now = func() time.Time { return at }
+	t.Cleanup(func() { now = time.Now })
+	path := filepath.Join(dir, "hosts.json")
+	bad := []byte(`[{"id": "h1", "addr": "example.com"},`) // cut short
+	os.WriteFile(path, bad, 0o600)
+
 	s, err := LoadHosts()
 	if err == nil || s == nil || len(s.Hosts) != 0 {
 		t.Fatalf("bad file: %+v %v", s, err)
+	}
+	copyPath := filepath.Join(dir, "hosts.json.broken-20261107-090503")
+	if BrokenName(at) != filepath.Base(copyPath) {
+		t.Errorf("name %q", BrokenName(at))
+	}
+	if got, _ := os.ReadFile(copyPath); !bytes.Equal(got, bad) {
+		t.Fatalf("copy %q", got)
+	}
+	if !strings.Contains(err.Error(), copyPath) {
+		t.Errorf("error does not name the copy: %v", err)
+	}
+
+	// Saving over it, as the app does next, leaves the copy.
+	s.Add(&Host{Addr: "new.example.com"})
+	if err := SaveHosts(s); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := os.ReadFile(copyPath); !bytes.Equal(got, bad) {
+		t.Errorf("copy after save %q", got)
+	}
+	if again, err := LoadHosts(); err != nil || len(again.Hosts) != 1 {
+		t.Errorf("reloaded %+v %v", again, err)
+	}
+	if left, _ := filepath.Glob(filepath.Join(dir, "*.tmp")); len(left) != 0 {
+		t.Errorf("temporary files left: %v", left)
 	}
 }
 

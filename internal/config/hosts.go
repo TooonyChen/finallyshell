@@ -231,10 +231,18 @@ func hostsPath() string { return filepath.Join(Dir(), "hosts.json") }
 // keeps when it migrates one, as older builds cannot read version 2.
 const V1BackupName = "hosts.v1.json"
 
+// now is the clock that names the copies of broken files; tests set it.
+var now = time.Now
+
+// BrokenName is the copy LoadHosts makes, next to hosts.json, of a
+// hosts.json it cannot parse, at t: hosts.json.broken-20061231-235959.
+func BrokenName(t time.Time) string { return "hosts.json.broken-" + t.Format("20060102-150405") }
+
 // LoadHosts reads hosts.json: an empty store when there is no file yet,
 // or with an error. A version 1 file is migrated (see ParseHosts) and,
 // the first time, copied to V1BackupName; it is rewritten as version 2
-// at the next SaveHosts.
+// at the next SaveHosts. A file that does not parse is copied to
+// BrokenName first, as the next SaveHosts replaces it.
 func LoadHosts() (*Store, error) {
 	data, err := os.ReadFile(hostsPath())
 	if os.IsNotExist(err) {
@@ -245,7 +253,11 @@ func LoadHosts() (*Store, error) {
 	}
 	s, migrated, err := ParseHosts(data)
 	if err != nil {
-		return NewStore(), err
+		broken := filepath.Join(Dir(), BrokenName(now()))
+		if werr := writeFileAtomic(broken, data); werr != nil { // best effort
+			return NewStore(), fmt.Errorf("%s: %w", hostsPath(), err)
+		}
+		return NewStore(), fmt.Errorf("%s: %w (copied to %s)", hostsPath(), err, broken)
 	}
 	if migrated {
 		backup := filepath.Join(Dir(), V1BackupName)
