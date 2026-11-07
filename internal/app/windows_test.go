@@ -166,6 +166,35 @@ func TestEscapeClosesWindow(t *testing.T) {
 	}
 }
 
+// On macOS Cmd+W closes a secondary window too, and the key of closing a
+// tab once the user moved it; elsewhere it does not.
+func TestCmdWClosesWindowOnMac(t *testing.T) {
+	defer func(was bool) { macOS = was }(macOS)
+	for _, mac := range []bool{true, false} {
+		macOS = mac
+		a, p := testApp(t)
+		a.openOptions()
+		tt := p.show(t, WindowOptions)
+		tt.Key(ui.Super, ui.KeyW)
+		if a.windowOpen(WindowOptions) == mac {
+			t.Errorf("mac %v: Cmd+W left the options window open: %v", mac, a.windowOpen(WindowOptions))
+		}
+		rebind(&a.settings.Shortcuts, "darwin", scCloseTab, keyCombo{ui.Super | ui.Shift, ui.KeyW})
+		a.openOptions()
+		tt = p.show(t, WindowOptions)
+		tt.Key(ui.Super|ui.Shift, ui.KeyW)
+		if a.windowOpen(WindowOptions) == mac {
+			t.Errorf("mac %v: the close tab key left the options window open: %v", mac, a.windowOpen(WindowOptions))
+		}
+		if !mac {
+			tt.Key(0, ui.KeyEscape)
+			if a.windowOpen(WindowOptions) {
+				t.Error("Escape left the options window open")
+			}
+		}
+	}
+}
+
 func TestClosingMainClosesWindows(t *testing.T) {
 	const manager, editor WindowKind = "test-manager", "test-editor"
 	a, p := testApp(t)

@@ -93,7 +93,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 | 切换到第 1–9 个标签 | Cmd+1…9 | Alt+1…9 |
 
 - 以前 Ctrl+Shift+T 打开连接管理器，现在和别的终端程序一样是新标签页；新标签页上就有最近的连接和“连接管理器”按钮。连接管理器改成 Ctrl+Shift+O。
-- 关闭标签在 macOS 上是 Cmd+W，不是 FinalShell 的 Cmd+Q（那是退出）。为了让 Cmd+W 到达窗口，macOS 上的菜单栏去掉了 MyGo 默认的“文件”菜单（里面的“关闭窗口”占着 Cmd+W）；关窗口用标题栏的按钮，子窗口按 Esc。
+- 关闭标签在 macOS 上是 Cmd+W，不是 FinalShell 的 Cmd+Q（那是退出）。为了让 Cmd+W 到达窗口，macOS 上的菜单栏去掉了 MyGo 默认的“文件”菜单（里面的“关闭窗口”占着 Cmd+W）。主窗口里 Cmd+W 关闭标签；子窗口（选项、连接编辑器）里 Cmd+W 关闭这个子窗口，和别的 Mac 程序一样（“关闭标签”改成别的键后，那个键也关闭子窗口），Esc 也照样关闭。Windows 和 Linux 上子窗口用 Esc 和系统的关闭按钮。
 - macOS 上切换标签只用 Cmd+数字：Option+数字会输入字符（¡™£……）。
 - Windows 上 terminal 插件默认还把 Ctrl+C（有选中时复制）和 Ctrl+V（剪贴板有内容时粘贴）绑成复制粘贴，这里去掉了，和 Linux 一样留给 shell（中断、原样输入下一个键）。复制粘贴用 Ctrl+Shift+C / Ctrl+Shift+V，或 Ctrl+Insert / Shift+Insert。
 - 只带 Ctrl 的字母键都是 shell 的（Ctrl+A……Ctrl+Z 等），在 Windows/Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
@@ -172,7 +172,7 @@ internal/
 和 FinalShell 一样，设置这类对话框是独立的窗口（MyGo 的子窗口，`WindowOptions.Parent`），不是主窗口里的浮层。目前有选项窗口和连接编辑器；连接管理器之后也会改成子窗口。连接编辑器现在是主窗口的普通（非模态）子窗口，因为连接管理器还是主窗口里的浮层：模态窗口在 macOS 上会变成盖住主窗口的 sheet，在 Linux 上会挡住所有窗口。连接管理器改成窗口后，可以把编辑器的 `Parent` 设成它、改成模态。
 
 - 每种窗口（`WindowKind`）同时只开一个：`a.openWindow(spec, view)` 在已经打开时只把它提到前面。`WindowSpec` 写标题（locales 里的函数，切换语言时重新取）、内容区大小、最小尺寸、父窗口（默认主窗口）和是否模态。
-- 窗口里按 Esc 或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口；关闭主窗口会关闭所有子窗口。
+- 窗口里按 Esc（macOS 上还有 Cmd+W）或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口；关闭主窗口会关闭所有子窗口。
 - 所有窗口共用一个 `App`，都在 UI 线程上。一个窗口只会在自己的输入之后重绘；改了别的窗口也显示的状态（保存的主机、设置）之后调用 `a.redraw()`，重绘所有窗口。`App.post` 投递的工作做完也会重绘所有窗口。
 - 测试里 `fakePlatform` 记下打开的窗口，`p.show(t, kind)` 用一个单独的 `ui.Tester` 画出它的内容。
 

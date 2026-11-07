@@ -162,7 +162,8 @@ func main() {
 	}
 	if runtime.GOOS == "darwin" {
 		// MyGo's default menu bar but its File menu, whose Close Window
-		// takes Cmd+W before the window, where it closes the tab.
+		// takes Cmd+W before the windows: the main one closes the tab with
+		// it, a secondary one itself (openWindow in internal/app).
 		mygo.App.SetMenu(mygo.NewMenu([]*mygo.MenuItem{
 			{Role: mygo.RoleAppMenu}, {Role: mygo.RoleEditMenu}, {Role: mygo.RoleViewMenu}, {Role: mygo.RoleWindowMenu},
 		}))

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"runtime"
 	"slices"
 
 	"github.com/egoist/mygo/ui"
@@ -37,6 +38,24 @@ type WindowSpec struct {
 	Modal bool
 }
 
+// macOS tells whether the app runs on macOS, where Cmd+W closes a
+// secondary window; tests set it.
+var macOS = runtime.GOOS == "darwin"
+
+// closeWindowShortcut tells whether the key that closes a secondary
+// window on macOS was pressed in it, as in every Mac app: Cmd+W, and the
+// key of closing a tab when the user moved it. The app's menu bar has no
+// File menu, whose Close Window would take Cmd+W (see main.go), so the
+// window takes it. Elsewhere Escape and the system close it.
+func (a *App) closeWindowShortcut(c *ui.Context) bool {
+	if !macOS {
+		return false
+	}
+	closeTab := a.shortcut(scCloseTab)
+	return c.Shortcut(ui.Super, ui.KeyW) ||
+		!closeTab.none() && closeTab != (keyCombo{ui.Super, ui.KeyW}) && c.Shortcut(closeTab.Mods, closeTab.Key)
+}
+
 // openWindow opens the window of spec.Kind showing view, or brings it to
 // the front when it is open already. The view is the window's alone: it
 // has the app's theme, and Escape closes the window unless something in
@@ -54,7 +73,7 @@ func (a *App) openWindow(spec WindowSpec, view func(c *ui.Context)) {
 	kind := spec.Kind
 	a.plat.OpenWindow(spec, func(c *ui.Context) {
 		c.SetTheme(theme)
-		if c.Shortcut(0, ui.KeyEscape) {
+		if c.Shortcut(0, ui.KeyEscape) || a.closeWindowShortcut(c) {
 			a.closeWindow(kind)
 		}
 		view(c)
