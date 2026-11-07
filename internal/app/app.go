@@ -72,6 +72,9 @@ type App struct {
 	pwHost *config.Host
 	pwText string
 
+	// The settings window.
+	settingsOpen bool
+
 	// The question before replacing files.
 	replace *replaceQuestion
 }

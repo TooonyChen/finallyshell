@@ -10,6 +10,7 @@ import (
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
+	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -62,6 +63,7 @@ func (a *App) dialogs(c *ui.Context) {
 		})
 	})
 	ui.Modal(c, &a.pwOpen, func() { a.passwordView(c) })
+	ui.Modal(c, &a.settingsOpen, func() { a.settingsView(c) })
 	if s := a.pendingHostKey(); s != nil {
 		open := true
 		ui.Modal(c, &open, func() { a.hostKeyView(c, s) })
@@ -298,6 +300,31 @@ func (a *App) replaceView(c *ui.Context, q *replaceQuestion) {
 			if ui.PrimaryButton(c, locales.Replace()).Clicked() {
 				a.replace = nil
 				q.yes()
+			}
+		})
+	})
+}
+
+// settingsView is the settings window: for now, the language.
+func (a *App) settingsView(c *ui.Context) {
+	ui.Column(c).Width(380).Gap(14).Children(func() {
+		ui.Text(c, locales.Settings()).FontSize(16).Bold()
+		ui.Column(c).Gap(8).Children(func() {
+			ui.Text(c, locales.SettingsLanguage()).Bold()
+			chosen := a.settings.Language
+			ui.RadioGroup(c, func() {
+				ui.Radio(c, &chosen, "", locales.FollowSystem())
+				for _, tag := range a.plat.Languages() {
+					ui.Radio(c, &chosen, tag, i18n.Autonym(tag))
+				}
+			}).Label(locales.SettingsLanguage())
+			if chosen != a.settings.Language {
+				a.setLanguage(chosen)
+			}
+		})
+		ui.Row(c).Justify(ui.End).Children(func() {
+			if ui.PrimaryButton(c, locales.Done()).Clicked() {
+				a.settingsOpen = false
 			}
 		})
 	})

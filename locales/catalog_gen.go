@@ -328,16 +328,6 @@ func (msgs Messages) Settings() string {
 	return Catalog.Format(msgs.locale, "settings", nil)
 }
 
-// Language says "Language"
-// in the language the app shows.
-func Language() string { return In(i18n.Locale()).Language() }
-
-// Language says "Language"
-// in the language of msgs.
-func (msgs Messages) Language() string {
-	return Catalog.Format(msgs.locale, "language", nil)
-}
-
 // FollowSystem says "System language"
 // in the language the app shows.
 func FollowSystem() string { return In(i18n.Locale()).FollowSystem() }
@@ -710,16 +700,6 @@ func ShowInFolder() string { return In(i18n.Locale()).ShowInFolder() }
 // in the language of msgs.
 func (msgs Messages) ShowInFolder() string {
 	return Catalog.Format(msgs.locale, "showInFolder", nil)
-}
-
-// DragOutHint says "Drag to copy the downloaded file elsewhere"
-// in the language the app shows.
-func DragOutHint() string { return In(i18n.Locale()).DragOutHint() }
-
-// DragOutHint says "Drag to copy the downloaded file elsewhere"
-// in the language of msgs.
-func (msgs Messages) DragOutHint() string {
-	return Catalog.Format(msgs.locale, "dragOutHint", nil)
 }
 
 // ReplaceTitle says "Replace existing items?"
@@ -1232,4 +1212,24 @@ func ErrTerminal(error string) string { return In(i18n.Locale()).ErrTerminal(err
 // in the language of msgs.
 func (msgs Messages) ErrTerminal(error string) string {
 	return Catalog.Format(msgs.locale, "errTerminal", map[string]any{"error": error})
+}
+
+// Done says "Done"
+// in the language the app shows.
+func Done() string { return In(i18n.Locale()).Done() }
+
+// Done says "Done"
+// in the language of msgs.
+func (msgs Messages) Done() string {
+	return Catalog.Format(msgs.locale, "done", nil)
+}
+
+// SettingsLanguage says "Language"
+// in the language the app shows.
+func SettingsLanguage() string { return In(i18n.Locale()).SettingsLanguage() }
+
+// SettingsLanguage says "Language"
+// in the language of msgs.
+func (msgs Messages) SettingsLanguage() string {
+	return Catalog.Format(msgs.locale, "settingsLanguage", nil)
 }

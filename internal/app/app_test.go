@@ -348,3 +348,42 @@ func TestErrorsInBothLanguages(t *testing.T) {
 		t.Errorf("en %q zh %q", en, zh)
 	}
 }
+
+func TestSettingsWindowChangesLanguage(t *testing.T) {
+	a, p := testApp(t)
+	demoSession(a, "web-1", "45.56.78.90")
+	a.active = 0
+	tt := ui.NewTester(a.View, 1280, 820)
+	p.tt = tt
+	if err := tt.Click(locales.Settings()); err != nil {
+		t.Fatal(err)
+	}
+	if !a.settingsOpen || !tt.HasText(locales.FollowSystem()) {
+		t.Fatalf("settings window not shown; texts %q", tt.Texts())
+	}
+	saveShot(t, tt, "settings.png")
+	if err := tt.Click("简体中文"); err != nil {
+		t.Fatal(err)
+	}
+	if a.settings.Language != "zh-Hans" || p.locale != "zh-Hans" {
+		t.Fatalf("language %q, shown %q", a.settings.Language, p.locale)
+	}
+	if !tt.HasText("界面语言") || !tt.HasText("会话 (1)") {
+		t.Errorf("not in Chinese; texts %q", tt.Texts())
+	}
+	if err := tt.Click("完成"); err != nil {
+		t.Fatal(err)
+	}
+	if a.settingsOpen {
+		t.Error("settings window still open")
+	}
+	if err := tt.Click("设置"); err != nil {
+		t.Fatal(err)
+	}
+	if err := tt.Click("跟随系统"); err != nil {
+		t.Fatal(err)
+	}
+	if a.settings.Language != "" || config.LoadSettings().Language != "" {
+		t.Errorf("not back to the system's language: %q", a.settings.Language)
+	}
+}

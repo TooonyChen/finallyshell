@@ -7,7 +7,6 @@ import (
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
-	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -118,7 +117,9 @@ func (a *App) sessionPanel(c *ui.Context) {
 	ui.Column(c).Fill().BorderWidth(1, 0, 0, 0).BorderColor(ui.Hex("#d1d5db")).Children(func() {
 		ui.Row(c).Padding(6, 6, 6, 10).Gap(2).Children(func() {
 			ui.Text(c, locales.SessionsTitle(len(a.sessions))).Bold().Grow(1)
-			a.settingsButton(c)
+			if widgets.IconButton(c, "settings", locales.Settings()).Clicked() {
+				a.settingsOpen = true
+			}
 			if widgets.IconButton(c, "plus", locales.NewConnection()).Clicked() {
 				a.openManager()
 			}
@@ -135,23 +136,6 @@ func (a *App) sessionPanel(c *ui.Context) {
 			}
 		})
 	})
-}
-
-// settingsButton opens a menu choosing the language.
-func (a *App) settingsButton(c *ui.Context) {
-	widgets.IconButton(c, "languages", locales.Language()).Menu(a.languageMenu)
-}
-
-func (a *App) languageMenu(m *ui.Menu) {
-	if m.Item(locales.FollowSystem()).Radio(a.settings.Language == "").Chosen() {
-		a.setLanguage("")
-	}
-	m.Separator()
-	for _, tag := range a.plat.Languages() {
-		if m.Item(i18n.Autonym(tag)).Radio(a.settings.Language == tag).Chosen() {
-			a.setLanguage(tag)
-		}
-	}
 }
 
 func (a *App) sessionRow(c *ui.Context, s *Session, active bool) {

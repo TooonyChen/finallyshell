@@ -29,7 +29,6 @@
   "connectingTo": "正在连接 {target}",
   "welcomeHint": "Ctrl+Shift+T 打开连接管理器",
   "settings": "设置",
-  "language": "语言",
   "followSystem": "跟随系统",
   "tabFiles": "文件",
   "tabTransfers": "传输",
@@ -67,7 +66,6 @@
   "transferProgress": "{done} / {total}，{speed}/s",
   "cancel": "取消",
   "showInFolder": "在文件夹中显示",
-  "dragOutHint": "可以把下载好的文件拖到别处",
   "replaceTitle": "覆盖已有项目？",
   "replaceBody": "{dir} 中已经有 {count} 个同名项目。",
   "replace": "覆盖",
@@ -118,5 +116,7 @@
   "errTimeout": "连接超时：请检查地址、端口和网络",
   "errNoSuchHost": "找不到主机：域名无法解析",
   "errOpenShell": "打开终端失败：{error}",
-  "errTerminal": "终端初始化失败：{error}"
+  "errTerminal": "终端初始化失败：{error}",
+  "done": "完成",
+  "settingsLanguage": "界面语言"
 }

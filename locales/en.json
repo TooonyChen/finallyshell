@@ -46,7 +46,6 @@
   "connectingTo": "Connecting to {target}",
   "welcomeHint": "Ctrl+Shift+T opens the connection manager",
   "settings": "Settings",
-  "language": "Language",
   "followSystem": "System language",
   "tabFiles": "Files",
   "tabTransfers": "Transfers",
@@ -91,7 +90,6 @@
   "transferProgress": "{done} of {total}, {speed}/s",
   "cancel": "Cancel",
   "showInFolder": "Show in folder",
-  "dragOutHint": "Drag to copy the downloaded file elsewhere",
   "replaceTitle": "Replace existing items?",
   "replaceBody": "{count, plural, one {# item with the same name already exists in {dir}.} other {# items with the same names already exist in {dir}.}}",
   "@replaceBody": {
@@ -152,5 +150,7 @@
   "errTimeout": "Connection timed out: check the address, port and network",
   "errNoSuchHost": "Host not found: the name does not resolve",
   "errOpenShell": "Could not open a shell: {error}",
-  "errTerminal": "Could not start the terminal: {error}"
+  "errTerminal": "Could not start the terminal: {error}",
+  "done": "Done",
+  "settingsLanguage": "Language"
 }

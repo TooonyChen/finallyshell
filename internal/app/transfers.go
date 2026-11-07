@@ -12,7 +12,6 @@ import (
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
-	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 	"github.com/pkg/sftp"
 )
@@ -298,11 +297,6 @@ func (a *App) transferPanel(c *ui.Context) {
 
 func (a *App) transferRow(c *ui.Context, t *transferJob) {
 	row := ui.Row(c).Gap(10).Padding(6, 10).BorderWidth(0, 0, 1, 0).BorderColor(ui.Hex("#f1f5f9"))
-	if t.state == transferDone && t.local != "" {
-		if data, err := transfer.FileData(t.local); err == nil {
-			row.DragData(data).Tooltip(locales.DragOutHint())
-		}
-	}
 	row.Children(func() {
 		ic, dirLabel, dest := icons.Get("upload"), locales.UploadDirection(), t.sess.label()+":"+t.dstDir
 		if t.dir == download {
