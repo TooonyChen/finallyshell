@@ -1,0 +1,50 @@
+---FINALSHELLY:hostname---
+web-1
+---FINALSHELLY:uname---
+Linux
+6.1.0-18-amd64
+x86_64
+---FINALSHELLY:os-release---
+PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+NAME="Debian GNU/Linux"
+VERSION="12 (bookworm)"
+---FINALSHELLY:release---
+Debian GNU/Linux 12 \n \l
+---FINALSHELLY:cpuinfo---
+processor	: 0
+model name	: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+physical id	: 0
+core id		: 0
+processor	: 1
+model name	: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+physical id	: 0
+core id		: 0
+processor	: 2
+model name	: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+physical id	: 0
+core id		: 1
+processor	: 3
+model name	: Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+physical id	: 0
+core id		: 1
+---FINALSHELLY:lscpu---
+    Model name:                         Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz
+    Core(s) per socket:                 2
+    Socket(s):                          1
+---FINALSHELLY:nproc---
+4
+---FINALSHELLY:meminfo---
+MemTotal:        4009216 kB
+SwapTotal:       2306044 kB
+---FINALSHELLY:uptime---
+35425043.31 139105562.24
+---FINALSHELLY:addr---
+1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
+1: lo    inet6 ::1/128 scope host noprefixroute \       valid_lft forever preferred_lft forever
+2: ens3    inet 45.56.78.90/24 brd 45.56.78.255 scope global ens3\       valid_lft forever preferred_lft forever
+2: ens3    inet6 2600:3c01::f03c:93ff:fe4a:1b2c/64 scope global dynamic mngtmpaddr \       valid_lft 5185sec preferred_lft 1585sec
+2: ens3    inet6 fe80::f03c:93ff:fe4a:1b2c/64 scope link \       valid_lft forever preferred_lft forever
+3: docker0    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0\       valid_lft forever preferred_lft forever
+---FINALSHELLY:disks---
+vda 52428800
+---FINALSHELLY:end---
