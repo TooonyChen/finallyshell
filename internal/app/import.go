@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"time"
 
 	"finalshelly/internal/config"
 	"finalshelly/internal/icons"
@@ -386,7 +387,7 @@ func (a *App) importChosen(st *importState, statuses []importStatus) {
 			entries = append(entries, r.e)
 		}
 	}
-	added := importer.Import(a.hosts, entries)
+	added := importer.Import(a.hosts, entries, time.Now())
 	failed, skipped := st.problemCounts()
 	imported, skipped := len(added), skipped+len(st.rows)-len(added)
 	keys := 0

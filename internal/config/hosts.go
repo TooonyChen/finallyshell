@@ -83,6 +83,11 @@ type Host struct {
 	// ssh -L, -R and -D: each enabled one starts as a session connects.
 	Tunnels []Tunnel `json:"tunnels,omitempty"`
 
+	// CreatedAt is when the host was added: made in the connection
+	// editor, duplicated or imported. Zero for a host saved before this
+	// was kept.
+	CreatedAt time.Time `json:"createdAt,omitzero"`
+
 	extra extras
 }
 

@@ -209,13 +209,21 @@ func TestImport(t *testing.T) {
 	if Present(s, pg.Host) == nil || Present(s, byName(t, src, "树莓派").Host) != nil {
 		t.Error("present")
 	}
-	added := Import(s, src.Entries)
+	at := time.Date(2026, 11, 7, 10, 0, 0, 0, time.UTC)
+	added := Import(s, src.Entries, at)
 	var names []string
 	for _, h := range added {
 		names = append(names, h.Title())
 		if h.ID == "" || s.Host(h.ID) != h {
 			t.Errorf("%s: id %q", h.Title(), h.ID)
 		}
+		// Created now, for the start page to list them as new.
+		if !h.CreatedAt.Equal(at) || !h.LastConnectedAt.IsZero() {
+			t.Errorf("%s: created %v, connected %v", h.Title(), h.CreatedAt, h.LastConnectedAt)
+		}
+	}
+	if !s.Hosts[0].CreatedAt.IsZero() {
+		t.Error("a host there before has a creation time")
 	}
 	// pg-main was there, and web-1 again is web-1.
 	if want := []string{"192.0.2.40", "web-1", "bastion", "树莓派"}; !slices.Equal(names, want) || len(s.Hosts) != before+4 {
@@ -250,7 +258,7 @@ func TestImport(t *testing.T) {
 	}
 
 	// Importing again adds nothing.
-	if again := Import(s, src.Entries); len(again) != 0 {
+	if again := Import(s, src.Entries, at.Add(time.Hour)); len(again) != 0 {
 		t.Errorf("again %d", len(again))
 	}
 	data, _ := json.Marshal(s)

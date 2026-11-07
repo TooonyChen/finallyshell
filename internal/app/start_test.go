@@ -13,26 +13,35 @@ import (
 )
 
 // startHosts saves hosts as a user who connected to some of them:
-// db-1 last, then web-1, then backup; staging and old-web never, and
-// old-web is deleted. They log in with a key that is not there, so
-// connecting asks nothing and fails at once.
+// db-1 last, then web-1, then backup; old-web, which is deleted, too.
+// The others never connected: new-app was added last, ci-runner before
+// it, and staging and legacy were saved before the time a host is added
+// was kept. They log in with a key that is not there, so connecting asks
+// nothing and fails at once.
 func startHosts(a *App) map[string]*config.Host {
 	at := time.Date(2026, 11, 7, 10, 0, 0, 0, time.UTC)
 	hosts := map[string]*config.Host{}
 	for _, h := range []struct {
 		name, addr, user, notes string
 		connected               time.Duration // before at; 0 for never
+		created                 time.Duration // before at; 0 for unknown
 		deleted                 bool
 	}{
-		{"web-1", "203.0.113.10", "root", "nginx, the shop", 2 * time.Hour, false},
-		{"staging", "staging.example.com", "deploy", "", 0, false},
-		{"db-1", "10.0.0.12", "postgres", "primary database", time.Minute, false},
-		{"backup", "10.0.0.30", "admin", "", 24 * time.Hour, false},
-		{"old-web", "203.0.113.99", "root", "", time.Hour, true},
+		{"web-1", "203.0.113.10", "root", "nginx, the shop", 2 * time.Hour, 0, false},
+		{"staging", "staging.example.com", "deploy", "", 0, 0, false},
+		{"ci-runner", "ci.example.net", "runner", "", 0, 72 * time.Hour, false},
+		{"db-1", "10.0.0.12", "postgres", "primary database", time.Minute, 30 * 24 * time.Hour, false},
+		{"backup", "10.0.0.30", "admin", "", 24 * time.Hour, 0, false},
+		{"new-app", "app.example.net", "ubuntu", "", 0, 10 * time.Minute, false},
+		{"old-web", "203.0.113.99", "root", "", time.Hour, time.Minute, true},
+		{"legacy", "legacy.example.org", "admin", "", 0, 0, false},
 	} {
 		x := &config.Host{ID: "id-" + h.name, Name: h.name, Addr: h.addr, User: h.user, Auth: config.AuthKey, KeyPath: "/nonexistent", Notes: h.notes}
 		if h.connected != 0 {
 			x.LastConnectedAt = at.Add(-h.connected)
+		}
+		if h.created != 0 {
+			x.CreatedAt = at.Add(-h.created)
 		}
 		if h.deleted {
 			x.DeletedAt = at
@@ -54,23 +63,72 @@ func titles(hosts []*config.Host) []string {
 func TestQuickHosts(t *testing.T) {
 	a, _ := testApp(t)
 	startHosts(a)
+	all := []string{"db-1", "web-1", "backup", "new-app", "ci-runner", "staging", "legacy"}
+	for _, k := range []struct {
+		query  string
+		want   []string
+		recent int
+	}{
+		// Recent, the last first; then the others, the last added first,
+		// and those added at a time unknown in the order they are kept.
+		{"", all, 3},
+		{"  ", all, 3},
+		{"web", []string{"web-1"}, 1},             // the deleted host left out
+		{"10.0.0", []string{"db-1", "backup"}, 2}, // by address
+		{"DEPLOY", []string{"staging"}, 0},        // by user, never connected
+		{"database", []string{"db-1"}, 1},         // by notes
+		{"i", []string{"db-1", "web-1", "backup", "ci-runner", "staging", "legacy"}, 3}, // in the same order
+		{"example", []string{"new-app", "ci-runner", "staging", "legacy"}, 0},
+		{"root shop", []string{"web-1"}, 1}, // every word
+		{"nothing", nil, 0},
+	} {
+		got, recent := quickHosts(a.hosts, k.query)
+		if !slices.Equal(titles(got), k.want) || recent != k.recent {
+			t.Errorf("%q: %q, %d recent; want %q, %d", k.query, titles(got), recent, k.want, k.recent)
+		}
+	}
+
+	// Clearing the recent list leaves every host to the others: by when
+	// they were added, db-1 a month ago.
+	a.hosts.ClearRecents()
+	got, recent := quickHosts(a.hosts, "")
+	if want := []string{"new-app", "ci-runner", "db-1", "web-1", "staging", "backup", "legacy"}; !slices.Equal(titles(got), want) || recent != 0 {
+		t.Errorf("after clearing: %q, %d recent; want %q", titles(got), recent, want)
+	}
+}
+
+func TestQuickRows(t *testing.T) {
+	a, _ := testApp(t)
+	startHosts(a)
+	show := func(rows []quickRow) []string {
+		var s []string
+		for _, r := range rows {
+			if r.host == nil {
+				s = append(s, fmt.Sprint("#", int(r.header)))
+			} else {
+				s = append(s, r.host.Title())
+			}
+		}
+		return s
+	}
 	for _, k := range []struct {
 		query string
 		want  []string
 	}{
-		{"", []string{"db-1", "web-1", "backup"}}, // recent, the last first
-		{"  ", []string{"db-1", "web-1", "backup"}},
-		{"web", []string{"web-1"}},                            // the deleted host left out
-		{"10.0.0", []string{"db-1", "backup"}},                // by address
-		{"DEPLOY", []string{"staging"}},                       // by user, never connected
-		{"database", []string{"db-1"}},                        // by notes
-		{"i", []string{"db-1", "web-1", "backup", "staging"}}, // recent first, then the rest
-		{"root shop", []string{"web-1"}},                      // every word
+		// A header over each part when there are both.
+		{"", []string{"#0", "db-1", "web-1", "backup", "#1", "new-app", "ci-runner", "staging", "legacy"}},
+		{"10.0.0", []string{"db-1", "backup"}},
+		{"example", []string{"new-app", "ci-runner", "staging", "legacy"}},
 		{"nothing", nil},
 	} {
-		if got := titles(quickHosts(a.hosts, k.query)); !slices.Equal(got, k.want) {
+		rows := quickRows(quickHosts(a.hosts, k.query))
+		if got := show(rows); !slices.Equal(got, k.want) {
 			t.Errorf("%q: %q, want %q", k.query, got, k.want)
 		}
+	}
+	rows := quickRows(quickHosts(a.hosts, ""))
+	if got := hostRows(rows); !slices.Equal(got, []int{1, 2, 3, 5, 6, 7, 8}) {
+		t.Errorf("host rows %v", got)
 	}
 }
 
@@ -109,14 +167,14 @@ func TestStartPageListsRecentAndClears(t *testing.T) {
 	if len(a.sessions) != 1 || !a.sessions[0].isNewTab() || a.active != 0 {
 		t.Fatalf("not on a new tab: %d rows, active %d", len(a.sessions), a.active)
 	}
-	shownInOrder(t, tt, "db-1", "web-1", "backup")
+	shownInOrder(t, tt, locales.RecentHosts(), "db-1", "web-1", "backup", locales.OtherHosts(), "new-app", "ci-runner", "staging", "legacy")
 	for _, s := range []string{locales.QuickConnect(), "10.0.0.12", "postgres", locales.NewTab(), "IP -", locales.ClearRecents()} {
 		if !tt.HasText(s) {
 			t.Errorf("missing %q", s)
 		}
 	}
-	if tt.HasText("staging") || tt.HasText("old-web") {
-		t.Error("lists a host never connected, or a deleted one")
+	if tt.HasText("old-web") {
+		t.Error("lists a deleted host")
 	}
 
 	saved := 0
@@ -130,21 +188,64 @@ func TestStartPageListsRecentAndClears(t *testing.T) {
 	if n := len(a.hosts.Recent(0)); n != 0 {
 		t.Errorf("%d recent hosts left", n)
 	}
-	if n := len(a.hosts.Live()); n != 4 {
-		t.Errorf("%d hosts left, want 4", n)
+	if n := len(a.hosts.Live()); n != 7 {
+		t.Errorf("%d hosts left, want 7", n)
 	}
+	// The hosts stay listed, by when they were added, without headers.
 	tt.Frame()
-	if !tt.HasText(locales.NoRecentHosts()) || tt.HasText("db-1") {
-		t.Errorf("the list not emptied; texts %q", tt.Texts())
+	shownInOrder(t, tt, "new-app", "ci-runner", "db-1", "web-1", "staging", "backup", "legacy")
+	if tt.HasText(locales.RecentHosts()) || tt.HasText(locales.OtherHosts()) {
+		t.Errorf("headers with no recent hosts; texts %q", tt.Texts())
+	}
+	if b, ok := tt.AccessByRole(ui.RoleButton, locales.ClearRecents()); !ok || !b.Disabled {
+		t.Errorf("Clear not disabled: %+v", b)
 	}
 	// Searching still finds them.
 	if err := tt.Click(locales.SearchHosts()); err != nil {
 		t.Fatal(err)
 	}
 	tt.Type("db")
-	if !tt.HasText("db-1") {
-		t.Errorf("search found nothing; texts %q", tt.Texts())
+	if !tt.HasText("db-1") || tt.HasText("new-app") {
+		t.Errorf("search not filtered; texts %q", tt.Texts())
 	}
+}
+
+// TestStartPageShowsNewHost saves a host from the connection editor
+// opened on the start page: the page shows it at once, first of the
+// hosts not connected to, and so does a duplicate made in the manager.
+func TestStartPageShowsNewHost(t *testing.T) {
+	a, p, tt, hosts := startApp(t)
+	savedHosts(a)
+	a.newConnection()
+	ed := editorWindow(t, a, p)
+	typeInto(t, ed, locales.FieldName(), "just-added")
+	typeInto(t, ed, locales.FieldHost(), "fresh.example.com")
+	typeInto(t, ed, locales.FieldPassword(), "pw")
+	redraws := p.redraws
+	if err := ed.Click(locales.Ok()); err != nil {
+		t.Fatal(err)
+	}
+	if a.windowOpen(WindowEditor) {
+		t.Fatal("the editor stayed open")
+	}
+	h := a.hosts.Host(a.editor.id)
+	if h == nil || h.Name != "just-added" || time.Since(h.CreatedAt) > time.Minute || !h.LastConnectedAt.IsZero() {
+		t.Fatalf("host %+v", h)
+	}
+	if p.redraws == redraws {
+		t.Error("the main window was not redrawn")
+	}
+	tt.Frame()
+	shownInOrder(t, tt, "backup", locales.OtherHosts(), "just-added", "new-app")
+
+	// Duplicated, the copy is newer still.
+	a.duplicateHost(hosts["staging"])
+	dup := a.hosts.Live()[slices.Index(a.hosts.Live(), hosts["staging"])+1]
+	if time.Since(dup.CreatedAt) > time.Minute || dup.CreatedAt.Before(h.CreatedAt) {
+		t.Errorf("duplicate created %v, the host %v", dup.CreatedAt, h.CreatedAt)
+	}
+	tt.Frame()
+	shownInOrder(t, tt, locales.OtherHosts(), dup.Title(), "just-added", "new-app")
 }
 
 // TestConnectFromNewTab connects from the start page by a click, by
@@ -163,6 +264,17 @@ func TestConnectFromNewTab(t *testing.T) {
 			tt.Type("0.") // db-1, web-1, backup, db-1 chosen
 			tt.Key(0, ui.KeyDown)
 			tt.Key(0, ui.KeyDown)
+			tt.Key(0, ui.KeyUp)
+			tt.Key(0, ui.KeyEnter)
+		},
+		"arrows past a header": func(t *testing.T, a *App, tt *ui.Tester) {
+			// Recent: db-1, web-1; other connections: new-app and more.
+			tt.Type("e")
+			tt.Key(0, ui.KeyDown)
+			tt.Key(0, ui.KeyDown)
+			if st := &a.current().start; st.row < 0 || quickRows(quickHosts(a.hosts, st.query))[st.row].host.Name != "new-app" {
+				t.Errorf("Down past the header chose row %d", st.row)
+			}
 			tt.Key(0, ui.KeyUp)
 			tt.Key(0, ui.KeyEnter)
 		},
@@ -410,10 +522,19 @@ func TestStartPageShots(t *testing.T) {
 			saveShot(t, tt, "start-recent-"+lang+".png")
 			tt.Type("10.0")
 			tt.Frame()
-			if !tt.HasText("10.0.0.30") || len(quickHosts(a.hosts, "10.0")) != 2 {
+			if hosts, _ := quickHosts(a.hosts, "10.0"); !tt.HasText("10.0.0.30") || len(hosts) != 2 {
 				t.Errorf("search not filtered; texts %q", tt.Texts())
 			}
 			saveShot(t, tt, "start-search-"+lang+".png")
+
+			// With the recent list cleared, as a new user's.
+			tt.Key(ui.Cmd, ui.KeyA)
+			tt.Key(0, ui.KeyBackspace)
+			if err := tt.Click(locales.ClearRecents()); err != nil {
+				t.Fatal(err)
+			}
+			tt.Frame()
+			saveShot(t, tt, "start-cleared-"+lang+".png")
 
 			e, ep := testApp(t)
 			ep.SetLocale(lang)

@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"finalshelly/internal/config"
 )
@@ -573,8 +574,9 @@ func Present(s *config.Store, h *config.Host) *config.Host {
 // Import adds the entries' hosts to s, each a copy with an ID, in the
 // folder of its folder path: s's folder of that name in each folder from
 // the top, or a new one. Hosts present already, as Present has them, or
-// earlier in entries, are skipped. It returns the hosts added.
-func Import(s *config.Store, entries []*Entry) []*config.Host {
+// earlier in entries, are skipped. Each host added is created at at, the
+// time of the import. It returns the hosts added.
+func Import(s *config.Store, entries []*Entry, at time.Time) []*config.Host {
 	var added []*config.Host
 	for _, e := range entries {
 		if Present(s, e.Host) != nil {
@@ -586,6 +588,7 @@ func Import(s *config.Store, entries []*Entry) []*config.Host {
 			h.ID += "-"
 		}
 		h.Folder = folderFor(s, e.Folder)
+		h.CreatedAt = at
 		s.Add(h)
 		added = append(added, h)
 	}

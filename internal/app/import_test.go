@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"finalshelly/internal/config"
 	"finalshelly/locales"
@@ -182,6 +183,10 @@ func TestImportFinalShell(t *testing.T) {
 	var names []string
 	for _, h := range added {
 		names = append(names, a.folderLabel(h.Folder)+"|"+h.Title())
+		// Added now, for quick connect to list them first of the others.
+		if time.Since(h.CreatedAt) > time.Minute {
+			t.Errorf("%s created %v", h.Title(), h.CreatedAt)
+		}
 	}
 	// Into the folder named Production the store had, and new ones.
 	if want := []string{"|web-1", "Production|bastion", "实验室 / Pi|树莓派"}; !slices.Equal(names, want) || added[1].Folder != "prod" {

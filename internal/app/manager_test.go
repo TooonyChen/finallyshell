@@ -543,7 +543,7 @@ func TestManagerDuplicateRenameCopy(t *testing.T) {
 	i := slices.IndexFunc(a.hosts.Hosts, func(h *config.Host) bool { return h.ID == "web-1" })
 	dup := a.hosts.Hosts[i+1]
 	if dup.ID == "web-1" || dup.Name != "web-1 (copy)" || dup.Addr != "203.0.113.10" || dup.Folder != "prod" || dup.Notes == "" ||
-		a.passwords[dup.ID] != "phrase" || !dup.LastConnectedAt.IsZero() {
+		a.passwords[dup.ID] != "phrase" || !dup.LastConnectedAt.IsZero() || time.Since(dup.CreatedAt) > time.Minute {
 		t.Fatalf("copy %+v", dup)
 	}
 	if it, _ := a.managerChosen(); it.host != dup.ID {

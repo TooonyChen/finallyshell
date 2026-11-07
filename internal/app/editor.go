@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"finalshelly/internal/config"
 	"finalshelly/internal/sshx"
@@ -212,7 +213,7 @@ func (a *App) saveEditor() {
 			return
 		}
 	} else {
-		h = &config.Host{Folder: ed.folder}
+		h = &config.Host{Folder: ed.folder, CreatedAt: time.Now()}
 		a.hosts.Add(h)
 		ed.id = h.ID
 	}

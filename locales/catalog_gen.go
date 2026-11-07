@@ -590,14 +590,24 @@ func (msgs Messages) HostColUser() string {
 	return Catalog.Format(msgs.locale, "hostColUser", nil)
 }
 
-// NoRecentHosts says "No recent connections. Open the connection manager to connect to a saved host."
+// RecentHosts says "Recent"
 // in the language the app shows.
-func NoRecentHosts() string { return In(i18n.Locale()).NoRecentHosts() }
+func RecentHosts() string { return In(i18n.Locale()).RecentHosts() }
 
-// NoRecentHosts says "No recent connections. Open the connection manager to connect to a saved host."
+// RecentHosts says "Recent"
 // in the language of msgs.
-func (msgs Messages) NoRecentHosts() string {
-	return Catalog.Format(msgs.locale, "noRecentHosts", nil)
+func (msgs Messages) RecentHosts() string {
+	return Catalog.Format(msgs.locale, "recentHosts", nil)
+}
+
+// OtherHosts says "Other connections"
+// in the language the app shows.
+func OtherHosts() string { return In(i18n.Locale()).OtherHosts() }
+
+// OtherHosts says "Other connections"
+// in the language of msgs.
+func (msgs Messages) OtherHosts() string {
+	return Catalog.Format(msgs.locale, "otherHosts", nil)
 }
 
 // NoMatchingHosts says "No connections match the search."

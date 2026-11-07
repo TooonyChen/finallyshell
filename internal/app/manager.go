@@ -884,7 +884,7 @@ func (a *App) duplicateHost(h *config.Host) {
 		dup.ID += "-"
 	}
 	dup.Name = locales.CopyOfName(h.Title())
-	dup.LastConnectedAt, dup.DeletedAt = time.Time{}, time.Time{}
+	dup.LastConnectedAt, dup.DeletedAt, dup.CreatedAt = time.Time{}, time.Time{}, time.Now()
 	i := slices.Index(a.hosts.Hosts, h)
 	a.hosts.Hosts = slices.Insert(a.hosts.Hosts, i+1, dup)
 	a.copyHostSecrets(h, dup)
