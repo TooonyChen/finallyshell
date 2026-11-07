@@ -26,6 +26,14 @@ func TestSSH(t *testing.T) {
 	p.until(t, "the home directory", func() bool { return s.files.cwd != "" && !s.files.loading })
 	home := s.files.cwd
 
+	// System info, read over an exec channel of its own.
+	a.openSysInfo(s)
+	p.until(t, "the system info", func() bool { return !a.sysInfo.loading })
+	if info := a.sysInfo.info; a.sysInfo.err != nil || info.Hostname == "" || info.Kernel == "" || info.CPUs == 0 || info.MemTotal == 0 {
+		t.Errorf("system info %+v, err %v", info, a.sysInfo.err)
+	}
+	a.closeSysInfo()
+
 	// Upload by dropping on the table, then download it back.
 	local := filepath.Join(t.TempDir(), "hello.txt")
 	os.WriteFile(local, []byte("hi from finalshelly"), 0o644)

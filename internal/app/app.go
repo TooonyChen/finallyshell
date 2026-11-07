@@ -97,6 +97,10 @@ type App struct {
 
 	// The question before replacing files.
 	replace *replaceQuestion
+
+	// The System info popover, and what reads it (readSysInfo when nil).
+	sysInfo     sysInfoPopover
+	readSysInfo sysInfoReader
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.

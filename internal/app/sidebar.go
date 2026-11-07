@@ -15,56 +15,101 @@ import (
 func (a *App) monitorPanel(c *ui.Context) {
 	s := a.current()
 	ui.Scroll(c).Fill().Children(func() {
-		ui.Column(c).FillWidth().Padding(10, 10, 8, 10).Gap(6).Children(func() {
-			if s == nil {
-				widgets.Muted(c, locales.NotConnected()).Padding(4, 0)
-				return
-			}
-			st := s.stats
-			ui.Row(c).Gap(6).Children(func() {
-				ip := s.ip
+		a.serverView(c, s)
+	})
+}
+
+// serverView is a server as the side panel shows it: its IP, the System
+// info button, and its stats. Without a session, or before the first
+// stats, it is the skeleton FinalShell shows: dashes and empty bars.
+func (a *App) serverView(c *ui.Context, s *Session) {
+	ui.Column(c).FillWidth().Padding(10, 10, 8, 10).Gap(6).Children(func() {
+		ui.Row(c).Gap(6).Children(func() {
+			ip := "-"
+			if s != nil {
+				ip = s.ip
 				if ip == "" {
 					ip = s.Host.Addr
 				}
-				ui.Text(c, "IP "+ip).SingleLine().Grow(1).MinWidth(0)
+			}
+			ui.Text(c, "IP "+ip).SingleLine().Grow(1).MinWidth(0)
+			if s != nil {
 				cp := ui.Text(c, locales.Copy()).TextColor(theme.Accent).Cursor(ui.CursorPointer)
 				if cp.Clicked() {
 					c.WriteClipboard(ip)
 				}
-			})
-			if !st.OK || s.status != statusConnected {
-				if s.status == statusConnected {
-					widgets.Muted(c, locales.ReadingServerInfo())
-				} else {
-					widgets.Muted(c, s.statusText())
-				}
-				return
 			}
-			ui.Text(c, locales.UptimeDays(int(st.Uptime.Hours()/24)))
-			ui.Text(c, locales.LoadAverage(fmt.Sprintf("%.2f, %.2f, %.2f", st.Load[0], st.Load[1], st.Load[2])))
-			widgets.UsageBar(c, locales.Cpu(), st.CPU/100, fmt.Sprintf("%.0f%%", st.CPU), ui.Hex("#86efac"))
-			widgets.UsageBar(c, locales.Memory(), ratio(st.MemUsed, st.MemTotal), usage(st.MemUsed, st.MemTotal), ui.Hex("#fdba74"))
-			widgets.UsageBar(c, locales.Swap(), ratio(st.SwapUsed, st.SwapTotal), usage(st.SwapUsed, st.SwapTotal), ui.Hex("#93c5fd"))
-
-			procTable(c, st.Procs)
-
-			ui.Row(c).Gap(8).Margin(4, 0, 0, 0).Children(func() {
-				ui.Text(c, "↑"+formatBytes(st.TxRate)).TextColor(ui.Hex("#ea580c"))
-				ui.Text(c, "↓"+formatBytes(st.RxRate)).TextColor(ui.Hex("#16a34a"))
-				ui.Spacer(c)
-				widgets.Muted(c, st.Iface)
-			})
-			widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.TxHist, st.RxHist}, []ui.Color{ui.Hex("#fb923c"), ui.Hex("#4ade80")}, formatBytes)
-
-			ui.Row(c).Gap(8).Margin(4, 0, 0, 0).Children(func() {
-				ui.Text(c, formatLatency(st.Latency)).TextColor(theme.Accent)
-				ui.Spacer(c)
-				widgets.Muted(c, locales.Latency())
-			})
-			widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.LatHist}, []ui.Color{ui.Hex("#60a5fa")}, func(v float64) string { return fmt.Sprintf("%.0f", v) })
-
-			diskTable(c, st.Disks)
 		})
+		a.sysInfoButton(c, s)
+		var st *monitor.Stats
+		switch {
+		case s == nil:
+		case s.status != statusConnected:
+			widgets.Muted(c, s.statusText())
+		case !s.stats.OK:
+			widgets.Muted(c, locales.ReadingServerInfo())
+		default:
+			st = &s.stats
+		}
+		serverStats(c, st)
+	})
+}
+
+// serverStats shows st, or the skeleton for nil.
+func serverStats(c *ui.Context, st *monitor.Stats) {
+	if st == nil {
+		ui.Text(c, locales.UptimeUnknown())
+		ui.Text(c, locales.LoadAverage("-"))
+		widgets.UsageBar(c, locales.Cpu(), 0, "0%", cpuColor)
+		widgets.UsageBar(c, locales.Memory(), 0, "0%", memColor)
+		widgets.UsageBar(c, locales.Swap(), 0, "0%", swapColor)
+		procTable(c, nil)
+		netRow(c, 0, 0, "")
+		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatBytes)
+		latencyRow(c, "-")
+		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatMillis)
+		diskTable(c, nil)
+		return
+	}
+	ui.Text(c, locales.UptimeDays(int(st.Uptime.Hours()/24)))
+	ui.Text(c, locales.LoadAverage(fmt.Sprintf("%.2f, %.2f, %.2f", st.Load[0], st.Load[1], st.Load[2])))
+	widgets.UsageBar(c, locales.Cpu(), st.CPU/100, fmt.Sprintf("%.0f%%", st.CPU), cpuColor)
+	widgets.UsageBar(c, locales.Memory(), ratio(st.MemUsed, st.MemTotal), usage(st.MemUsed, st.MemTotal), memColor)
+	widgets.UsageBar(c, locales.Swap(), ratio(st.SwapUsed, st.SwapTotal), usage(st.SwapUsed, st.SwapTotal), swapColor)
+
+	procTable(c, st.Procs)
+
+	netRow(c, st.TxRate, st.RxRate, st.Iface)
+	widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.TxHist, st.RxHist}, []ui.Color{ui.Hex("#fb923c"), ui.Hex("#4ade80")}, formatBytes)
+
+	latencyRow(c, formatLatency(st.Latency))
+	widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.LatHist}, []ui.Color{ui.Hex("#60a5fa")}, formatMillis)
+
+	diskTable(c, st.Disks)
+}
+
+func formatMillis(v float64) string { return fmt.Sprintf("%.0f", v) }
+
+var (
+	cpuColor  = ui.Hex("#86efac")
+	memColor  = ui.Hex("#fdba74")
+	swapColor = ui.Hex("#93c5fd")
+)
+
+func netRow(c *ui.Context, tx, rx float64, iface string) {
+	ui.Row(c).Gap(8).Margin(4, 0, 0, 0).Children(func() {
+		ui.Text(c, "↑"+formatBytes(tx)).TextColor(ui.Hex("#ea580c"))
+		ui.Text(c, "↓"+formatBytes(rx)).TextColor(ui.Hex("#16a34a"))
+		ui.Spacer(c)
+		widgets.Muted(c, iface)
+	})
+}
+
+func latencyRow(c *ui.Context, latency string) {
+	ui.Row(c).Gap(8).Margin(4, 0, 0, 0).Children(func() {
+		ui.Text(c, latency).TextColor(theme.Accent)
+		ui.Spacer(c)
+		widgets.Muted(c, locales.Latency())
 	})
 }
 

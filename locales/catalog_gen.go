@@ -84,6 +84,198 @@ func (msgs Messages) UptimeDays(days int) string {
 	return Catalog.Format(msgs.locale, "uptimeDays", map[string]any{"days": days})
 }
 
+// UptimeUnknown says "Up -"
+// in the language the app shows.
+func UptimeUnknown() string { return In(i18n.Locale()).UptimeUnknown() }
+
+// UptimeUnknown says "Up -"
+// in the language of msgs.
+func (msgs Messages) UptimeUnknown() string {
+	return Catalog.Format(msgs.locale, "uptimeUnknown", nil)
+}
+
+// SystemInfo says "System info"
+// in the language the app shows.
+func SystemInfo() string { return In(i18n.Locale()).SystemInfo() }
+
+// SystemInfo says "System info"
+// in the language of msgs.
+func (msgs Messages) SystemInfo() string {
+	return Catalog.Format(msgs.locale, "systemInfo", nil)
+}
+
+// SysHostname says "Hostname"
+// in the language the app shows.
+func SysHostname() string { return In(i18n.Locale()).SysHostname() }
+
+// SysHostname says "Hostname"
+// in the language of msgs.
+func (msgs Messages) SysHostname() string {
+	return Catalog.Format(msgs.locale, "sysHostname", nil)
+}
+
+// SysOS says "OS"
+// in the language the app shows.
+func SysOS() string { return In(i18n.Locale()).SysOS() }
+
+// SysOS says "OS"
+// in the language of msgs.
+func (msgs Messages) SysOS() string {
+	return Catalog.Format(msgs.locale, "sysOS", nil)
+}
+
+// SysKernel says "Kernel"
+// in the language the app shows.
+func SysKernel() string { return In(i18n.Locale()).SysKernel() }
+
+// SysKernel says "Kernel"
+// in the language of msgs.
+func (msgs Messages) SysKernel() string {
+	return Catalog.Format(msgs.locale, "sysKernel", nil)
+}
+
+// SysArch says "Architecture"
+// in the language the app shows.
+func SysArch() string { return In(i18n.Locale()).SysArch() }
+
+// SysArch says "Architecture"
+// in the language of msgs.
+func (msgs Messages) SysArch() string {
+	return Catalog.Format(msgs.locale, "sysArch", nil)
+}
+
+// SysCores says "{count, plural, one {# core} other {# cores}}"
+// in the language the app shows.
+func SysCores(count int) string { return In(i18n.Locale()).SysCores(count) }
+
+// SysCores says "{count, plural, one {# core} other {# cores}}"
+// in the language of msgs.
+func (msgs Messages) SysCores(count int) string {
+	return Catalog.Format(msgs.locale, "sysCores", map[string]any{"count": count})
+}
+
+// SysCoresThreads says "{cores, plural, one {# core} other {# cores}}, {threads, plural, one {# thread} other {# threads}}"
+// in the language the app shows.
+//
+// Physical cores and logical processors of the server's CPU.
+func SysCoresThreads(cores int, threads int) string {
+	return In(i18n.Locale()).SysCoresThreads(cores, threads)
+}
+
+// SysCoresThreads says "{cores, plural, one {# core} other {# cores}}, {threads, plural, one {# thread} other {# threads}}"
+// in the language of msgs.
+//
+// Physical cores and logical processors of the server's CPU.
+func (msgs Messages) SysCoresThreads(cores int, threads int) string {
+	return Catalog.Format(msgs.locale, "sysCoresThreads", map[string]any{"cores": cores, "threads": threads})
+}
+
+// SysMemory says "Memory"
+// in the language the app shows.
+func SysMemory() string { return In(i18n.Locale()).SysMemory() }
+
+// SysMemory says "Memory"
+// in the language of msgs.
+func (msgs Messages) SysMemory() string {
+	return Catalog.Format(msgs.locale, "sysMemory", nil)
+}
+
+// SysUptime says "Uptime"
+// in the language the app shows.
+func SysUptime() string { return In(i18n.Locale()).SysUptime() }
+
+// SysUptime says "Uptime"
+// in the language of msgs.
+func (msgs Messages) SysUptime() string {
+	return Catalog.Format(msgs.locale, "sysUptime", nil)
+}
+
+// SysUptimeValue says "{days, plural, =0 {{time}} one {# day, {time}} other {# days, {time}}}"
+// in the language the app shows.
+//
+// How long the server has been up; time is hours:minutes, as 3:07.
+func SysUptimeValue(days int, time_ string) string {
+	return In(i18n.Locale()).SysUptimeValue(days, time_)
+}
+
+// SysUptimeValue says "{days, plural, =0 {{time}} one {# day, {time}} other {# days, {time}}}"
+// in the language of msgs.
+//
+// How long the server has been up; time is hours:minutes, as 3:07.
+func (msgs Messages) SysUptimeValue(days int, time_ string) string {
+	return Catalog.Format(msgs.locale, "sysUptimeValue", map[string]any{"days": days, "time": time_})
+}
+
+// SysAddresses says "IP addresses"
+// in the language the app shows.
+func SysAddresses() string { return In(i18n.Locale()).SysAddresses() }
+
+// SysAddresses says "IP addresses"
+// in the language of msgs.
+func (msgs Messages) SysAddresses() string {
+	return Catalog.Format(msgs.locale, "sysAddresses", nil)
+}
+
+// SysDisks says "Disks"
+// in the language the app shows.
+func SysDisks() string { return In(i18n.Locale()).SysDisks() }
+
+// SysDisks says "Disks"
+// in the language of msgs.
+func (msgs Messages) SysDisks() string {
+	return Catalog.Format(msgs.locale, "sysDisks", nil)
+}
+
+// SysInfoFailed says "Could not read system info: {error}"
+// in the language the app shows.
+func SysInfoFailed(error string) string { return In(i18n.Locale()).SysInfoFailed(error) }
+
+// SysInfoFailed says "Could not read system info: {error}"
+// in the language of msgs.
+func (msgs Messages) SysInfoFailed(error string) string {
+	return Catalog.Format(msgs.locale, "sysInfoFailed", map[string]any{"error": error})
+}
+
+// SysInfoTimeout says "The server took too long to answer"
+// in the language the app shows.
+func SysInfoTimeout() string { return In(i18n.Locale()).SysInfoTimeout() }
+
+// SysInfoTimeout says "The server took too long to answer"
+// in the language of msgs.
+func (msgs Messages) SysInfoTimeout() string {
+	return Catalog.Format(msgs.locale, "sysInfoTimeout", nil)
+}
+
+// SysInfoNoShell says "The server has no POSIX shell (sh) to run the query"
+// in the language the app shows.
+func SysInfoNoShell() string { return In(i18n.Locale()).SysInfoNoShell() }
+
+// SysInfoNoShell says "The server has no POSIX shell (sh) to run the query"
+// in the language of msgs.
+func (msgs Messages) SysInfoNoShell() string {
+	return Catalog.Format(msgs.locale, "sysInfoNoShell", nil)
+}
+
+// SysInfoOff says "The server monitor is turned off for this host, so no system info is read."
+// in the language the app shows.
+func SysInfoOff() string { return In(i18n.Locale()).SysInfoOff() }
+
+// SysInfoOff says "The server monitor is turned off for this host, so no system info is read."
+// in the language of msgs.
+func (msgs Messages) SysInfoOff() string {
+	return Catalog.Format(msgs.locale, "sysInfoOff", nil)
+}
+
+// Retry says "Retry"
+// in the language the app shows.
+func Retry() string { return In(i18n.Locale()).Retry() }
+
+// Retry says "Retry"
+// in the language of msgs.
+func (msgs Messages) Retry() string {
+	return Catalog.Format(msgs.locale, "retry", nil)
+}
+
 // LoadAverage says "Load {load}"
 // in the language the app shows.
 func LoadAverage(load string) string { return In(i18n.Locale()).LoadAverage(load) }

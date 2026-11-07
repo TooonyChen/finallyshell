@@ -12,6 +12,54 @@
       }
     }
   },
+  "uptimeUnknown": "Up -",
+  "systemInfo": "System info",
+  "sysHostname": "Hostname",
+  "sysOS": "OS",
+  "sysKernel": "Kernel",
+  "sysArch": "Architecture",
+  "sysCores": "{count, plural, one {# core} other {# cores}}",
+  "@sysCores": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sysCoresThreads": "{cores, plural, one {# core} other {# cores}}, {threads, plural, one {# thread} other {# threads}}",
+  "@sysCoresThreads": {
+    "description": "Physical cores and logical processors of the server's CPU.",
+    "placeholders": {
+      "cores": {
+        "type": "int"
+      },
+      "threads": {
+        "type": "int"
+      }
+    }
+  },
+  "sysMemory": "Memory",
+  "sysUptime": "Uptime",
+  "sysUptimeValue": "{days, plural, =0 {{time}} one {# day, {time}} other {# days, {time}}}",
+  "@sysUptimeValue": {
+    "description": "How long the server has been up; time is hours:minutes, as 3:07.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String",
+        "example": "3:07"
+      }
+    }
+  },
+  "sysAddresses": "IP addresses",
+  "sysDisks": "Disks",
+  "sysInfoFailed": "Could not read system info: {error}",
+  "sysInfoTimeout": "The server took too long to answer",
+  "sysInfoNoShell": "The server has no POSIX shell (sh) to run the query",
+  "sysInfoOff": "The server monitor is turned off for this host, so no system info is read.",
+  "retry": "Retry",
   "loadAverage": "Load {load}",
   "cpu": "CPU",
   "memory": "Mem",
