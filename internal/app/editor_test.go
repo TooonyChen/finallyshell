@@ -239,7 +239,7 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	ed := a.editor
 	want := connEditor{id: "h1", name: "web", addr: "10.0.0.1", port: "2200", notes: "main box\nrack 4",
 		auth: config.AuthKey, user: "root", keyPath: "~/.ssh/id_rsa", passphrase: "phrase",
-		monitor: false, termType: "vt220", backspace: config.BackspaceCtrlH,
+		remember: true, monitor: false, termType: "vt220", backspace: config.BackspaceCtrlH,
 		proxy:   proxyFields{kind: config.ProxySOCKS5, addr: "10.0.0.9", port: "1081", user: "alice", password: "pp", saved: h.Proxy, hosts: a.hosts},
 		tunnels: newTunnelEditor(&h)}
 	fields := *ed

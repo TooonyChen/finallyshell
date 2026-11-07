@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
 	"errors"
@@ -26,6 +27,16 @@ type fakeSSH struct {
 
 	mu  sync.Mutex
 	pty fakePTY // the last pseudo-terminal asked for
+	// authorized is the public key the server lets in, besides the
+	// password "secret"; nil for none.
+	authorized ssh.PublicKey
+}
+
+// authorize lets the key in.
+func (srv *fakeSSH) authorize(key ssh.PublicKey) {
+	srv.mu.Lock()
+	srv.authorized = key
+	srv.mu.Unlock()
 }
 
 // fakePTY is what a client asked of a pseudo-terminal.
@@ -73,9 +84,17 @@ func startFakeSSH(t *testing.T) *fakeSSH {
 	if err != nil {
 		t.Fatal(err)
 	}
+	srv := &fakeSSH{}
 	cfg := &ssh.ServerConfig{PasswordCallback: func(_ ssh.ConnMetadata, pw []byte) (*ssh.Permissions, error) {
 		if string(pw) != "secret" {
 			return nil, errors.New("wrong password")
+		}
+		return nil, nil
+	}, PublicKeyCallback: func(_ ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
+		srv.mu.Lock()
+		defer srv.mu.Unlock()
+		if srv.authorized == nil || !bytes.Equal(key.Marshal(), srv.authorized.Marshal()) {
+			return nil, errors.New("unknown key")
 		}
 		return nil, nil
 	}}
@@ -85,7 +104,6 @@ func startFakeSSH(t *testing.T) *fakeSSH {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { ln.Close() })
-	srv := &fakeSSH{}
 	addr := ln.Addr().(*net.TCPAddr)
 	srv.host, srv.port = addr.IP.String(), addr.Port
 	go func() {

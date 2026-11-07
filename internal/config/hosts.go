@@ -29,7 +29,8 @@ const (
 	AuthKey      AuthKind = "key"
 )
 
-// Host is a saved connection. Passwords are never saved.
+// Host is a saved connection. Passwords are never saved here: the app
+// keeps them in the system's credential store, or in memory.
 //
 // New fields (a proxy, tunnels, terminal options) go at the end, with
 // omitempty or omitzero, so files without them load as before. JSON keys
@@ -66,6 +67,12 @@ type Host struct {
 	// Backspace is what the Backspace key sends: "" for ^? (DEL), as
 	// most terminals send, or BackspaceCtrlH.
 	Backspace BackspaceKey `json:"backspace,omitempty"`
+	// NoRememberPassword keeps the host's password, or its key's
+	// passphrase, out of the system's credential store: the app keeps it
+	// in memory until it quits. It is the inverse of "Remember password",
+	// so that a host without the key remembers it. Read it with
+	// RemembersPassword.
+	NoRememberPassword bool `json:"noRememberPassword,omitempty"`
 
 	// Proxy is how the host is reached: through a SOCKS5 or HTTP proxy,
 	// or through another saved host, a jump host. nil connects directly.
@@ -131,6 +138,10 @@ func (h *Host) TermTypeOrDefault() string {
 // MonitorEnabled says whether sessions to h poll the server for the side
 // panel.
 func (h *Host) MonitorEnabled() bool { return !h.NoMonitor }
+
+// RemembersPassword says whether the app keeps h's password, or its
+// key's passphrase, in the system's credential store.
+func (h *Host) RemembersPassword() bool { return !h.NoRememberPassword }
 
 // Clone is a copy of h, its proxy, its tunnels and the keys this build
 // does not know included, sharing nothing with h, with the same ID: give

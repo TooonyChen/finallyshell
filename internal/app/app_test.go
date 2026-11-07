@@ -35,10 +35,11 @@ type fakePlatform struct {
 	fakeFilePicker
 	fakeFullScreen
 	fakeImagePicker
+	*fakeSecrets
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {
-	p := &fakePlatform{posts: make(chan func(), 1024), downloads: t.TempDir()}
+	p := &fakePlatform{posts: make(chan func(), 1024), downloads: t.TempDir(), fakeSecrets: newFakeSecrets()}
 	i18n.SetLocaleFunc(func() string { return p.locale })
 	t.Cleanup(func() { i18n.SetLocaleFunc(nil) })
 	return p

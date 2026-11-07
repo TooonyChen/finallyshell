@@ -171,7 +171,9 @@ func TestConnectFromNewTab(t *testing.T) {
 			// A port nothing listens on, to fail at once.
 			h.Auth, h.KeyPath, h.Addr, h.Port = config.AuthPassword, "", "127.0.0.1", 1
 			tt.ClickAt(rowCenter(t, tt, "web-1"))
-			if !a.pwOpen || a.sessions[1].Host != nil {
+			// Asked once the credential store has none.
+			a.plat.(*fakePlatform).until(t, "the password prompt", func() bool { return a.pwOpen })
+			if a.sessions[1].Host != nil {
 				t.Fatalf("no password asked (open %v)", a.pwOpen)
 			}
 			tt.Frame()

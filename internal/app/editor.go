@@ -80,12 +80,19 @@ type connEditor struct {
 	user                    string
 	password                string
 	keyPath, passphrase     string
+	remember                bool // in the system's credential store
 	monitor                 bool
 	termType                string
 	backspace               config.BackspaceKey
 	proxy                   proxyFields  // the Proxy page (editor_proxy.go)
 	tunnels                 tunnelEditor // see editor_tunnels.go
 	folder                  string       // a new host's, from the manager
+
+	// readingSecret is set while the host's saved password, or
+	// passphrase, is read from the credential store into the fields.
+	readingSecret bool
+	// readingProxySecret is the same of its proxy's password.
+	readingProxySecret bool
 
 	// checked is set once OK was pressed: from then on the errors show,
 	// and follow the fields as they change.
@@ -116,7 +123,7 @@ func (a *App) openEditor(h *config.Host, from WindowKind) {
 		a.plat.FocusWindow(WindowEditor)
 		return
 	}
-	ed := &connEditor{port: "22", user: "root", auth: config.AuthPassword, monitor: true}
+	ed := &connEditor{port: "22", user: "root", auth: config.AuthPassword, remember: true, monitor: true}
 	if h != nil {
 		ed.id = h.ID
 		ed.name, ed.addr, ed.notes = h.Name, h.Addr, h.Notes
@@ -130,12 +137,14 @@ func (a *App) openEditor(h *config.Host, from WindowKind) {
 		} else {
 			ed.password = a.passwords[h.ID]
 		}
+		ed.remember = h.RemembersPassword()
 		ed.monitor = h.MonitorEnabled()
 		ed.termType, ed.backspace = h.TermType, h.Backspace
 	}
 	ed.proxy = a.proxyFieldsOf(h)
 	ed.tunnels = newTunnelEditor(h)
 	a.editor = ed
+	a.readEditorSecret(ed, h)
 	spec := editorSpec(h != nil)
 	if from == WindowManager && a.windowOpen(WindowManager) {
 		// A sheet of the manager on macOS, showing its title inside;
@@ -215,11 +224,7 @@ func (a *App) saveEditor() {
 	if ed.auth == config.AuthKey {
 		h.KeyPath, secret = strings.TrimSpace(ed.keyPath), ed.passphrase
 	}
-	if secret != "" || ed.auth == config.AuthKey {
-		a.passwords[h.ID] = secret
-	} else {
-		delete(a.passwords, h.ID) // asked for as the host connects
-	}
+	a.keepLogin(h, secret, ed.remember, ed.readingSecret)
 	h.NoMonitor = !ed.monitor
 	h.TermType, h.Backspace = strings.TrimSpace(ed.termType), ed.backspace
 	if h.TermType == config.DefaultTermType {
@@ -227,6 +232,7 @@ func (a *App) saveEditor() {
 	}
 	a.saveProxy(h, &ed.proxy)
 	h.Tunnels = ed.tunnels.result()
+	a.keepProxySecret(h, ed.remember, ed.readingProxySecret)
 	a.manager.reveal(managerItem{host: h.ID})
 	a.redraw() // the manager and the sessions show the host
 	if err := a.saveHosts(a.hosts); err != nil {
@@ -359,12 +365,13 @@ func (a *App) sshPage(c *ui.Context, ed *connEditor, errs map[editorField]string
 				}).Error(errs[fieldKeyPath])
 				ui.Field(c, locales.FieldPassphrase(), func() {
 					input(ui.TextInput(c, &ed.passphrase).Password().Placeholder(locales.PassphrasePlaceholder()))
-				}).Description(locales.PasswordNote())
+				})
 			} else {
 				ui.Field(c, locales.FieldPassword(), func() {
 					input(ui.TextInput(c, &ed.password).Password())
-				}).Description(locales.PasswordNote())
+				})
 			}
+			a.rememberField(c, &ed.remember, ed.auth == config.AuthKey)
 		})
 		ui.Fieldset(c, locales.SectionAdvanced(), func() {
 			ui.Field(c, "", func() {

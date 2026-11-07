@@ -857,6 +857,7 @@ func (a *App) deleteHostForever(h *config.Host) {
 	a.hosts.Remove(h.ID)
 	delete(a.passwords, h.ID)
 	delete(a.passwords, proxySecretKey(h.ID))
+	a.deleteHostSecrets(h.ID)
 	a.saveFromManager()
 }
 
@@ -872,7 +873,7 @@ func (a *App) duplicateHost(h *config.Host) {
 	dup.LastConnectedAt, dup.DeletedAt = time.Time{}, time.Time{}
 	i := slices.Index(a.hosts.Hosts, h)
 	a.hosts.Hosts = slices.Insert(a.hosts.Hosts, i+1, dup)
-	// TODO(#6): copy the secrets the keychain keeps for h too.
+	a.copyHostSecrets(h, dup)
 	for from, to := range map[string]string{h.ID: dup.ID, proxySecretKey(h.ID): proxySecretKey(dup.ID)} {
 		if pw, ok := a.passwords[from]; ok {
 			a.passwords[to] = pw

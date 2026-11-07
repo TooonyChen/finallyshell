@@ -418,7 +418,7 @@ func TestDialSOCKS5(t *testing.T) {
 				c.proxy.Kind = config.ProxySOCKS5
 				_, err := Dial(target(c.target, &c.proxy), opts)
 				var hop *HopError
-				if !errors.As(err, &hop) || hop.Proxy != paddr || !c.check(hop.Err) {
+				if !errors.As(err, &hop) || hop.Proxy != paddr || hop.HostID != "target" || !c.check(hop.Err) {
 					t.Fatalf("error %v", err)
 				}
 				if !strings.HasPrefix(err.Error(), "proxy "+paddr+": ") {
@@ -491,7 +491,7 @@ func TestDialHTTPProxy(t *testing.T) {
 			h.Port = c.port
 			_, err := Dial(h, opts)
 			var hop *HopError
-			if !errors.As(err, &hop) || hop.Proxy != paddr || !c.check(hop.Err) {
+			if !errors.As(err, &hop) || hop.Proxy != paddr || hop.HostID != "target" || !c.check(hop.Err) {
 				t.Fatalf("error %v", err)
 			}
 		})
@@ -567,7 +567,7 @@ func TestDialJumpHost(t *testing.T) {
 		bad.Jump = &Hop{Host: jumpHost, Options: badJump}
 		_, err := Dial(h, bad)
 		var hop *HopError
-		if !errors.As(err, &hop) || hop.JumpHost != "jump-1" || hop.Proxy != "" || Classify(hop.Err) != "auth" {
+		if !errors.As(err, &hop) || hop.JumpHost != "jump-1" || hop.HostID != "j" || hop.Proxy != "" || Classify(hop.Err) != "auth" {
 			t.Fatalf("error %v", err)
 		}
 		if !strings.HasPrefix(err.Error(), "jump host jump-1: ") {
@@ -584,7 +584,7 @@ func TestDialJumpHost(t *testing.T) {
 		_, err := Dial(h, o)
 		var hop *HopError
 		var fwd *ForwardError
-		if !errors.As(err, &hop) || hop.JumpHost != "jump-1" || !errors.As(err, &fwd) || fwd.Addr != srv.addr {
+		if !errors.As(err, &hop) || hop.JumpHost != "jump-1" || hop.HostID != "j" || !errors.As(err, &fwd) || fwd.Addr != srv.addr {
 			t.Fatalf("error %v", err)
 		}
 		if noFwd.open.Load() != 0 {
@@ -643,7 +643,7 @@ func TestDialJumpHost(t *testing.T) {
 		o.Jump = &Hop{Host: &mid, Options: midOpts}
 		_, err = Dial(h, o)
 		var hop *HopError
-		if !errors.As(err, &hop) || hop.Proxy != "127.0.0.1:"+strconv.Itoa(port) || !strings.HasPrefix(err.Error(), "proxy ") {
+		if !errors.As(err, &hop) || hop.Proxy != "127.0.0.1:"+strconv.Itoa(port) || hop.HostID != "o" || !strings.HasPrefix(err.Error(), "proxy ") {
 			t.Fatalf("error %v", err)
 		}
 	})

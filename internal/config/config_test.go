@@ -188,6 +188,8 @@ func fullHost() *Host {
 			{Kind: TunnelRemote, ListenHost: "0.0.0.0", ListenPort: 9000, TargetHost: "localhost", TargetPort: 3000, Disabled: true},
 			{Kind: TunnelDynamic, ListenPort: 1080},
 		},
+
+		NoRememberPassword: true,
 	}
 }
 
@@ -221,7 +223,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy", "tunnels"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy", "tunnels", "noRememberPassword"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}

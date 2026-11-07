@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"crypto/x509"
 	"errors"
 	"net"
 	"sync/atomic"
@@ -80,7 +81,9 @@ func (s *Session) label() string {
 }
 
 // connect starts connecting s on a goroutine, with the password, or the
-// passphrase of its key.
+// passphrase of its key, which the goroutine waits for from the
+// credential store when the app has not read it yet. A password the
+// server refuses opens the prompt (loginFailed).
 func (a *App) connect(s *Session, secret string) {
 	if s.cancel != nil {
 		s.cancel()
@@ -97,13 +100,25 @@ func (a *App) connect(s *Session, secret string) {
 	}
 	h := *s.Host
 	topts := a.terminalOptions(&h) // here, on the UI thread, which owns the settings
-	fail := func(err error) { a.post(func() { s.status, s.err = statusFailed, err }) }
+	passphrase := a.storedPassphrase(s.Host)
+	fail := func(err error) {
+		a.post(func() {
+			s.status, s.err = statusFailed, err
+			if ctx.Err() == nil {
+				a.loginFailed(s, err)
+			}
+		})
+	}
 	go func() {
+		if passphrase != nil {
+			opts.Passphrase = passphrase(ctx)
+		}
 		client, err := sshx.Dial(&h, opts)
 		if err != nil {
 			fail(err)
 			return
 		}
+		a.post(func() { a.loggedIn(s.Host) })
 		if ctx.Err() != nil { // closed while connecting
 			client.Close()
 			return
@@ -318,6 +333,8 @@ func describeError(err error) string {
 		return locales.ErrNeedPassphrase()
 	case errors.Is(err, sshx.ErrNoAuth):
 		return locales.ErrNoAuth()
+	case errors.Is(err, x509.IncorrectPasswordError):
+		return locales.ErrWrongPassphrase()
 	case errors.As(err, &keyFile):
 		if keyFile.Parse {
 			return locales.ErrParseKey(keyFile.Err.Error())

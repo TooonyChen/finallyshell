@@ -147,6 +147,8 @@ func TestConnectThroughJumpHost(t *testing.T) {
 	a.hosts.Add(h)
 
 	a.openSession(h)
+	// Once the credential store was read, which has neither.
+	p.until(t, "the prompt", func() bool { return a.pwOpen })
 	mainWin.Frame()
 	if !a.pwOpen || a.pwNeed.key != "t" || !mainWin.HasText(locales.EnterPassword()) || !mainWin.HasText(h.Target()) {
 		t.Fatalf("first prompt %+v; texts %q", a.pwNeed, mainWin.Texts())
@@ -221,6 +223,11 @@ func TestJumpHostErrors(t *testing.T) {
 	if got, want := describeError(s.err), locales.ErrViaJump("jump-1", locales.ErrAuthFailed()); got != want {
 		t.Errorf("wrong password: %q, want %q", got, want)
 	}
+	// The prompt asks for the jump host's password again.
+	if !a.pwOpen || a.pwNeed.key != "j" || a.pwErr != s.err {
+		t.Errorf("prompt %v %+v, err %v", a.pwOpen, a.pwNeed, a.pwErr)
+	}
+	a.pwOpen = false
 	p.SetLocale("zh-Hans")
 	if got := describeError(s.err); got != "跳板机 jump-1：认证失败：用户名、密码或私钥不正确" {
 		t.Errorf("in Chinese: %q", got)
@@ -259,7 +266,7 @@ func TestJumpHostErrors(t *testing.T) {
 // the way: the host's, its proxy's, then each jump host's and its
 // proxy's.
 func TestMissingSecrets(t *testing.T) {
-	a, _ := testApp(t)
+	a, p := testApp(t)
 	socks := &config.ProxyConfig{Kind: config.ProxySOCKS5, Addr: "198.51.100.7", Port: 1080, User: "alice"}
 	outer := &config.Host{ID: "o", Name: "outer", Addr: "203.0.113.1", User: "o", Auth: config.AuthPassword, Proxy: socks}
 	mid := &config.Host{ID: "m", Addr: "10.0.0.2", User: "m", Auth: config.AuthKey, KeyPath: "k", Proxy: jumpTo("o")}
@@ -325,6 +332,7 @@ func TestMissingSecrets(t *testing.T) {
 	a.sessions = append(a.sessions, s)
 	h.Proxy = jumpTo("o")
 	a.reconnect(s)
+	p.until(t, "the prompt", func() bool { return a.pwOpen })
 	if !a.pwOpen || a.pwNeed.key != "o" || s.status != statusClosed {
 		t.Errorf("reconnect: prompt %v %+v, status %d", a.pwOpen, a.pwNeed, s.status)
 	}

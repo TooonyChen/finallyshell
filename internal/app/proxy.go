@@ -21,7 +21,8 @@ import (
 func proxySecretKey(hostID string) string { return "proxy/" + hostID }
 
 // proxySecrets holds the proxies' passwords, by proxySecretKey: with the
-// hosts' passwords, in memory for this run, never in hosts.json.
+// hosts' passwords, in memory for this run, never in hosts.json. In the
+// credential store each is the host's secretProxyPassword (secrets.go).
 func (a *App) proxySecrets() map[string]string { return a.passwords }
 
 // usesProxyPassword says whether connecting to h takes the password of
@@ -69,8 +70,9 @@ func (a *App) dialOptions(h *config.Host, secret string, ask func(*sshx.HostKeyQ
 	return opts, nil
 }
 
-// secretNeed is a password that connecting takes and the app does not
-// know: of the host, of a jump host on the way, or of a proxy.
+// secretNeed is a secret that connecting takes: of the host, of a jump
+// host on the way, or of a proxy. The prompt asks for those the app does
+// not know.
 type secretNeed struct {
 	key   string // in a.passwords, or a.proxySecrets for a proxy's
 	proxy bool
@@ -79,49 +81,109 @@ type secretNeed struct {
 	// via is the host connected to, when the password is for a hop on
 	// the way to it; "" for the host's own.
 	via string
+
+	// host is whose secret it is, whose "Remember password" it follows;
+	// store is its key in the credential store (secrets.go).
+	host  *config.Host
+	store string
+	// passphrase is set for the passphrase of host's key, which the app
+	// does not ask for before connecting: a key may have none. detail is
+	// the key's file.
+	passphrase bool
+	detail     string
 }
 
-// missingSecret is the first password that connecting to h takes and
-// the app does not know: h's, its proxy's, then those of its jump hosts
-// and their proxies, in the order they are on the way; nil for none. A
-// jump host that is missing or loops asks nothing: connecting says so.
-func (a *App) missingSecret(h *config.Host) *secretNeed {
+// loginNeed is what x logs in with as connecting to h takes it: x's
+// password, or its key's passphrase. x is h, or a jump host on the way.
+func loginNeed(x, h *config.Host) *secretNeed {
+	n := &secretNeed{key: x.ID, store: loginSecretKey(x), host: x, title: locales.EnterPassword, who: x.Target()}
+	if x.Auth == config.AuthKey {
+		n.passphrase, n.title, n.detail = true, locales.EnterPassphrase, x.KeyPath
+	}
+	if x != h {
+		if x.Name != "" {
+			n.who = x.Name + " (" + n.who + ")"
+		}
+		n.via = h.Title()
+		if !n.passphrase {
+			n.title = locales.JumpHostPasswordTitle
+		}
+	}
+	return n
+}
+
+// proxyNeed is the password of x's proxy, as connecting to h takes it.
+func proxyNeed(x, h *config.Host) *secretNeed {
+	p := config.ProxyOf(x)
+	return &secretNeed{key: proxySecretKey(x.ID), proxy: true, title: locales.ProxyPasswordTitle,
+		who: p.User + "@" + sshx.ProxyAddr(p), via: h.Title(),
+		host: x, store: hostSecretKey(x.ID, secretProxyPassword)}
+}
+
+// chainSecrets are the secrets connecting to h takes, in the order they
+// are on the way: h's password or its key's passphrase, its proxy's
+// password, then those of its jump hosts and their proxies. A jump host
+// that is missing or loops takes none: connecting says so.
+func (a *App) chainSecrets(h *config.Host) []*secretNeed {
 	hosts := []*config.Host{h}
 	if jumps, err := a.hosts.JumpHosts(h); err == nil {
 		hosts = append(hosts, jumps...)
 	}
+	var needs []*secretNeed
 	for _, x := range hosts {
-		if _, known := a.passwords[x.ID]; x.Auth == config.AuthPassword && !known {
-			if x == h {
-				return &secretNeed{key: x.ID, title: locales.EnterPassword, who: x.Target()}
-			}
-			who := x.Target()
-			if x.Name != "" {
-				who = x.Name + " (" + who + ")"
-			}
-			return &secretNeed{key: x.ID, title: locales.JumpHostPasswordTitle, who: who, via: h.Title()}
+		needs = append(needs, loginNeed(x, h))
+		if usesProxyPassword(x) {
+			needs = append(needs, proxyNeed(x, h))
 		}
-		if _, known := a.proxySecrets()[proxySecretKey(x.ID)]; usesProxyPassword(x) && !known {
-			p := config.ProxyOf(x)
-			return &secretNeed{key: proxySecretKey(x.ID), proxy: true, title: locales.ProxyPasswordTitle,
-				who: p.User + "@" + sshx.ProxyAddr(p), via: h.Title()}
+	}
+	return needs
+}
+
+// missingSecret is the first password that connecting to h takes and
+// the app does not know, in the order chainSecrets has them; nil for
+// none. A key's passphrase is never missing.
+func (a *App) missingSecret(h *config.Host) *secretNeed {
+	for _, n := range a.chainSecrets(h) {
+		if _, known := a.knownSecret(n); !known && !n.passphrase {
+			return n
 		}
 	}
 	return nil
 }
 
 // askSecret shows the password prompt for need; then runs once it is
-// entered.
+// entered (passwordEntered).
 func (a *App) askSecret(need *secretNeed, then func()) {
 	a.pwOpen, a.pwNeed, a.pwThen, a.pwText = true, need, then, ""
+	a.pwRemember, a.pwErr = need.host.RemembersPassword(), nil
+	a.checkSecrets()
 }
 
-// keepSecret keeps the password entered for need.
+// knownSecret is need's secret as the app knows it this run.
+func (a *App) knownSecret(need *secretNeed) (string, bool) {
+	m := a.passwords
+	if need.proxy {
+		m = a.proxySecrets()
+	}
+	v, ok := m[need.key]
+	return v, ok
+}
+
+// keepSecret keeps the password entered for need, for this run.
 func (a *App) keepSecret(need *secretNeed, pw string) {
 	if need.proxy {
 		a.proxySecrets()[need.key] = pw
 	} else {
 		a.passwords[need.key] = pw
+	}
+}
+
+// forgetSecret forgets need's secret for this run.
+func (a *App) forgetSecret(need *secretNeed) {
+	if need.proxy {
+		delete(a.proxySecrets(), need.key)
+	} else {
+		delete(a.passwords, need.key)
 	}
 }
 

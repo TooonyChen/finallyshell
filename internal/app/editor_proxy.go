@@ -203,7 +203,7 @@ func (a *App) proxyPage(c *ui.Context, ed *connEditor, errs map[editorField]stri
 			if strings.TrimSpace(pf.user) != "" {
 				ui.Field(c, locales.FieldPassword(), func() {
 					input(ui.TextInput(c, &pf.password).Password())
-				}).Description(locales.PasswordNote())
+				}).Description(a.rememberNote(ed.remember))
 			}
 		case config.ProxyJump:
 			choices := jumpChoices(pf.hosts, ed.id)

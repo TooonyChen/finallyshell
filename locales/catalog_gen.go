@@ -1264,14 +1264,84 @@ func (msgs Messages) FieldPassword() string {
 	return Catalog.Format(msgs.locale, "fieldPassword", nil)
 }
 
-// PasswordNote says "Passwords are kept in memory only: enter them again after restarting."
+// RememberPassword says "Remember password"
 // in the language the app shows.
-func PasswordNote() string { return In(i18n.Locale()).PasswordNote() }
+func RememberPassword() string { return In(i18n.Locale()).RememberPassword() }
 
-// PasswordNote says "Passwords are kept in memory only: enter them again after restarting."
+// RememberPassword says "Remember password"
 // in the language of msgs.
-func (msgs Messages) PasswordNote() string {
-	return Catalog.Format(msgs.locale, "passwordNote", nil)
+func (msgs Messages) RememberPassword() string {
+	return Catalog.Format(msgs.locale, "rememberPassword", nil)
+}
+
+// RememberPassphrase says "Remember passphrase"
+// in the language the app shows.
+func RememberPassphrase() string { return In(i18n.Locale()).RememberPassphrase() }
+
+// RememberPassphrase says "Remember passphrase"
+// in the language of msgs.
+func (msgs Messages) RememberPassphrase() string {
+	return Catalog.Format(msgs.locale, "rememberPassphrase", nil)
+}
+
+// SecretStoredNote says "Saved in the system's credential store ({store}), never in hosts.json."
+// in the language the app shows.
+func SecretStoredNote(store string) string { return In(i18n.Locale()).SecretStoredNote(store) }
+
+// SecretStoredNote says "Saved in the system's credential store ({store}), never in hosts.json."
+// in the language of msgs.
+func (msgs Messages) SecretStoredNote(store string) string {
+	return Catalog.Format(msgs.locale, "secretStoredNote", map[string]any{"store": store})
+}
+
+// SecretMemoryNote says "Kept in memory only: enter it again after restarting."
+// in the language the app shows.
+func SecretMemoryNote() string { return In(i18n.Locale()).SecretMemoryNote() }
+
+// SecretMemoryNote says "Kept in memory only: enter it again after restarting."
+// in the language of msgs.
+func (msgs Messages) SecretMemoryNote() string {
+	return Catalog.Format(msgs.locale, "secretMemoryNote", nil)
+}
+
+// SecretsUnavailable says "The system's credential store ({store}) is not available: passwords are kept in memory only."
+// in the language the app shows.
+func SecretsUnavailable(store string) string { return In(i18n.Locale()).SecretsUnavailable(store) }
+
+// SecretsUnavailable says "The system's credential store ({store}) is not available: passwords are kept in memory only."
+// in the language of msgs.
+func (msgs Messages) SecretsUnavailable(store string) string {
+	return Catalog.Format(msgs.locale, "secretsUnavailable", map[string]any{"store": store})
+}
+
+// StoreKeychain says "Keychain"
+// in the language the app shows.
+func StoreKeychain() string { return In(i18n.Locale()).StoreKeychain() }
+
+// StoreKeychain says "Keychain"
+// in the language of msgs.
+func (msgs Messages) StoreKeychain() string {
+	return Catalog.Format(msgs.locale, "storeKeychain", nil)
+}
+
+// StoreCredentialManager says "Credential Manager"
+// in the language the app shows.
+func StoreCredentialManager() string { return In(i18n.Locale()).StoreCredentialManager() }
+
+// StoreCredentialManager says "Credential Manager"
+// in the language of msgs.
+func (msgs Messages) StoreCredentialManager() string {
+	return Catalog.Format(msgs.locale, "storeCredentialManager", nil)
+}
+
+// StoreSecretService says "Secret Service"
+// in the language the app shows.
+func StoreSecretService() string { return In(i18n.Locale()).StoreSecretService() }
+
+// StoreSecretService says "Secret Service"
+// in the language of msgs.
+func (msgs Messages) StoreSecretService() string {
+	return Catalog.Format(msgs.locale, "storeSecretService", nil)
 }
 
 // ErrHostRequired says "Enter the host"
@@ -2474,6 +2544,26 @@ func ErrNeedPassphrase() string { return In(i18n.Locale()).ErrNeedPassphrase() }
 // in the language of msgs.
 func (msgs Messages) ErrNeedPassphrase() string {
 	return Catalog.Format(msgs.locale, "errNeedPassphrase", nil)
+}
+
+// ErrWrongPassphrase says "Wrong passphrase for the private key"
+// in the language the app shows.
+func ErrWrongPassphrase() string { return In(i18n.Locale()).ErrWrongPassphrase() }
+
+// ErrWrongPassphrase says "Wrong passphrase for the private key"
+// in the language of msgs.
+func (msgs Messages) ErrWrongPassphrase() string {
+	return Catalog.Format(msgs.locale, "errWrongPassphrase", nil)
+}
+
+// EnterPassphrase says "Enter the key's passphrase"
+// in the language the app shows.
+func EnterPassphrase() string { return In(i18n.Locale()).EnterPassphrase() }
+
+// EnterPassphrase says "Enter the key's passphrase"
+// in the language of msgs.
+func (msgs Messages) EnterPassphrase() string {
+	return Catalog.Format(msgs.locale, "enterPassphrase", nil)
 }
 
 // ErrNoAuth says "No way to log in: enter a password or a key"

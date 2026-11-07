@@ -185,7 +185,28 @@
   "fieldPassphrase": "Passphrase",
   "passphrasePlaceholder": "Leave empty if none",
   "fieldPassword": "Password",
-  "passwordNote": "Passwords are kept in memory only: enter them again after restarting.",
+  "rememberPassword": "Remember password",
+  "rememberPassphrase": "Remember passphrase",
+  "secretStoredNote": "Saved in the system's credential store ({store}), never in hosts.json.",
+  "@secretStoredNote": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "secretMemoryNote": "Kept in memory only: enter it again after restarting.",
+  "secretsUnavailable": "The system's credential store ({store}) is not available: passwords are kept in memory only.",
+  "@secretsUnavailable": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "storeKeychain": "Keychain",
+  "storeCredentialManager": "Credential Manager",
+  "storeSecretService": "Secret Service",
   "errHostRequired": "Enter the host",
   "errUserRequired": "Enter the user",
   "errPortInvalid": "Enter a port from 1 to 65535",
@@ -322,6 +343,8 @@
   "errReadKey": "Could not read the private key: {error}",
   "errParseKey": "Could not parse the private key: {error}",
   "errNeedPassphrase": "The private key is protected: enter its passphrase",
+  "errWrongPassphrase": "Wrong passphrase for the private key",
+  "enterPassphrase": "Enter the key's passphrase",
   "errNoAuth": "No way to log in: enter a password or a key",
   "errAuthFailed": "Authentication failed: wrong user, password or key",
   "errRefused": "Connection refused: no SSH service on that port",

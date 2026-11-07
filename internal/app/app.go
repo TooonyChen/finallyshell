@@ -70,6 +70,18 @@ type Platform interface {
 	// Quit quits the app, as the tray's Quit does: the platform asks
 	// QuitRequested first, then closes every window.
 	Quit()
+
+	// SecretGet returns the secret kept under key in the system's
+	// credential store, with ok false when there is none. SecretSet keeps
+	// value under key, replacing what it had; SecretDelete removes it,
+	// and deleting a key without one is no error. Where the system has no
+	// store they fail with an error for which errors.Is(err,
+	// errors.ErrUnsupported) holds. They may block for long, while the
+	// system asks the user: the app calls them on a goroutine
+	// (secrets.go).
+	SecretGet(key string) (value string, ok bool, err error)
+	SecretSet(key, value string) error
+	SecretDelete(key string) error
 }
 
 // App is the state of the window.
@@ -78,7 +90,8 @@ type App struct {
 	settings config.Settings
 
 	hosts     *config.Store     // deleted hosts included: lists show hosts.Live()
-	passwords map[string]string // by host ID, for this run only
+	passwords map[string]string // by host ID: what the host logs in with, this run
+	secrets   secretStore       // the system's credential store (secrets.go)
 	sessions  []*Session        // new tabs included
 	active    int
 	sessList  ui.ListState
@@ -109,12 +122,14 @@ type App struct {
 	editor *connEditor
 
 	// The password prompt: the password a connection takes (a saved
-	// host's, a jump host's or a proxy's), and what to do once it is
-	// entered (see proxy.go).
-	pwOpen bool
-	pwNeed *secretNeed
-	pwThen func()
-	pwText string
+	// host's, a jump host's or a proxy's), or a key's passphrase, and
+	// what to do once it is entered (see proxy.go and secrets.go).
+	pwOpen     bool
+	pwNeed     *secretNeed
+	pwThen     func()
+	pwText     string
+	pwRemember bool  // "Remember password"
+	pwErr      error // why the last one did not work, or nil
 
 	// The secondary windows that are open.
 	windows map[WindowKind]bool
@@ -255,9 +270,14 @@ func (a *App) setLanguage(tag string) {
 func (a *App) openSession(h *config.Host) { a.openSessionIn(a.selectedNewTab(), h) }
 
 // openSessionIn opens a session to h in tab, a new tab, or in a tab of
-// its own for nil, asking first for the passwords the app does not know:
-// its own, then its proxy's and jump hosts', one at a time.
+// its own for nil. It reads the passwords connecting takes from the
+// system's credential store first, those the app does not know yet, and
+// asks for those the store does not have either: h's own, then its
+// proxy's and jump hosts', one at a time.
 func (a *App) openSessionIn(tab *Session, h *config.Host) {
+	if a.readChainSecrets(h, func() { a.openSessionIn(tab, h) }) {
+		return
+	}
 	if need := a.missingSecret(h); need != nil {
 		a.askSecret(need, func() { a.openSessionIn(tab, h) })
 		return
@@ -280,7 +300,10 @@ func (a *App) reconnect(s *Session) {
 		return
 	}
 	// A jump host or a proxy with a password not known yet, as the host
-	// was edited to go through it.
+	// was edited to go through it, or one forgotten as it did not work.
+	if a.readChainSecrets(s.Host, func() { a.reconnect(s) }) {
+		return
+	}
 	if need := a.missingSecret(s.Host); need != nil {
 		a.askSecret(need, func() { a.reconnect(s) })
 		return

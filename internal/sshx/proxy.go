@@ -60,7 +60,11 @@ type HopError struct {
 	Proxy string
 	// JumpHost is the title of the jump host that failed.
 	JumpHost string
-	Err      error
+	// HostID is the ID of the host the hop belongs to, which titles may
+	// not tell apart: the jump host that failed, or the host whose proxy
+	// failed.
+	HostID string
+	Err    error
 }
 
 func (e *HopError) Error() string {
@@ -122,6 +126,10 @@ func dialRoute(h *config.Host, opts Options, cfg *ssh.ClientConfig) (*ssh.Client
 		}
 	default:
 		return nil, fmt.Errorf("unknown proxy kind %q", p.Kind)
+	}
+	var hop *HopError
+	if err != nil && p.Kind != config.ProxyJump && errors.As(err, &hop) && hop.HostID == "" {
+		hop.HostID = h.ID // h's own proxy failed
 	}
 	if err != nil {
 		return nil, err
@@ -246,19 +254,19 @@ func dialJump(hop *Hop, addr string, timeout time.Duration) (net.Conn, error) {
 	if hop == nil || hop.Host == nil {
 		return nil, ErrNoJumpHost
 	}
-	name := hop.Host.Title()
+	name, id := hop.Host.Title(), hop.Host.ID
 	jc, err := Dial(hop.Host, hop.Options)
 	if err != nil {
 		var hop *HopError
 		if errors.As(err, &hop) {
 			return nil, err // a hop before the jump host failed: it says which
 		}
-		return nil, &HopError{JumpHost: name, Err: err}
+		return nil, &HopError{JumpHost: name, HostID: id, Err: err}
 	}
 	conn, err := dialThrough(jc, addr, timeout)
 	if err != nil {
 		jc.Close()
-		return nil, &HopError{JumpHost: name, Err: &ForwardError{Addr: addr, Err: err}}
+		return nil, &HopError{JumpHost: name, HostID: id, Err: &ForwardError{Addr: addr, Err: err}}
 	}
 	return newHopConn(conn, nil, addr, jc), nil
 }

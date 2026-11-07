@@ -35,11 +35,21 @@ func (a *App) passwordView(c *ui.Context) {
 		ui.Text(c, need.title()).FontSize(16).Bold()
 		ui.Column(c).Gap(2).Children(func() {
 			widgets.Muted(c, need.who)
+			if need.detail != "" {
+				widgets.Muted(c, need.detail).FontSize(12)
+			}
 			if need.via != "" {
 				widgets.Muted(c, locales.PasswordOnTheWay(need.via)).FontSize(12)
 			}
 		})
+		if a.pwErr != nil {
+			ui.Text(c, describeError(a.pwErr)).TextColor(theme.Danger)
+		}
 		submit := ui.TextInput(c, &a.pwText).Password().AutoFocus().Submitted()
+		ui.Column(c).Gap(4).Children(func() {
+			a.rememberBox(c, &a.pwRemember, need.passphrase)
+			widgets.Muted(c, a.rememberNote(a.pwRemember)).FontSize(12)
+		})
 		ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
 			if ui.Button(c, locales.Cancel()).Clicked() {
 				a.pwOpen = false
@@ -49,12 +59,7 @@ func (a *App) passwordView(c *ui.Context) {
 			}
 		})
 		if submit {
-			a.keepSecret(need, a.pwText)
-			then := a.pwThen
-			a.pwOpen, a.pwText, a.pwNeed, a.pwThen = false, "", nil, nil
-			if then != nil {
-				then() // may ask for the next password
-			}
+			a.passwordEntered()
 		}
 	})
 }
