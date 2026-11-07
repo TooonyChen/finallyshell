@@ -7,6 +7,7 @@ package app
 
 import (
 	"slices"
+	"time"
 
 	"finalshelly/internal/config"
 	"finalshelly/locales"
@@ -55,6 +56,10 @@ type App struct {
 	termFont    terminal.Font
 	termTheme   *terminal.Theme
 
+	// The pane sizes changed since they were saved, last at layoutAt.
+	layoutDirty bool
+	layoutAt    time.Time
+
 	saveHosts    func([]*config.Host) error
 	saveSettings func(config.Settings) error
 
@@ -86,10 +91,10 @@ func New(plat Platform) *App {
 		passwords:    map[string]string{},
 		active:       -1,
 		hostRow:      -1,
-		sideWidth:    240,
-		monitorPct:   62,
-		terminalPct:  64,
-		treeWidth:    200,
+		sideWidth:    defaultSideWidth,
+		monitorPct:   defaultMonitorPct,
+		terminalPct:  defaultTerminalPct,
+		treeWidth:    defaultTreeWidth,
 		termFont:     terminal.Font{Family: "JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace", Size: 13.5},
 		saveHosts:    config.SaveHosts,
 		saveSettings: config.SaveSettings,
@@ -99,6 +104,7 @@ func New(plat Platform) *App {
 	}
 	a.hosts, _ = config.LoadHosts()
 	a.settings = config.LoadSettings()
+	a.restoreLayout()
 	a.transfers.init()
 	return a
 }
@@ -129,7 +135,9 @@ var sidebarBG = ui.Hex("#f3f4f6")
 func (a *App) View(c *ui.Context) {
 	c.SetTheme(theme)
 	a.shortcuts(c)
-	ui.Split(c, &a.sideWidth, func() { a.sidebar(c) }, func() { a.mainArea(c) }).SplitReset(240).Fill()
+	a.saveLayoutAtRest(c)
+	split := ui.Split(c, &a.sideWidth, func() { a.sidebar(c) }, func() { a.mainArea(c) }).SplitReset(defaultSideWidth).Fill()
+	a.splitMoved(c, split, &a.sideWidth, sidebarLimits)
 	a.dialogs(c)
 }
 
@@ -156,12 +164,14 @@ func (a *App) cycle(d int) {
 
 func (a *App) sidebar(c *ui.Context) {
 	ui.Column(c).Fill().Background(sidebarBG).Children(func() {
-		ui.SplitVerticalPercent(c, &a.monitorPct, func() { a.monitorPanel(c) }, func() { a.sessionPanel(c) }).Fill()
+		split := ui.SplitVerticalPercent(c, &a.monitorPct, func() { a.monitorPanel(c) }, func() { a.sessionPanel(c) }).SplitReset(defaultMonitorPct).Fill()
+		a.splitMoved(c, split, &a.monitorPct, monitorLimits)
 	})
 }
 
 func (a *App) mainArea(c *ui.Context) {
-	ui.SplitVerticalPercent(c, &a.terminalPct, func() { a.terminalArea(c) }, func() { a.bottomPanel(c) }).Fill()
+	split := ui.SplitVerticalPercent(c, &a.terminalPct, func() { a.terminalArea(c) }, func() { a.bottomPanel(c) }).SplitReset(defaultTerminalPct).Fill()
+	a.splitMoved(c, split, &a.terminalPct, terminalLimits)
 }
 
 // bottomPanel is the files of the active session, and the transfers.
@@ -226,8 +236,12 @@ func (a *App) closeSession(s *Session) {
 	}
 }
 
-// CloseAll ends every connection, as the window closes.
+// CloseAll ends every connection, as the window closes, and saves the
+// pane sizes the user changed.
 func (a *App) CloseAll() {
+	if a.layoutDirty {
+		a.saveLayout()
+	}
 	for _, s := range a.sessions {
 		a.transfers.cancelSession(s)
 		s.disconnect()

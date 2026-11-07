@@ -220,7 +220,8 @@ func (a *App) filePanel(c *ui.Context) {
 		if f.err != nil {
 			ui.Text(c, fileErrorText(f.err)).TextColor(theme.Danger).Padding(4, 10)
 		}
-		ui.Split(c, &a.treeWidth, func() { a.dirTree(c, s) }, func() { a.fileTable(c, s) }).Grow(1)
+		split := ui.Split(c, &a.treeWidth, func() { a.dirTree(c, s) }, func() { a.fileTable(c, s) }).SplitReset(defaultTreeWidth).Grow(1)
+		a.splitMoved(c, split, &a.treeWidth, treeLimits)
 	})
 }
 

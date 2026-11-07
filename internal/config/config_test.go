@@ -18,10 +18,11 @@ func TestHostsAndSettings(t *testing.T) {
 	if h.Target() != "root@example.com:2200" || h.Title() != "example.com" {
 		t.Errorf("target %q title %q", h.Target(), h.Title())
 	}
-	if err := SaveSettings(Settings{Language: "zh-Hans"}); err != nil {
+	want := Settings{Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180}
+	if err := SaveSettings(want); err != nil {
 		t.Fatal(err)
 	}
-	if s := LoadSettings(); s.Language != "zh-Hans" {
-		t.Errorf("settings %+v", s)
+	if s := LoadSettings(); s != want {
+		t.Errorf("settings %+v, want %+v", s, want)
 	}
 }
