@@ -1,0 +1,18 @@
+[
+  {
+    "id": "h1714000000000000001",
+    "name": "web",
+    "addr": "203.0.113.10",
+    "port": 2222,
+    "user": "deploy",
+    "auth": "password"
+  },
+  {
+    "id": "h1714000000000000002",
+    "name": "",
+    "addr": "db.example.com",
+    "user": "root",
+    "auth": "key",
+    "keyPath": "~/.ssh/id_ed25519"
+  }
+]

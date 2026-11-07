@@ -28,6 +28,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 
 - 中文和英文界面。默认跟随系统语言，点左下角“会话”标题旁的设置按钮，在设置窗口里切换，选择会保存。
 - 连接管理器：新建、编辑、删除主机，密码或私钥登录。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码不落盘，只存在内存里。
+- 连接成功时记下时间，供“最近连接”使用。主机的 `noMonitor` 为 `true` 时不轮询服务器状态，也就不开额外的 exec 通道（有些跳板机不允许）。
 - 第一次连接时弹窗显示主机指纹，信任后记入 `finalshelly/known_hosts`；指纹变化时拒绝连接。
 - 左上：当前会话服务器的 IP、运行时间、负载、CPU/内存/交换、内存占用前几的进程、网速和延迟曲线、磁盘。每 2 秒通过 SSH 读取一次 `/proc`，只支持 Linux 服务器。
 - 左下：竖向会话列表，状态点（绿：已连接，黄：连接中，红：失败），右键菜单（重新连接、复制会话、断开、关闭），拖动排序。
@@ -40,6 +41,25 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 
 快捷键：Ctrl+Shift+T 连接管理器（macOS 也可以 Cmd+T），Ctrl+Tab / Ctrl+Shift+Tab 切换会话，Ctrl+Shift+W 关闭会话。终端内复制粘贴是 Ctrl+Shift+C / Ctrl+Shift+V（macOS 是 Cmd+C / Cmd+V）。
 
+## 配置文件
+
+`hosts.json` 从第 2 版起是一个对象（第 1 版是主机数组，第一次读取时自动迁移，原文件另存为 `hosts.v1.json`，下次保存时改写成第 2 版）：
+
+```json
+{
+  "version": 2,
+  "folders": [{"id": "f1", "name": "生产"}, {"id": "f2", "name": "数据库", "parent": "f1"}],
+  "hosts": [{
+    "id": "h1", "name": "web", "addr": "203.0.113.10", "port": 2222, "user": "root",
+    "auth": "key", "keyPath": "~/.ssh/id_ed25519",
+    "folder": "f2", "notes": "备注", "noMonitor": true,
+    "lastConnectedAt": "2026-11-07T10:00:00+08:00"
+  }]
+}
+```
+
+`folder` 是所在文件夹的 ID，空表示顶层；文件夹用 `parent` 嵌套。有 `deletedAt`（删除时间）的主机是“已删除”的，列表里不显示。空值的字段不写出来，没有 `noMonitor` 就是开启监控。不认识的字段（新版本写的）原样保留，保存时不会丢。写入时先写临时文件再改名，不会写出半个文件。
+
 ## 代码结构
 
 Go 里一个文件夹就是一个包（package），包之间不能循环引用，所以按职责拆分。`internal/` 下的包只能被本项目使用。
@@ -48,7 +68,7 @@ Go 里一个文件夹就是一个包（package），包之间不能循环引用�
 main.go              启动 MyGo、开窗口，把系统功能（对话框、下载目录、语言）交给 app
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
-  config/            主机列表和设置的读写、配置目录
+  config/            主机和文件夹（hosts.json）、设置的读写，配置目录
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn
   monitor/           服务器状态采集和解析
   remotefs/          SFTP 列目录、上传、下载（带进度和取消）

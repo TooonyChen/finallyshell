@@ -1,0 +1,19 @@
+{
+  "version": 3,
+  "theme": {"accent": "#2563eb"},
+  "folders": [
+    {"id": "f1", "name": "Prod", "color": "red"}
+  ],
+  "hosts": [
+    {
+      "id": "h1",
+      "name": "web",
+      "addr": "203.0.113.10",
+      "user": "deploy",
+      "auth": "password",
+      "folder": "f1",
+      "proxy": {"kind": "socks5", "addr": "127.0.0.1:1080"},
+      "tunnels": [{"local": 8080, "remote": "localhost:80"}]
+    }
+  ]
+}
