@@ -10,7 +10,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -67,6 +66,13 @@ type Options struct {
 	// KnownHosts is the known_hosts file: <config dir>/known_hosts when
 	// empty.
 	KnownHosts string
+
+	// ProxyPassword is the password of the host's SOCKS5 or HTTP proxy,
+	// for the proxy's user (see proxy.go).
+	ProxyPassword string
+	// Jump is the jump host of a host whose proxy is one, with what
+	// logging in to it takes, its own jump host included.
+	Jump *Hop
 }
 
 var knownHostsMu sync.Mutex
@@ -160,7 +166,8 @@ func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, error) {
 	return methods, nil
 }
 
-// Dial connects and logs in to h.
+// Dial connects and logs in to h, through its proxy or jump host if it
+// has one (see proxy.go).
 func Dial(h *config.Host, opts Options) (*ssh.Client, error) {
 	auth, err := authMethods(h, opts)
 	if err != nil {
@@ -171,7 +178,7 @@ func Dial(h *config.Host, opts Options) (*ssh.Client, error) {
 		return nil, err
 	}
 	cfg := &ssh.ClientConfig{User: h.User, Auth: auth, HostKeyCallback: hk, Timeout: 15 * time.Second}
-	return ssh.Dial("tcp", net.JoinHostPort(h.Addr, strconv.Itoa(h.PortOr22())), cfg)
+	return dialRoute(h, opts, cfg)
 }
 
 // Shell is an interactive shell on an SSH connection, which the terminal
