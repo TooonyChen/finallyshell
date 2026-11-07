@@ -27,6 +27,8 @@ const (
 	pageColors     = "terminal/colors"
 	pageBackground = "terminal/background"
 	pageFont       = "terminal/font"
+	pageFiles      = "files"
+	pageFileIcons  = "files/icons"
 )
 
 // optionPage is a page of the options window.
@@ -75,6 +77,14 @@ var optionPages = []optionPage{
 	{
 		id: pageFont, parent: pageTerminal, title: locales.OptionsFont,
 		view: (*App).fontPage,
+	},
+	{
+		id: pageFiles, title: locales.OptionsFileManager,
+		view: nil,
+	},
+	{
+		id: pageFileIcons, parent: pageFiles, title: locales.OptionsFileIcons,
+		view: (*App).fileIconsPage,
 	},
 }
 

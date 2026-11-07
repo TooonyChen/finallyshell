@@ -4553,3 +4553,233 @@ func OptionAskDownloadDir() string { return In(i18n.Locale()).OptionAskDownloadD
 func (msgs Messages) OptionAskDownloadDir() string {
 	return Catalog.Format(msgs.locale, "optionAskDownloadDir", nil)
 }
+
+// OptionsFileManager says "File manager"
+// in the language the app shows.
+func OptionsFileManager() string { return In(i18n.Locale()).OptionsFileManager() }
+
+// OptionsFileManager says "File manager"
+// in the language of msgs.
+func (msgs Messages) OptionsFileManager() string {
+	return Catalog.Format(msgs.locale, "optionsFileManager", nil)
+}
+
+// OptionsFileIcons says "File icon theme"
+// in the language the app shows.
+func OptionsFileIcons() string { return In(i18n.Locale()).OptionsFileIcons() }
+
+// OptionsFileIcons says "File icon theme"
+// in the language of msgs.
+func (msgs Messages) OptionsFileIcons() string {
+	return Catalog.Format(msgs.locale, "optionsFileIcons", nil)
+}
+
+// FileIconsPreview says "Preview"
+// in the language the app shows.
+func FileIconsPreview() string { return In(i18n.Locale()).FileIconsPreview() }
+
+// FileIconsPreview says "Preview"
+// in the language of msgs.
+func (msgs Messages) FileIconsPreview() string {
+	return Catalog.Format(msgs.locale, "fileIconsPreview", nil)
+}
+
+// FileIconsBundled says "Built in"
+// in the language the app shows.
+func FileIconsBundled() string { return In(i18n.Locale()).FileIconsBundled() }
+
+// FileIconsBundled says "Built in"
+// in the language of msgs.
+func (msgs Messages) FileIconsBundled() string {
+	return Catalog.Format(msgs.locale, "fileIconsBundled", nil)
+}
+
+// FileIconsInstalled says "Installed from VSIX"
+// in the language the app shows.
+func FileIconsInstalled() string { return In(i18n.Locale()).FileIconsInstalled() }
+
+// FileIconsInstalled says "Installed from VSIX"
+// in the language of msgs.
+func (msgs Messages) FileIconsInstalled() string {
+	return Catalog.Format(msgs.locale, "fileIconsInstalled", nil)
+}
+
+// FileIconsDetected says "Installed in VS Code and similar editors"
+// in the language the app shows.
+func FileIconsDetected() string { return In(i18n.Locale()).FileIconsDetected() }
+
+// FileIconsDetected says "Installed in VS Code and similar editors"
+// in the language of msgs.
+func (msgs Messages) FileIconsDetected() string {
+	return Catalog.Format(msgs.locale, "fileIconsDetected", nil)
+}
+
+// FileIconsMinimal says "Minimal"
+// in the language the app shows.
+func FileIconsMinimal() string { return In(i18n.Locale()).FileIconsMinimal() }
+
+// FileIconsMinimal says "Minimal"
+// in the language of msgs.
+func (msgs Messages) FileIconsMinimal() string {
+	return Catalog.Format(msgs.locale, "fileIconsMinimal", nil)
+}
+
+// FileIconsMinimalNote says "One icon for files, one for folders"
+// in the language the app shows.
+func FileIconsMinimalNote() string { return In(i18n.Locale()).FileIconsMinimalNote() }
+
+// FileIconsMinimalNote says "One icon for files, one for folders"
+// in the language of msgs.
+func (msgs Messages) FileIconsMinimalNote() string {
+	return Catalog.Format(msgs.locale, "fileIconsMinimalNote", nil)
+}
+
+// FileIconsNote says "Lists the icon themes installed in VS Code, VS Code Insiders, VSCodium, Cursor and Windsurf. A theme installed from a…"
+// in the language the app shows.
+func FileIconsNote() string { return In(i18n.Locale()).FileIconsNote() }
+
+// FileIconsNote says "Lists the icon themes installed in VS Code, VS Code Insiders, VSCodium, Cursor and Windsurf. A theme installed from a…"
+// in the language of msgs.
+func (msgs Messages) FileIconsNote() string {
+	return Catalog.Format(msgs.locale, "fileIconsNote", nil)
+}
+
+// InstallVSIX says "Install from VSIX…"
+// in the language the app shows.
+func InstallVSIX() string { return In(i18n.Locale()).InstallVSIX() }
+
+// InstallVSIX says "Install from VSIX…"
+// in the language of msgs.
+func (msgs Messages) InstallVSIX() string {
+	return Catalog.Format(msgs.locale, "installVSIX", nil)
+}
+
+// InstallVSIXTitle says "Choose a VSIX file"
+// in the language the app shows.
+func InstallVSIXTitle() string { return In(i18n.Locale()).InstallVSIXTitle() }
+
+// InstallVSIXTitle says "Choose a VSIX file"
+// in the language of msgs.
+func (msgs Messages) InstallVSIXTitle() string {
+	return Catalog.Format(msgs.locale, "installVSIXTitle", nil)
+}
+
+// VsixFiles says "VSIX packages"
+// in the language the app shows.
+func VsixFiles() string { return In(i18n.Locale()).VsixFiles() }
+
+// VsixFiles says "VSIX packages"
+// in the language of msgs.
+func (msgs Messages) VsixFiles() string {
+	return Catalog.Format(msgs.locale, "vsixFiles", nil)
+}
+
+// RemoveIconTheme says "Remove"
+// in the language the app shows.
+func RemoveIconTheme() string { return In(i18n.Locale()).RemoveIconTheme() }
+
+// RemoveIconTheme says "Remove"
+// in the language of msgs.
+func (msgs Messages) RemoveIconTheme() string {
+	return Catalog.Format(msgs.locale, "removeIconTheme", nil)
+}
+
+// RemoveNamedIconTheme says "Remove {name}"
+// in the language the app shows.
+func RemoveNamedIconTheme(name string) string { return In(i18n.Locale()).RemoveNamedIconTheme(name) }
+
+// RemoveNamedIconTheme says "Remove {name}"
+// in the language of msgs.
+func (msgs Messages) RemoveNamedIconTheme(name string) string {
+	return Catalog.Format(msgs.locale, "removeNamedIconTheme", map[string]any{"name": name})
+}
+
+// RemoveIconThemeTitle says "Remove the icon theme {name}?"
+// in the language the app shows.
+func RemoveIconThemeTitle(name string) string { return In(i18n.Locale()).RemoveIconThemeTitle(name) }
+
+// RemoveIconThemeTitle says "Remove the icon theme {name}?"
+// in the language of msgs.
+func (msgs Messages) RemoveIconThemeTitle(name string) string {
+	return Catalog.Format(msgs.locale, "removeIconThemeTitle", map[string]any{"name": name})
+}
+
+// RemoveIconThemeDetail says "Its VSIX file is deleted from the settings folder."
+// in the language the app shows.
+func RemoveIconThemeDetail() string { return In(i18n.Locale()).RemoveIconThemeDetail() }
+
+// RemoveIconThemeDetail says "Its VSIX file is deleted from the settings folder."
+// in the language of msgs.
+func (msgs Messages) RemoveIconThemeDetail() string {
+	return Catalog.Format(msgs.locale, "removeIconThemeDetail", nil)
+}
+
+// IconThemeMissing says "The chosen icon theme is not installed any more: showing Material Icon Theme."
+// in the language the app shows.
+func IconThemeMissing() string { return In(i18n.Locale()).IconThemeMissing() }
+
+// IconThemeMissing says "The chosen icon theme is not installed any more: showing Material Icon Theme."
+// in the language of msgs.
+func (msgs Messages) IconThemeMissing() string {
+	return Catalog.Format(msgs.locale, "iconThemeMissing", nil)
+}
+
+// IconThemeUnreadable says "The chosen icon theme could not be read ({error}): showing Material Icon Theme."
+// in the language the app shows.
+func IconThemeUnreadable(error string) string { return In(i18n.Locale()).IconThemeUnreadable(error) }
+
+// IconThemeUnreadable says "The chosen icon theme could not be read ({error}): showing Material Icon Theme."
+// in the language of msgs.
+func (msgs Messages) IconThemeUnreadable(error string) string {
+	return Catalog.Format(msgs.locale, "iconThemeUnreadable", map[string]any{"error": error})
+}
+
+// VsixNotPackage says "This file is not a VSIX package."
+// in the language the app shows.
+func VsixNotPackage() string { return In(i18n.Locale()).VsixNotPackage() }
+
+// VsixNotPackage says "This file is not a VSIX package."
+// in the language of msgs.
+func (msgs Messages) VsixNotPackage() string {
+	return Catalog.Format(msgs.locale, "vsixNotPackage", nil)
+}
+
+// VsixNoIconTheme says "This extension has no file icon theme."
+// in the language the app shows.
+func VsixNoIconTheme() string { return In(i18n.Locale()).VsixNoIconTheme() }
+
+// VsixNoIconTheme says "This extension has no file icon theme."
+// in the language of msgs.
+func (msgs Messages) VsixNoIconTheme() string {
+	return Catalog.Format(msgs.locale, "vsixNoIconTheme", nil)
+}
+
+// VsixTooLarge says "The VSIX package is larger than 50 MB."
+// in the language the app shows.
+func VsixTooLarge() string { return In(i18n.Locale()).VsixTooLarge() }
+
+// VsixTooLarge says "The VSIX package is larger than 50 MB."
+// in the language of msgs.
+func (msgs Messages) VsixTooLarge() string {
+	return Catalog.Format(msgs.locale, "vsixTooLarge", nil)
+}
+
+// VsixInstallFailed says "Could not install it: {error}"
+// in the language the app shows.
+func VsixInstallFailed(error string) string { return In(i18n.Locale()).VsixInstallFailed(error) }
+
+// VsixInstallFailed says "Could not install it: {error}"
+// in the language of msgs.
+func (msgs Messages) VsixInstallFailed(error string) string {
+	return Catalog.Format(msgs.locale, "vsixInstallFailed", map[string]any{"error": error})
+}
+
+// FileIconsThemes says "Themes"
+// in the language the app shows.
+func FileIconsThemes() string { return In(i18n.Locale()).FileIconsThemes() }
+
+// FileIconsThemes says "Themes"
+// in the language of msgs.
+func (msgs Messages) FileIconsThemes() string {
+	return Catalog.Format(msgs.locale, "fileIconsThemes", nil)
+}

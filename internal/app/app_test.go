@@ -37,6 +37,7 @@ type fakePlatform struct {
 	fakeImagePicker
 	fakeFolderPicker
 	fakeDownloads
+	fakeVSIXPicker
 	*fakeSecrets
 }
 
@@ -83,6 +84,7 @@ func testApp(t *testing.T) (*App, *fakePlatform) {
 	p := newFakePlatform(t)
 	a := New(p)
 	a.saveHosts = func(*config.Store) error { return nil }
+	a.home = func() string { return "" } // no editors' extensions
 	return a, p
 }
 

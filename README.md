@@ -101,6 +101,13 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 左下：竖向会话列表，状态点（绿：已连接，黄：连接中，红：失败），右键菜单（重新连接、复制会话、断开、关闭），拖动排序。“+”按钮新开一个新标签页；新标签页和会话一样可以切换、拖动、关闭，标题里的数目不算新标签页。全部关掉后右边仍显示快速连接，在那里连接会新开一个标签页。
 - 右上：终端。断开后保留最后的画面，顶部出现“重新连接”。
 - 右下“文件”页：SFTP 浏览，左边目录树，右边文件表格（可多选），路径栏可以直接输入路径。
+- 文件图标主题：文件面板按文件名显示图标（`docker-compose.yml` 是 Docker 图标，`main.go` 是 Go 图标，`src/` 是 src 文件夹，展开的文件夹换成打开的样子），用的是 VS Code 的文件图标主题格式，所以 VS Code 的图标主题都能用。在选项的“文件管理 › 文件图标主题”页选择，上面有预览，选了立刻生效。
+  - 内置：Material Icon Theme（默认）、Seti（VS Code 自带的那个），以及“简洁”（只有文件和文件夹两个图标，就是以前的样子）。
+  - “从 VSIX 安装…”：选一个 `.vsix` 文件（VS Code 扩展包，比如从 [Open VSX](https://open-vsx.org) 下载的），确认它有能读的图标主题后原样复制到配置目录的 `icon-themes/<发布者>.<名称>.vsix`，同一个扩展的新版本替换旧的；装好后自动选中。最大 50 MB。列表里的删除按钮删掉这个副本。
+  - 自动列出 VS Code、VS Code Insiders、VSCodium、Cursor、Windsurf 里已经装了的图标主题（`~/.vscode/extensions` 等，Windows 上在 `%USERPROFILE%` 下），直接读，不复制；已卸载的（`.obsolete`）跳过，同一个扩展只列最新版本。“刷新”重新查找。选中的主题后来不见了或读不出来时显示 Material Icon Theme，并在选项页说明原因。
+  - 只读取主题的 JSON 和它引用的 SVG、PNG、字体，扩展里的代码不会运行；引用到扩展外面的路径直接忽略。用字体做图标的主题（Seti 用 WOFF，file-icons 用 WOFF2）先转成 TrueType 再注册给界面。按 VS Code 的规则匹配：先文件名，再扩展名（最长的优先，`a.test.ts` 先找 `test.ts`），再语言（文件名到语言的对应表来自 VS Code 自带的语言扩展），最后是默认的文件图标；界面是浅色的，所以用主题的 `light` 部分。
+  - 在 `settings.json` 里是 `fileIconTheme`：没有是 Material，`minimal` 是简洁，`bundled:seti` 是 Seti，其他是 `<发布者>.<名称>/<主题 ID>`。
+  - 内置的两个主题都是 MIT 协议，许可证在各自的 VSIX 里（`internal/fileicons/bundled/`）。更新它们和语言表：改 `internal/fileicons/internal/gen` 里的版本号，运行 `go generate ./internal/fileicons`（需要 git 和网络）。
 - 上传：把文件或文件夹从资源管理器 / Finder 拖到文件表格（传到当前目录）或目录树的某个文件夹上；也可以用工具栏的上传按钮或右键菜单选文件、选文件夹。
 - 下载：选中文件或文件夹，点下载按钮（存到下载目录，默认是系统的“下载”文件夹 `~/Downloads`，可以在选项的“传输”页修改），或右键“下载到…”自己选位置。“传输”页勾选“每次下载时询问保存位置”后，下载按钮每次都先用系统的选择文件夹对话框问保存位置。
 - 右下“隧道”页：当前会话的隧道，每条显示状态（正在启动、监听中、已停止，或出错的原因，比如“端口 127.0.0.1:8080 已被占用”“服务器没有监听 …：端口在服务器上已被占用，或不允许转发”）、当前和累计连接数、上下行字节数，以及上一个连不上目标的连接的原因。每行有“启动”/“停止”。标签上的数字是正在监听的隧道数。会话连接成功后启动已启用的隧道，某条隧道失败（比如端口被占用）只影响它自己，会话照常连接；断开、连接断掉或关闭会话时全部停止并释放端口，重新连接时按主机当前的设置重新启动。经过代理或跳板机连接时，隧道走的是到这台主机本身的连接。“编辑隧道…”打开连接编辑器的“隧道”页。
@@ -200,6 +207,7 @@ internal/
   monitor/           服务器状态采集和解析
   remotefs/          SFTP 列目录、上传、下载（带进度和取消）
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
+  fileicons/         VS Code 文件图标主题：读 VSIX 和扩展目录、按名字找图标、字体转换、安装和查找已装的主题；bundled/ 是内置的 Material 和 Seti，languages_gen.go 是 VS Code 的语言表，internal/gen 生成它们
   widgets/           可复用的小控件：图标按钮、用量条、折线图、表单行、左侧导航加页面（nav.go）
   app/               界面和状态
     app.go           App 状态、整体布局、打开/关闭会话
@@ -212,6 +220,8 @@ internal/
     start.go         新标签页：快速连接、搜索、清空最近连接
     splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
     files.go         文件面板：目录树、文件表格、拖入上传
+    fileicons.go     文件面板的图标主题：后台读取、显示图标、安装和删除
+    options_fileicons.go “文件管理 › 文件图标主题”页
     transfers.go     传输队列、“传输”页，和两处共用的传输行 transferRow
     downloads.go     “下载列表”弹出框、下载目录、重试和打开、应用图标上的数目和进度（Platform.ShowTransfers）、选项的“传输”页
     tunnels.go       会话的隧道：连接后启动、断开时停止，“隧道”页

@@ -37,6 +37,9 @@ type Platform interface {
 	// OpenImage asks for an image file, over the window of parent as
 	// OpenFile does: "" when canceled. It blocks too.
 	OpenImage(parent WindowKind, title string) (string, error)
+	// OpenVSIX asks for a VSIX file (a VS Code extension), over the window
+	// of parent as OpenFile does: "" when canceled. It blocks too.
+	OpenVSIX(parent WindowKind, title string) (string, error)
 	// OpenFolder asks for a folder to read, as FinalShell's, over the
 	// window of parent as OpenFile does, hidden folders shown: "" when
 	// canceled. It blocks too.
@@ -168,6 +171,12 @@ type App struct {
 	// the terminal alone (fullscreen.go).
 	shortcutsUI shortcutsPage
 	fullScreen  fullScreenState
+
+	// The file panel's icon theme (fileicons.go), and the home folder,
+	// where editors keep the extensions it lists: homeDir, which tests
+	// replace.
+	iconThemes iconThemeState
+	home       func() string
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -187,6 +196,7 @@ func New(plat Platform) *App {
 		saveSettings: config.SaveSettings,
 
 		findFinalShell: importer.Find,
+		home:           homeDir,
 	}
 	a.hosts, _ = config.LoadHosts()
 	a.settings = config.LoadSettings()

@@ -121,7 +121,18 @@ type Settings struct {
 	// connects; by default connecting from it closes it, as FinalShell's
 	// "Close window after connecting", checked, does.
 	KeepManagerOpen bool `json:"keepManagerOpen,omitempty"`
+
+	// FileIconTheme is the file panel's icon theme, as package fileicons
+	// names it: "" for Material Icon Theme, "minimal" for the app's own
+	// file and folder icons, "bundled:seti" for Seti, or
+	// "<publisher>.<extension>/<theme>" for one installed from a VSIX or in
+	// an editor such as VS Code.
+	FileIconTheme string `json:"fileIconTheme,omitempty"`
 }
+
+// IconThemesDir is where the VSIX files of the icon themes the user
+// installs are kept.
+func IconThemesDir() string { return filepath.Join(Dir(), "icon-themes") }
 
 // RightClick is what a right click in a terminal does (Settings.RightClick).
 // A value this version does not know shows the context menu.

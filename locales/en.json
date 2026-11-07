@@ -711,5 +711,56 @@
   "optionsDownloads": "Downloads",
   "downloadFolderNote": "Download saves files here. Download to… in the file list's menu chooses another folder for once.",
   "downloadFolderDefault": "Use default",
-  "optionAskDownloadDir": "Ask where to save each download"
+  "optionAskDownloadDir": "Ask where to save each download",
+  "optionsFileManager": "File manager",
+  "optionsFileIcons": "File icon theme",
+  "fileIconsPreview": "Preview",
+  "fileIconsBundled": "Built in",
+  "fileIconsInstalled": "Installed from VSIX",
+  "fileIconsDetected": "Installed in VS Code and similar editors",
+  "fileIconsMinimal": "Minimal",
+  "fileIconsMinimalNote": "One icon for files, one for folders",
+  "fileIconsNote": "Lists the icon themes installed in VS Code, VS Code Insiders, VSCodium, Cursor and Windsurf. A theme installed from a VSIX file is copied into the settings folder. Only the theme's icons are read; nothing in the extension runs.",
+  "installVSIX": "Install from VSIX…",
+  "installVSIXTitle": "Choose a VSIX file",
+  "vsixFiles": "VSIX packages",
+  "removeIconTheme": "Remove",
+  "removeNamedIconTheme": "Remove {name}",
+  "@removeNamedIconTheme": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeIconThemeTitle": "Remove the icon theme {name}?",
+  "@removeIconThemeTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeIconThemeDetail": "Its VSIX file is deleted from the settings folder.",
+  "iconThemeMissing": "The chosen icon theme is not installed any more: showing Material Icon Theme.",
+  "iconThemeUnreadable": "The chosen icon theme could not be read ({error}): showing Material Icon Theme.",
+  "@iconThemeUnreadable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "vsixNotPackage": "This file is not a VSIX package.",
+  "vsixNoIconTheme": "This extension has no file icon theme.",
+  "vsixTooLarge": "The VSIX package is larger than 50 MB.",
+  "vsixInstallFailed": "Could not install it: {error}",
+  "@vsixInstallFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fileIconsThemes": "Themes"
 }

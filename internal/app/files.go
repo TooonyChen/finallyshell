@@ -5,7 +5,6 @@ import (
 	"path"
 	"strings"
 
-	"finalshelly/internal/icons"
 	"finalshelly/internal/remotefs"
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
@@ -257,8 +256,10 @@ func (a *App) dirTree(c *ui.Context, s *Session) {
 		row := ui.Row(c).Gap(5).Grow(1).Radius(4)
 		a.dropZone(row, s, dir)
 		row.Children(func() {
-			ui.Icon(c, icons.Get("folder")).FontSize(14).TextColor(ui.Hex("#eab308"))
 			name := path.Base(dir)
+			// "/" is a folder like any other, not a workspace's root,
+			// which themes give an icon of its own.
+			a.fileIcon(c, name, true, f.tree.Open.Has(dir), false)
 			t := ui.Text(c, name).SingleLine()
 			if dir == f.cwd {
 				t.Bold()
@@ -288,11 +289,7 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 			switch col {
 			case 0:
 				ui.Row(c).Gap(6).Children(func() {
-					ic, color := icons.Get("file"), theme.TextMuted
-					if e.IsDir() {
-						ic, color = icons.Get("folder"), ui.Hex("#eab308")
-					}
-					ui.Icon(c, ic).FontSize(14).TextColor(color)
+					a.fileIcon(c, e.Name, e.IsDir(), false, false)
 					ui.Text(c, e.Name).SingleLine()
 				})
 			case 1:
