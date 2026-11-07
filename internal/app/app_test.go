@@ -35,6 +35,7 @@ type fakePlatform struct {
 	fakeFilePicker
 	fakeFullScreen
 	fakeImagePicker
+	fakeFolderPicker
 	*fakeSecrets
 }
 

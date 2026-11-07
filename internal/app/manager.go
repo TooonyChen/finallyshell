@@ -64,7 +64,9 @@ type managerState struct {
 	prompt   *managerPrompt
 	question *managerQuestion
 	saveErr  func() string
-	over     managerItem // the row a drag was over in the last frame
+	// notice says how the last import went, until the manager closes.
+	notice func() string
+	over   managerItem // the row a drag was over in the last frame
 }
 
 // managerPrompt asks for a name, of a new folder or for a rename.
@@ -99,7 +101,7 @@ func (a *App) openManager() {
 			m.tree.Open.Add(managerItem{folder: f.ID})
 		}
 	}
-	m.focus, m.prompt, m.question = true, nil, nil
+	m.focus, m.prompt, m.question, m.notice = true, nil, nil, nil
 	if m.query != "" { // it opens without the last search
 		m.query = ""
 		a.searchChanged()
@@ -295,6 +297,8 @@ func (a *App) managerView(c *ui.Context) {
 			ui.Spacer(c)
 			if m.saveErr != nil {
 				ui.Text(c, m.saveErr()).TextColor(theme.Danger).SingleLine().MinWidth(0)
+			} else if m.notice != nil {
+				ui.Text(c, m.notice()).TextColor(theme.TextMuted).SingleLine().MinWidth(0)
 			}
 		})
 	})
@@ -309,14 +313,21 @@ func (a *App) managerToolbar(c *ui.Context) {
 	m := &a.manager
 	ui.Row(c).Gap(10).Padding(8, 10).AlignItems(ui.Center).Children(func() {
 		ui.Toolbar(c, func() {
-			tool := func(icon, label string, text bool) ui.Element {
+			// A tool shows its icon, and short when it is not "".
+			toolText := func(icon, label, short string) ui.Element {
 				b := ui.Button(c, "").Label(label).Tooltip(label)
 				return b.Children(func() {
 					ui.Icon(c, icons.Get(icon)).FontSize(15).TextColor(theme.TextMuted)
-					if text {
-						ui.Text(c, label).SingleLine()
+					if short != "" {
+						ui.Text(c, short).SingleLine()
 					}
 				})
+			}
+			tool := func(icon, label string, text bool) ui.Element {
+				if text {
+					return toolText(icon, label, label)
+				}
+				return toolText(icon, label, "")
 			}
 			if tool("plus", locales.NewConnection(), true).Clicked() {
 				a.newConnectionIn(a.managerTarget())
@@ -332,7 +343,10 @@ func (a *App) managerToolbar(c *ui.Context) {
 					m.tree.Open.Add(managerItem{folder: f.ID})
 				}
 			}
-			// Importing from FinalShell (#17) goes here.
+			// Short, as the toolbar has little room at the manager's size.
+			if toolText("import", locales.ImportFinalShell(), locales.Import()).Clicked() {
+				a.importFinalShell()
+			}
 		}).Label(locales.ManagerTitle()).Grow(1).MinWidth(0)
 		ui.Checkbox(c, &m.showDeleted, locales.ShowDeleted())
 		labels, ids := []string{locales.FilterAll()}, []string{""}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"finalshelly/internal/config"
+	"finalshelly/internal/importer"
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
@@ -36,6 +37,10 @@ type Platform interface {
 	// OpenImage asks for an image file, over the window of parent as
 	// OpenFile does: "" when canceled. It blocks too.
 	OpenImage(parent WindowKind, title string) (string, error)
+	// OpenFolder asks for a folder to read, as FinalShell's, over the
+	// window of parent as OpenFile does, hidden folders shown: "" when
+	// canceled. It blocks too.
+	OpenFolder(parent WindowKind, title string) (string, error)
 	// DownloadsDir is where downloads go unless the user chooses.
 	DownloadsDir() string
 	// ShowInFolder shows a file in the system's file manager.
@@ -121,6 +126,11 @@ type App struct {
 	// The connection editor's fields, while its window is open.
 	editor *connEditor
 
+	// The import window's state (import.go), and what finds FinalShell's
+	// folder: importer.Find, which tests replace.
+	imp            *importState
+	findFinalShell func() string
+
 	// The password prompt: the password a connection takes (a saved
 	// host's, a jump host's or a proxy's), or a key's passphrase, and
 	// what to do once it is entered (see proxy.go and secrets.go).
@@ -167,6 +177,8 @@ func New(plat Platform) *App {
 		treeWidth:    defaultTreeWidth,
 		saveHosts:    config.SaveHosts,
 		saveSettings: config.SaveSettings,
+
+		findFinalShell: importer.Find,
 	}
 	a.hosts, _ = config.LoadHosts()
 	a.settings = config.LoadSettings()

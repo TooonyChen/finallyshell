@@ -129,6 +129,12 @@ func (p *platform) OpenImage(parent app.WindowKind, title string) (string, error
 	}}})
 }
 
+// OpenFolder shows hidden folders, as FinalShell's ~/.finalshell on Linux
+// and ~/Library on macOS are.
+func (p *platform) OpenFolder(parent app.WindowKind, title string) (string, error) {
+	return p.openOne(parent, mygo.OpenDialogOptions{Title: title, Directory: true, ShowHiddenFiles: true})
+}
+
 // openOne asks for one file as opts say, over the window of parent, or
 // the main window when that is not open: "" when canceled.
 func (p *platform) openOne(parent app.WindowKind, opts mygo.OpenDialogOptions) (string, error) {

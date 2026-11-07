@@ -1,0 +1,23 @@
+{
+  "forwarding_auto_reconnect": false,
+  "delete_time": 0,
+  "secret_key_id": "",
+  "user_name": "root",
+  "remote_port_forwarding": {},
+  "conection_type": 100,
+  "description": "front end\nrack 4",
+  "proxy_id": "",
+  "authentication_type": 1,
+  "password": "c2FtcGxlLW5vdC1hLXJlYWwtc2VjcmV0LTAwMDA=",
+  "modified_time": 1700000000000,
+  "host": "192.0.2.10",
+  "id": "1001",
+  "create_time": 1700000000000,
+  "port_forwarding_list": [],
+  "parent_id": "root",
+  "backspace_key_sequence": 2,
+  "port": 22,
+  "terminal_encoding": "UTF-8",
+  "exec_channel_enable": true,
+  "name": "web-1"
+}

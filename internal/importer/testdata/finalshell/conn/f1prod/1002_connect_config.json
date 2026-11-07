@@ -1,0 +1,3 @@
+{"id": "1002", "name": "bastion", "host": "bastion.example.com", "port": "2222", "user_name": "deploy",
+ "conection_type": 100, "authentication_type": 2, "secret_key_id": "k1", "password": "",
+ "parent_id": "f1prod", "proxy_id": "p1", "delete_time": 0}

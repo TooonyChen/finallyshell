@@ -4069,3 +4069,335 @@ func ListSeparator() string { return In(i18n.Locale()).ListSeparator() }
 func (msgs Messages) ListSeparator() string {
 	return Catalog.Format(msgs.locale, "listSeparator", nil)
 }
+
+// ImportFinalShell says "Import from FinalShell"
+// in the language the app shows.
+func ImportFinalShell() string { return In(i18n.Locale()).ImportFinalShell() }
+
+// ImportFinalShell says "Import from FinalShell"
+// in the language of msgs.
+func (msgs Messages) ImportFinalShell() string {
+	return Catalog.Format(msgs.locale, "importFinalShell", nil)
+}
+
+// Import says "Import"
+// in the language the app shows.
+func Import() string { return In(i18n.Locale()).Import() }
+
+// Import says "Import"
+// in the language of msgs.
+func (msgs Messages) Import() string {
+	return Catalog.Format(msgs.locale, "import", nil)
+}
+
+// ImportTitle says "Import from FinalShell"
+// in the language the app shows.
+func ImportTitle() string { return In(i18n.Locale()).ImportTitle() }
+
+// ImportTitle says "Import from FinalShell"
+// in the language of msgs.
+func (msgs Messages) ImportTitle() string {
+	return Catalog.Format(msgs.locale, "importTitle", nil)
+}
+
+// ChooseFinalShellFolder says "Choose FinalShell's data folder"
+// in the language the app shows.
+func ChooseFinalShellFolder() string { return In(i18n.Locale()).ChooseFinalShellFolder() }
+
+// ChooseFinalShellFolder says "Choose FinalShell's data folder"
+// in the language of msgs.
+func (msgs Messages) ChooseFinalShellFolder() string {
+	return Catalog.Format(msgs.locale, "chooseFinalShellFolder", nil)
+}
+
+// ChooseFolder says "Choose folder…"
+// in the language the app shows.
+func ChooseFolder() string { return In(i18n.Locale()).ChooseFolder() }
+
+// ChooseFolder says "Choose folder…"
+// in the language of msgs.
+func (msgs Messages) ChooseFolder() string {
+	return Catalog.Format(msgs.locale, "chooseFolder", nil)
+}
+
+// FinalShellFolderAt says "FinalShell folder: {dir}"
+// in the language the app shows.
+func FinalShellFolderAt(dir string) string { return In(i18n.Locale()).FinalShellFolderAt(dir) }
+
+// FinalShellFolderAt says "FinalShell folder: {dir}"
+// in the language of msgs.
+func (msgs Messages) FinalShellFolderAt(dir string) string {
+	return Catalog.Format(msgs.locale, "finalShellFolderAt", map[string]any{"dir": dir})
+}
+
+// ProblemLine says "{file}: {reason}"
+// in the language the app shows.
+//
+// A file not imported from, and why.
+func ProblemLine(file string, reason string) string {
+	return In(i18n.Locale()).ProblemLine(file, reason)
+}
+
+// ProblemLine says "{file}: {reason}"
+// in the language of msgs.
+//
+// A file not imported from, and why.
+func (msgs Messages) ProblemLine(file string, reason string) string {
+	return Catalog.Format(msgs.locale, "problemLine", map[string]any{"file": file, "reason": reason})
+}
+
+// ImportLooking says "Looking for FinalShell's connections…"
+// in the language the app shows.
+func ImportLooking() string { return In(i18n.Locale()).ImportLooking() }
+
+// ImportLooking says "Looking for FinalShell's connections…"
+// in the language of msgs.
+func (msgs Messages) ImportLooking() string {
+	return Catalog.Format(msgs.locale, "importLooking", nil)
+}
+
+// FinalShellNotFound says "FinalShell's data folder was not found. Choose the folder FinalShell keeps its data in, the one with a conn folder in…"
+// in the language the app shows.
+func FinalShellNotFound() string { return In(i18n.Locale()).FinalShellNotFound() }
+
+// FinalShellNotFound says "FinalShell's data folder was not found. Choose the folder FinalShell keeps its data in, the one with a conn folder in…"
+// in the language of msgs.
+func (msgs Messages) FinalShellNotFound() string {
+	return Catalog.Format(msgs.locale, "finalShellNotFound", nil)
+}
+
+// FinalShellNoConnections says "No FinalShell connections in {dir}."
+// in the language the app shows.
+func FinalShellNoConnections(dir string) string {
+	return In(i18n.Locale()).FinalShellNoConnections(dir)
+}
+
+// FinalShellNoConnections says "No FinalShell connections in {dir}."
+// in the language of msgs.
+func (msgs Messages) FinalShellNoConnections(dir string) string {
+	return Catalog.Format(msgs.locale, "finalShellNoConnections", map[string]any{"dir": dir})
+}
+
+// FinalShellReadFailed says "Could not read the folder: {error}"
+// in the language the app shows.
+func FinalShellReadFailed(error string) string { return In(i18n.Locale()).FinalShellReadFailed(error) }
+
+// FinalShellReadFailed says "Could not read the folder: {error}"
+// in the language of msgs.
+func (msgs Messages) FinalShellReadFailed(error string) string {
+	return Catalog.Format(msgs.locale, "finalShellReadFailed", map[string]any{"error": error})
+}
+
+// ImportPasswordsNote says "Passwords are not imported, as FinalShell encrypts them: each is asked for at the first connection."
+// in the language the app shows.
+func ImportPasswordsNote() string { return In(i18n.Locale()).ImportPasswordsNote() }
+
+// ImportPasswordsNote says "Passwords are not imported, as FinalShell encrypts them: each is asked for at the first connection."
+// in the language of msgs.
+func (msgs Messages) ImportPasswordsNote() string {
+	return Catalog.Format(msgs.locale, "importPasswordsNote", nil)
+}
+
+// ImportColFolder says "Folder"
+// in the language the app shows.
+func ImportColFolder() string { return In(i18n.Locale()).ImportColFolder() }
+
+// ImportColFolder says "Folder"
+// in the language of msgs.
+func (msgs Messages) ImportColFolder() string {
+	return Catalog.Format(msgs.locale, "importColFolder", nil)
+}
+
+// ImportColStatus says "Note"
+// in the language the app shows.
+func ImportColStatus() string { return In(i18n.Locale()).ImportColStatus() }
+
+// ImportColStatus says "Note"
+// in the language of msgs.
+func (msgs Messages) ImportColStatus() string {
+	return Catalog.Format(msgs.locale, "importColStatus", nil)
+}
+
+// SelectAll says "Select all"
+// in the language the app shows.
+func SelectAll() string { return In(i18n.Locale()).SelectAll() }
+
+// SelectAll says "Select all"
+// in the language of msgs.
+func (msgs Messages) SelectAll() string {
+	return Catalog.Format(msgs.locale, "selectAll", nil)
+}
+
+// SelectNone says "Select none"
+// in the language the app shows.
+func SelectNone() string { return In(i18n.Locale()).SelectNone() }
+
+// SelectNone says "Select none"
+// in the language of msgs.
+func (msgs Messages) SelectNone() string {
+	return Catalog.Format(msgs.locale, "selectNone", nil)
+}
+
+// ImportChosen says "{chosen} of {total} selected"
+// in the language the app shows.
+func ImportChosen(chosen int, total int) string { return In(i18n.Locale()).ImportChosen(chosen, total) }
+
+// ImportChosen says "{chosen} of {total} selected"
+// in the language of msgs.
+func (msgs Messages) ImportChosen(chosen int, total int) string {
+	return Catalog.Format(msgs.locale, "importChosen", map[string]any{"chosen": chosen, "total": total})
+}
+
+// ImportCount says "{count, plural, =0 {Import} one {Import #} other {Import #}}"
+// in the language the app shows.
+func ImportCount(count int) string { return In(i18n.Locale()).ImportCount(count) }
+
+// ImportCount says "{count, plural, =0 {Import} one {Import #} other {Import #}}"
+// in the language of msgs.
+func (msgs Messages) ImportCount(count int) string {
+	return Catalog.Format(msgs.locale, "importCount", map[string]any{"count": count})
+}
+
+// ImportPresent says "Already present as “{name}”"
+// in the language the app shows.
+func ImportPresent(name string) string { return In(i18n.Locale()).ImportPresent(name) }
+
+// ImportPresent says "Already present as “{name}”"
+// in the language of msgs.
+func (msgs Messages) ImportPresent(name string) string {
+	return Catalog.Format(msgs.locale, "importPresent", map[string]any{"name": name})
+}
+
+// ImportSameAs says "Same host as “{name}” above"
+// in the language the app shows.
+func ImportSameAs(name string) string { return In(i18n.Locale()).ImportSameAs(name) }
+
+// ImportSameAs says "Same host as “{name}” above"
+// in the language of msgs.
+func (msgs Messages) ImportSameAs(name string) string {
+	return Catalog.Format(msgs.locale, "importSameAs", map[string]any{"name": name})
+}
+
+// ImportNeedsKey says "Choose the key file after importing"
+// in the language the app shows.
+func ImportNeedsKey() string { return In(i18n.Locale()).ImportNeedsKey() }
+
+// ImportNeedsKey says "Choose the key file after importing"
+// in the language of msgs.
+func (msgs Messages) ImportNeedsKey() string {
+	return Catalog.Format(msgs.locale, "importNeedsKey", nil)
+}
+
+// ImportNoProxy says "Proxy not imported"
+// in the language the app shows.
+func ImportNoProxy() string { return In(i18n.Locale()).ImportNoProxy() }
+
+// ImportNoProxy says "Proxy not imported"
+// in the language of msgs.
+func (msgs Messages) ImportNoProxy() string {
+	return Catalog.Format(msgs.locale, "importNoProxy", nil)
+}
+
+// ImportNothing says "No SSH connections to import."
+// in the language the app shows.
+func ImportNothing() string { return In(i18n.Locale()).ImportNothing() }
+
+// ImportNothing says "No SSH connections to import."
+// in the language of msgs.
+func (msgs Messages) ImportNothing() string {
+	return Catalog.Format(msgs.locale, "importNothing", nil)
+}
+
+// ImportProblems says "Files not imported: {failed} failed, {skipped} skipped"
+// in the language the app shows.
+func ImportProblems(failed int, skipped int) string {
+	return In(i18n.Locale()).ImportProblems(failed, skipped)
+}
+
+// ImportProblems says "Files not imported: {failed} failed, {skipped} skipped"
+// in the language of msgs.
+func (msgs Messages) ImportProblems(failed int, skipped int) string {
+	return Catalog.Format(msgs.locale, "importProblems", map[string]any{"failed": failed, "skipped": skipped})
+}
+
+// ProblemBroken says "not a valid connection file"
+// in the language the app shows.
+func ProblemBroken() string { return In(i18n.Locale()).ProblemBroken() }
+
+// ProblemBroken says "not a valid connection file"
+// in the language of msgs.
+func (msgs Messages) ProblemBroken() string {
+	return Catalog.Format(msgs.locale, "problemBroken", nil)
+}
+
+// ProblemUnreadable says "could not be read"
+// in the language the app shows.
+func ProblemUnreadable() string { return In(i18n.Locale()).ProblemUnreadable() }
+
+// ProblemUnreadable says "could not be read"
+// in the language of msgs.
+func (msgs Messages) ProblemUnreadable() string {
+	return Catalog.Format(msgs.locale, "problemUnreadable", nil)
+}
+
+// ProblemTooLarge says "too large for a connection file"
+// in the language the app shows.
+func ProblemTooLarge() string { return In(i18n.Locale()).ProblemTooLarge() }
+
+// ProblemTooLarge says "too large for a connection file"
+// in the language of msgs.
+func (msgs Messages) ProblemTooLarge() string {
+	return Catalog.Format(msgs.locale, "problemTooLarge", nil)
+}
+
+// ProblemNoHost says "no host address"
+// in the language the app shows.
+func ProblemNoHost() string { return In(i18n.Locale()).ProblemNoHost() }
+
+// ProblemNoHost says "no host address"
+// in the language of msgs.
+func (msgs Messages) ProblemNoHost() string {
+	return Catalog.Format(msgs.locale, "problemNoHost", nil)
+}
+
+// ProblemNotSSH says "not an SSH connection, skipped"
+// in the language the app shows.
+func ProblemNotSSH() string { return In(i18n.Locale()).ProblemNotSSH() }
+
+// ProblemNotSSH says "not an SSH connection, skipped"
+// in the language of msgs.
+func (msgs Messages) ProblemNotSSH() string {
+	return Catalog.Format(msgs.locale, "problemNotSSH", nil)
+}
+
+// ProblemDeleted says "deleted in FinalShell, skipped"
+// in the language the app shows.
+func ProblemDeleted() string { return In(i18n.Locale()).ProblemDeleted() }
+
+// ProblemDeleted says "deleted in FinalShell, skipped"
+// in the language of msgs.
+func (msgs Messages) ProblemDeleted() string {
+	return Catalog.Format(msgs.locale, "problemDeleted", nil)
+}
+
+// ImportResult says "Imported {imported, plural, one {# connection} other {# connections}}, skipped {skipped}, failed {failed}."
+// in the language the app shows.
+func ImportResult(imported int, skipped int, failed int) string {
+	return In(i18n.Locale()).ImportResult(imported, skipped, failed)
+}
+
+// ImportResult says "Imported {imported, plural, one {# connection} other {# connections}}, skipped {skipped}, failed {failed}."
+// in the language of msgs.
+func (msgs Messages) ImportResult(imported int, skipped int, failed int) string {
+	return Catalog.Format(msgs.locale, "importResult", map[string]any{"imported": imported, "skipped": skipped, "failed": failed})
+}
+
+// ImportKeysNote says "{count, plural, one {# uses a private key: edit it to choose the key file.} other {# use a private key: edit them to …"
+// in the language the app shows.
+func ImportKeysNote(count int) string { return In(i18n.Locale()).ImportKeysNote(count) }
+
+// ImportKeysNote says "{count, plural, one {# uses a private key: edit it to choose the key file.} other {# use a private key: edit them to …"
+// in the language of msgs.
+func (msgs Messages) ImportKeysNote(count int) string {
+	return Catalog.Format(msgs.locale, "importKeysNote", map[string]any{"count": count})
+}

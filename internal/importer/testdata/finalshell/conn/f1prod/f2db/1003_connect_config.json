@@ -1,0 +1,3 @@
+{"id": "1003", "name": "pg-main", "host": "db.example.com", "port": 5022, "user_name": "postgres",
+ "conection_type": 100, "authentication_type": 1, "password": "c2FtcGxlLW5vdC1hLXJlYWwtc2VjcmV0LTAwMDE=",
+ "parent_id": "f2db", "exec_channel_enable": false, "description": "primary"}
