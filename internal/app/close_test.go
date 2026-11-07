@@ -20,19 +20,8 @@ const termSpotX, termSpotY = 760, 260
 func closeApp(t *testing.T, selected int) (*App, *ui.Tester, map[string]color.RGBA) {
 	t.Helper()
 	a, p := testApp(t)
-	done := make(chan struct{})
-	t.Cleanup(func() { close(done) })
 	for i, name := range []string{"alpha", "bravo", "charlie"} {
-		s := demoSession(a, name, name+".example")
-		term, err := terminal.New(terminal.Options{Conn: idleConn{done}, Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme})
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Cleanup(func() { term.Close() })
-		s.term = term
-		// A background color of its own (red, green, yellow), and the
-		// screen erased in it.
-		term.Feed([]byte("\x1b[4" + string(rune('1'+i)) + "m\x1b[2J"))
+		coloredSession(t, a, name, i)
 	}
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
@@ -48,6 +37,23 @@ func closeApp(t *testing.T, selected int) (*App, *ui.Tester, map[string]color.RG
 	a.active = selected
 	tt.Frame()
 	return a, tt, shows
+}
+
+// coloredSession adds a connected session named name whose terminal is
+// erased in ANSI background color 1+color (red, green, yellow, blue, …),
+// so that a test tells by a pixel which terminal shows.
+func coloredSession(t *testing.T, a *App, name string, color int) *Session {
+	t.Helper()
+	s := demoSession(a, name, name+".example")
+	done := make(chan struct{})
+	term, err := terminal.New(terminal.Options{Conn: idleConn{done}, Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { term.Close(); close(done) })
+	s.term = term
+	term.Feed([]byte("\x1b[4" + string(rune('1'+color)) + "m\x1b[2J"))
+	return s
 }
 
 // rowCenter is the middle of the session row of name.

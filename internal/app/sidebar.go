@@ -249,7 +249,10 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 			closed = true
 		}
 	})
-	if row.DoubleClicked() && s.status != statusConnected && s.status != statusConnecting {
+	// RowDoubleClicked, not DoubleClicked: that makes this row clickable,
+	// and the press goes to the innermost clickable element, so the
+	// list's row, which chooses the session, would never see a click.
+	if row.RowDoubleClicked() && s.status != statusConnected && s.status != statusConnecting {
 		a.reconnect(s)
 	}
 	row.Children(func() {
