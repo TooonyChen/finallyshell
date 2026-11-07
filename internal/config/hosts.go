@@ -72,6 +72,10 @@ type Host struct {
 	// Its password is not saved, as the host's is not.
 	Proxy *ProxyConfig `json:"proxy,omitempty"`
 
+	// Tunnels are the ports forwarded through the host's connection, as
+	// ssh -L, -R and -D: each enabled one starts as a session connects.
+	Tunnels []Tunnel `json:"tunnels,omitempty"`
+
 	extra extras
 }
 

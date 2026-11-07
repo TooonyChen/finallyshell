@@ -183,6 +183,11 @@ func fullHost() *Host {
 		TermType:        "vt220",
 		Backspace:       BackspaceCtrlH,
 		Proxy:           &ProxyConfig{Kind: ProxySOCKS5, Addr: "198.51.100.7", Port: 1081, User: "proxyuser", JumpHost: "h9"},
+		Tunnels: []Tunnel{
+			{Kind: TunnelLocal, ListenPort: 8080, TargetHost: "10.0.0.5", TargetPort: 80},
+			{Kind: TunnelRemote, ListenHost: "0.0.0.0", ListenPort: 9000, TargetHost: "localhost", TargetPort: 3000, Disabled: true},
+			{Kind: TunnelDynamic, ListenPort: 1080},
+		},
 	}
 }
 
@@ -216,7 +221,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy", "tunnels"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}
