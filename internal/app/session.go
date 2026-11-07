@@ -103,7 +103,7 @@ func (a *App) connect(s *Session, secret string) {
 			client.Close()
 			return
 		}
-		shell, err := sshx.OpenShell(client)
+		shell, err := sshx.OpenShell(client, sshx.PTY{Term: h.TermTypeOrDefault(), Erase: eraseChar(h.Backspace)})
 		if err != nil {
 			client.Close()
 			fail(&stepError{"shell", err})
@@ -114,6 +114,7 @@ func (a *App) connect(s *Session, secret string) {
 			Font:      a.termFont,
 			Theme:     a.termTheme,
 			DarkTheme: a.termTheme,
+			OnKey:     backspaceKey(h.Backspace, func() *terminal.Terminal { return s.term }),
 			OnExit: func(int) {
 				a.post(func() {
 					if s.status == statusConnected && s.cancel != nil {
@@ -171,6 +172,40 @@ func (a *App) connect(s *Session, secret string) {
 			a.openDir(s, home)
 		})
 	}()
+}
+
+// eraseChar is the character Backspace sends with bs.
+func eraseChar(bs config.BackspaceKey) byte {
+	if bs == config.BackspaceCtrlH {
+		return 0x08
+	}
+	return 0x7f
+}
+
+// backspaceKey is the terminal's Options.OnKey for a host whose
+// Backspace sends bs: nil for ^?, which the terminal sends itself. With
+// ^H, Backspace sends it, and Alt+Backspace Esc and ^H, as xterm does
+// with backarrowKey off. term is the terminal the key goes to: the key
+// handler asks it as it runs, on the UI thread.
+func backspaceKey(bs config.BackspaceKey, term func() *terminal.Terminal) func(ui.Modifiers, ui.Key) bool {
+	if bs != config.BackspaceCtrlH {
+		return nil
+	}
+	return func(mods ui.Modifiers, key ui.Key) bool {
+		t := term()
+		if key != ui.KeyBackspace || t == nil {
+			return false
+		}
+		switch mods {
+		case 0:
+			t.Send([]byte{0x08})
+		case ui.Alt:
+			t.Send([]byte{0x1b, 0x08})
+		default:
+			return false
+		}
+		return true
+	}
 }
 
 // noteConnected keeps the time h connected, for the recent hosts.

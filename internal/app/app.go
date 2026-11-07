@@ -29,6 +29,10 @@ type Platform interface {
 	// ChooseFolder asks for a folder to download into: "" when canceled.
 	// It blocks too.
 	ChooseFolder(title string) (string, error)
+	// OpenFile asks for one file to read, as a private key, starting in
+	// dir ("" for the system's choice), over the window of parent, or the
+	// main window when that is not open: "" when canceled. It blocks too.
+	OpenFile(parent WindowKind, title, dir string) (string, error)
 	// DownloadsDir is where downloads go unless the user chooses.
 	DownloadsDir() string
 	// ShowInFolder shows a file in the system's file manager.
@@ -98,8 +102,9 @@ type App struct {
 	managerOpen bool
 	hostRow     int
 	hostList    ui.ListState
-	form        hostForm
-	formOpen    bool
+
+	// The connection editor's fields, while its window is open.
+	editor *connEditor
 
 	// The password prompt for a saved host.
 	pwOpen bool

@@ -1,11 +1,6 @@
 package app
 
 import (
-	"slices"
-	"strconv"
-	"strings"
-
-	"finalshelly/internal/config"
 	"finalshelly/internal/icons"
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
@@ -13,53 +8,18 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// hostForm edits a host in the connection manager.
-type hostForm struct {
-	editing    *config.Host // nil for a new host
-	name       string
-	addr       string
-	port       string
-	user       string
-	auth       config.AuthKind
-	password   string
-	keyPath    string
-	passphrase string
-	// err says what is wrong, in the language shown when it is drawn.
-	err func() string
-}
-
+// openManager shows the connection manager, and the connection editor
+// for a new host when there is no host to list.
 func (a *App) openManager() {
 	a.managerOpen = true
-	a.formOpen = len(a.hosts.Live()) == 0
-	if a.formOpen {
-		a.startForm(nil)
+	if len(a.hosts.Live()) == 0 {
+		a.newConnection()
 	}
-}
-
-func (a *App) startForm(h *config.Host) {
-	a.form = hostForm{editing: h, port: "22", user: "root", auth: config.AuthPassword}
-	if h != nil {
-		a.form.name, a.form.addr, a.form.user, a.form.keyPath = h.Name, h.Addr, h.User, h.KeyPath
-		a.form.port = strconv.Itoa(h.PortOr22())
-		a.form.auth = h.Auth
-		if h.Auth == config.AuthKey {
-			a.form.passphrase = a.passwords[h.ID]
-		} else {
-			a.form.password = a.passwords[h.ID]
-		}
-	}
-	a.formOpen = true
 }
 
 func (a *App) dialogs(c *ui.Context) {
 	ui.Modal(c, &a.managerOpen, func() {
-		ui.Column(c).Width(540).Gap(12).Children(func() {
-			if a.formOpen {
-				a.hostFormView(c)
-			} else {
-				a.hostListView(c)
-			}
-		})
+		ui.Column(c).Width(540).Gap(12).Children(func() { a.hostListView(c) })
 	})
 	ui.Modal(c, &a.pwOpen, func() { a.passwordView(c) })
 	if s := a.pendingHostKey(); s != nil {
@@ -83,7 +43,7 @@ func (a *App) hostListView(c *ui.Context) {
 	ui.Row(c).Children(func() {
 		ui.Text(c, locales.ManagerTitle()).FontSize(16).Bold().Grow(1)
 		if ui.Button(c, locales.NewHost()).Clicked() {
-			a.startForm(nil)
+			a.newConnection()
 		}
 	})
 	hosts := a.hosts.Live()
@@ -111,7 +71,7 @@ func (a *App) hostListView(c *ui.Context) {
 	chosen := a.hostRow >= 0 && a.hostRow < len(hosts)
 	ui.Row(c).Gap(8).Children(func() {
 		if ui.Button(c, locales.Edit()).Disabled(!chosen).Clicked() {
-			a.startForm(hosts[a.hostRow])
+			a.editConnection(hosts[a.hostRow])
 		}
 		if ui.Button(c, locales.Delete()).Disabled(!chosen).Clicked() {
 			a.hosts.Remove(hosts[a.hostRow].ID) // for good, until there is a list of deleted hosts
@@ -127,109 +87,6 @@ func (a *App) hostListView(c *ui.Context) {
 			a.openSession(hosts[a.hostRow])
 		}
 	})
-}
-
-func (a *App) hostFormView(c *ui.Context) {
-	f := &a.form
-	title := locales.NewConnection()
-	if f.editing != nil {
-		title = locales.EditConnection()
-	}
-	ui.Text(c, title).FontSize(16).Bold()
-	widgets.Field(c, locales.FieldName(), func() {
-		ui.TextInput(c, &f.name).Placeholder(locales.FieldNamePlaceholder()).Grow(1)
-	})
-	widgets.Field(c, locales.FieldHost(), func() {
-		ui.TextInput(c, &f.addr).Placeholder(locales.FieldHostPlaceholder()).Grow(1).AutoFocus()
-		ui.Text(c, locales.FieldPort())
-		ui.TextInput(c, &f.port).Width(64)
-	})
-	widgets.Field(c, locales.FieldUser(), func() { ui.TextInput(c, &f.user).Grow(1) })
-	widgets.Field(c, locales.FieldAuth(), func() {
-		byPassword, byKey := locales.AuthPassword(), locales.AuthKey()
-		chosen := byPassword
-		if f.auth == config.AuthKey {
-			chosen = byKey
-		}
-		if ui.Select(c, &chosen, []string{byPassword, byKey}).Width(140).Changed() {
-			f.auth = config.AuthPassword
-			if chosen == byKey {
-				f.auth = config.AuthKey
-			}
-		}
-	})
-	if f.auth == config.AuthKey {
-		widgets.Field(c, locales.FieldKeyFile(), func() {
-			ui.TextInput(c, &f.keyPath).Placeholder("~/.ssh/id_ed25519").Grow(1)
-		})
-		widgets.Field(c, locales.FieldPassphrase(), func() {
-			ui.TextInput(c, &f.passphrase).Password().Placeholder(locales.PassphrasePlaceholder()).Grow(1)
-		})
-	} else {
-		widgets.Field(c, locales.FieldPassword(), func() { ui.TextInput(c, &f.password).Password().Grow(1) })
-	}
-	widgets.Muted(c, locales.PasswordNote()).FontSize(12)
-	if f.err != nil {
-		ui.Text(c, f.err()).TextColor(theme.Danger)
-	}
-	ui.Row(c).Gap(8).Children(func() {
-		if len(a.hosts.Live()) > 0 && ui.Button(c, locales.Back()).Clicked() {
-			a.formOpen = false
-		}
-		ui.Spacer(c)
-		if ui.Button(c, locales.Save()).Clicked() {
-			a.saveForm()
-		}
-		if ui.PrimaryButton(c, locales.SaveAndConnect()).Clicked() {
-			if h := a.saveForm(); h != nil {
-				a.managerOpen = false
-				a.openSession(h)
-			}
-		}
-	})
-}
-
-// saveForm checks the form and saves its host, returning it, or nil with
-// the form's error set.
-func (a *App) saveForm() *config.Host {
-	f := &a.form
-	f.addr, f.user = strings.TrimSpace(f.addr), strings.TrimSpace(f.user)
-	port, err := strconv.Atoi(strings.TrimSpace(f.port))
-	switch {
-	case f.addr == "":
-		f.err = locales.ErrHostRequired
-		return nil
-	case f.user == "":
-		f.err = locales.ErrUserRequired
-		return nil
-	case err != nil || port <= 0 || port > 65535:
-		f.err = locales.ErrPortInvalid
-		return nil
-	case f.auth == config.AuthKey && strings.TrimSpace(f.keyPath) == "":
-		f.err = locales.ErrKeyFileRequired
-		return nil
-	}
-	h := f.editing
-	if h == nil {
-		h = &config.Host{ID: config.NewHostID()}
-		a.hosts.Add(h)
-	}
-	h.Name, h.Addr, h.Port, h.User, h.Auth = strings.TrimSpace(f.name), f.addr, port, f.user, f.auth
-	if f.auth == config.AuthKey {
-		h.KeyPath = strings.TrimSpace(f.keyPath)
-		a.passwords[h.ID] = f.passphrase
-	} else {
-		h.KeyPath = ""
-		a.passwords[h.ID] = f.password
-	}
-	if err := a.saveHosts(a.hosts); err != nil {
-		f.err = func() string { return locales.ErrSaveFailed(err.Error()) }
-	} else {
-		f.err = nil
-	}
-	a.formOpen = false
-	a.hostRow = slices.Index(a.hosts.Live(), h)
-	return h
 }
 
 func (a *App) passwordView(c *ui.Context) {

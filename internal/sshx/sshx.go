@@ -182,8 +182,25 @@ type Shell struct {
 	stdout io.Reader
 }
 
-// OpenShell starts a login shell in a pseudo-terminal.
-func OpenShell(client *ssh.Client) (*Shell, error) {
+// PTY is the pseudo-terminal a shell runs in.
+type PTY struct {
+	// Term is its type, the shell's TERM: config.DefaultTermType when
+	// empty.
+	Term string
+	// Erase is the character the terminal's Backspace sends, which the
+	// server's line editing then erases with (VERASE): DEL (0x7f) when 0.
+	Erase byte
+}
+
+// OpenShell starts a login shell in a pseudo-terminal as pty says.
+func OpenShell(client *ssh.Client, pty PTY) (*Shell, error) {
+	term, erase := pty.Term, pty.Erase
+	if term == "" {
+		term = config.DefaultTermType
+	}
+	if erase == 0 {
+		erase = 0x7f
+	}
 	sess, err := client.NewSession()
 	if err != nil {
 		return nil, err
@@ -199,8 +216,8 @@ func OpenShell(client *ssh.Client) (*Shell, error) {
 		return nil, err
 	}
 	sess.Stderr = sess.Stdout
-	modes := ssh.TerminalModes{ssh.ECHO: 1, ssh.TTY_OP_ISPEED: 14400, ssh.TTY_OP_OSPEED: 14400}
-	if err := sess.RequestPty("xterm-256color", 24, 80, modes); err != nil {
+	modes := ssh.TerminalModes{ssh.ECHO: 1, ssh.VERASE: uint32(erase), ssh.TTY_OP_ISPEED: 14400, ssh.TTY_OP_OSPEED: 14400}
+	if err := sess.RequestPty(term, 24, 80, modes); err != nil {
 		sess.Close()
 		return nil, err
 	}

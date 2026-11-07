@@ -379,8 +379,11 @@ func TestStartPageWithoutHosts(t *testing.T) {
 	if err := tt.Click(locales.NewConnection()); err != nil {
 		t.Fatal(err)
 	}
-	if !a.managerOpen || !a.formOpen {
-		t.Errorf("the editor not open: manager %v form %v", a.managerOpen, a.formOpen)
+	if !a.windowOpen(WindowEditor) || a.editor == nil || a.editor.id != "" {
+		t.Fatalf("the editor for a new host not open: %v", a.windows)
+	}
+	if spec := p.windows[WindowEditor].spec; spec.Title() != locales.NewConnection() {
+		t.Errorf("title %q", spec.Title())
 	}
 }
 

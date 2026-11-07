@@ -1124,36 +1124,6 @@ func (msgs Messages) Connect() string {
 	return Catalog.Format(msgs.locale, "connect", nil)
 }
 
-// Back says "Back"
-// in the language the app shows.
-func Back() string { return In(i18n.Locale()).Back() }
-
-// Back says "Back"
-// in the language of msgs.
-func (msgs Messages) Back() string {
-	return Catalog.Format(msgs.locale, "back", nil)
-}
-
-// Save says "Save"
-// in the language the app shows.
-func Save() string { return In(i18n.Locale()).Save() }
-
-// Save says "Save"
-// in the language of msgs.
-func (msgs Messages) Save() string {
-	return Catalog.Format(msgs.locale, "save", nil)
-}
-
-// SaveAndConnect says "Save and connect"
-// in the language the app shows.
-func SaveAndConnect() string { return In(i18n.Locale()).SaveAndConnect() }
-
-// SaveAndConnect says "Save and connect"
-// in the language of msgs.
-func (msgs Messages) SaveAndConnect() string {
-	return Catalog.Format(msgs.locale, "saveAndConnect", nil)
-}
-
 // EditConnection says "Edit connection"
 // in the language the app shows.
 func EditConnection() string { return In(i18n.Locale()).EditConnection() }
@@ -1224,11 +1194,11 @@ func (msgs Messages) FieldUser() string {
 	return Catalog.Format(msgs.locale, "fieldUser", nil)
 }
 
-// FieldAuth says "Log in with"
+// FieldAuth says "Method"
 // in the language the app shows.
 func FieldAuth() string { return In(i18n.Locale()).FieldAuth() }
 
-// FieldAuth says "Log in with"
+// FieldAuth says "Method"
 // in the language of msgs.
 func (msgs Messages) FieldAuth() string {
 	return Catalog.Format(msgs.locale, "fieldAuth", nil)
@@ -1254,11 +1224,11 @@ func (msgs Messages) AuthKey() string {
 	return Catalog.Format(msgs.locale, "authKey", nil)
 }
 
-// FieldKeyFile says "Key file"
+// FieldKeyFile says "Private key"
 // in the language the app shows.
 func FieldKeyFile() string { return In(i18n.Locale()).FieldKeyFile() }
 
-// FieldKeyFile says "Key file"
+// FieldKeyFile says "Private key"
 // in the language of msgs.
 func (msgs Messages) FieldKeyFile() string {
 	return Catalog.Format(msgs.locale, "fieldKeyFile", nil)
@@ -1324,21 +1294,21 @@ func (msgs Messages) ErrUserRequired() string {
 	return Catalog.Format(msgs.locale, "errUserRequired", nil)
 }
 
-// ErrPortInvalid says "The port is not valid"
+// ErrPortInvalid says "Enter a port from 1 to 65535"
 // in the language the app shows.
 func ErrPortInvalid() string { return In(i18n.Locale()).ErrPortInvalid() }
 
-// ErrPortInvalid says "The port is not valid"
+// ErrPortInvalid says "Enter a port from 1 to 65535"
 // in the language of msgs.
 func (msgs Messages) ErrPortInvalid() string {
 	return Catalog.Format(msgs.locale, "errPortInvalid", nil)
 }
 
-// ErrKeyFileRequired says "Enter the key file"
+// ErrKeyFileRequired says "Choose the private key"
 // in the language the app shows.
 func ErrKeyFileRequired() string { return In(i18n.Locale()).ErrKeyFileRequired() }
 
-// ErrKeyFileRequired says "Enter the key file"
+// ErrKeyFileRequired says "Choose the private key"
 // in the language of msgs.
 func (msgs Messages) ErrKeyFileRequired() string {
 	return Catalog.Format(msgs.locale, "errKeyFileRequired", nil)
@@ -1352,6 +1322,246 @@ func ErrSaveFailed(error string) string { return In(i18n.Locale()).ErrSaveFailed
 // in the language of msgs.
 func (msgs Messages) ErrSaveFailed(error string) string {
 	return Catalog.Format(msgs.locale, "errSaveFailed", map[string]any{"error": error})
+}
+
+// Ok says "OK"
+// in the language the app shows.
+func Ok() string { return In(i18n.Locale()).Ok() }
+
+// Ok says "OK"
+// in the language of msgs.
+func (msgs Messages) Ok() string {
+	return Catalog.Format(msgs.locale, "ok", nil)
+}
+
+// EditorPageSSH says "SSH connection"
+// in the language the app shows.
+func EditorPageSSH() string { return In(i18n.Locale()).EditorPageSSH() }
+
+// EditorPageSSH says "SSH connection"
+// in the language of msgs.
+func (msgs Messages) EditorPageSSH() string {
+	return Catalog.Format(msgs.locale, "editorPageSSH", nil)
+}
+
+// EditorPageTerminal says "Terminal"
+// in the language the app shows.
+func EditorPageTerminal() string { return In(i18n.Locale()).EditorPageTerminal() }
+
+// EditorPageTerminal says "Terminal"
+// in the language of msgs.
+func (msgs Messages) EditorPageTerminal() string {
+	return Catalog.Format(msgs.locale, "editorPageTerminal", nil)
+}
+
+// EditorPageProxy says "Proxy"
+// in the language the app shows.
+func EditorPageProxy() string { return In(i18n.Locale()).EditorPageProxy() }
+
+// EditorPageProxy says "Proxy"
+// in the language of msgs.
+func (msgs Messages) EditorPageProxy() string {
+	return Catalog.Format(msgs.locale, "editorPageProxy", nil)
+}
+
+// EditorPageTunnels says "Tunnels"
+// in the language the app shows.
+func EditorPageTunnels() string { return In(i18n.Locale()).EditorPageTunnels() }
+
+// EditorPageTunnels says "Tunnels"
+// in the language of msgs.
+func (msgs Messages) EditorPageTunnels() string {
+	return Catalog.Format(msgs.locale, "editorPageTunnels", nil)
+}
+
+// SectionGeneral says "General"
+// in the language the app shows.
+func SectionGeneral() string { return In(i18n.Locale()).SectionGeneral() }
+
+// SectionGeneral says "General"
+// in the language of msgs.
+func (msgs Messages) SectionGeneral() string {
+	return Catalog.Format(msgs.locale, "sectionGeneral", nil)
+}
+
+// SectionAuth says "Authentication"
+// in the language the app shows.
+func SectionAuth() string { return In(i18n.Locale()).SectionAuth() }
+
+// SectionAuth says "Authentication"
+// in the language of msgs.
+func (msgs Messages) SectionAuth() string {
+	return Catalog.Format(msgs.locale, "sectionAuth", nil)
+}
+
+// SectionAdvanced says "Advanced"
+// in the language the app shows.
+func SectionAdvanced() string { return In(i18n.Locale()).SectionAdvanced() }
+
+// SectionAdvanced says "Advanced"
+// in the language of msgs.
+func (msgs Messages) SectionAdvanced() string {
+	return Catalog.Format(msgs.locale, "sectionAdvanced", nil)
+}
+
+// FieldNotes says "Notes"
+// in the language the app shows.
+func FieldNotes() string { return In(i18n.Locale()).FieldNotes() }
+
+// FieldNotes says "Notes"
+// in the language of msgs.
+func (msgs Messages) FieldNotes() string {
+	return Catalog.Format(msgs.locale, "fieldNotes", nil)
+}
+
+// Browse says "Browse…"
+// in the language the app shows.
+func Browse() string { return In(i18n.Locale()).Browse() }
+
+// Browse says "Browse…"
+// in the language of msgs.
+func (msgs Messages) Browse() string {
+	return Catalog.Format(msgs.locale, "browse", nil)
+}
+
+// ChooseKeyFile says "Choose a private key"
+// in the language the app shows.
+func ChooseKeyFile() string { return In(i18n.Locale()).ChooseKeyFile() }
+
+// ChooseKeyFile says "Choose a private key"
+// in the language of msgs.
+func (msgs Messages) ChooseKeyFile() string {
+	return Catalog.Format(msgs.locale, "chooseKeyFile", nil)
+}
+
+// MonitorChannel says "Enable exec channel (server monitor)"
+// in the language the app shows.
+func MonitorChannel() string { return In(i18n.Locale()).MonitorChannel() }
+
+// MonitorChannel says "Enable exec channel (server monitor)"
+// in the language of msgs.
+func (msgs Messages) MonitorChannel() string {
+	return Catalog.Format(msgs.locale, "monitorChannel", nil)
+}
+
+// MonitorChannelHint says "Turn it off for jump hosts that disconnect when another channel opens."
+// in the language the app shows.
+func MonitorChannelHint() string { return In(i18n.Locale()).MonitorChannelHint() }
+
+// MonitorChannelHint says "Turn it off for jump hosts that disconnect when another channel opens."
+// in the language of msgs.
+func (msgs Messages) MonitorChannelHint() string {
+	return Catalog.Format(msgs.locale, "monitorChannelHint", nil)
+}
+
+// FieldTermType says "Terminal type"
+// in the language the app shows.
+func FieldTermType() string { return In(i18n.Locale()).FieldTermType() }
+
+// FieldTermType says "Terminal type"
+// in the language of msgs.
+func (msgs Messages) FieldTermType() string {
+	return Catalog.Format(msgs.locale, "fieldTermType", nil)
+}
+
+// FieldEncoding says "Character encoding"
+// in the language the app shows.
+func FieldEncoding() string { return In(i18n.Locale()).FieldEncoding() }
+
+// FieldEncoding says "Character encoding"
+// in the language of msgs.
+func (msgs Messages) FieldEncoding() string {
+	return Catalog.Format(msgs.locale, "fieldEncoding", nil)
+}
+
+// EncodingHint says "Only UTF-8 for now."
+// in the language the app shows.
+func EncodingHint() string { return In(i18n.Locale()).EncodingHint() }
+
+// EncodingHint says "Only UTF-8 for now."
+// in the language of msgs.
+func (msgs Messages) EncodingHint() string {
+	return Catalog.Format(msgs.locale, "encodingHint", nil)
+}
+
+// FieldBackspace says "Backspace sends"
+// in the language the app shows.
+func FieldBackspace() string { return In(i18n.Locale()).FieldBackspace() }
+
+// FieldBackspace says "Backspace sends"
+// in the language of msgs.
+func (msgs Messages) FieldBackspace() string {
+	return Catalog.Format(msgs.locale, "fieldBackspace", nil)
+}
+
+// TerminalNextConnect says "Changes apply the next time the host connects."
+// in the language the app shows.
+func TerminalNextConnect() string { return In(i18n.Locale()).TerminalNextConnect() }
+
+// TerminalNextConnect says "Changes apply the next time the host connects."
+// in the language of msgs.
+func (msgs Messages) TerminalNextConnect() string {
+	return Catalog.Format(msgs.locale, "terminalNextConnect", nil)
+}
+
+// ErrTermTypeInvalid says "Use letters, digits and - . + _ only"
+// in the language the app shows.
+func ErrTermTypeInvalid() string { return In(i18n.Locale()).ErrTermTypeInvalid() }
+
+// ErrTermTypeInvalid says "Use letters, digits and - . + _ only"
+// in the language of msgs.
+func (msgs Messages) ErrTermTypeInvalid() string {
+	return Catalog.Format(msgs.locale, "errTermTypeInvalid", nil)
+}
+
+// ProxyLater says "Connecting through a proxy is coming in a later version."
+// in the language the app shows.
+func ProxyLater() string { return In(i18n.Locale()).ProxyLater() }
+
+// ProxyLater says "Connecting through a proxy is coming in a later version."
+// in the language of msgs.
+func (msgs Messages) ProxyLater() string {
+	return Catalog.Format(msgs.locale, "proxyLater", nil)
+}
+
+// TunnelsLater says "Tunnels (port forwarding) are coming in a later version."
+// in the language the app shows.
+func TunnelsLater() string { return In(i18n.Locale()).TunnelsLater() }
+
+// TunnelsLater says "Tunnels (port forwarding) are coming in a later version."
+// in the language of msgs.
+func (msgs Messages) TunnelsLater() string {
+	return Catalog.Format(msgs.locale, "tunnelsLater", nil)
+}
+
+// BackspaceDEL says "ASCII DEL (^?)"
+// in the language the app shows.
+func BackspaceDEL() string { return In(i18n.Locale()).BackspaceDEL() }
+
+// BackspaceDEL says "ASCII DEL (^?)"
+// in the language of msgs.
+func (msgs Messages) BackspaceDEL() string {
+	return Catalog.Format(msgs.locale, "backspaceDEL", nil)
+}
+
+// BackspaceCtrlH says "Control-H (^H)"
+// in the language the app shows.
+func BackspaceCtrlH() string { return In(i18n.Locale()).BackspaceCtrlH() }
+
+// BackspaceCtrlH says "Control-H (^H)"
+// in the language of msgs.
+func (msgs Messages) BackspaceCtrlH() string {
+	return Catalog.Format(msgs.locale, "backspaceCtrlH", nil)
+}
+
+// ErrHostDeleted says "This connection was deleted"
+// in the language the app shows.
+func ErrHostDeleted() string { return In(i18n.Locale()).ErrHostDeleted() }
+
+// ErrHostDeleted says "This connection was deleted"
+// in the language of msgs.
+func (msgs Messages) ErrHostDeleted() string {
+	return Catalog.Format(msgs.locale, "errHostDeleted", nil)
 }
 
 // EnterPassword says "Enter password"

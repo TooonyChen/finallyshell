@@ -113,6 +113,23 @@ func (p *platform) ChooseFolder(title string) (string, error) {
 	return paths[0], nil
 }
 
+func (p *platform) OpenFile(parent app.WindowKind, title, dir string) (string, error) {
+	// The windows are the UI thread's; the dialog waits on this one.
+	owner := make(chan *mygo.Window, 1)
+	p.win.Update(func() {
+		w := p.win
+		if c := p.windows[parent]; c != nil {
+			w = c.win
+		}
+		owner <- w
+	})
+	paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: <-owner, Title: title, DefaultPath: dir, ShowHiddenFiles: true})
+	if err != nil || len(paths) == 0 {
+		return "", err
+	}
+	return paths[0], nil
+}
+
 func (p *platform) DownloadsDir() string {
 	if dir, err := mygo.App.Path(mygo.PathDownloads); err == nil && dir != "" {
 		return dir

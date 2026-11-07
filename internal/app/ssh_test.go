@@ -57,12 +57,23 @@ func TestSSH(t *testing.T) {
 	}
 	s.sftp.Remove(home + "/hello.txt")
 
-	// Reconnecting asks nothing: the key is known now.
+	// The shell's TERM is the host's terminal type.
+	s.term.Send([]byte("echo term-$TERM\r"))
+	p.until(t, "the default TERM", func() bool { return strings.Contains(s.term.Text(), "term-xterm-256color") })
+
+	// Reconnecting asks nothing: the key is known now. It takes the
+	// host's changes.
+	s.Host.TermType, s.Host.Backspace = "vt220", config.BackspaceCtrlH
 	a.reconnect(s)
 	p.until(t, "the reconnection", func() bool { return s.status == statusConnected || s.status == statusFailed || s.hostKeyQ != nil })
 	if s.status != statusConnected {
 		t.Fatalf("reconnect: status %d err %v question %v", s.status, s.err, s.hostKeyQ != nil)
 	}
+	s.term.Send([]byte("echo term-$TERM\r"))
+	p.until(t, "the host's TERM", func() bool { return strings.Contains(s.term.Text(), "term-vt220") })
+	s.term.Send([]byte("stty -a | tr ';' '\\n' | grep -w erase | tr -d ' ' | sed 's/^/stty-/'\r"))
+	p.until(t, "the erase character", func() bool { return strings.Contains(s.term.Text(), "stty-erase=^H") })
+	s.Host.TermType, s.Host.Backspace = "", config.BackspaceDEL
 
 	// A wrong password fails with a message in the app's words.
 	bad := &config.Host{ID: "bad", Addr: s.Host.Addr, Port: s.Host.Port, User: s.Host.User, Auth: config.AuthPassword}

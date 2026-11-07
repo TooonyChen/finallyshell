@@ -3,11 +3,10 @@ package app
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"encoding/json"
 	"errors"
 	"io"
 	"net"
-	"reflect"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -26,6 +25,44 @@ type fakeSSH struct {
 	port       int
 	keepalives atomic.Int32 // keepalive@openssh.com requests
 	execs      atomic.Int32 // exec requests
+
+	mu  sync.Mutex
+	pty fakePTY // the last pseudo-terminal asked for
+}
+
+// fakePTY is what a client asked of a pseudo-terminal.
+type fakePTY struct {
+	term  string
+	erase uint32 // VERASE; 0 when not sent
+}
+
+func (srv *fakeSSH) lastPTY() fakePTY {
+	srv.mu.Lock()
+	defer srv.mu.Unlock()
+	return srv.pty
+}
+
+// notePTY keeps the pty-req's terminal type and erase character.
+func (srv *fakeSSH) notePTY(payload []byte) {
+	var req struct {
+		Term             string
+		Cols, Rows, W, H uint32
+		Modes            string
+	}
+	if ssh.Unmarshal(payload, &req) != nil {
+		return
+	}
+	pty := fakePTY{term: req.Term}
+	modes := []byte(req.Modes)
+	for len(modes) >= 5 && modes[0] != 0 { // TTY_OP_END
+		if modes[0] == ssh.VERASE {
+			pty.erase = uint32(modes[1])<<24 | uint32(modes[2])<<16 | uint32(modes[3])<<8 | uint32(modes[4])
+		}
+		modes = modes[5:]
+	}
+	srv.mu.Lock()
+	srv.pty = pty
+	srv.mu.Unlock()
 }
 
 func startFakeSSH(t *testing.T) *fakeSSH {
@@ -93,7 +130,10 @@ func (srv *fakeSSH) serve(conn net.Conn, cfg *ssh.ServerConfig) {
 		go func() {
 			for r := range chReqs {
 				switch r.Type {
-				case "pty-req", "shell", "window-change":
+				case "pty-req":
+					srv.notePTY(r.Payload)
+					r.Reply(true, nil)
+				case "shell", "window-change":
 					r.Reply(true, nil)
 				case "exec":
 					srv.execs.Add(1)
@@ -173,8 +213,8 @@ func TestManagerHidesDeletedHosts(t *testing.T) {
 	tt := ui.NewTester(a.View, 1280, 820)
 	a.openManager()
 	tt.Frame()
-	if a.formOpen || !tt.HasText("kept-host") || tt.HasText("gone-host") {
-		t.Fatalf("form %v; texts %q", a.formOpen, tt.Texts())
+	if a.windowOpen(WindowEditor) || !tt.HasText("kept-host") || tt.HasText("gone-host") {
+		t.Fatalf("editor %v; texts %q", a.windowOpen(WindowEditor), tt.Texts())
 	}
 	// Row 0 is the first host shown, not the first saved.
 	a.hostRow = 0
@@ -189,55 +229,7 @@ func TestManagerHidesDeletedHosts(t *testing.T) {
 	a.managerOpen = false
 	a.openManager()
 	tt.Frame()
-	if !a.formOpen || tt.HasText("gone-host") {
-		t.Errorf("form %v; texts %q", a.formOpen, tt.Texts())
-	}
-}
-
-func TestEditKeepsHostFields(t *testing.T) {
-	a, _ := testApp(t)
-	var saved []byte
-	a.saveHosts = func(s *config.Store) error {
-		var err error
-		saved, err = json.Marshal(s)
-		return err
-	}
-	var h config.Host
-	err := json.Unmarshal([]byte(`{"id": "h1", "name": "web", "addr": "10.0.0.1", "user": "root", "auth": "password",
-		"folder": "f1", "notes": "main box", "noMonitor": true, "lastConnectedAt": "2026-11-07T10:00:00Z",
-		"proxy": {"kind": "socks5"}}`), &h)
-	if err != nil {
-		t.Fatal(err)
-	}
-	a.hosts.Add(&h)
-	tt := ui.NewTester(a.View, 1280, 820)
-	a.openManager()
-	a.hostRow = 0
-	tt.Frame()
-	if err := tt.Click(locales.Edit()); err != nil {
-		t.Fatal(err)
-	}
-	tt.Frame()
-	a.form.name = "web-1"
-	if err := tt.Click(locales.Save()); err != nil {
-		t.Fatal(err)
-	}
-	if a.form.err != nil {
-		t.Fatal(a.form.err())
-	}
-	var file struct {
-		Hosts []map[string]any `json:"hosts"`
-	}
-	if err := json.Unmarshal(saved, &file); err != nil || len(file.Hosts) != 1 {
-		t.Fatalf("saved %s: %v", saved, err)
-	}
-	got := file.Hosts[0]
-	for k, want := range map[string]any{
-		"name": "web-1", "folder": "f1", "notes": "main box", "noMonitor": true,
-		"lastConnectedAt": "2026-11-07T10:00:00Z", "proxy": map[string]any{"kind": "socks5"},
-	} {
-		if !reflect.DeepEqual(got[k], want) {
-			t.Errorf("%s = %v, want %v", k, got[k], want)
-		}
+	if !a.windowOpen(WindowEditor) || a.editor.id != "" || tt.HasText("gone-host") {
+		t.Errorf("editor %v; texts %q", a.windowOpen(WindowEditor), tt.Texts())
 	}
 }

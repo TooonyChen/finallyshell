@@ -62,11 +62,8 @@ func (a *App) fillTab(tab *Session, h *config.Host, secret string) {
 	a.connect(tab, secret)
 }
 
-// startNewConnection opens the editor for a new host. For now that is
-// the connection manager, which shows its form while there are no hosts.
-// TODO(#7): call a.newConnection() once the connection editor window
-// lands.
-func (a *App) startNewConnection() { a.openManager() }
+// startNewConnection opens the connection editor for a new host.
+func (a *App) startNewConnection() { a.newConnection() }
 
 // clearRecents empties the recent list, keeping the hosts.
 func (a *App) clearRecents() {

@@ -32,6 +32,7 @@ type fakePlatform struct {
 	shown     []string
 	fakeWindows
 	fakeSystem
+	fakeFilePicker
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {
@@ -189,20 +190,13 @@ func TestConnectionManager(t *testing.T) {
 	a, p := testApp(t)
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
-	if err := tt.Click(locales.NewConnection()); err != nil {
-		t.Fatal(err)
+	tt.Key(ui.Ctrl|ui.Shift, ui.KeyT) // with no hosts, on a new one
+	if !a.managerOpen || !a.windowOpen(WindowEditor) {
+		t.Fatalf("manager %v editor %v", a.managerOpen, a.windowOpen(WindowEditor))
 	}
-	if !a.managerOpen || !a.formOpen {
-		t.Fatalf("manager %v form %v", a.managerOpen, a.formOpen)
-	}
-	if err := tt.Click(locales.Save()); err != nil {
-		t.Fatal(err)
-	}
-	if a.form.err == nil || a.form.err() != locales.ErrHostRequired() {
-		t.Fatalf("an empty host saved")
-	}
-	a.form.addr = "example.com"
-	if err := tt.Click(locales.Save()); err != nil {
+	editor := p.show(t, WindowEditor)
+	editor.Type("example.com")
+	if err := editor.Click(locales.Ok()); err != nil {
 		t.Fatal(err)
 	}
 	if hosts := a.hosts.Live(); len(hosts) != 1 || hosts[0].Addr != "example.com" || hosts[0].PortOr22() != 22 || !hosts[0].MonitorEnabled() {
