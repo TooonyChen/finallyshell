@@ -106,10 +106,12 @@ type App struct {
 	// The connection editor's fields, while its window is open.
 	editor *connEditor
 
-	// The password prompt for a saved host.
+	// The password prompt: the password a connection takes (a saved
+	// host's, a jump host's or a proxy's), and what to do once it is
+	// entered (see proxy.go).
 	pwOpen bool
-	pwHost *config.Host
-	pwTab  *Session // the new tab to connect in, or nil for a tab of its own
+	pwNeed *secretNeed
+	pwThen func()
 	pwText string
 
 	// The secondary windows that are open.
@@ -257,14 +259,14 @@ func (a *App) setLanguage(tag string) {
 func (a *App) openSession(h *config.Host) { a.openSessionIn(a.selectedNewTab(), h) }
 
 // openSessionIn opens a session to h in tab, a new tab, or in a tab of
-// its own for nil, asking for its password first when the app does not
-// know it.
+// its own for nil, asking first for the passwords the app does not know:
+// its own, then its proxy's and jump hosts', one at a time.
 func (a *App) openSessionIn(tab *Session, h *config.Host) {
-	pw, known := a.passwords[h.ID]
-	if h.Auth == config.AuthPassword && !known {
-		a.pwOpen, a.pwHost, a.pwTab, a.pwText = true, h, tab, ""
+	if need := a.missingSecret(h); need != nil {
+		a.askSecret(need, func() { a.openSessionIn(tab, h) })
 		return
 	}
+	pw := a.passwords[h.ID]
 	if tab != nil && tab.isNewTab() && slices.Contains(a.sessions, tab) {
 		a.fillTab(tab, h, pw)
 		return
@@ -278,7 +280,13 @@ func (a *App) openSessionIn(tab *Session, h *config.Host) {
 }
 
 func (a *App) reconnect(s *Session) {
-	if s.isNewTab() {
+	if s.isNewTab() || !slices.Contains(a.sessions, s) {
+		return
+	}
+	// A jump host or a proxy with a password not known yet, as the host
+	// was edited to go through it.
+	if need := a.missingSecret(s.Host); need != nil {
+		a.askSecret(need, func() { a.reconnect(s) })
 		return
 	}
 	s.disconnect()

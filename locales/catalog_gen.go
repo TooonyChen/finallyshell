@@ -1514,14 +1514,238 @@ func (msgs Messages) ErrTermTypeInvalid() string {
 	return Catalog.Format(msgs.locale, "errTermTypeInvalid", nil)
 }
 
-// ProxyLater says "Connecting through a proxy is coming in a later version."
+// FieldProxyType says "Type"
 // in the language the app shows.
-func ProxyLater() string { return In(i18n.Locale()).ProxyLater() }
+func FieldProxyType() string { return In(i18n.Locale()).FieldProxyType() }
 
-// ProxyLater says "Connecting through a proxy is coming in a later version."
+// FieldProxyType says "Type"
 // in the language of msgs.
-func (msgs Messages) ProxyLater() string {
-	return Catalog.Format(msgs.locale, "proxyLater", nil)
+func (msgs Messages) FieldProxyType() string {
+	return Catalog.Format(msgs.locale, "fieldProxyType", nil)
+}
+
+// ProxyNone says "None"
+// in the language the app shows.
+func ProxyNone() string { return In(i18n.Locale()).ProxyNone() }
+
+// ProxyNone says "None"
+// in the language of msgs.
+func (msgs Messages) ProxyNone() string {
+	return Catalog.Format(msgs.locale, "proxyNone", nil)
+}
+
+// ProxyJumpHost says "Jump host"
+// in the language the app shows.
+func ProxyJumpHost() string { return In(i18n.Locale()).ProxyJumpHost() }
+
+// ProxyJumpHost says "Jump host"
+// in the language of msgs.
+func (msgs Messages) ProxyJumpHost() string {
+	return Catalog.Format(msgs.locale, "proxyJumpHost", nil)
+}
+
+// ProxyNoneHint says "Connect to the host directly."
+// in the language the app shows.
+func ProxyNoneHint() string { return In(i18n.Locale()).ProxyNoneHint() }
+
+// ProxyNoneHint says "Connect to the host directly."
+// in the language of msgs.
+func (msgs Messages) ProxyNoneHint() string {
+	return Catalog.Format(msgs.locale, "proxyNoneHint", nil)
+}
+
+// ProxySOCKS5Hint says "The proxy looks up the host's name, so it can be a name only the proxy's network knows."
+// in the language the app shows.
+func ProxySOCKS5Hint() string { return In(i18n.Locale()).ProxySOCKS5Hint() }
+
+// ProxySOCKS5Hint says "The proxy looks up the host's name, so it can be a name only the proxy's network knows."
+// in the language of msgs.
+func (msgs Messages) ProxySOCKS5Hint() string {
+	return Catalog.Format(msgs.locale, "proxySOCKS5Hint", nil)
+}
+
+// ProxyHTTPHint says "Uses HTTP CONNECT. The proxy must allow connections to the host's SSH port."
+// in the language the app shows.
+func ProxyHTTPHint() string { return In(i18n.Locale()).ProxyHTTPHint() }
+
+// ProxyHTTPHint says "Uses HTTP CONNECT. The proxy must allow connections to the host's SSH port."
+// in the language of msgs.
+func (msgs Messages) ProxyHTTPHint() string {
+	return Catalog.Format(msgs.locale, "proxyHTTPHint", nil)
+}
+
+// ProxyJumpHint says "Logs in to another saved connection first and connects to this host from there, like ssh -J. The jump host can have i…"
+// in the language the app shows.
+func ProxyJumpHint() string { return In(i18n.Locale()).ProxyJumpHint() }
+
+// ProxyJumpHint says "Logs in to another saved connection first and connects to this host from there, like ssh -J. The jump host can have i…"
+// in the language of msgs.
+func (msgs Messages) ProxyJumpHint() string {
+	return Catalog.Format(msgs.locale, "proxyJumpHint", nil)
+}
+
+// ProxyUserPlaceholder says "Leave empty if the proxy needs none"
+// in the language the app shows.
+func ProxyUserPlaceholder() string { return In(i18n.Locale()).ProxyUserPlaceholder() }
+
+// ProxyUserPlaceholder says "Leave empty if the proxy needs none"
+// in the language of msgs.
+func (msgs Messages) ProxyUserPlaceholder() string {
+	return Catalog.Format(msgs.locale, "proxyUserPlaceholder", nil)
+}
+
+// FieldJumpHost says "Jump host"
+// in the language the app shows.
+func FieldJumpHost() string { return In(i18n.Locale()).FieldJumpHost() }
+
+// FieldJumpHost says "Jump host"
+// in the language of msgs.
+func (msgs Messages) FieldJumpHost() string {
+	return Catalog.Format(msgs.locale, "fieldJumpHost", nil)
+}
+
+// NoJumpHosts says "There is no other saved connection to use as the jump host."
+// in the language the app shows.
+func NoJumpHosts() string { return In(i18n.Locale()).NoJumpHosts() }
+
+// NoJumpHosts says "There is no other saved connection to use as the jump host."
+// in the language of msgs.
+func (msgs Messages) NoJumpHosts() string {
+	return Catalog.Format(msgs.locale, "noJumpHosts", nil)
+}
+
+// JumpHostNote says "Its host key, login and password are its own, as when connecting to it."
+// in the language the app shows.
+func JumpHostNote() string { return In(i18n.Locale()).JumpHostNote() }
+
+// JumpHostNote says "Its host key, login and password are its own, as when connecting to it."
+// in the language of msgs.
+func (msgs Messages) JumpHostNote() string {
+	return Catalog.Format(msgs.locale, "jumpHostNote", nil)
+}
+
+// ErrJumpHostRequired says "Choose the jump host"
+// in the language the app shows.
+func ErrJumpHostRequired() string { return In(i18n.Locale()).ErrJumpHostRequired() }
+
+// ErrJumpHostRequired says "Choose the jump host"
+// in the language of msgs.
+func (msgs Messages) ErrJumpHostRequired() string {
+	return Catalog.Format(msgs.locale, "errJumpHostRequired", nil)
+}
+
+// ErrJumpLoop says "The jump hosts form a loop: {hosts}"
+// in the language the app shows.
+func ErrJumpLoop(hosts string) string { return In(i18n.Locale()).ErrJumpLoop(hosts) }
+
+// ErrJumpLoop says "The jump hosts form a loop: {hosts}"
+// in the language of msgs.
+func (msgs Messages) ErrJumpLoop(hosts string) string {
+	return Catalog.Format(msgs.locale, "errJumpLoop", map[string]any{"hosts": hosts})
+}
+
+// ErrJumpHostMissing says "The jump host of {host} was deleted"
+// in the language the app shows.
+func ErrJumpHostMissing(host string) string { return In(i18n.Locale()).ErrJumpHostMissing(host) }
+
+// ErrJumpHostMissing says "The jump host of {host} was deleted"
+// in the language of msgs.
+func (msgs Messages) ErrJumpHostMissing(host string) string {
+	return Catalog.Format(msgs.locale, "errJumpHostMissing", map[string]any{"host": host})
+}
+
+// ErrViaProxy says "Proxy {proxy}: {error}"
+// in the language the app shows.
+func ErrViaProxy(proxy string, error string) string {
+	return In(i18n.Locale()).ErrViaProxy(proxy, error)
+}
+
+// ErrViaProxy says "Proxy {proxy}: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrViaProxy(proxy string, error string) string {
+	return Catalog.Format(msgs.locale, "errViaProxy", map[string]any{"proxy": proxy, "error": error})
+}
+
+// ErrViaJump says "Jump host {host}: {error}"
+// in the language the app shows.
+func ErrViaJump(host string, error string) string { return In(i18n.Locale()).ErrViaJump(host, error) }
+
+// ErrViaJump says "Jump host {host}: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrViaJump(host string, error string) string {
+	return Catalog.Format(msgs.locale, "errViaJump", map[string]any{"host": host, "error": error})
+}
+
+// ErrProxyAuth says "Authentication failed: wrong proxy user or password"
+// in the language the app shows.
+func ErrProxyAuth() string { return In(i18n.Locale()).ErrProxyAuth() }
+
+// ErrProxyAuth says "Authentication failed: wrong proxy user or password"
+// in the language of msgs.
+func (msgs Messages) ErrProxyAuth() string {
+	return Catalog.Format(msgs.locale, "errProxyAuth", nil)
+}
+
+// ErrProxyRefused says "Connection refused: no proxy on that port"
+// in the language the app shows.
+func ErrProxyRefused() string { return In(i18n.Locale()).ErrProxyRefused() }
+
+// ErrProxyRefused says "Connection refused: no proxy on that port"
+// in the language of msgs.
+func (msgs Messages) ErrProxyRefused() string {
+	return Catalog.Format(msgs.locale, "errProxyRefused", nil)
+}
+
+// ErrCannotReach says "Cannot connect to {addr}: {reason}"
+// in the language the app shows.
+func ErrCannotReach(addr string, reason string) string {
+	return In(i18n.Locale()).ErrCannotReach(addr, reason)
+}
+
+// ErrCannotReach says "Cannot connect to {addr}: {reason}"
+// in the language of msgs.
+func (msgs Messages) ErrCannotReach(addr string, reason string) string {
+	return Catalog.Format(msgs.locale, "errCannotReach", map[string]any{"addr": addr, "reason": reason})
+}
+
+// ErrForwardProhibited says "Cannot connect to {addr}: the jump host does not allow TCP forwarding (AllowTcpForwarding)"
+// in the language the app shows.
+func ErrForwardProhibited(addr string) string { return In(i18n.Locale()).ErrForwardProhibited(addr) }
+
+// ErrForwardProhibited says "Cannot connect to {addr}: the jump host does not allow TCP forwarding (AllowTcpForwarding)"
+// in the language of msgs.
+func (msgs Messages) ErrForwardProhibited(addr string) string {
+	return Catalog.Format(msgs.locale, "errForwardProhibited", map[string]any{"addr": addr})
+}
+
+// JumpHostPasswordTitle says "Jump host password"
+// in the language the app shows.
+func JumpHostPasswordTitle() string { return In(i18n.Locale()).JumpHostPasswordTitle() }
+
+// JumpHostPasswordTitle says "Jump host password"
+// in the language of msgs.
+func (msgs Messages) JumpHostPasswordTitle() string {
+	return Catalog.Format(msgs.locale, "jumpHostPasswordTitle", nil)
+}
+
+// ProxyPasswordTitle says "Proxy password"
+// in the language the app shows.
+func ProxyPasswordTitle() string { return In(i18n.Locale()).ProxyPasswordTitle() }
+
+// ProxyPasswordTitle says "Proxy password"
+// in the language of msgs.
+func (msgs Messages) ProxyPasswordTitle() string {
+	return Catalog.Format(msgs.locale, "proxyPasswordTitle", nil)
+}
+
+// PasswordOnTheWay says "Needed to connect to {host}"
+// in the language the app shows.
+func PasswordOnTheWay(host string) string { return In(i18n.Locale()).PasswordOnTheWay(host) }
+
+// PasswordOnTheWay says "Needed to connect to {host}"
+// in the language of msgs.
+func (msgs Messages) PasswordOnTheWay(host string) string {
+	return Catalog.Format(msgs.locale, "passwordOnTheWay", map[string]any{"host": host})
 }
 
 // TunnelsLater says "Tunnels (port forwarding) are coming in a later version."

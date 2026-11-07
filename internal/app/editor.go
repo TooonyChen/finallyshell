@@ -61,8 +61,11 @@ const (
 
 // page is the editor's page that shows f.
 func (f editorField) page() string {
-	if f == fieldTermType {
+	switch {
+	case f == fieldTermType:
 		return editorTerminal
+	case slices.Contains(proxyFieldOrder, f):
+		return editorProxy
 	}
 	return editorSSH
 }
@@ -81,6 +84,7 @@ type connEditor struct {
 	monitor                 bool
 	termType                string
 	backspace               config.BackspaceKey
+	proxy                   proxyFields // the Proxy page (editor_proxy.go)
 
 	// checked is set once OK was pressed: from then on the errors show,
 	// and follow the fields as they change.
@@ -126,6 +130,7 @@ func (a *App) openEditor(h *config.Host) {
 		ed.monitor = h.MonitorEnabled()
 		ed.termType, ed.backspace = h.TermType, h.Backspace
 	}
+	ed.proxy = a.proxyFieldsOf(h)
 	a.editor = ed
 	a.openWindow(editorSpec(h != nil), a.editorView)
 }
@@ -156,6 +161,7 @@ func (ed *connEditor) problems() map[editorField]string {
 	if !validTermType(strings.TrimSpace(ed.termType)) {
 		errs[fieldTermType] = locales.ErrTermTypeInvalid()
 	}
+	ed.proxyProblems(errs)
 	return errs
 }
 
@@ -167,7 +173,7 @@ func (a *App) saveEditor() {
 	ed.checked = true
 	if errs := ed.problems(); len(errs) > 0 {
 		first, here := "", false
-		for _, f := range []editorField{fieldAddr, fieldPort, fieldUser, fieldKeyPath, fieldTermType} {
+		for _, f := range append([]editorField{fieldAddr, fieldPort, fieldUser, fieldKeyPath, fieldTermType}, proxyFieldOrder...) {
 			if errs[f] != "" {
 				first = cmp.Or(first, f.page())
 				here = here || f.page() == ed.nav.Page
@@ -208,6 +214,7 @@ func (a *App) saveEditor() {
 	if h.TermType == config.DefaultTermType {
 		h.TermType = ""
 	}
+	a.saveProxy(h, &ed.proxy)
 	a.hostRow = slices.Index(a.hosts.Live(), h)
 	a.redraw() // the manager and the sessions show the host
 	if err := a.saveHosts(a.hosts); err != nil {
@@ -269,7 +276,7 @@ func (a *App) editorView(c *ui.Context) {
 	pages := []widgets.NavPage{
 		{ID: editorSSH, Title: locales.EditorPageSSH, View: func(c *ui.Context) { a.sshPage(c, ed, errs, input) }},
 		{ID: editorTerminal, Title: locales.EditorPageTerminal, View: func(c *ui.Context) { a.terminalPage(c, ed, errs, input) }},
-		{ID: editorProxy, Title: locales.EditorPageProxy, View: func(c *ui.Context) { widgets.Muted(c, locales.ProxyLater()) }},
+		{ID: editorProxy, Title: locales.EditorPageProxy, View: func(c *ui.Context) { a.proxyPage(c, ed, errs, input) }},
 		{ID: editorTunnels, Title: locales.EditorPageTunnels, View: func(c *ui.Context) { widgets.Muted(c, locales.TunnelsLater()) }},
 	}
 	ui.Column(c).Fill().Children(func() {

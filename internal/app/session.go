@@ -85,11 +85,12 @@ func (a *App) connect(s *Session, secret string) {
 	s.status, s.err, s.hostKeyQ = statusConnecting, nil, nil
 	ctx, cancel := context.WithCancel(context.Background())
 	s.cancel = cancel
-	opts := sshx.Options{AskHostKey: func(q *sshx.HostKeyQuestion) { a.post(func() { s.hostKeyQ = q }) }}
-	if s.Host.Auth == config.AuthKey {
-		opts.Passphrase = secret
-	} else {
-		opts.Password = secret
+	// Through the host's proxy or jump hosts, if any (see proxy.go):
+	// closing the client closes theirs.
+	opts, err := a.dialOptions(s.Host, secret, func(q *sshx.HostKeyQuestion) { a.post(func() { s.hostKeyQ = q }) })
+	if err != nil {
+		s.status, s.err = statusFailed, err
+		return
 	}
 	h := *s.Host
 	fail := func(err error) { a.post(func() { s.status, s.err = statusFailed, err }) }
@@ -272,6 +273,9 @@ func describeError(err error) string {
 	var changed *sshx.HostKeyChangedError
 	var keyFile *sshx.KeyFileError
 	var step *stepError
+	if msg, ok := describeRoute(err); ok { // a proxy or jump host on the way
+		return msg
+	}
 	switch {
 	case err == nil:
 		return ""

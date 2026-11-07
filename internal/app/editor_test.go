@@ -211,12 +211,13 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	err := json.Unmarshal([]byte(`{"id": "h1", "name": "web", "addr": "10.0.0.1", "port": 2200, "user": "root", "auth": "key",
 		"keyPath": "~/.ssh/id_rsa", "folder": "f1", "notes": "main box\nrack 4", "noMonitor": true,
 		"lastConnectedAt": "2026-11-07T10:00:00Z", "termType": "vt220", "backspace": "ctrl-h",
-		"proxy": {"kind": "socks5"}}`), &h)
+		"proxy": {"kind": "socks5", "addr": "10.0.0.9", "port": 1081, "user": "alice", "timeout": 5}}`), &h)
 	if err != nil {
 		t.Fatal(err)
 	}
 	a.hosts.Add(&h)
 	a.passwords["h1"] = "phrase"
+	a.proxySecrets()["proxy/h1"] = "pp"
 	mainWin := ui.NewTester(a.View, 1280, 820)
 	p.tt = mainWin
 	a.openManager()
@@ -235,7 +236,8 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	ed := a.editor
 	want := connEditor{id: "h1", name: "web", addr: "10.0.0.1", port: "2200", notes: "main box\nrack 4",
 		auth: config.AuthKey, user: "root", keyPath: "~/.ssh/id_rsa", passphrase: "phrase",
-		monitor: false, termType: "vt220", backspace: config.BackspaceCtrlH}
+		monitor: false, termType: "vt220", backspace: config.BackspaceCtrlH,
+		proxy: proxyFields{kind: config.ProxySOCKS5, addr: "10.0.0.9", port: "1081", user: "alice", password: "pp", saved: h.Proxy, hosts: a.hosts}}
 	fields := *ed
 	fields.nav = widgets.NavState{}
 	if !reflect.DeepEqual(fields, want) || ed.nav.Page != editorSSH {
@@ -284,7 +286,7 @@ func TestEditorEditKeepsFields(t *testing.T) {
 		"id": "h1", "name": "web-1", "addr": "10.0.0.1", "port": 2200.0, "user": "root", "auth": "key",
 		"keyPath": "~/.ssh/id_rsa", "folder": "f1", "notes": "main box\nrack 4", "noMonitor": true,
 		"lastConnectedAt": "2026-11-07T10:00:00Z", "termType": "vt220", "backspace": "ctrl-h",
-		"proxy": map[string]any{"kind": "socks5"},
+		"proxy": map[string]any{"kind": "socks5", "addr": "10.0.0.9", "port": 1081.0, "user": "alice", "timeout": 5.0},
 	} {
 		if !reflect.DeepEqual(got[k], want) {
 			t.Errorf("%s = %v, want %v", k, got[k], want)
@@ -293,7 +295,7 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	if len(got) != 14 {
 		t.Errorf("saved keys %v", got)
 	}
-	if a.passwords["h1"] != "phrase" || a.hosts.Host("h1") != &h {
+	if a.passwords["h1"] != "phrase" || a.proxySecrets()["proxy/h1"] != "pp" || a.hosts.Host("h1") != &h {
 		t.Errorf("passphrase %q", a.passwords["h1"])
 	}
 }
@@ -615,7 +617,7 @@ func TestEditorPages(t *testing.T) {
 			wants := map[string][]string{
 				editorSSH:      {locales.SectionGeneral(), locales.SectionAuth(), locales.SectionAdvanced(), locales.FieldNotes(), locales.MonitorChannel()},
 				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), "UTF-8", locales.BackspaceDEL()},
-				editorProxy:    {locales.ProxyLater()},
+				editorProxy:    {locales.FieldProxyType(), locales.ProxyNone(), locales.ProxyNoneHint()},
 				editorTunnels:  {locales.TunnelsLater()},
 			}
 			labels := map[string]string{

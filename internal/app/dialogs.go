@@ -90,13 +90,18 @@ func (a *App) hostListView(c *ui.Context) {
 }
 
 func (a *App) passwordView(c *ui.Context) {
-	h := a.pwHost
-	if h == nil {
+	need := a.pwNeed
+	if need == nil {
 		return
 	}
 	ui.Column(c).Width(380).Gap(12).Children(func() {
-		ui.Text(c, locales.EnterPassword()).FontSize(16).Bold()
-		widgets.Muted(c, h.Target())
+		ui.Text(c, need.title()).FontSize(16).Bold()
+		ui.Column(c).Gap(2).Children(func() {
+			widgets.Muted(c, need.who)
+			if need.via != "" {
+				widgets.Muted(c, locales.PasswordOnTheWay(need.via)).FontSize(12)
+			}
+		})
 		submit := ui.TextInput(c, &a.pwText).Password().AutoFocus().Submitted()
 		ui.Row(c).Gap(8).Justify(ui.End).Children(func() {
 			if ui.Button(c, locales.Cancel()).Clicked() {
@@ -107,9 +112,12 @@ func (a *App) passwordView(c *ui.Context) {
 			}
 		})
 		if submit {
-			a.passwords[h.ID] = a.pwText
-			a.pwOpen, a.pwText = false, ""
-			a.openSessionIn(a.pwTab, h)
+			a.keepSecret(need, a.pwText)
+			then := a.pwThen
+			a.pwOpen, a.pwText, a.pwNeed, a.pwThen = false, "", nil, nil
+			if then != nil {
+				then() // may ask for the next password
+			}
 		}
 	})
 }

@@ -39,7 +39,14 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 连接编辑器（新建连接 / 编辑连接）是单独的窗口，左边是页面，下面是“确定”“取消”：
   - “SSH 连接”：名称、主机、端口、备注（多行），认证方法（密码或私钥）、用户名、密码或私钥文件（“浏览…”选文件）和私钥密码，“启用 exec 通道（服务器监控）”。错误提示显示在对应的输入框下面。
   - “终端”：终端类型（发给服务器的 `TERM`，默认 `xterm-256color`）；退格键发送 `^?`（DEL，默认）或 `^H`，同时把服务器终端的 erase 字符设成一样的；字符编码目前只有 UTF-8（libghostty-vt 只解码 UTF-8，程序也不做转码）。
-  - “代理”“隧道”：以后的版本提供。
+  - “代理”：类型选“不使用”（直接连接）、SOCKS5、HTTP 或“跳板机”。
+    - SOCKS5 和 HTTP（`CONNECT`）填代理的主机、端口（默认 1080 / 8080），代理需要认证时填用户名和密码（HTTP 是 Basic 认证）。SOCKS5 由代理解析主机名，所以主机可以填只有代理那边认识的名字。
+    - “跳板机”从已保存的其他连接里选一个（不能选自己），相当于 `ssh -J`：先登录跳板机，再由跳板机的 SSH 服务器转发到这台主机（跳板机要允许 TCP 转发）。跳板机自己也可以设代理或跳板机，按顺序一跳一跳连过去；绕回来形成循环时，编辑器和连接时都会提示 “跳板机形成了循环：a → b → a”。
+    - 每一跳都和直接连接它一样：第一次连接时确认它的主机指纹，用它自己的登录方式和密码。连接时，还不知道的密码按顺序一个一个问：先问主机自己的，再问它的代理的，再问各个跳板机的（标题写“输入跳板机密码”或“输入代理密码”，下面写是哪个主机、为了连接谁）。主机改成走跳板机后重新连接，也会先问新跳板机的密码。
+    - 代理密码和主机密码一样只存在内存里，不写进 `hosts.json`。
+    - 出错时说明是哪一跳：“代理 1.2.3.4:1080：连接被拒绝：端口没有开放代理服务”“跳板机 web-1：认证失败：…”“跳板机 web-1：无法连接到 10.0.0.5:22：…”。
+    - 关闭或断开会话时，跳板机的连接一起关闭。
+  - “隧道”：以后的版本提供。
   - 回车等于“确定”（备注里回车是换行），Esc 等于“取消”。同时只开一个编辑器：已经开着时再点新建或编辑，只会把开着的那个提到前面，里面没保存的内容不会丢。修改已经打开会话的主机，下次连接时生效。编辑期间主机在连接管理器里被删除了，“确定”只提示“此连接已被删除”，不会把它存回去。
 - 连接成功时记下时间，供“最近连接”使用。主机的 `noMonitor` 为 `true` 时不轮询服务器状态，也就不开额外的 exec 通道（有些跳板机不允许）。
 - 第一次连接时弹窗显示主机指纹，信任后记入 `finalshelly/known_hosts`；指纹变化时拒绝连接。
@@ -68,10 +75,16 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
     "auth": "key", "keyPath": "~/.ssh/id_ed25519",
     "folder": "f2", "notes": "备注", "noMonitor": true,
     "termType": "vt220", "backspace": "ctrl-h",
+    "proxy": {"kind": "jump", "jumpHost": "h2"},
     "lastConnectedAt": "2026-11-07T10:00:00+08:00"
+  }, {
+    "id": "h2", "name": "bastion", "addr": "198.51.100.1", "user": "jump", "auth": "password",
+    "proxy": {"kind": "socks5", "addr": "127.0.0.1", "port": 1080, "user": "alice"}
   }]
 }
 ```
+
+`proxy` 是怎么连到这台主机：`kind` 为 `socks5`、`http`（这两种有 `addr`、`port`，需要认证时有 `user`）或 `jump`（`jumpHost` 是跳板机的主机 ID）；没有 `proxy` 就是直接连接。代理密码不写进文件。
 
 `folder` 是所在文件夹的 ID，空表示顶层；文件夹用 `parent` 嵌套。有 `deletedAt`（删除时间）的主机是“已删除”的，列表里不显示。空值的字段不写出来，没有 `noMonitor` 就是开启监控，没有 `termType` 就是 `xterm-256color`，没有 `backspace` 就是发送 `^?`（`ctrl-h` 是发送 `^H`）。不认识的字段（新版本写的）原样保留，保存时不会丢。写入时先写临时文件再改名，不会写出半个文件。如果 `hosts.json` 读不出来（比如被手改坏了），启动时先把它原样复制成同目录下的 `hosts.json.broken-<年月日-时分秒>`，再按空列表启动，下次保存不会把原来的内容弄丢。
 
@@ -84,8 +97,8 @@ main.go              启动 MyGo、开主窗口，把系统功能（子窗口、
 tray.go              托盘图标、确认用的消息框、退出
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
-  config/            主机和文件夹（hosts.json）、设置的读写，配置目录
-  sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn
+  config/            主机和文件夹（hosts.json）、设置的读写，配置目录；proxy.go 是代理设置和跳板机链（找循环）
+  sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接
   monitor/           服务器状态采集和解析
   remotefs/          SFTP 列目录、上传、下载（带进度和取消）
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
@@ -103,6 +116,8 @@ internal/
     dialogs.go       连接管理器、密码、主机指纹、覆盖确认
     options.go       选项窗口：页面列表和“常规”页
     editor.go        连接编辑器窗口：a.newConnection()、a.editConnection(h)，校验和保存
+    editor_proxy.go  连接编辑器的“代理”页
+    proxy.go         经过代理和跳板机连接：拨号用的选项、连接前要问的密码、各跳错误的翻译
     closing.go       关闭主窗口、退出时做什么：隐藏到托盘、先确认
     windows.go       子窗口：按种类打开/聚焦/关闭，重绘所有窗口
     format.go        大小、速度、延迟的格式化
