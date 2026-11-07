@@ -26,7 +26,14 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 
 ## 功能
 
-- 中文和英文界面。默认跟随系统语言，点左下角“会话”标题旁的设置按钮，在设置窗口里切换，选择会保存。
+- 中文和英文界面。默认跟随系统语言，点左下角“会话”标题旁的齿轮按钮打开“选项”窗口，在“常规”页切换，选择会保存。
+- “选项”窗口（和 FinalShell 一样，左边是页面树，右边是页面）。“常规”页：
+  - 界面语言：跟随系统 / English / 简体中文。
+  - 自动选中标签（默认开）：新连接打开后切换过去。关掉后新会话在后台打开，当前会话保持选中；没有选中的会话时仍然选中新的。
+  - 关闭时最小化到托盘（默认关）：点主窗口的关闭按钮时隐藏到托盘图标（macOS 是菜单栏），图标菜单里有“显示主窗口”和“退出”。Windows 上左键单击图标也能显示窗口，macOS 上点 Dock 图标也能显示。系统没有托盘时（Linux 没装 `libayatana-appindicator3`）按没开这一项处理。
+  - 关闭窗口前确认（默认开）：有会话已连接或正在连接时，关闭主窗口或退出（托盘菜单、macOS 的 Cmd+Q）之前用系统的消息框问一次。同时开了托盘：关闭按钮直接隐藏，不问；“退出”才问。
+  - “终端”下的鼠标、快捷键、配色、背景图片、字体几页还没做，先显示“以后的版本提供”。
+  所有选项改了立刻生效，保存在 `settings.json`。
 - 连接管理器：新建、编辑、删除主机，密码或私钥登录。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码不落盘，只存在内存里。
 - 连接成功时记下时间，供“最近连接”使用。主机的 `noMonitor` 为 `true` 时不轮询服务器状态，也就不开额外的 exec 通道（有些跳板机不允许）。
 - 第一次连接时弹窗显示主机指纹，信任后记入 `finalshelly/known_hosts`；指纹变化时拒绝连接。
@@ -67,6 +74,7 @@ Go 里一个文件夹就是一个包（package），包之间不能循环引用�
 
 ```
 main.go              启动 MyGo、开主窗口，把系统功能（子窗口、对话框、下载目录、语言）交给 app
+tray.go              托盘图标、确认用的消息框、退出
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
   config/            主机和文件夹（hosts.json）、设置的读写，配置目录
@@ -74,7 +82,7 @@ internal/
   monitor/           服务器状态采集和解析
   remotefs/          SFTP 列目录、上传、下载（带进度和取消）
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
-  widgets/           可复用的小控件：图标按钮、用量条、折线图、表单行
+  widgets/           可复用的小控件：图标按钮、用量条、折线图、表单行、左侧导航加页面（nav.go）
   app/               界面和状态
     app.go           App 状态、整体布局、快捷键、打开/关闭会话
     session.go       一个会话：连接、终端、监控、SFTP；错误信息的翻译
@@ -84,7 +92,9 @@ internal/
     splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
     files.go         文件面板：目录树、文件表格、拖入上传
     transfers.go     传输队列和“传输”页
-    dialogs.go       连接管理器、设置窗口、密码、主机指纹、覆盖确认
+    dialogs.go       连接管理器、密码、主机指纹、覆盖确认
+    options.go       选项窗口：页面列表和“常规”页
+    closing.go       关闭主窗口、退出时做什么：隐藏到托盘、先确认
     windows.go       子窗口：按种类打开/聚焦/关闭，重绘所有窗口
     format.go        大小、速度、延迟的格式化
 ```
@@ -93,7 +103,7 @@ internal/
 
 ### 子窗口
 
-和 FinalShell 一样，设置这类对话框是独立的窗口（MyGo 的子窗口，`WindowOptions.Parent`），不是主窗口里的浮层。目前只有设置窗口；连接管理器、连接编辑器之后也会改成子窗口。
+和 FinalShell 一样，设置这类对话框是独立的窗口（MyGo 的子窗口，`WindowOptions.Parent`），不是主窗口里的浮层。目前只有选项窗口；连接管理器、连接编辑器之后也会改成子窗口。
 
 - 每种窗口（`WindowKind`）同时只开一个：`a.openWindow(spec, view)` 在已经打开时只把它提到前面。`WindowSpec` 写标题（locales 里的函数，切换语言时重新取）、内容区大小、最小尺寸、父窗口（默认主窗口）和是否模态。
 - 窗口里按 Esc 或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口；关闭主窗口会关闭所有子窗口。
@@ -109,6 +119,21 @@ internal/
 | Linux | GTK `transient_for` 父窗口 | `gtk_window_set_modal`：GTK 会挡住本程序其他所有窗口的输入，不只是父窗口。Wayland 下窗口位置由合成器决定 |
 
 子窗口打开时居中在父窗口上方，不能最小化。
+
+### 选项窗口加一页
+
+页面都列在 `internal/app/options.go` 的 `optionPages` 里，按树的顺序，父页面在子页面前面。`view` 为 `nil` 的页面显示“以后的版本提供”。给一页加内容：在新文件里写 `func (a *App) fontPage(c *ui.Context)`，把那一项的 `view: nil` 改成 `view: (*App).fontPage`；新页面就加一项 `{id: ..., parent: ..., title: locales.Xxx, view: ...}`。每项占几行，几个人同时改不同的页面不会改到同一行。页面里改设置用 `a.changeSettings(func() { ... })`，会保存并重绘所有窗口。
+
+### 关闭和退出
+
+| | 点关闭按钮 | 退出（托盘菜单、Cmd+Q、SIGINT） |
+|---|---|---|
+| 开了托盘（且系统有托盘） | 隐藏到托盘，不问 | 有会话打开且开了确认：先问 |
+| 没开托盘 | 有会话打开且开了确认：先问，确定后退出 | 同左 |
+
+“有会话打开”指已连接或正在连接。逻辑在 `closing.go`（`CloseRequested`、`QuitRequested`，用假的 Platform 测试），`main.go` 在主窗口的 `OnClose` 和 `App.OnBeforeQuit` 里调用它们。确认框是 `mygo.Dialog.Message`，在 goroutine 里等用户回答，答“退出”后再调 `mygo.App.Quit()`。
+
+各平台的行为是读 MyGo v0.8.1 代码确认的，没有在真机上试过：macOS 托盘图标在菜单栏，是模板图（随菜单栏变色），点击弹出菜单；Dock 图标一直在，点它（`OnActivate`）显示隐藏的窗口；确认框是主窗口的 sheet（窗口隐藏时是独立的框）。Windows 左键单击图标显示窗口，右键弹出菜单，模板图在深色任务栏上画成白色。Linux 用 AppIndicator，需要 `libayatana-appindicator3`，没有时 `NewTray` 报错，窗口不隐藏；GNOME 默认不显示 AppIndicator 图标（要装扩展），这时图标创建成功但看不见，窗口隐藏后就找不回来了（只能结束进程），所以 Linux 上慎开这一项。
 
 ### 加一条文案
 
