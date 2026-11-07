@@ -31,10 +31,11 @@ const (
 var nextSessionID atomic.Int64
 
 // Session is one open tab: a connection to a host, its shell, the
-// server's stats and its files.
+// server's stats and its files. A new tab has no Host yet: it shows the
+// start page (see start.go).
 type Session struct {
 	ID     int64
-	Host   *config.Host
+	Host   *config.Host // nil for a new tab
 	status sessionStatus
 	err    error // why it failed or closed; nil when the user disconnected
 	ip     string
@@ -47,6 +48,8 @@ type Session struct {
 
 	hostKeyQ *sshx.HostKeyQuestion
 	cancel   context.CancelFunc
+
+	start startState // the start page, while it is a new tab
 }
 
 // errConnectionLost is a session whose shell ended.
@@ -61,12 +64,17 @@ type stepError struct {
 func (e *stepError) Error() string { return e.step + ": " + e.err.Error() }
 
 func newSession(h *config.Host) *Session {
-	s := &Session{ID: nextSessionID.Add(1), Host: h}
+	s := &Session{ID: nextSessionID.Add(1), Host: h, start: startState{row: -1}}
 	s.files.init()
 	return s
 }
 
-func (s *Session) label() string { return s.Host.Title() }
+func (s *Session) label() string {
+	if s.isNewTab() {
+		return locales.NewTab()
+	}
+	return s.Host.Title()
+}
 
 // connect starts connecting s on a goroutine, with the password, or the
 // passphrase of its key.

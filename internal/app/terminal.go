@@ -1,8 +1,6 @@
 package app
 
 import (
-	"finalshelly/internal/icons"
-	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
@@ -18,8 +16,8 @@ var (
 // from showing.
 func (a *App) terminalArea(c *ui.Context) {
 	s := a.current()
-	if s == nil {
-		a.welcome(c)
+	if s == nil || s.isNewTab() {
+		a.startPage(c, s)
 		return
 	}
 	ui.Column(c.Key(s.ID)).Fill().Background(termBG).Children(func() {
@@ -62,16 +60,5 @@ func (a *App) statusBanner(c *ui.Context, s *Session) {
 		if s.status != statusConnecting && ui.Button(c, locales.Reconnect()).Clicked() {
 			a.reconnect(s)
 		}
-	})
-}
-
-func (a *App) welcome(c *ui.Context) {
-	ui.Column(c).Fill().Background(termBG).Center().Gap(14).Children(func() {
-		ui.Icon(c, icons.Get("terminal")).FontSize(40).TextColor(ui.Hex("#6b7280"))
-		ui.Text(c, locales.NoSessions()).TextColor(termText).FontSize(16)
-		if ui.PrimaryButton(c, locales.NewConnection()).Clicked() {
-			a.openManager()
-		}
-		widgets.Muted(c, locales.WelcomeHint())
 	})
 }

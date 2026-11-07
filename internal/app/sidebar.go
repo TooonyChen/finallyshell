@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"finalshelly/internal/icons"
 	"finalshelly/internal/monitor"
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
@@ -11,9 +12,12 @@ import (
 )
 
 // monitorPanel shows the active session's server, as FinalShell's left
-// column does.
+// column does: the skeleton for a new tab.
 func (a *App) monitorPanel(c *ui.Context) {
 	s := a.current()
+	if s != nil && s.isNewTab() {
+		s = nil
+	}
 	ui.Scroll(c).Fill().Children(func() {
 		a.serverView(c, s)
 	})
@@ -163,12 +167,12 @@ func diskTable(c *ui.Context, disks []monitor.Disk) {
 func (a *App) sessionPanel(c *ui.Context) {
 	ui.Column(c).Fill().BorderWidth(1, 0, 0, 0).BorderColor(ui.Hex("#d1d5db")).Children(func() {
 		ui.Row(c).Padding(6, 6, 6, 10).Gap(2).Children(func() {
-			ui.Text(c, locales.SessionsTitle(len(a.sessions))).Bold().Grow(1)
+			ui.Text(c, locales.SessionsTitle(a.sessionCount())).Bold().Grow(1)
 			if widgets.IconButton(c, "settings", locales.Options()).Clicked() {
 				a.openOptions()
 			}
-			if widgets.IconButton(c, "plus", locales.NewConnection()).Clicked() {
-				a.openManager()
+			if widgets.IconButton(c, "plus", locales.NewTab()).Clicked() {
+				a.NewTab()
 			}
 		})
 		// No Key: with one, the list follows the chosen session by it, and
@@ -198,16 +202,42 @@ func (a *App) sessionPanel(c *ui.Context) {
 	})
 }
 
+// sessionCount is the number of sessions, new tabs left out.
+func (a *App) sessionCount() int {
+	n := 0
+	for _, s := range a.sessions {
+		if !s.isNewTab() {
+			n++
+		}
+	}
+	return n
+}
+
 // sessionRow is the tab of s. It reports whether the user closed it.
 func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 	row := ui.Row(c).Gap(8).Padding(5, 4, 5, 8).Radius(5)
 	hovered := row.Hovered()
+	if s.isNewTab() {
+		row.ContextMenu(func(m *ui.Menu) {
+			if m.Item(locales.Close()).Danger().Chosen() {
+				closed = true
+			}
+		})
+		row.Children(func() {
+			// As wide as a status dot, so that the names line up.
+			ui.Box(c).Size(8, 8).Center().Shrink(0).Children(func() {
+				ui.Icon(c, icons.Get("app-window")).FontSize(13).TextColor(rowSubColor(active))
+			})
+			closed = rowText(c, locales.NewTab(), locales.NotConnected(), active, hovered) || closed
+		})
+		return closed
+	}
 	row.ContextMenu(func(m *ui.Menu) {
 		if m.Item(locales.Reconnect()).Chosen() {
 			a.reconnect(s)
 		}
 		if m.Item(locales.DuplicateSession()).Chosen() {
-			a.openSession(s.Host)
+			a.openSessionIn(nil, s.Host) // in a tab of its own, though a new tab is selected
 		}
 		if m.Item(locales.Disconnect()).Disabled(s.status != statusConnected && s.status != statusConnecting).Chosen() {
 			a.transfers.cancelSession(s)
@@ -224,28 +254,36 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 	}
 	row.Children(func() {
 		widgets.StatusDot(c, s.statusColor(theme))
-		ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-			name := ui.Text(c, s.label()).SingleLine()
-			if active {
-				name.Bold()
-			}
-			sub := s.Host.Target()
-			if s.status != statusConnected {
-				sub = s.statusText()
-			}
-			subColor := theme.TextMuted
-			if active {
-				subColor = theme.AccentText.Alpha(0.8)
-			}
-			ui.Text(c, sub).FontSize(11.5).SingleLine().TextColor(subColor)
-		})
-		closeBtn := widgets.IconButton(c, "x", locales.CloseSession()).Size(20, 20)
-		if !hovered && !active {
-			closeBtn.Invisible()
+		sub := s.Host.Target()
+		if s.status != statusConnected {
+			sub = s.statusText()
 		}
-		if closeBtn.Clicked() {
-			closed = true
-		}
+		closed = rowText(c, s.label(), sub, active, hovered) || closed
 	})
 	return closed
+}
+
+// rowText is the name and the line under it of a session row, and its
+// close button, which shows on the selected row and the row hovered. It
+// reports whether the button was clicked.
+func rowText(c *ui.Context, name, sub string, active, hovered bool) bool {
+	ui.Column(c).Grow(1).MinWidth(0).Children(func() {
+		t := ui.Text(c, name).SingleLine()
+		if active {
+			t.Bold()
+		}
+		ui.Text(c, sub).FontSize(11.5).SingleLine().TextColor(rowSubColor(active))
+	})
+	closeBtn := widgets.IconButton(c, "x", locales.CloseSession()).Size(20, 20)
+	if !hovered && !active {
+		closeBtn.Invisible()
+	}
+	return closeBtn.Clicked()
+}
+
+func rowSubColor(active bool) ui.Color {
+	if active {
+		return theme.AccentText.Alpha(0.8)
+	}
+	return theme.TextMuted
 }

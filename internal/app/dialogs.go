@@ -252,7 +252,7 @@ func (a *App) passwordView(c *ui.Context) {
 		if submit {
 			a.passwords[h.ID] = a.pwText
 			a.pwOpen, a.pwText = false, ""
-			a.openSession(h)
+			a.openSessionIn(a.pwTab, h)
 		}
 	})
 }

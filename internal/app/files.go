@@ -178,7 +178,7 @@ func fileColumns() []ui.TableColumn {
 // filePanel browses the active session's server over SFTP.
 func (a *App) filePanel(c *ui.Context) {
 	s := a.current()
-	if s == nil {
+	if s == nil || s.isNewTab() {
 		return
 	}
 	f := &s.files

@@ -140,6 +140,7 @@ func main() {
 	mygo.App.WhenReady(func() {
 		plat := &platform{windows: map[app.WindowKind]*childWindow{}}
 		a := app.New(plat)
+		a.NewTab() // it starts on the start page
 		plat.win = mygo.NewWindow(mygo.WindowOptions{
 			Title:     locales.AppTitle(),
 			Width:     1280,

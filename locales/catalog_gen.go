@@ -530,6 +530,126 @@ func (msgs Messages) WelcomeHint() string {
 	return Catalog.Format(msgs.locale, "welcomeHint", nil)
 }
 
+// NewTab says "New tab"
+// in the language the app shows.
+func NewTab() string { return In(i18n.Locale()).NewTab() }
+
+// NewTab says "New tab"
+// in the language of msgs.
+func (msgs Messages) NewTab() string {
+	return Catalog.Format(msgs.locale, "newTab", nil)
+}
+
+// QuickConnect says "Quick connect"
+// in the language the app shows.
+func QuickConnect() string { return In(i18n.Locale()).QuickConnect() }
+
+// QuickConnect says "Quick connect"
+// in the language of msgs.
+func (msgs Messages) QuickConnect() string {
+	return Catalog.Format(msgs.locale, "quickConnect", nil)
+}
+
+// SearchHosts says "Search name, host, user or notes"
+// in the language the app shows.
+func SearchHosts() string { return In(i18n.Locale()).SearchHosts() }
+
+// SearchHosts says "Search name, host, user or notes"
+// in the language of msgs.
+func (msgs Messages) SearchHosts() string {
+	return Catalog.Format(msgs.locale, "searchHosts", nil)
+}
+
+// HostColName says "Name"
+// in the language the app shows.
+func HostColName() string { return In(i18n.Locale()).HostColName() }
+
+// HostColName says "Name"
+// in the language of msgs.
+func (msgs Messages) HostColName() string {
+	return Catalog.Format(msgs.locale, "hostColName", nil)
+}
+
+// HostColHost says "Host"
+// in the language the app shows.
+func HostColHost() string { return In(i18n.Locale()).HostColHost() }
+
+// HostColHost says "Host"
+// in the language of msgs.
+func (msgs Messages) HostColHost() string {
+	return Catalog.Format(msgs.locale, "hostColHost", nil)
+}
+
+// HostColUser says "User"
+// in the language the app shows.
+func HostColUser() string { return In(i18n.Locale()).HostColUser() }
+
+// HostColUser says "User"
+// in the language of msgs.
+func (msgs Messages) HostColUser() string {
+	return Catalog.Format(msgs.locale, "hostColUser", nil)
+}
+
+// NoRecentHosts says "No recent connections. Open the connection manager to connect to a saved host."
+// in the language the app shows.
+func NoRecentHosts() string { return In(i18n.Locale()).NoRecentHosts() }
+
+// NoRecentHosts says "No recent connections. Open the connection manager to connect to a saved host."
+// in the language of msgs.
+func (msgs Messages) NoRecentHosts() string {
+	return Catalog.Format(msgs.locale, "noRecentHosts", nil)
+}
+
+// NoMatchingHosts says "No connections match the search."
+// in the language the app shows.
+func NoMatchingHosts() string { return In(i18n.Locale()).NoMatchingHosts() }
+
+// NoMatchingHosts says "No connections match the search."
+// in the language of msgs.
+func (msgs Messages) NoMatchingHosts() string {
+	return Catalog.Format(msgs.locale, "noMatchingHosts", nil)
+}
+
+// ClearRecents says "Clear"
+// in the language the app shows.
+func ClearRecents() string { return In(i18n.Locale()).ClearRecents() }
+
+// ClearRecents says "Clear"
+// in the language of msgs.
+func (msgs Messages) ClearRecents() string {
+	return Catalog.Format(msgs.locale, "clearRecents", nil)
+}
+
+// ConnectionManager says "Connection manager"
+// in the language the app shows.
+func ConnectionManager() string { return In(i18n.Locale()).ConnectionManager() }
+
+// ConnectionManager says "Connection manager"
+// in the language of msgs.
+func (msgs Messages) ConnectionManager() string {
+	return Catalog.Format(msgs.locale, "connectionManager", nil)
+}
+
+// NoHostsTitle says "No connections yet"
+// in the language the app shows.
+func NoHostsTitle() string { return In(i18n.Locale()).NoHostsTitle() }
+
+// NoHostsTitle says "No connections yet"
+// in the language of msgs.
+func (msgs Messages) NoHostsTitle() string {
+	return Catalog.Format(msgs.locale, "noHostsTitle", nil)
+}
+
+// NoHostsBody says "Add a server, then connect to it from here."
+// in the language the app shows.
+func NoHostsBody() string { return In(i18n.Locale()).NoHostsBody() }
+
+// NoHostsBody says "Add a server, then connect to it from here."
+// in the language of msgs.
+func (msgs Messages) NoHostsBody() string {
+	return Catalog.Format(msgs.locale, "noHostsBody", nil)
+}
+
 // FollowSystem says "System language"
 // in the language the app shows.
 func FollowSystem() string { return In(i18n.Locale()).FollowSystem() }

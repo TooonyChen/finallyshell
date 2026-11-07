@@ -72,9 +72,10 @@ type App struct {
 
 	hosts     *config.Store     // deleted hosts included: lists show hosts.Live()
 	passwords map[string]string // by host ID, for this run only
-	sessions  []*Session
+	sessions  []*Session        // new tabs included
 	active    int
 	sessList  ui.ListState
+	start     startState // the start page shown while no row is selected
 
 	sideWidth   float32
 	monitorPct  float32
@@ -103,6 +104,7 @@ type App struct {
 	// The password prompt for a saved host.
 	pwOpen bool
 	pwHost *config.Host
+	pwTab  *Session // the new tab to connect in, or nil for a tab of its own
 	pwText string
 
 	// The secondary windows that are open.
@@ -129,6 +131,7 @@ func New(plat Platform) *App {
 		windows:      map[WindowKind]bool{},
 		active:       -1,
 		hostRow:      -1,
+		start:        startState{row: -1},
 		sideWidth:    defaultSideWidth,
 		monitorPct:   defaultMonitorPct,
 		terminalPct:  defaultTerminalPct,
@@ -244,12 +247,21 @@ func (a *App) setLanguage(tag string) {
 	a.redraw()
 }
 
-// openSession opens a tab for h, asking for its password first when the
-// app does not know it.
-func (a *App) openSession(h *config.Host) {
+// openSession opens a session to h: in the selected row when it is a new
+// tab, else in a tab of its own.
+func (a *App) openSession(h *config.Host) { a.openSessionIn(a.selectedNewTab(), h) }
+
+// openSessionIn opens a session to h in tab, a new tab, or in a tab of
+// its own for nil, asking for its password first when the app does not
+// know it.
+func (a *App) openSessionIn(tab *Session, h *config.Host) {
 	pw, known := a.passwords[h.ID]
 	if h.Auth == config.AuthPassword && !known {
-		a.pwOpen, a.pwHost, a.pwText = true, h, ""
+		a.pwOpen, a.pwHost, a.pwTab, a.pwText = true, h, tab, ""
+		return
+	}
+	if tab != nil && tab.isNewTab() && slices.Contains(a.sessions, tab) {
+		a.fillTab(tab, h, pw)
 		return
 	}
 	s := newSession(h)
@@ -261,6 +273,9 @@ func (a *App) openSession(h *config.Host) {
 }
 
 func (a *App) reconnect(s *Session) {
+	if s.isNewTab() {
+		return
+	}
 	s.disconnect()
 	a.connect(s, a.passwords[s.Host.ID])
 }

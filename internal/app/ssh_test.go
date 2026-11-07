@@ -94,8 +94,14 @@ func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
 	h := &config.Host{ID: "test", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
 	a.hosts.Add(h)
 	a.passwords[h.ID] = pass
+	// From a new tab, as the app starts: the tab becomes the session.
+	a.NewTab()
+	tab := a.current()
 	a.openSession(h)
 	s := a.current()
+	if s != tab || len(a.sessions) != 1 || s.Host != h {
+		t.Fatalf("the new tab did not become the session: %d rows", len(a.sessions))
+	}
 
 	p.until(t, "the host key question", func() bool { return s.hostKeyQ != nil || s.status == statusFailed })
 	if s.status == statusFailed {
