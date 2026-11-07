@@ -30,12 +30,30 @@ trailing period, at most about 72 characters. Types: `feat`, `fix`,
 footer. Scopes are package or area names: `app`, `sshx`, `remotefs`,
 `monitor`, `config`, `widgets`, `locales`, `terminal`, `settings`.
 
+### Issues first
+
+Work is issue-driven; the `issue-workflow` skill
+(`.claude/skills/issue-workflow/`) has the whole loop. The rules:
+
+- Before code, research the problem's possible solutions and write the
+  chosen one, with the options and acceptance criteria, into a GitHub
+  issue. Ask the owner only about product decisions, with a
+  recommendation.
+- Every PR has an issue. No issue yet, even for a small follow-up: open
+  one first.
+- One issue, one branch, one PR.
+
 ### Pull requests
 
 - The title is a Conventional Commit line, as it becomes the squash commit.
 - The body follows `.github/pull_request_template.md`: what changed and why,
   and how it was tested.
-- PRs are squash-merged into `main`.
+- The body links its issue: `Closes #N` when the PR resolves it, so the
+  merge closes the issue; `Refs #N` when it resolves only part of it, or
+  follows up a closed one.
+- PRs are squash-merged into `main`, never merge commits or rebase merges.
+  The squash commit is the PR title plus ` (#PR)`, and its message keeps
+  the `Closes #N` line.
 
 ## Working on the code
 
