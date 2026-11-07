@@ -283,7 +283,7 @@
   "backgroundCopyNote": "Finalshelly 会把图片复制到自己的配置目录，移动或删除原图都没有影响。“移除”会删除这份副本。",
   "errImageRead": "无法读取图片：{error}",
   "errImageFormat": "无法显示这个文件：请选择 PNG、JPEG、GIF、WebP 或 BMP 图片。",
-  "errImageTooLarge": "图片太大：最大 {size}。",
+  "errImageTooLarge": "图片太大：最大 {size}，{megapixels} 百万像素。",
   "errImageMissing": "背景图片不见了：请重新选择，或者移除。",
   "errImageSave": "无法复制图片：{error}",
   "done": "完成",

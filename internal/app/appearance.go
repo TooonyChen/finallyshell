@@ -2,11 +2,8 @@ package app
 
 import (
 	"errors"
-	"fmt"
-	"io"
 	"io/fs"
 	"math"
-	"os"
 	"slices"
 	"strings"
 
@@ -26,11 +23,21 @@ import (
 // appearance is the state of the terminal's look beyond termFont and
 // termTheme, and of the pages that set it.
 type appearance struct {
-	themeName  string     // the theme termTheme is, "" before it is loaded
-	background string     // the copy image was read from
-	image      *ui.Bitmap // the background image, nil for none
-	imageErr   error      // why the background image does not show
-	choosing   bool       // the dialog choosing an image is open
+	themeName string // the theme termTheme is, "" before it is loaded
+
+	// The background image: the copy it is, or is to be, read from, and
+	// once read, its pixels or why it does not show. It is read on a
+	// goroutine once something shows it (backgroundImage); until then, as
+	// when image is nil, terminals show the theme's background alone.
+	background string
+	image      *ui.Bitmap
+	imageErr   error
+	requested  bool // background's read has started, or image is it
+	gen        int  // counts the reads, so that a stale one is dropped
+	// read reads an image file and decodes it, off the UI thread:
+	// readImage when nil. Tests hold it up.
+	read     func(path string) (*ui.Bitmap, error)
+	choosing bool // the dialog choosing an image is open
 
 	families []string                   // the monospaced font families, once listed
 	themes   map[string]*terminal.Theme // the themes the color page showed
@@ -39,9 +46,6 @@ type appearance struct {
 	themeList     ui.ListState
 	themeScrolled bool // the list scrolled to the theme chosen
 }
-
-// maxBackgroundSize is the largest image file the background takes.
-const maxBackgroundSize = 64 << 20
 
 // The errors of a background image, besides reading and copying it.
 var (
@@ -129,11 +133,10 @@ func (a *App) loadAppearance() lookChange {
 		a.termTheme, a.look.themeName, ch.theme = loadTheme(name), name, true
 	}
 	if name := a.settings.TermBackground; name != a.look.background {
-		a.look.background = name
-		a.look.image, a.look.imageErr = nil, nil
-		if name != "" {
-			a.look.image, a.look.imageErr = loadBackground(name)
-		}
+		// Read once something shows it, as startup reads nothing.
+		st := &a.look
+		st.background, st.image, st.imageErr, st.requested = name, nil, nil, false
+		st.gen++
 	}
 	return ch
 }
@@ -161,45 +164,64 @@ func (a *App) updateTerminal(term *terminal.Terminal, opts terminal.Options) {
 	}
 }
 
-// readImage reads the image file at path and decodes it.
-func readImage(path string) ([]byte, *ui.Bitmap, error) {
-	f, err := os.Open(path)
+// readImage reads the image file at path and decodes it, scaled down to
+// at most maxBackgroundSide pixels across and down.
+func readImage(path string) (*ui.Bitmap, error) {
+	data, err := readImageFile(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	defer f.Close()
-	data, err := io.ReadAll(io.LimitReader(f, maxBackgroundSize+1))
-	if err != nil {
-		return nil, nil, err
-	}
-	if len(data) > maxBackgroundSize {
-		return nil, nil, errImageTooLarge
-	}
-	img, err := ui.DecodeBitmap(data)
-	if err != nil {
-		return nil, nil, fmt.Errorf("%w: %v", errImageFormat, err)
-	}
-	return data, img, nil
+	return decodeBackground(data, maxBackgroundSide)
 }
 
-// loadBackground reads the app's copy name of the background image.
-func loadBackground(name string) (*ui.Bitmap, error) {
+// loadBackground reads the app's copy name of the background image with
+// read.
+func loadBackground(name string, read func(string) (*ui.Bitmap, error)) (*ui.Bitmap, error) {
 	path, err := config.BackgroundPath(name)
 	if err != nil {
 		return nil, err
 	}
-	_, img, err := readImage(path)
+	img, err := read(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		err = errImageMissing
 	}
 	return img, err
 }
 
+// backgroundImage is the background image, nil while there is none or
+// it is being read. The first call after it changes starts reading it on
+// a goroutine, which shows it once read, unless it changed meanwhile.
+func (a *App) backgroundImage() *ui.Bitmap {
+	st := &a.look
+	if st.background != "" && !st.requested {
+		st.requested = true
+		st.gen++
+		name, gen, read := st.background, st.gen, st.read
+		if read == nil {
+			read = readImage
+		}
+		go func() {
+			img, err := loadBackground(name, read)
+			a.post(func() {
+				if st.gen == gen {
+					st.image, st.imageErr = img, err
+				}
+			})
+		}()
+	}
+	return st.image
+}
+
 // importBackground reads the image at path and keeps a copy of it,
-// returning the copy's name; nothing is copied unless it is an image the
-// app can show.
+// returning the copy's name and the image as the app keeps it; nothing
+// is copied unless it is an image the app can show. It runs off the UI
+// thread.
 func importBackground(path string) (string, *ui.Bitmap, error) {
-	data, img, err := readImage(path)
+	data, err := readImageFile(path)
+	if err != nil {
+		return "", nil, err
+	}
+	img, err := decodeBackground(data, maxBackgroundSide)
 	if err != nil {
 		return "", nil, err
 	}
@@ -249,7 +271,9 @@ func (a *App) setBackground(name string, img *ui.Bitmap) {
 	old := a.settings.TermBackground
 	a.changeTerminalSettings(func() {
 		a.settings.TermBackground = name
-		a.look.background, a.look.image, a.look.imageErr = name, img, nil
+		st := &a.look
+		st.background, st.image, st.imageErr, st.requested = name, img, nil, true
+		st.gen++ // a read of the image before is stale
 	})
 	if old != "" && old != name {
 		config.RemoveBackground(old)
@@ -275,7 +299,7 @@ func describeImageError(err error) string {
 	case errors.Is(err, errImageFormat):
 		return locales.ErrImageFormat()
 	case errors.Is(err, errImageTooLarge):
-		return locales.ErrImageTooLarge(formatSize(maxBackgroundSize))
+		return locales.ErrImageTooLarge(maxBackgroundPixels, formatSize(maxBackgroundSize))
 	case errors.Is(err, errImageMissing), errors.Is(err, config.ErrNoBackground):
 		return locales.ErrImageMissing()
 	}
@@ -297,7 +321,7 @@ func (a *App) backgroundOpacity() float32 {
 func (a *App) terminalBackdrop(c *ui.Context, radius float32) ui.Element {
 	bg := a.termColors().Background
 	e := ui.Box(c).Background(bg).Radius(radius)
-	if img := a.look.image; img != nil {
+	if img := a.backgroundImage(); img != nil {
 		fit, opacity := a.settings.TermBackgroundFit, a.backgroundOpacity()
 		e.Draw(func(p *ui.Painter, r ui.Rect) { drawBackdrop(p, r, radius, img, fit, opacity, bg) })
 	}

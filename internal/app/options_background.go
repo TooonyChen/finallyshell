@@ -29,8 +29,10 @@ func (a *App) backgroundPage(c *ui.Context) {
 		ui.Field(c, locales.BackgroundImage(), func() {
 			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
 				ui.Box(c).Size(96, 60).Shrink(0).Radius(4).Border(1, theme.Border).Background(a.termColors().Background).Clip().Center().Children(func() {
-					if st.image != nil {
-						ui.Image(c, st.image).Size(96, 60).Fit(ui.Cover)
+					if img := a.backgroundImage(); img != nil {
+						ui.Image(c, img).Size(96, 60).Fit(ui.Cover)
+					} else if a.settings.TermBackground != "" && st.imageErr == nil {
+						ui.Spinner(c).TextColor(a.termColors().Foreground)
 					} else {
 						ui.Text(c, locales.BackgroundNone()).FontSize(12).TextColor(a.termColors().Foreground.Alpha(0.7))
 					}
@@ -49,7 +51,7 @@ func (a *App) backgroundPage(c *ui.Context) {
 				for _, f := range backgroundFits {
 					ui.Radio(c, &chosen, f.fit, f.name())
 				}
-			}).Row().Gap(16).Label(locales.BackgroundFit()).Disabled(st.image == nil)
+			}).Row().Gap(16).Label(locales.BackgroundFit()).Disabled(a.settings.TermBackground == "")
 			if chosen != a.settings.TermBackgroundFit {
 				a.changeTerminalSettings(func() { a.settings.TermBackgroundFit = chosen })
 			}
@@ -57,12 +59,12 @@ func (a *App) backgroundPage(c *ui.Context) {
 		ui.Field(c, locales.BackgroundOpacity(), func() {
 			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
 				pct := float64(a.backgroundOpacity() * 100)
-				if ui.Slider(c, &pct, 5, 100).Width(220).Label(locales.BackgroundOpacity()).Disabled(st.image == nil).Changed() {
+				if ui.Slider(c, &pct, 5, 100).Width(220).Label(locales.BackgroundOpacity()).Disabled(a.settings.TermBackground == "").Changed() {
 					v := float32(math.Round(pct))
 					a.changeTerminalSettings(func() { a.settings.TermBackgroundOpacity = orZero(v, config.DefaultBackgroundOpacity) })
 				}
 				pctText := ui.Text(c, fmt.Sprintf("%.0f%%", a.backgroundOpacity()*100)).Width(40)
-				if st.image == nil {
+				if a.settings.TermBackground == "" {
 					pctText.TextColor(theme.TextMuted)
 				}
 			})

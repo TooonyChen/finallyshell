@@ -364,7 +364,14 @@
   "backgroundCopyNote": "Finalshelly keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Remove deletes the copy.",
   "errImageRead": "Could not read the image: {error}",
   "errImageFormat": "Finalshelly cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image.",
-  "errImageTooLarge": "The image is too large: the limit is {size}.",
+  "errImageTooLarge": "The image is too large: the limit is {size} and {megapixels} million pixels.",
+  "@errImageTooLarge": {
+    "placeholders": {
+      "megapixels": {
+        "type": "int"
+      }
+    }
+  },
   "errImageMissing": "The background image is missing: choose it again, or remove it.",
   "errImageSave": "Could not copy the image: {error}",
   "done": "Done",

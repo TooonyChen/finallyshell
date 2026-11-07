@@ -383,6 +383,15 @@ func TestLookPagesInChinese(t *testing.T) {
 	saveShot(t, main, "terminal-background-zh.png")
 }
 
+// waitBackground asks for a's background image and waits until it is
+// read, returning it.
+func waitBackground(t *testing.T, a *App, p *fakePlatform) *ui.Bitmap {
+	t.Helper()
+	a.backgroundImage()
+	p.until(t, "the background read", func() bool { return a.look.image != nil || a.look.imageErr != nil })
+	return a.look.image
+}
+
 // copies are the background images the app keeps.
 func copies(t *testing.T) []string {
 	t.Helper()
@@ -456,7 +465,7 @@ func TestBackgroundImage(t *testing.T) {
 	if err := os.Remove(src); err != nil {
 		t.Fatal(err)
 	}
-	if b := New(p); b.look.image == nil || b.look.imageErr != nil {
+	if b := New(p); waitBackground(t, b, p) == nil || b.look.imageErr != nil {
 		t.Errorf("a new run: image %v, error %v", b.look.image, b.look.imageErr)
 	}
 
@@ -555,7 +564,7 @@ func TestBackgroundImageErrors(t *testing.T) {
 		s.TermBackground = bad
 		config.SaveSettings(s)
 		b := New(p)
-		if b.look.image != nil || describeImageError(b.look.imageErr) != locales.ErrImageMissing() {
+		if waitBackground(t, b, p) != nil || describeImageError(b.look.imageErr) != locales.ErrImageMissing() {
 			t.Errorf("%s: image %v, error %v", bad, b.look.image, b.look.imageErr)
 		}
 		b.removeBackground()

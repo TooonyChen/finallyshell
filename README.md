@@ -54,7 +54,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 选项的“终端 › 字体”“终端 › 配色”“终端 › 背景图片”三页管终端的外观，改了立刻应用到所有打开的终端（`SetFont`、`SetTheme`），新开的终端也用新设置；连接过程中改了，连上后也会补上。每页下面有“恢复默认”，上面有预览（用界面控件画的示例提示符、彩色 `ls`、带连字的代码，用的是同样的字体、配色和背景）。
   - 字体：字体名称（输入时提示系统里已安装的等宽字体，来自 `ui.FontFamilies`；可以写逗号隔开的多个，用第一个装了的；空着是默认的 JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace）、字号（6 到 48，默认 13.5）、行高（字体本身行高的 0.8 到 2 倍，默认 1）、粗细（细 300 / 常规 400 / 中等 500 / 半粗 600 / 粗 700；插件的粗体总是比它重 300、至少 700，没有单独的粗体粗细）、连字（默认开，关掉是 `-calt`、`-liga`）。改字体会结束终端里的 Ctrl+= 缩放；只改配色不会。
   - 配色：Ghostty 自带的几百个主题（`terminal.GhosttyThemes()`，也包括 Ghostty 主题目录里用户自己的），搜索框按名称过滤，每行带背景色和几种颜色的小样，预览下面是 16 种 ANSI 颜色。默认 Tomorrow Night；主题文件不见了时用默认的。界面一直是浅色，插件的 `DarkTheme` 只在深色窗口里用，所以只有一个选择，同时设给 `Theme` 和 `DarkTheme`。
-  - 背景图片：“选择…”用系统的打开对话框选 PNG、JPEG、GIF、WebP 或 BMP（64 MB 以内），先解码确认能显示，再复制一份到配置目录（`finalshelly/background-<时间>.<扩展名>`），所以原图移走、删掉都没关系；换图或“移除”会删掉旧的副本。填充方式：铺满（裁剪）/ 完整显示 / 平铺；不透明度 5% 到 100%（默认 30%）。不是图片、读不了的文件只显示错误，不复制、不替换现在的图；副本不见了（或 `settings.json` 里的名字不是副本）时显示“背景图片不见了”，可以重新选择或移除。
+  - 背景图片：“选择…”用系统的打开对话框选 PNG、JPEG、GIF、WebP 或 BMP（文件 64 MB 以内，最多 1 亿像素），先解码确认能显示，再复制一份到配置目录（`finalshelly/background-<时间>.<扩展名>`），所以原图移走、删掉都没关系；换图或“移除”会删掉旧的副本。填充方式：铺满（裁剪）/ 完整显示 / 平铺；不透明度 5% 到 100%（默认 30%）。不是图片、读不了的文件只显示错误，不复制、不替换现在的图；副本不见了（或 `settings.json` 里的名字不是副本）时显示“背景图片不见了”，可以重新选择或移除。图片的读取和解码都不在界面线程上：启动时不读，第一次要显示时在 goroutine 里读，读完再通过 `App.post` 显示，没读完时终端只显示配色的背景色；读的过程中换了或移除了图片，旧的结果直接丢掉。超过 3840 像素（长边）的图片缩小后再保存在内存里（副本仍是原文件），JPEG 按 EXIF 方向摆正。
   - 实现：终端都用 `Transparent: true` 创建，应用自己在终端下面画背景：先是配色的背景色，再画图片，再盖一层 (1 − 不透明度) 的背景色，所以文字一直在配色背景上。程序自己设的背景色（OSC 11、单元格背景）照常画。
   - 在 `settings.json` 里是 `termFontFamily`、`termFontSize`、`termLineHeight`、`termFontWeight`、`termNoLigatures`、`termTheme`、`termBackground`（副本的文件名）、`termBackgroundFit`（`contain`、`tile`；没有是铺满）、`termBackgroundOpacity`（百分比）；没有就是默认值。
 - 连接管理器：新建、编辑、删除主机，密码或私钥登录。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码不落盘，只存在内存里。
@@ -180,6 +180,7 @@ internal/
     shortcutspage.go “终端 › 快捷键”页和按键录制框
     keycombo.go      组合键：在 settings.json 里的写法和界面上的显示（macOS 用 ⌘⇧ 符号）
     appearance.go    终端的外观：字体、配色、背景图片怎样变成终端的选项，背景的绘制、复制和删除
+    bgimage.go       背景图片的读取：大小限制、缩小、EXIF 方向
     options_font.go、options_colors.go、options_background.go
                      “终端 › 字体”“配色”“背景图片”三页和它们的预览
     editor.go        连接编辑器窗口：a.newConnection()、a.editConnection(h)，校验和保存

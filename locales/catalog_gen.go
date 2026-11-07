@@ -2894,14 +2894,16 @@ func (msgs Messages) ErrImageFormat() string {
 	return Catalog.Format(msgs.locale, "errImageFormat", nil)
 }
 
-// ErrImageTooLarge says "The image is too large: the limit is {size}."
+// ErrImageTooLarge says "The image is too large: the limit is {size} and {megapixels} million pixels."
 // in the language the app shows.
-func ErrImageTooLarge(size string) string { return In(i18n.Locale()).ErrImageTooLarge(size) }
+func ErrImageTooLarge(megapixels int, size string) string {
+	return In(i18n.Locale()).ErrImageTooLarge(megapixels, size)
+}
 
-// ErrImageTooLarge says "The image is too large: the limit is {size}."
+// ErrImageTooLarge says "The image is too large: the limit is {size} and {megapixels} million pixels."
 // in the language of msgs.
-func (msgs Messages) ErrImageTooLarge(size string) string {
-	return Catalog.Format(msgs.locale, "errImageTooLarge", map[string]any{"size": size})
+func (msgs Messages) ErrImageTooLarge(megapixels int, size string) string {
+	return Catalog.Format(msgs.locale, "errImageTooLarge", map[string]any{"megapixels": megapixels, "size": size})
 }
 
 // ErrImageMissing says "The background image is missing: choose it again, or remove it."
