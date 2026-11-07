@@ -1,4 +1,4 @@
-# Finalshelly
+# Finallyshell
 
 An SSH client in Go laid out like FinalShell, with vertical session tabs.
 UI: MyGo native UI (`github.com/egoist/mygo/ui`); terminal: MyGo's terminal
@@ -61,7 +61,7 @@ Work is issue-driven; the `issue-workflow` skill
   (headless; `tt.Image()` gives a frame for screenshots, `SHOT_DIR=dir`
   makes the tests save theirs).
 - `TestSSH` in `internal/app` runs against a real server when
-  `FINALSHELLY_TEST_SSH=user:password@host:port` is set.
+  `FINALLYSHELL_TEST_SSH=user:password@host:port` is set.
 - New UI text goes in `locales/en.json` and `locales/zh-Hans.json`, then
   `go tool mygo generate`; commit the regenerated `locales/catalog_gen.go`.
 - Run `go vet ./...` and `go tool mygo vet` before committing.

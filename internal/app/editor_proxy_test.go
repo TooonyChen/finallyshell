@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"finalshelly/internal/config"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

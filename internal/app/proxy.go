@@ -9,9 +9,9 @@ import (
 	"errors"
 	"strings"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"golang.org/x/crypto/ssh"
 )

@@ -31,7 +31,7 @@ func TestTunnelHelpers(t *testing.T) {
 // A tunnel keeps the keys this build does not know, and a kind it does
 // not know, as a newer build wrote them.
 func TestTunnelUnknownKeys(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	newer, err := os.ReadFile("testdata/hosts_newer.json")
 	if err != nil {
 		t.Fatal(err)

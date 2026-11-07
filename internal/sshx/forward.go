@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 
 	"golang.org/x/crypto/ssh"
 )

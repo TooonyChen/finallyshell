@@ -13,14 +13,14 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshtest"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshtest"
 
 	"golang.org/x/crypto/ssh"
 )
 
 // testServers are the servers the forwarding tests run against: the one
-// in the test's process, and the real one FINALSHELLY_TEST_SSH names
+// in the test's process, and the real one FINALLYSHELL_TEST_SSH names
 // (user:password@host:port), which has to allow TCP forwarding.
 func testServers(t *testing.T, run func(t *testing.T, client *ssh.Client, drop func())) {
 	t.Run("inprocess", func(t *testing.T) {
@@ -28,9 +28,9 @@ func testServers(t *testing.T, run func(t *testing.T, client *ssh.Client, drop f
 		run(t, srv.Dial(t), srv.DropConnections)
 	})
 	t.Run("live", func(t *testing.T) {
-		spec := os.Getenv("FINALSHELLY_TEST_SSH")
+		spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 		if spec == "" {
-			t.Skip("FINALSHELLY_TEST_SSH not set")
+			t.Skip("FINALLYSHELL_TEST_SSH not set")
 		}
 		cred, addr, _ := strings.Cut(spec, "@")
 		user, pass, _ := strings.Cut(cred, ":")

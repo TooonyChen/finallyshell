@@ -3,10 +3,10 @@ package app
 import (
 	"fmt"
 
-	"finalshelly/internal/icons"
-	"finalshelly/internal/monitor"
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/icons"
+	"finallyshell/internal/monitor"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

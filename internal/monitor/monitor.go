@@ -48,7 +48,7 @@ type Disk struct {
 	Size  uint64
 }
 
-const sep = "---FINALSHELLY---"
+const sep = "---FINALLYSHELL---"
 
 // statsScript reads everything in one round trip. It needs only /proc,
 // df and ps, as on any Linux server.

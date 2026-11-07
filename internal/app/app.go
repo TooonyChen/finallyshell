@@ -9,10 +9,10 @@ import (
 	"slices"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/importer"
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/importer"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"

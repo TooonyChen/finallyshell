@@ -15,9 +15,9 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 	"golang.org/x/crypto/ssh"
@@ -338,12 +338,12 @@ func TestMissingSecrets(t *testing.T) {
 	}
 }
 
-// TestSSHJumpHost goes through the server FINALSHELLY_TEST_SSH names to
+// TestSSHJumpHost goes through the server FINALLYSHELL_TEST_SSH names to
 // itself, as the session's jump host, and runs a command in the shell.
 func TestSSHJumpHost(t *testing.T) {
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
+		t.Skip("FINALLYSHELL_TEST_SSH not set")
 	}
 	cred, addr, _ := strings.Cut(spec, "@")
 	user, pass, _ := strings.Cut(cred, ":")

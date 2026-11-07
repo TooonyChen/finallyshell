@@ -7,9 +7,9 @@ import (
 	"log"
 	"runtime"
 
-	"finalshelly/internal/app"
-	"finalshelly/internal/icons"
-	"finalshelly/locales"
+	"finallyshell/internal/app"
+	"finallyshell/internal/icons"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo"
 )

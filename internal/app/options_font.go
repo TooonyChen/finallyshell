@@ -3,9 +3,9 @@ package app
 import (
 	"strings"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

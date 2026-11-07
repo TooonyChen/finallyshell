@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"finalshelly/internal/monitor"
-	"finalshelly/locales"
+	"finallyshell/internal/monitor"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 	"golang.org/x/crypto/ssh"

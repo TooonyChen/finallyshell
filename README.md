@@ -1,4 +1,4 @@
-# Finalshelly
+# Finallyshell
 
 一个仿 FinalShell 布局的 SSH 客户端，纯 Go 编写。界面用 [MyGo](https://github.com/egoist/mygo) 的原生 UI，终端是 MyGo 的 terminal 插件（底层 libghostty-vt，运行时加载，不需要 cgo）。
 
@@ -21,7 +21,7 @@ go test ./...
 用真实服务器跑集成测试（连接、终端、监控、拖拽上传、下载）：
 
 ```sh
-FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH -v
+FINALLYSHELL_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH -v
 ```
 
 隧道的测试（`internal/sshx` 的 `TestTunnels`、`internal/app` 的 `TestSSHTunnels`）也用这个变量，服务器要在本机（远程隧道的端口从本机去连）并允许 TCP 转发（`AllowTcpForwarding yes`）。不设变量时它们用进程内的测试服务器（`internal/sshtest`）。
@@ -54,10 +54,10 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 选项的“终端 › 字体”“终端 › 配色”“终端 › 背景图片”三页管终端的外观，改了立刻应用到所有打开的终端（`SetFont`、`SetTheme`），新开的终端也用新设置；连接过程中改了，连上后也会补上。每页下面有“恢复默认”，上面有预览（用界面控件画的示例提示符、彩色 `ls`、带连字的代码，用的是同样的字体、配色和背景）。
   - 字体：字体名称（输入时提示系统里已安装的等宽字体，来自 `ui.FontFamilies`；可以写逗号隔开的多个，用第一个装了的；空着是默认的 JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace）、字号（6 到 48，默认 13.5）、行高（字体本身行高的 0.8 到 2 倍，默认 1）、粗细（细 300 / 常规 400 / 中等 500 / 半粗 600 / 粗 700；插件的粗体总是比它重 300、至少 700，没有单独的粗体粗细）、连字（默认开，关掉是 `-calt`、`-liga`）。改字体会结束终端里的 Ctrl+= 缩放；只改配色不会。
   - 配色：Ghostty 自带的几百个主题（`terminal.GhosttyThemes()`，也包括 Ghostty 主题目录里用户自己的），搜索框按名称过滤，每行带背景色和几种颜色的小样，预览下面是 16 种 ANSI 颜色。默认 Tomorrow Night；主题文件不见了时用默认的。界面一直是浅色，插件的 `DarkTheme` 只在深色窗口里用，所以只有一个选择，同时设给 `Theme` 和 `DarkTheme`。
-  - 背景图片：“选择…”用系统的打开对话框选 PNG、JPEG、GIF、WebP 或 BMP（文件 64 MB 以内，最多 1 亿像素），先解码确认能显示，再复制一份到配置目录（`finalshelly/background-<时间>.<扩展名>`），所以原图移走、删掉都没关系；换图或“移除”会删掉旧的副本。填充方式：铺满（裁剪）/ 完整显示 / 平铺；不透明度 5% 到 100%（默认 30%）。不是图片、读不了的文件只显示错误，不复制、不替换现在的图；副本不见了（或 `settings.json` 里的名字不是副本）时显示“背景图片不见了”，可以重新选择或移除。图片的读取和解码都不在界面线程上：启动时不读，第一次要显示时在 goroutine 里读，读完再通过 `App.post` 显示，没读完时终端只显示配色的背景色；读的过程中换了或移除了图片，旧的结果直接丢掉。超过 3840 像素（长边）的图片缩小后再保存在内存里（副本仍是原文件），JPEG 按 EXIF 方向摆正。
+  - 背景图片：“选择…”用系统的打开对话框选 PNG、JPEG、GIF、WebP 或 BMP（文件 64 MB 以内，最多 1 亿像素），先解码确认能显示，再复制一份到配置目录（`finallyshell/background-<时间>.<扩展名>`），所以原图移走、删掉都没关系；换图或“移除”会删掉旧的副本。填充方式：铺满（裁剪）/ 完整显示 / 平铺；不透明度 5% 到 100%（默认 30%）。不是图片、读不了的文件只显示错误，不复制、不替换现在的图；副本不见了（或 `settings.json` 里的名字不是副本）时显示“背景图片不见了”，可以重新选择或移除。图片的读取和解码都不在界面线程上：启动时不读，第一次要显示时在 goroutine 里读，读完再通过 `App.post` 显示，没读完时终端只显示配色的背景色；读的过程中换了或移除了图片，旧的结果直接丢掉。超过 3840 像素（长边）的图片缩小后再保存在内存里（副本仍是原文件），JPEG 按 EXIF 方向摆正。
   - 实现：终端都用 `Transparent: true` 创建，应用自己在终端下面画背景：先是配色的背景色，再画图片，再盖一层 (1 − 不透明度) 的背景色，所以文字一直在配色背景上。程序自己设的背景色（OSC 11、单元格背景）照常画。
   - 在 `settings.json` 里是 `termFontFamily`、`termFontSize`、`termLineHeight`、`termFontWeight`、`termNoLigatures`、`termTheme`、`termBackground`（副本的文件名）、`termBackgroundFit`（`contain`、`tile`；没有是铺满）、`termBackgroundOpacity`（百分比）；没有就是默认值。
-- 连接管理器（macOS 上 Cmd+O，其他系统 Ctrl+Shift+O，可以在“快捷键”页改）是单独的窗口，和 FinalShell 一样是文件夹和连接的树，列是名称、主机、端口、用户名、备注（只显示第一行），点列头排序，拖列头边缘改宽度。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码从不写进去，存在系统的凭据存储里（见下面的“密码存在哪里”）。
+- 连接管理器（macOS 上 Cmd+O，其他系统 Ctrl+Shift+O，可以在“快捷键”页改）是单独的窗口，和 FinalShell 一样是文件夹和连接的树，列是名称、主机、端口、用户名、备注（只显示第一行），点列头排序，拖列头边缘改宽度。主机列表存在 `<用户配置目录>/finallyshell/hosts.json`，密码从不写进去，存在系统的凭据存储里（见下面的“密码存在哪里”）。
   - 工具栏：新建连接、新建文件夹（建在选中的文件夹里，选中的是连接就建在它所在的文件夹里）、全部折叠、全部展开、导入（从 FinalShell 导入，见下面）、“显示已删除”、文件夹筛选（“全部”或只看某个文件夹）、搜索框。下面是“连接后关闭窗口”（默认勾选，记在 `settings.json` 的 `keepManagerOpen` 里，没有这一项就是关闭）。
   - 搜索边输入边过滤，按名称、地址、用户名、备注匹配（每个词都要匹配，不分大小写），自动展开含有结果的文件夹并选中第一个结果，回车连接它；清空搜索后恢复原来展开的文件夹。
   - 双击或回车连接：在主窗口打开会话（主窗口选中的是新标签页时就连在那个标签页里），把主窗口提到前面，勾选了“连接后关闭窗口”就关掉连接管理器。
@@ -94,7 +94,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
     - 端口必须是 1 到 65535，目标主机必填；同一台机器上已有隧道监听同一个端口时提示“已有另一条隧道监听这个端口”。“随会话启动”关掉的隧道不自动启动，但可以在“隧道”页手动启动。
   - 回车等于“确定”（备注里回车是换行），Esc 等于“取消”。同时只开一个编辑器：已经开着时再点新建或编辑，只会把开着的那个提到前面，里面没保存的内容不会丢。修改已经打开会话的主机，下次连接时生效。编辑期间主机在连接管理器里被删除了，“确定”只提示“此连接已被删除”，不会把它存回去。
 - 连接成功时记下时间，供“最近连接”使用。主机的 `noMonitor` 为 `true` 时不轮询服务器状态，也就不开额外的 exec 通道（有些跳板机不允许）。
-- 第一次连接时弹窗显示主机指纹，信任后记入 `finalshelly/known_hosts`；指纹变化时拒绝连接。
+- 第一次连接时弹窗显示主机指纹，信任后记入 `finallyshell/known_hosts`；指纹变化时拒绝连接。
 - 左上：当前会话服务器的 IP、运行时间、负载、CPU/内存/交换、内存占用前几的进程、网速和延迟曲线、磁盘。每 2 秒通过 SSH 读取一次 `/proc`，只支持 Linux 服务器。
 - IP 下方的“系统信息”按钮：弹出主机名、系统（`/etc/os-release`）、内核、架构、CPU 型号和核数、内存、运行时间、IP 地址、硬盘，“复制”按钮把这些复制成纯文本。每次打开时通过一个 exec 通道读取一次，用一段 POSIX sh 脚本，BusyBox 也能跑，缺 `lscpu`、`nproc`、`ip` 之类的工具时跳过或换用别的。未连接时左上显示 FinalShell 那样的空白占位（“-”、0%）。
 - 左下：竖向会话列表，状态点（绿：已连接，黄：连接中，红：失败），右键菜单（重新连接、复制会话、断开、关闭），拖动排序。“+”按钮新开一个新标签页；新标签页和会话一样可以切换、拖动、关闭，标题里的数目不算新标签页。全部关掉后右边仍显示快速连接，在那里连接会新开一个标签页。
@@ -104,7 +104,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 下载：选中文件或文件夹，点下载按钮（存到系统的“下载”文件夹），或右键“下载到…”自己选位置。
 - 右下“隧道”页：当前会话的隧道，每条显示状态（正在启动、监听中、已停止，或出错的原因，比如“端口 127.0.0.1:8080 已被占用”“服务器没有监听 …：端口在服务器上已被占用，或不允许转发”）、当前和累计连接数、上下行字节数，以及上一个连不上目标的连接的原因。每行有“启动”/“停止”。标签上的数字是正在监听的隧道数。会话连接成功后启动已启用的隧道，某条隧道失败（比如端口被占用）只影响它自己，会话照常连接；断开、连接断掉或关闭会话时全部停止并释放端口，重新连接时按主机当前的设置重新启动。经过代理或跳板机连接时，隧道走的是到这台主机本身的连接。“编辑隧道…”打开连接编辑器的“隧道”页。
 - 右下“传输”页：进度、速度、取消；同时最多跑 3 个，其余排队。目标位置已有同名项目时先询问是否覆盖。下载完成后可以“在文件夹中显示”。
-- 拖动区域之间的分隔条调整大小（获得焦点后也可以用方向键），双击恢复默认大小。每个区域有最小尺寸，不会被拖到看不见；大小保存在 `finalshelly/settings.json`，下次启动恢复。
+- 拖动区域之间的分隔条调整大小（获得焦点后也可以用方向键），双击恢复默认大小。每个区域有最小尺寸，不会被拖到看不见；大小保存在 `finallyshell/settings.json`，下次启动恢复。
 
 快捷键（默认，和 FinalShell 一样，都可以在“终端 › 快捷键”页修改）：
 
@@ -164,13 +164,13 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 
 ### 密码存在哪里
 
-密码和私钥密码用 MyGo 的 `mygo.Secrets` 存在系统的凭据存储里，由系统为当前用户加密。服务名是 `finalshelly`，不是应用的 identifier：这样 `mygo dev`、`go run` 和安装版用的是同一份，和它们共用 `hosts.json` 一样。键是 `host/<主机 ID>/password`（密码）、`host/<主机 ID>/passphrase`（私钥密码）或 `host/<主机 ID>/proxy-password`（这台主机的 SOCKS5 或 HTTP 代理的密码）。“记住密码”按主机设置，管这台主机的这几个密码。
+密码和私钥密码用 MyGo 的 `mygo.Secrets` 存在系统的凭据存储里，由系统为当前用户加密。服务名是 `finallyshell`，不是应用的 identifier：这样 `mygo dev`、`go run` 和安装版用的是同一份，和它们共用 `hosts.json` 一样。键是 `host/<主机 ID>/password`（密码）、`host/<主机 ID>/passphrase`（私钥密码）或 `host/<主机 ID>/proxy-password`（这台主机的 SOCKS5 或 HTTP 代理的密码）。“记住密码”按主机设置，管这台主机的这几个密码。
 
 | 系统 | 存在哪里 | 怎么查看 |
 |---|---|---|
-| macOS | 登录钥匙串里的通用密码，名称（服务）是 `finalshelly`，账户是键 | “钥匙串访问” |
-| Windows | 凭据管理器里的普通凭据，目标是 `finalshelly/<键>` | 控制面板 → 凭据管理器 → Windows 凭据 |
-| Linux | Secret Service（GNOME Keyring、KWallet、KeePassXC 等，通过 libsecret），属性 `service` 是 `finalshelly`，`account` 是键 | “密码和密钥”（Seahorse），或 `secret-tool lookup service finalshelly account host/<主机 ID>/password` |
+| macOS | 登录钥匙串里的通用密码，名称（服务）是 `finallyshell`，账户是键 | “钥匙串访问” |
+| Windows | 凭据管理器里的普通凭据，目标是 `finallyshell/<键>` | 控制面板 → 凭据管理器 → Windows 凭据 |
+| Linux | Secret Service（GNOME Keyring、KWallet、KeePassXC 等，通过 libsecret），属性 `service` 是 `finallyshell`，`account` 是键 | “密码和密钥”（Seahorse），或 `secret-tool lookup service finallyshell account host/<主机 ID>/password` |
 
 - 连接时先用这次运行里已经知道的密码，没有就读一次凭据存储，存储里也没有才弹出密码框。整条路上的密码都这样：主机的、它的代理的、每个跳板机的和跳板机的代理的。密码框里也有“记住密码”。主机自己的私钥密码在连接时读取，读不到就按没有密码的私钥连接。
 - 服务器拒绝保存的密码时，会话显示“认证失败”，同时弹出密码框；私钥缺少私钥密码或私钥密码不对时，同样弹出输入私钥密码的框（带“记住私钥密码”）。跳板机拒绝它的密码、代理拒绝认证时，也弹出那一个的密码框。输入后在同一个会话里重新连接。

@@ -11,7 +11,7 @@ import (
 // The terminal's look reads back as it was saved, under the keys the
 // file has, and a file without them reads as the defaults.
 func TestTerminalLookSettings(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	want := Settings{
 		TermFontFamily: "Fira Code, monospace", TermFontSize: 15.5, TermLineHeight: 1.2, TermFontWeight: 500,
 		TermNoLigatures: true, TermTheme: "Dracula",
@@ -38,7 +38,7 @@ func TestTerminalLookSettings(t *testing.T) {
 }
 
 func TestBackgroundCopies(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	data := []byte("not really a picture")
 	name, err := SaveBackground(data, "/home/me/Pictures/Sea.JPG")
 	if err != nil {

@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/monitor"
-	"finalshelly/internal/remotefs"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/monitor"
+	"finallyshell/internal/remotefs"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"

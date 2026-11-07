@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 )
 
-// Dir is where the app keeps its files: $FINALSHELLY_DIR, else
-// <user config dir>/finalshelly.
+// Dir is where the app keeps its files: $FINALLYSHELL_DIR, else
+// <user config dir>/finallyshell.
 func Dir() string {
-	if d := os.Getenv("FINALSHELLY_DIR"); d != "" {
+	if d := os.Getenv("FINALLYSHELL_DIR"); d != "" {
 		return d
 	}
 	d, err := os.UserConfigDir()
 	if err != nil {
 		d = "."
 	}
-	return filepath.Join(d, "finalshelly")
+	return filepath.Join(d, "finallyshell")
 }
 
 // Settings are the app's preferences.

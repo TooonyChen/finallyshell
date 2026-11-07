@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"finalshelly/locales"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

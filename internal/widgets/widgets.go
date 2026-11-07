@@ -5,7 +5,7 @@ package widgets
 import (
 	"math"
 
-	"finalshelly/internal/icons"
+	"finallyshell/internal/icons"
 
 	"github.com/egoist/mygo/ui"
 )

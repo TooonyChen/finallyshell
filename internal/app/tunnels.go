@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshx"
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshx"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

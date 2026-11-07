@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/monitor"
-	"finalshelly/internal/remotefs"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/monitor"
+	"finallyshell/internal/remotefs"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/plugins/terminal"
@@ -79,7 +79,7 @@ func (p *fakePlatform) until(t *testing.T, what string, cond func() bool) {
 }
 
 func testApp(t *testing.T) (*App, *fakePlatform) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	p := newFakePlatform(t)
 	a := New(p)
 	a.saveHosts = func(*config.Store) error { return nil }

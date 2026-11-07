@@ -6,8 +6,8 @@ import (
 	"sync"
 	"testing"
 
-	"finalshelly/internal/config"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/locales"
 )
 
 // fakeSystem stands in for the tray, the message box and quitting.

@@ -16,9 +16,9 @@ import (
 	"sync"
 	"testing"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 	"golang.org/x/crypto/ssh"
@@ -783,13 +783,13 @@ func TestStoredPassphrase(t *testing.T) {
 	}
 }
 
-// TestSSHRememberedPassword runs against the server FINALSHELLY_TEST_SSH
+// TestSSHRememberedPassword runs against the server FINALLYSHELL_TEST_SSH
 // names, with the fake store: a wrong saved password asks for the right
 // one, which replaces it, and the next run connects without asking.
 func TestSSHRememberedPassword(t *testing.T) {
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
+		t.Skip("FINALLYSHELL_TEST_SSH not set")
 	}
 	cred, addr, _ := strings.Cut(spec, "@")
 	user, pass, _ := strings.Cut(cred, ":")

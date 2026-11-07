@@ -1,33 +1,33 @@
----FINALSHELLY:hostname---
+---FINALLYSHELL:hostname---
 pi-gate
----FINALSHELLY:uname---
+---FINALLYSHELL:uname---
 Linux
 6.6.31-0-rpi
 aarch64
----FINALSHELLY:os-release---
+---FINALLYSHELL:os-release---
 NAME="Alpine Linux"
 PRETTY_NAME="Alpine Linux v3.20"
----FINALSHELLY:release---
+---FINALLYSHELL:release---
 Welcome to Alpine Linux 3.20
----FINALSHELLY:cpuinfo---
+---FINALLYSHELL:cpuinfo---
 processor	: 0
 processor	: 1
 processor	: 2
 processor	: 3
 Model		: Raspberry Pi 4 Model B Rev 1.4
----FINALSHELLY:lscpu---
----FINALSHELLY:nproc---
+---FINALLYSHELL:lscpu---
+---FINALLYSHELL:nproc---
 4
----FINALSHELLY:meminfo---
+---FINALLYSHELL:meminfo---
 MemTotal:        3884296 kB
 SwapTotal:             0 kB
----FINALSHELLY:uptime---
+---FINALLYSHELL:uptime---
 93784.52 371220.10
----FINALSHELLY:addr---
+---FINALLYSHELL:addr---
 1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
 2: eth0    inet 192.168.1.40/24 brd 192.168.1.255 scope global eth0\       valid_lft forever preferred_lft forever
 3: wlan0    inet 192.168.1.41/24 brd 192.168.1.255 scope global secondary wlan0\       valid_lft forever preferred_lft forever
----FINALSHELLY:disks---
+---FINALLYSHELL:disks---
 mmcblk0 62333952
 sda 1953525168 Extreme SSD
----FINALSHELLY:end---
+---FINALLYSHELL:end---
