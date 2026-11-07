@@ -19,7 +19,8 @@ import (
 // Platform is what the app asks of the system. The program passes the
 // real one; tests pass a fake.
 type Platform interface {
-	// Post runs fn on the UI thread and draws a new frame.
+	// Post runs fn on the UI thread, then draws every open window again.
+	// It returns without waiting.
 	Post(fn func())
 	// OpenFiles asks for files to upload, or one folder with folder set:
 	// nil when canceled. It blocks; the app calls it on a goroutine.
@@ -35,6 +36,20 @@ type Platform interface {
 	SetLocale(tag string)
 	// Languages are the languages the app is written in.
 	Languages() []string
+
+	// OpenWindow opens a secondary window showing view, as spec says, a
+	// child of the window of spec.Parent, or of the main window for "".
+	// It calls closed once the window is gone, however it went: closed by
+	// the user, by CloseWindow, or with its parent. Titles follow the
+	// language as it changes.
+	OpenWindow(spec WindowSpec, view func(c *ui.Context), closed func())
+	// FocusWindow brings the open window of kind to the front, with the
+	// keyboard.
+	FocusWindow(kind WindowKind)
+	// CloseWindow closes the window of kind, and its children.
+	CloseWindow(kind WindowKind)
+	// Redraw draws every open window again, the main one included.
+	Redraw()
 }
 
 // App is the state of the window.
@@ -77,8 +92,8 @@ type App struct {
 	pwHost *config.Host
 	pwText string
 
-	// The settings window.
-	settingsOpen bool
+	// The secondary windows that are open.
+	windows map[WindowKind]bool
 
 	// The question before replacing files.
 	replace *replaceQuestion
@@ -89,6 +104,7 @@ func New(plat Platform) *App {
 	a := &App{
 		plat:         plat,
 		passwords:    map[string]string{},
+		windows:      map[WindowKind]bool{},
 		active:       -1,
 		hostRow:      -1,
 		sideWidth:    defaultSideWidth,
@@ -203,6 +219,7 @@ func (a *App) setLanguage(tag string) {
 	a.settings.Language = tag
 	a.plat.SetLocale(tag)
 	a.saveSettings(a.settings)
+	a.redraw()
 }
 
 // openSession opens a tab for h, asking for its password first when the
@@ -240,9 +257,10 @@ func (a *App) closeSession(s *Session) {
 	}
 }
 
-// CloseAll ends every connection, as the window closes, and saves the
-// pane sizes the user changed.
+// CloseAll ends every connection, as the main window closes, closes the
+// secondary windows, and saves the pane sizes the user changed.
 func (a *App) CloseAll() {
+	a.closeWindows()
 	if a.layoutDirty {
 		a.saveLayout()
 	}

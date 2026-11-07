@@ -118,7 +118,7 @@ func (a *App) sessionPanel(c *ui.Context) {
 		ui.Row(c).Padding(6, 6, 6, 10).Gap(2).Children(func() {
 			ui.Text(c, locales.SessionsTitle(len(a.sessions))).Bold().Grow(1)
 			if widgets.IconButton(c, "settings", locales.Settings()).Clicked() {
-				a.settingsOpen = true
+				a.openSettings()
 			}
 			if widgets.IconButton(c, "plus", locales.NewConnection()).Clicked() {
 				a.openManager()

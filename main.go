@@ -15,11 +15,90 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// platform is the system, as the app asks it for dialogs, folders and
-// the language.
-type platform struct{ win *mygo.Window }
+// platform is the system, as the app asks it for windows, dialogs,
+// folders and the language. Its methods run on the UI thread, apart from
+// Post and the dialogs, which the app calls from goroutines.
+type platform struct {
+	win     *mygo.Window // the main window
+	windows map[app.WindowKind]*childWindow
+}
 
-func (p *platform) Post(fn func()) { p.win.Update(fn) }
+// childWindow is an open secondary window.
+type childWindow struct {
+	win   *mygo.Window
+	title func() string
+}
+
+// Post runs fn on the UI thread and redraws every window: the state fn
+// changes may show in any of them.
+func (p *platform) Post(fn func()) {
+	p.win.Update(func() {
+		fn()
+		p.redrawChildren()
+	})
+}
+
+func (p *platform) Redraw() {
+	p.win.Invalidate()
+	p.redrawChildren()
+}
+
+func (p *platform) redrawChildren() {
+	for _, w := range p.windows {
+		w.win.Invalidate()
+	}
+}
+
+func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), closed func()) {
+	parent := p.win
+	if w := p.windows[spec.Parent]; spec.Parent != "" && w != nil {
+		parent = w.win
+	}
+	// Centered over the parent, as dialogs are, rather than on the
+	// screen. A sheet (Modal on macOS) and Wayland place it themselves.
+	b := parent.Bounds()
+	win := mygo.NewWindow(mygo.WindowOptions{
+		Title:           spec.Title(),
+		Width:           spec.Width,
+		Height:          spec.Height,
+		UseContentSize:  true,
+		MinWidth:        spec.MinWidth,
+		MinHeight:       spec.MinHeight,
+		X:               b.X + (b.Width-spec.Width)/2,
+		Y:               b.Y + (b.Height-spec.Height)/2,
+		Parent:          parent,
+		Modal:           spec.Modal,
+		DisableMinimize: true,
+		Content:         ui.View(view),
+	})
+	p.windows[spec.Kind] = &childWindow{win: win, title: spec.Title}
+	win.OnClosed(func() {
+		if w := p.windows[spec.Kind]; w != nil && w.win == win {
+			delete(p.windows, spec.Kind)
+		}
+		closed()
+	})
+}
+
+func (p *platform) FocusWindow(kind app.WindowKind) {
+	if w := p.windows[kind]; w != nil {
+		w.win.Focus() // restores it too, and makes it the key window
+	}
+}
+
+func (p *platform) CloseWindow(kind app.WindowKind) {
+	if w := p.windows[kind]; w != nil {
+		w.win.Close()
+	}
+}
+
+// retitle sets the windows' titles again in the language shown now.
+func (p *platform) retitle() {
+	p.win.SetTitle(locales.AppTitle())
+	for _, w := range p.windows {
+		w.win.SetTitle(w.title())
+	}
+}
 
 func (p *platform) OpenFiles(title string, folder bool) ([]string, error) {
 	return mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: p.win, Title: title, Directory: folder, Multiple: !folder})
@@ -50,7 +129,7 @@ func main() {
 		mygo.App.SetLocale(lang)
 	}
 	mygo.App.WhenReady(func() {
-		plat := &platform{}
+		plat := &platform{windows: map[app.WindowKind]*childWindow{}}
 		a := app.New(plat)
 		plat.win = mygo.NewWindow(mygo.WindowOptions{
 			Title:     locales.AppTitle(),
@@ -60,7 +139,9 @@ func main() {
 			MinHeight: 560,
 			Content:   ui.View(a.View),
 		})
+		// Its children close with it, before this runs.
 		plat.win.OnClosed(a.CloseAll)
+		mygo.App.OnLocaleChanged(func(string) { plat.retitle() })
 	})
 	if err := mygo.App.Run(); err != nil {
 		log.Fatal(err)

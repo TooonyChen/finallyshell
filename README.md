@@ -45,7 +45,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 Go 里一个文件夹就是一个包（package），包之间不能循环引用，所以按职责拆分。`internal/` 下的包只能被本项目使用。
 
 ```
-main.go              启动 MyGo、开窗口，把系统功能（对话框、下载目录、语言）交给 app
+main.go              启动 MyGo、开主窗口，把系统功能（子窗口、对话框、下载目录、语言）交给 app
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
   config/            主机列表和设置的读写、配置目录
@@ -62,11 +62,31 @@ internal/
     splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
     files.go         文件面板：目录树、文件表格、拖入上传
     transfers.go     传输队列和“传输”页
-    dialogs.go       连接管理器、设置、密码、主机指纹、覆盖确认
+    dialogs.go       连接管理器、设置窗口、密码、主机指纹、覆盖确认
+    windows.go       子窗口：按种类打开/聚焦/关闭，重绘所有窗口
     format.go        大小、速度、延迟的格式化
 ```
 
 依赖方向是单向的：`app` 用其他所有包，`widgets` 只用 `icons`，其余包互不依赖界面。
+
+### 子窗口
+
+和 FinalShell 一样，设置这类对话框是独立的窗口（MyGo 的子窗口，`WindowOptions.Parent`），不是主窗口里的浮层。目前只有设置窗口；连接管理器、连接编辑器之后也会改成子窗口。
+
+- 每种窗口（`WindowKind`）同时只开一个：`a.openWindow(spec, view)` 在已经打开时只把它提到前面。`WindowSpec` 写标题（locales 里的函数，切换语言时重新取）、内容区大小、最小尺寸、父窗口（默认主窗口）和是否模态。
+- 窗口里按 Esc 或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口；关闭主窗口会关闭所有子窗口。
+- 所有窗口共用一个 `App`，都在 UI 线程上。一个窗口只会在自己的输入之后重绘；改了别的窗口也显示的状态（保存的主机、设置）之后调用 `a.redraw()`，重绘所有窗口。`App.post` 投递的工作做完也会重绘所有窗口。
+- 测试里 `fakePlatform` 记下打开的窗口，`p.show(t, kind)` 用一个单独的 `ui.Tester` 画出它的内容。
+
+各平台的行为（读 MyGo v0.8.1 后端代码确认的，还没在真机上逐一试过）：
+
+| | 普通子窗口 | 模态（`Modal`） |
+|---|---|---|
+| macOS | 普通 `NSWindow`，总在父窗口上面，父窗口最小化时跟着隐藏 | 父窗口的 sheet（从标题栏下方滑出，没有自己的标题栏，位置由系统决定）；父窗口本身是子窗口时也一样 |
+| Windows | 父窗口拥有的窗口（owner），总在父窗口上面，没有自己的任务栏按钮 | 打开期间禁用父窗口（`EnableWindow`），只禁用直接的父窗口 |
+| Linux | GTK `transient_for` 父窗口 | `gtk_window_set_modal`：GTK 会挡住本程序其他所有窗口的输入，不只是父窗口。Wayland 下窗口位置由合成器决定 |
+
+子窗口打开时居中在父窗口上方，不能最小化。
 
 ### 加一条文案
 

@@ -63,7 +63,6 @@ func (a *App) dialogs(c *ui.Context) {
 		})
 	})
 	ui.Modal(c, &a.pwOpen, func() { a.passwordView(c) })
-	ui.Modal(c, &a.settingsOpen, func() { a.settingsView(c) })
 	if s := a.pendingHostKey(); s != nil {
 		open := true
 		ui.Modal(c, &open, func() { a.hostKeyView(c, s) })
@@ -305,11 +304,20 @@ func (a *App) replaceView(c *ui.Context, q *replaceQuestion) {
 	})
 }
 
+// openSettings opens the settings window, or brings it to the front.
+func (a *App) openSettings() {
+	a.openWindow(WindowSpec{
+		Kind:  WindowSettings,
+		Title: locales.Settings,
+		Width: 400, Height: 210,
+		MinWidth: 340, MinHeight: 220,
+	}, a.settingsView)
+}
+
 // settingsView is the settings window: for now, the language.
 func (a *App) settingsView(c *ui.Context) {
-	ui.Column(c).Width(380).Gap(14).Children(func() {
-		ui.Text(c, locales.Settings()).FontSize(16).Bold()
-		ui.Column(c).Gap(8).Children(func() {
+	ui.Column(c).Fill().Padding(16).Gap(14).Children(func() {
+		ui.Column(c).Gap(8).Grow(1).Children(func() {
 			ui.Text(c, locales.SettingsLanguage()).Bold()
 			chosen := a.settings.Language
 			ui.RadioGroup(c, func() {
@@ -324,7 +332,7 @@ func (a *App) settingsView(c *ui.Context) {
 		})
 		ui.Row(c).Justify(ui.End).Children(func() {
 			if ui.PrimaryButton(c, locales.Done()).Clicked() {
-				a.settingsOpen = false
+				a.closeWindow(WindowSettings)
 			}
 		})
 	})
