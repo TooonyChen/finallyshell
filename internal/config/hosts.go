@@ -60,8 +60,30 @@ type Host struct {
 	// a host that is not deleted.
 	DeletedAt time.Time `json:"deletedAt,omitzero"`
 
+	// TermType is the terminal type the shell is asked for, its TERM: ""
+	// for DefaultTermType. Read it with TermTypeOrDefault.
+	TermType string `json:"termType,omitempty"`
+	// Backspace is what the Backspace key sends: "" for ^? (DEL), as
+	// most terminals send, or BackspaceCtrlH.
+	Backspace BackspaceKey `json:"backspace,omitempty"`
+
 	extra extras
 }
+
+// DefaultTermType is the terminal type of a host that names none: what
+// the terminal is, Ghostty's VT core with 256 colors and more.
+const DefaultTermType = "xterm-256color"
+
+// BackspaceKey is what the Backspace key sends to a host.
+type BackspaceKey string
+
+const (
+	// BackspaceDEL sends ^? (0x7f), as xterm, Ghostty and most others.
+	BackspaceDEL BackspaceKey = ""
+	// BackspaceCtrlH sends ^H (0x08), for servers whose erase character
+	// is ^H, as some old systems and serial consoles.
+	BackspaceCtrlH BackspaceKey = "ctrl-h"
+)
 
 // PortOr22 is the host's port, 22 when unset.
 func (h *Host) PortOr22() int {
@@ -86,6 +108,15 @@ func (h *Host) Target() string {
 		s += ":" + strconv.Itoa(h.PortOr22())
 	}
 	return s
+}
+
+// TermTypeOrDefault is the host's terminal type, DefaultTermType when
+// unset.
+func (h *Host) TermTypeOrDefault() string {
+	if h.TermType == "" {
+		return DefaultTermType
+	}
+	return h.TermType
 }
 
 // MonitorEnabled says whether sessions to h poll the server for the side

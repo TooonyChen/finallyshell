@@ -48,8 +48,12 @@ func TestHostHelpers(t *testing.T) {
 	if h.Target() != "root@example.com:2200" || h.Title() != "example.com" {
 		t.Errorf("target %q title %q", h.Target(), h.Title())
 	}
-	if !h.MonitorEnabled() || h.Deleted() {
-		t.Errorf("a new host: monitor %v deleted %v", h.MonitorEnabled(), h.Deleted())
+	if !h.MonitorEnabled() || h.Deleted() || h.TermTypeOrDefault() != "xterm-256color" || h.Backspace != BackspaceDEL {
+		t.Errorf("a new host: monitor %v deleted %v term %q backspace %q", h.MonitorEnabled(), h.Deleted(), h.TermTypeOrDefault(), h.Backspace)
+	}
+	h.TermType = "vt100"
+	if h.TermTypeOrDefault() != "vt100" {
+		t.Errorf("term %q", h.TermTypeOrDefault())
 	}
 }
 
@@ -174,6 +178,8 @@ func fullHost() *Host {
 		NoMonitor:       true,
 		LastConnectedAt: time.Date(2026, 11, 7, 9, 30, 15, 123456789, time.UTC),
 		DeletedAt:       time.Date(2026, 11, 8, 1, 2, 3, 0, time.UTC),
+		TermType:        "vt220",
+		Backspace:       BackspaceCtrlH,
 	}
 }
 
@@ -207,7 +213,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}
