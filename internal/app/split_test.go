@@ -393,7 +393,7 @@ func TestSSHResize(t *testing.T) {
 
 	a, p := testApp(t)
 	h := &config.Host{ID: "test", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
-	a.hosts = []*config.Host{h}
+	a.hosts.Add(h)
 	a.passwords[h.ID] = pass
 	tt := ui.NewTester(a.View, winW, winH)
 	p.tt = tt

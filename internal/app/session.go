@@ -132,14 +132,19 @@ func (a *App) connect(s *Session, secret string) {
 			}
 			s.client, s.term, s.ip = client, term, ip
 			s.status, s.err = statusConnected, nil
+			a.noteConnected(s.Host)
 		})
-		go monitor.Run(ctx, client, 2*time.Second, func(st monitor.Stats) {
-			a.post(func() {
-				if ctx.Err() == nil {
-					s.stats = st
-				}
+		// The monitor polls with an exec channel; hosts that drop extra
+		// channels turn it off.
+		if h.MonitorEnabled() {
+			go monitor.Run(ctx, client, 2*time.Second, func(st monitor.Stats) {
+				a.post(func() {
+					if ctx.Err() == nil {
+						s.stats = st
+					}
+				})
 			})
-		})
+		}
 		sc, err := remotefs.NewClient(client)
 		if err != nil {
 			a.post(func() { s.files.err = &sftpError{err} })
@@ -158,6 +163,13 @@ func (a *App) connect(s *Session, secret string) {
 			a.openDir(s, home)
 		})
 	}()
+}
+
+// noteConnected keeps the time h connected, for the recent hosts.
+func (a *App) noteConnected(h *config.Host) {
+	if a.hosts.MarkConnected(h.ID, time.Now()) {
+		a.saveHosts(a.hosts)
+	}
 }
 
 // disconnect ends s's connection, keeping its tab.

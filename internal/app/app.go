@@ -42,7 +42,7 @@ type App struct {
 	plat     Platform
 	settings config.Settings
 
-	hosts     []*config.Host
+	hosts     *config.Store     // deleted hosts included: lists show hosts.Live()
 	passwords map[string]string // by host ID, for this run only
 	sessions  []*Session
 	active    int
@@ -60,7 +60,7 @@ type App struct {
 	layoutDirty bool
 	layoutAt    time.Time
 
-	saveHosts    func([]*config.Host) error
+	saveHosts    func(*config.Store) error
 	saveSettings func(config.Settings) error
 
 	transfers transferQueue

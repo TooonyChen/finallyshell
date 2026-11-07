@@ -74,14 +74,14 @@ func testApp(t *testing.T) (*App, *fakePlatform) {
 	t.Setenv("FINALSHELLY_DIR", t.TempDir())
 	p := newFakePlatform(t)
 	a := New(p)
-	a.saveHosts = func([]*config.Host) error { return nil }
+	a.saveHosts = func(*config.Store) error { return nil }
 	return a, p
 }
 
 // demoSession is a connected session with made-up stats and files.
 func demoSession(a *App, name, addr string) *Session {
 	h := &config.Host{ID: config.NewHostID(), Name: name, Addr: addr, User: "root", Auth: config.AuthPassword}
-	a.hosts = append(a.hosts, h)
+	a.hosts.Add(h)
 	s := newSession(h)
 	s.status, s.ip = statusConnected, addr
 	hist := func(base float64) []float64 {
@@ -202,8 +202,8 @@ func TestConnectionManager(t *testing.T) {
 	if err := tt.Click(locales.Save()); err != nil {
 		t.Fatal(err)
 	}
-	if len(a.hosts) != 1 || a.hosts[0].Addr != "example.com" || a.hosts[0].PortOr22() != 22 {
-		t.Fatalf("hosts %+v", a.hosts)
+	if hosts := a.hosts.Live(); len(hosts) != 1 || hosts[0].Addr != "example.com" || hosts[0].PortOr22() != 22 || !hosts[0].MonitorEnabled() {
+		t.Fatalf("hosts %+v", a.hosts.Hosts)
 	}
 	tt.Frame()
 	if !tt.HasText(locales.ManagerTitle()) || !tt.HasText("root@example.com") {

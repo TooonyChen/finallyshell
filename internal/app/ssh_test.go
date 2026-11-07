@@ -84,7 +84,7 @@ func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
 
 	a, p := testApp(t)
 	h := &config.Host{ID: "test", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
-	a.hosts = []*config.Host{h}
+	a.hosts.Add(h)
 	a.passwords[h.ID] = pass
 	a.openSession(h)
 	s := a.current()

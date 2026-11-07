@@ -31,7 +31,7 @@ type hostForm struct {
 
 func (a *App) openManager() {
 	a.managerOpen = true
-	a.formOpen = len(a.hosts) == 0
+	a.formOpen = len(a.hosts.Live()) == 0
 	if a.formOpen {
 		a.startForm(nil)
 	}
@@ -88,11 +88,12 @@ func (a *App) hostListView(c *ui.Context) {
 			a.startForm(nil)
 		}
 	})
+	hosts := a.hosts.Live()
 	a.hostList.Selected = &a.hostRow
-	a.hostList.Key = func(i int) any { return a.hosts[i].ID }
-	a.hostList.Label = func(i int) string { return a.hosts[i].Title() }
-	list := ui.List(c, &a.hostList, len(a.hosts), func(i int) {
-		h := a.hosts[i]
+	a.hostList.Key = func(i int) any { return hosts[i].ID }
+	a.hostList.Label = func(i int) string { return hosts[i].Title() }
+	list := ui.List(c, &a.hostList, len(hosts), func(i int) {
+		h := hosts[i]
 		sub := theme.TextMuted
 		if i == a.hostRow {
 			sub = theme.AccentText.Alpha(0.8)
@@ -105,17 +106,17 @@ func (a *App) hostListView(c *ui.Context) {
 			})
 		})
 	}).Height(300).Border(1, theme.Border).Radius(6)
-	if list.Submitted() && a.hostRow >= 0 && a.hostRow < len(a.hosts) {
+	if list.Submitted() && a.hostRow >= 0 && a.hostRow < len(hosts) {
 		a.managerOpen = false
-		a.openSession(a.hosts[a.hostRow])
+		a.openSession(hosts[a.hostRow])
 	}
-	chosen := a.hostRow >= 0 && a.hostRow < len(a.hosts)
+	chosen := a.hostRow >= 0 && a.hostRow < len(hosts)
 	ui.Row(c).Gap(8).Children(func() {
 		if ui.Button(c, locales.Edit()).Disabled(!chosen).Clicked() {
-			a.startForm(a.hosts[a.hostRow])
+			a.startForm(hosts[a.hostRow])
 		}
 		if ui.Button(c, locales.Delete()).Disabled(!chosen).Clicked() {
-			a.hosts = slices.Delete(a.hosts, a.hostRow, a.hostRow+1)
+			a.hosts.Remove(hosts[a.hostRow].ID) // for good, until there is a list of deleted hosts
 			a.hostRow = -1
 			a.saveHosts(a.hosts)
 		}
@@ -125,7 +126,7 @@ func (a *App) hostListView(c *ui.Context) {
 		}
 		if ui.PrimaryButton(c, locales.Connect()).Disabled(!chosen).Clicked() {
 			a.managerOpen = false
-			a.openSession(a.hosts[a.hostRow])
+			a.openSession(hosts[a.hostRow])
 		}
 	})
 }
@@ -174,7 +175,7 @@ func (a *App) hostFormView(c *ui.Context) {
 		ui.Text(c, f.err()).TextColor(theme.Danger)
 	}
 	ui.Row(c).Gap(8).Children(func() {
-		if len(a.hosts) > 0 && ui.Button(c, locales.Back()).Clicked() {
+		if len(a.hosts.Live()) > 0 && ui.Button(c, locales.Back()).Clicked() {
 			a.formOpen = false
 		}
 		ui.Spacer(c)
@@ -213,7 +214,7 @@ func (a *App) saveForm() *config.Host {
 	h := f.editing
 	if h == nil {
 		h = &config.Host{ID: config.NewHostID()}
-		a.hosts = append(a.hosts, h)
+		a.hosts.Add(h)
 	}
 	h.Name, h.Addr, h.Port, h.User, h.Auth = strings.TrimSpace(f.name), f.addr, port, f.user, f.auth
 	if f.auth == config.AuthKey {
@@ -229,7 +230,7 @@ func (a *App) saveForm() *config.Host {
 		f.err = nil
 	}
 	a.formOpen = false
-	a.hostRow = slices.Index(a.hosts, h)
+	a.hostRow = slices.Index(a.hosts.Live(), h)
 	return h
 }
 
