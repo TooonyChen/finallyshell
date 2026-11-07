@@ -115,6 +115,19 @@ func (p *platform) ChooseFolder(title string) (string, error) {
 }
 
 func (p *platform) OpenFile(parent app.WindowKind, title, dir string) (string, error) {
+	return p.openOne(parent, mygo.OpenDialogOptions{Title: title, DefaultPath: dir, ShowHiddenFiles: true})
+}
+
+func (p *platform) OpenImage(parent app.WindowKind, title string) (string, error) {
+	return p.openOne(parent, mygo.OpenDialogOptions{Title: title, Filters: []mygo.FileFilter{{
+		Name:       locales.ImageFiles(),
+		Extensions: []string{"png", "jpg", "jpeg", "gif", "webp", "bmp"},
+	}}})
+}
+
+// openOne asks for one file as opts say, over the window of parent, or
+// the main window when that is not open: "" when canceled.
+func (p *platform) openOne(parent app.WindowKind, opts mygo.OpenDialogOptions) (string, error) {
 	// The windows are the UI thread's; the dialog waits on this one.
 	owner := make(chan *mygo.Window, 1)
 	p.win.Update(func() {
@@ -124,7 +137,8 @@ func (p *platform) OpenFile(parent app.WindowKind, title, dir string) (string, e
 		}
 		owner <- w
 	})
-	paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: <-owner, Title: title, DefaultPath: dir, ShowHiddenFiles: true})
+	opts.Parent = <-owner
+	paths, err := mygo.Dialog.Open(opts)
 	if err != nil || len(paths) == 0 {
 		return "", err
 	}

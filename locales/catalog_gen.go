@@ -2524,6 +2524,406 @@ func (msgs Messages) ErrTerminal(error string) string {
 	return Catalog.Format(msgs.locale, "errTerminal", map[string]any{"error": error})
 }
 
+// LookAppliesNow says "Changes apply to every open terminal at once."
+// in the language the app shows.
+func LookAppliesNow() string { return In(i18n.Locale()).LookAppliesNow() }
+
+// LookAppliesNow says "Changes apply to every open terminal at once."
+// in the language of msgs.
+func (msgs Messages) LookAppliesNow() string {
+	return Catalog.Format(msgs.locale, "lookAppliesNow", nil)
+}
+
+// LookPreview says "Preview"
+// in the language the app shows.
+func LookPreview() string { return In(i18n.Locale()).LookPreview() }
+
+// LookPreview says "Preview"
+// in the language of msgs.
+func (msgs Messages) LookPreview() string {
+	return Catalog.Format(msgs.locale, "lookPreview", nil)
+}
+
+// LookRestoreDefaults says "Restore defaults"
+// in the language the app shows.
+func LookRestoreDefaults() string { return In(i18n.Locale()).LookRestoreDefaults() }
+
+// LookRestoreDefaults says "Restore defaults"
+// in the language of msgs.
+func (msgs Messages) LookRestoreDefaults() string {
+	return Catalog.Format(msgs.locale, "lookRestoreDefaults", nil)
+}
+
+// FontFamily says "Font family"
+// in the language the app shows.
+func FontFamily() string { return In(i18n.Locale()).FontFamily() }
+
+// FontFamily says "Font family"
+// in the language of msgs.
+func (msgs Messages) FontFamily() string {
+	return Catalog.Format(msgs.locale, "fontFamily", nil)
+}
+
+// FontFamilyPlaceholder says "Default coding fonts"
+// in the language the app shows.
+func FontFamilyPlaceholder() string { return In(i18n.Locale()).FontFamilyPlaceholder() }
+
+// FontFamilyPlaceholder says "Default coding fonts"
+// in the language of msgs.
+func (msgs Messages) FontFamilyPlaceholder() string {
+	return Catalog.Format(msgs.locale, "fontFamilyPlaceholder", nil)
+}
+
+// FontFamilyHint says "Installed monospaced fonts are suggested as you type. Several, separated by commas, are tried in order."
+// in the language the app shows.
+func FontFamilyHint() string { return In(i18n.Locale()).FontFamilyHint() }
+
+// FontFamilyHint says "Installed monospaced fonts are suggested as you type. Several, separated by commas, are tried in order."
+// in the language of msgs.
+func (msgs Messages) FontFamilyHint() string {
+	return Catalog.Format(msgs.locale, "fontFamilyHint", nil)
+}
+
+// FontSize says "Size"
+// in the language the app shows.
+func FontSize() string { return In(i18n.Locale()).FontSize() }
+
+// FontSize says "Size"
+// in the language of msgs.
+func (msgs Messages) FontSize() string {
+	return Catalog.Format(msgs.locale, "fontSize", nil)
+}
+
+// FontLineHeight says "Line height"
+// in the language the app shows.
+func FontLineHeight() string { return In(i18n.Locale()).FontLineHeight() }
+
+// FontLineHeight says "Line height"
+// in the language of msgs.
+func (msgs Messages) FontLineHeight() string {
+	return Catalog.Format(msgs.locale, "fontLineHeight", nil)
+}
+
+// FontLineHeightHint says "A multiple of the font's own line height."
+// in the language the app shows.
+func FontLineHeightHint() string { return In(i18n.Locale()).FontLineHeightHint() }
+
+// FontLineHeightHint says "A multiple of the font's own line height."
+// in the language of msgs.
+func (msgs Messages) FontLineHeightHint() string {
+	return Catalog.Format(msgs.locale, "fontLineHeightHint", nil)
+}
+
+// FontWeight says "Weight"
+// in the language the app shows.
+func FontWeight() string { return In(i18n.Locale()).FontWeight() }
+
+// FontWeight says "Weight"
+// in the language of msgs.
+func (msgs Messages) FontWeight() string {
+	return Catalog.Format(msgs.locale, "fontWeight", nil)
+}
+
+// FontWeightHint says "Bold text is drawn heavier than this."
+// in the language the app shows.
+func FontWeightHint() string { return In(i18n.Locale()).FontWeightHint() }
+
+// FontWeightHint says "Bold text is drawn heavier than this."
+// in the language of msgs.
+func (msgs Messages) FontWeightHint() string {
+	return Catalog.Format(msgs.locale, "fontWeightHint", nil)
+}
+
+// FontWeightLight says "Light"
+// in the language the app shows.
+func FontWeightLight() string { return In(i18n.Locale()).FontWeightLight() }
+
+// FontWeightLight says "Light"
+// in the language of msgs.
+func (msgs Messages) FontWeightLight() string {
+	return Catalog.Format(msgs.locale, "fontWeightLight", nil)
+}
+
+// FontWeightRegular says "Regular"
+// in the language the app shows.
+func FontWeightRegular() string { return In(i18n.Locale()).FontWeightRegular() }
+
+// FontWeightRegular says "Regular"
+// in the language of msgs.
+func (msgs Messages) FontWeightRegular() string {
+	return Catalog.Format(msgs.locale, "fontWeightRegular", nil)
+}
+
+// FontWeightMedium says "Medium"
+// in the language the app shows.
+func FontWeightMedium() string { return In(i18n.Locale()).FontWeightMedium() }
+
+// FontWeightMedium says "Medium"
+// in the language of msgs.
+func (msgs Messages) FontWeightMedium() string {
+	return Catalog.Format(msgs.locale, "fontWeightMedium", nil)
+}
+
+// FontWeightSemibold says "Semibold"
+// in the language the app shows.
+func FontWeightSemibold() string { return In(i18n.Locale()).FontWeightSemibold() }
+
+// FontWeightSemibold says "Semibold"
+// in the language of msgs.
+func (msgs Messages) FontWeightSemibold() string {
+	return Catalog.Format(msgs.locale, "fontWeightSemibold", nil)
+}
+
+// FontWeightBold says "Bold"
+// in the language the app shows.
+func FontWeightBold() string { return In(i18n.Locale()).FontWeightBold() }
+
+// FontWeightBold says "Bold"
+// in the language of msgs.
+func (msgs Messages) FontWeightBold() string {
+	return Catalog.Format(msgs.locale, "fontWeightBold", nil)
+}
+
+// FontLigatures says "Ligatures"
+// in the language the app shows.
+func FontLigatures() string { return In(i18n.Locale()).FontLigatures() }
+
+// FontLigatures says "Ligatures"
+// in the language of msgs.
+func (msgs Messages) FontLigatures() string {
+	return Catalog.Format(msgs.locale, "fontLigatures", nil)
+}
+
+// FontLigaturesHint says "Draws pairs such as -> and != as one glyph, in fonts that have ligatures."
+// in the language the app shows.
+func FontLigaturesHint() string { return In(i18n.Locale()).FontLigaturesHint() }
+
+// FontLigaturesHint says "Draws pairs such as -> and != as one glyph, in fonts that have ligatures."
+// in the language of msgs.
+func (msgs Messages) FontLigaturesHint() string {
+	return Catalog.Format(msgs.locale, "fontLigaturesHint", nil)
+}
+
+// SearchThemes says "Search color schemes"
+// in the language the app shows.
+func SearchThemes() string { return In(i18n.Locale()).SearchThemes() }
+
+// SearchThemes says "Search color schemes"
+// in the language of msgs.
+func (msgs Messages) SearchThemes() string {
+	return Catalog.Format(msgs.locale, "searchThemes", nil)
+}
+
+// NoMatchingThemes says "No color scheme matches."
+// in the language the app shows.
+func NoMatchingThemes() string { return In(i18n.Locale()).NoMatchingThemes() }
+
+// NoMatchingThemes says "No color scheme matches."
+// in the language of msgs.
+func (msgs Messages) NoMatchingThemes() string {
+	return Catalog.Format(msgs.locale, "noMatchingThemes", nil)
+}
+
+// ThemeDefault says "Default"
+// in the language the app shows.
+func ThemeDefault() string { return In(i18n.Locale()).ThemeDefault() }
+
+// ThemeDefault says "Default"
+// in the language of msgs.
+func (msgs Messages) ThemeDefault() string {
+	return Catalog.Format(msgs.locale, "themeDefault", nil)
+}
+
+// ThemesSource says "The color schemes that Ghostty ships, and your own in Ghostty's themes folder."
+// in the language the app shows.
+func ThemesSource() string { return In(i18n.Locale()).ThemesSource() }
+
+// ThemesSource says "The color schemes that Ghostty ships, and your own in Ghostty's themes folder."
+// in the language of msgs.
+func (msgs Messages) ThemesSource() string {
+	return Catalog.Format(msgs.locale, "themesSource", nil)
+}
+
+// BackgroundImage says "Image"
+// in the language the app shows.
+func BackgroundImage() string { return In(i18n.Locale()).BackgroundImage() }
+
+// BackgroundImage says "Image"
+// in the language of msgs.
+func (msgs Messages) BackgroundImage() string {
+	return Catalog.Format(msgs.locale, "backgroundImage", nil)
+}
+
+// BackgroundNone says "None"
+// in the language the app shows.
+func BackgroundNone() string { return In(i18n.Locale()).BackgroundNone() }
+
+// BackgroundNone says "None"
+// in the language of msgs.
+func (msgs Messages) BackgroundNone() string {
+	return Catalog.Format(msgs.locale, "backgroundNone", nil)
+}
+
+// ChooseImage says "Choose…"
+// in the language the app shows.
+func ChooseImage() string { return In(i18n.Locale()).ChooseImage() }
+
+// ChooseImage says "Choose…"
+// in the language of msgs.
+func (msgs Messages) ChooseImage() string {
+	return Catalog.Format(msgs.locale, "chooseImage", nil)
+}
+
+// RemoveImage says "Remove"
+// in the language the app shows.
+func RemoveImage() string { return In(i18n.Locale()).RemoveImage() }
+
+// RemoveImage says "Remove"
+// in the language of msgs.
+func (msgs Messages) RemoveImage() string {
+	return Catalog.Format(msgs.locale, "removeImage", nil)
+}
+
+// ChooseImageTitle says "Choose a background image"
+// in the language the app shows.
+func ChooseImageTitle() string { return In(i18n.Locale()).ChooseImageTitle() }
+
+// ChooseImageTitle says "Choose a background image"
+// in the language of msgs.
+func (msgs Messages) ChooseImageTitle() string {
+	return Catalog.Format(msgs.locale, "chooseImageTitle", nil)
+}
+
+// ImageFiles says "Images"
+// in the language the app shows.
+func ImageFiles() string { return In(i18n.Locale()).ImageFiles() }
+
+// ImageFiles says "Images"
+// in the language of msgs.
+func (msgs Messages) ImageFiles() string {
+	return Catalog.Format(msgs.locale, "imageFiles", nil)
+}
+
+// BackgroundFit says "Fit"
+// in the language the app shows.
+func BackgroundFit() string { return In(i18n.Locale()).BackgroundFit() }
+
+// BackgroundFit says "Fit"
+// in the language of msgs.
+func (msgs Messages) BackgroundFit() string {
+	return Catalog.Format(msgs.locale, "backgroundFit", nil)
+}
+
+// BackgroundCover says "Cover"
+// in the language the app shows.
+func BackgroundCover() string { return In(i18n.Locale()).BackgroundCover() }
+
+// BackgroundCover says "Cover"
+// in the language of msgs.
+func (msgs Messages) BackgroundCover() string {
+	return Catalog.Format(msgs.locale, "backgroundCover", nil)
+}
+
+// BackgroundContain says "Contain"
+// in the language the app shows.
+func BackgroundContain() string { return In(i18n.Locale()).BackgroundContain() }
+
+// BackgroundContain says "Contain"
+// in the language of msgs.
+func (msgs Messages) BackgroundContain() string {
+	return Catalog.Format(msgs.locale, "backgroundContain", nil)
+}
+
+// BackgroundTile says "Tile"
+// in the language the app shows.
+func BackgroundTile() string { return In(i18n.Locale()).BackgroundTile() }
+
+// BackgroundTile says "Tile"
+// in the language of msgs.
+func (msgs Messages) BackgroundTile() string {
+	return Catalog.Format(msgs.locale, "backgroundTile", nil)
+}
+
+// BackgroundOpacity says "Opacity"
+// in the language the app shows.
+func BackgroundOpacity() string { return In(i18n.Locale()).BackgroundOpacity() }
+
+// BackgroundOpacity says "Opacity"
+// in the language of msgs.
+func (msgs Messages) BackgroundOpacity() string {
+	return Catalog.Format(msgs.locale, "backgroundOpacity", nil)
+}
+
+// BackgroundOpacityHint says "How much of the image shows through the color scheme's background, which keeps text readable."
+// in the language the app shows.
+func BackgroundOpacityHint() string { return In(i18n.Locale()).BackgroundOpacityHint() }
+
+// BackgroundOpacityHint says "How much of the image shows through the color scheme's background, which keeps text readable."
+// in the language of msgs.
+func (msgs Messages) BackgroundOpacityHint() string {
+	return Catalog.Format(msgs.locale, "backgroundOpacityHint", nil)
+}
+
+// BackgroundCopyNote says "Finalshelly keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// in the language the app shows.
+func BackgroundCopyNote() string { return In(i18n.Locale()).BackgroundCopyNote() }
+
+// BackgroundCopyNote says "Finalshelly keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// in the language of msgs.
+func (msgs Messages) BackgroundCopyNote() string {
+	return Catalog.Format(msgs.locale, "backgroundCopyNote", nil)
+}
+
+// ErrImageRead says "Could not read the image: {error}"
+// in the language the app shows.
+func ErrImageRead(error string) string { return In(i18n.Locale()).ErrImageRead(error) }
+
+// ErrImageRead says "Could not read the image: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrImageRead(error string) string {
+	return Catalog.Format(msgs.locale, "errImageRead", map[string]any{"error": error})
+}
+
+// ErrImageFormat says "Finalshelly cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
+// in the language the app shows.
+func ErrImageFormat() string { return In(i18n.Locale()).ErrImageFormat() }
+
+// ErrImageFormat says "Finalshelly cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
+// in the language of msgs.
+func (msgs Messages) ErrImageFormat() string {
+	return Catalog.Format(msgs.locale, "errImageFormat", nil)
+}
+
+// ErrImageTooLarge says "The image is too large: the limit is {size}."
+// in the language the app shows.
+func ErrImageTooLarge(size string) string { return In(i18n.Locale()).ErrImageTooLarge(size) }
+
+// ErrImageTooLarge says "The image is too large: the limit is {size}."
+// in the language of msgs.
+func (msgs Messages) ErrImageTooLarge(size string) string {
+	return Catalog.Format(msgs.locale, "errImageTooLarge", map[string]any{"size": size})
+}
+
+// ErrImageMissing says "The background image is missing: choose it again, or remove it."
+// in the language the app shows.
+func ErrImageMissing() string { return In(i18n.Locale()).ErrImageMissing() }
+
+// ErrImageMissing says "The background image is missing: choose it again, or remove it."
+// in the language of msgs.
+func (msgs Messages) ErrImageMissing() string {
+	return Catalog.Format(msgs.locale, "errImageMissing", nil)
+}
+
+// ErrImageSave says "Could not copy the image: {error}"
+// in the language the app shows.
+func ErrImageSave(error string) string { return In(i18n.Locale()).ErrImageSave(error) }
+
+// ErrImageSave says "Could not copy the image: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrImageSave(error string) string {
+	return Catalog.Format(msgs.locale, "errImageSave", map[string]any{"error": error})
+}
+
 // Done says "Done"
 // in the language the app shows.
 func Done() string { return In(i18n.Locale()).Done() }

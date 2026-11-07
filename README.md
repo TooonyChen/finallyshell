@@ -34,7 +34,6 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
   - 自动选中标签（默认开）：新连接打开后切换过去。关掉后新会话在后台打开，当前会话保持选中；没有选中的会话时仍然选中新的。
   - 关闭时最小化到托盘（默认关）：点主窗口的关闭按钮时隐藏到托盘图标（macOS 是菜单栏），图标菜单里有“显示主窗口”和“退出”。Windows 上左键单击图标也能显示窗口，macOS 上点 Dock 图标也能显示。系统没有托盘时（Linux 没装 `libayatana-appindicator3`）按没开这一项处理。
   - 关闭窗口前确认（默认开）：有会话已连接或正在连接时，关闭主窗口或退出（托盘菜单、macOS 的 Cmd+Q）之前用系统的消息框问一次。同时开了托盘：关闭按钮直接隐藏，不问；“退出”才问。
-  - “终端”下的配色、背景图片、字体几页还没做，先显示“以后的版本提供”。
   所有选项改了立刻保存在 `settings.json`，除了下面“鼠标”页说的两项，也立刻生效。
 - 选项的“终端 › 鼠标”页，用的都是 terminal 插件本身的功能：
   - 选中即复制（默认关）：用鼠标选中文字（还有“全选”）后自动复制到剪贴板。
@@ -52,6 +51,12 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
   - 在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`，键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`），`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键；没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
 - 终端查找（Ctrl+Shift+F，macOS 是 Cmd+F）：终端右上角出现查找栏（MyGo 的 `ui.FindBar`），边输入边用插件的 `Search` 搜屏幕和滚动历史，高亮所有匹配，显示“第几项，共几项”。回车到下一个（往上，更早的输出），Shift+回车到上一个，F3 / Shift+F3（macOS 是 Cmd+G / Shift+Cmd+G）也行；Esc 或“完成”关闭，结束搜索，键盘回到终端。再按一次快捷键时全选查找框里的文字。每个会话的查找栏分开。不区分 ASCII 字母大小写（插件就是这样）。
 - 全屏（Ctrl+Shift+Enter，macOS 是 Cmd+Enter）：隐藏左边栏和下面的文件面板，只留终端，窗口也进入系统的全屏；再按一次退出。Esc 只在没有 shell 接收它时退出全屏（新标签页、断开的会话），连接着的终端里 Esc 照常发给 shell（vi 要用）。窗口本来就是系统全屏的，退出时保持系统全屏；用系统的办法（macOS 的绿色按钮）退出系统全屏，也一起退出程序的全屏。
+- 选项的“终端 › 字体”“终端 › 配色”“终端 › 背景图片”三页管终端的外观，改了立刻应用到所有打开的终端（`SetFont`、`SetTheme`），新开的终端也用新设置；连接过程中改了，连上后也会补上。每页下面有“恢复默认”，上面有预览（用界面控件画的示例提示符、彩色 `ls`、带连字的代码，用的是同样的字体、配色和背景）。
+  - 字体：字体名称（输入时提示系统里已安装的等宽字体，来自 `ui.FontFamilies`；可以写逗号隔开的多个，用第一个装了的；空着是默认的 JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace）、字号（6 到 48，默认 13.5）、行高（字体本身行高的 0.8 到 2 倍，默认 1）、粗细（细 300 / 常规 400 / 中等 500 / 半粗 600 / 粗 700；插件的粗体总是比它重 300、至少 700，没有单独的粗体粗细）、连字（默认开，关掉是 `-calt`、`-liga`）。改字体会结束终端里的 Ctrl+= 缩放；只改配色不会。
+  - 配色：Ghostty 自带的几百个主题（`terminal.GhosttyThemes()`，也包括 Ghostty 主题目录里用户自己的），搜索框按名称过滤，每行带背景色和几种颜色的小样，预览下面是 16 种 ANSI 颜色。默认 Tomorrow Night；主题文件不见了时用默认的。界面一直是浅色，插件的 `DarkTheme` 只在深色窗口里用，所以只有一个选择，同时设给 `Theme` 和 `DarkTheme`。
+  - 背景图片：“选择…”用系统的打开对话框选 PNG、JPEG、GIF、WebP 或 BMP（64 MB 以内），先解码确认能显示，再复制一份到配置目录（`finalshelly/background-<时间>.<扩展名>`），所以原图移走、删掉都没关系；换图或“移除”会删掉旧的副本。填充方式：铺满（裁剪）/ 完整显示 / 平铺；不透明度 5% 到 100%（默认 30%）。不是图片、读不了的文件只显示错误，不复制、不替换现在的图；副本不见了（或 `settings.json` 里的名字不是副本）时显示“背景图片不见了”，可以重新选择或移除。
+  - 实现：终端都用 `Transparent: true` 创建，应用自己在终端下面画背景：先是配色的背景色，再画图片，再盖一层 (1 − 不透明度) 的背景色，所以文字一直在配色背景上。程序自己设的背景色（OSC 11、单元格背景）照常画。
+  - 在 `settings.json` 里是 `termFontFamily`、`termFontSize`、`termLineHeight`、`termFontWeight`、`termNoLigatures`、`termTheme`、`termBackground`（副本的文件名）、`termBackgroundFit`（`contain`、`tile`；没有是铺满）、`termBackgroundOpacity`（百分比）；没有就是默认值。
 - 连接管理器：新建、编辑、删除主机，密码或私钥登录。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码不落盘，只存在内存里。
 - 新标签页（启动时打开一个）：“快速连接”列出最近连接过的主机（名称、主机、用户名），最后连接的在最上面，点一下或按回车就在这个标签页里连接，同一行变成会话。搜索框边输入边过滤，按名称、地址、用户名、备注匹配所有主机（最近连接过的排在前面），上下方向键选择。“清空”清掉最近连接记录，不删主机。“连接管理器”按钮打开连接管理器；在新标签页选中时从连接管理器连接，也连在这个标签页里。一个主机都没有时显示“新建连接”按钮。
 - 连接编辑器（新建连接 / 编辑连接）是单独的窗口，左边是页面，下面是“确定”“取消”：
@@ -148,7 +153,7 @@ main.go              启动 MyGo、开主窗口，把系统功能（子窗口、
 tray.go              托盘图标、确认用的消息框、退出
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
-  config/            主机和文件夹（hosts.json）、设置的读写，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置
+  config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
   sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发
   monitor/           服务器状态采集和解析
@@ -174,6 +179,9 @@ internal/
     shortcuts.go     快捷键：操作和各平台的默认键、哪些键不能用、冲突、窗口快捷键的分派、终端的 Keybinds
     shortcutspage.go “终端 › 快捷键”页和按键录制框
     keycombo.go      组合键：在 settings.json 里的写法和界面上的显示（macOS 用 ⌘⇧ 符号）
+    appearance.go    终端的外观：字体、配色、背景图片怎样变成终端的选项，背景的绘制、复制和删除
+    options_font.go、options_colors.go、options_background.go
+                     “终端 › 字体”“配色”“背景图片”三页和它们的预览
     editor.go        连接编辑器窗口：a.newConnection()、a.editConnection(h)，校验和保存
     editor_proxy.go  连接编辑器的“代理”页
     editor_tunnels.go 连接编辑器的“隧道”页：表格和添加/编辑对话框

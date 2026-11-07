@@ -13,7 +13,7 @@ import (
 var optionsWindow = WindowSpec{
 	Kind:  WindowOptions,
 	Title: locales.Options,
-	Width: 720, Height: 520,
+	Width: 760, Height: 600,
 	MinWidth: 560, MinHeight: 400,
 }
 
@@ -61,15 +61,15 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageColors, parent: pageTerminal, title: locales.OptionsColorScheme,
-		view: nil,
+		view: (*App).colorsPage,
 	},
 	{
 		id: pageBackground, parent: pageTerminal, title: locales.OptionsBackground,
-		view: nil,
+		view: (*App).backgroundPage,
 	},
 	{
 		id: pageFont, parent: pageTerminal, title: locales.OptionsFont,
-		view: nil,
+		view: (*App).fontPage,
 	},
 }
 

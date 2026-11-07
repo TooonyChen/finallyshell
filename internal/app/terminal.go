@@ -7,11 +7,6 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-var (
-	termBG   = ui.Hex("#1d1f21") // Tomorrow Night's background
-	termText = ui.Hex("#c5c8c6")
-)
-
 // terminalArea shows the active session's terminal, or what keeps it
 // from showing.
 func (a *App) terminalArea(c *ui.Context) {
@@ -20,14 +15,16 @@ func (a *App) terminalArea(c *ui.Context) {
 		a.startPage(c, s)
 		return
 	}
-	area := ui.Column(c.Key(s.ID)).Fill().Background(termBG)
+	colors := a.termColors()
+	termText := colors.Foreground
+	area := ui.Column(c.Key(s.ID)).Fill().Background(colors.Background)
 	a.reconnectShortcut(area, s)
 	area.Children(func() {
 		if s.status != statusConnected {
 			a.statusBanner(c, s)
 		}
 		if s.term != nil {
-			ui.Box(c).Grow(1).Padding(4, 0, 0, 6).Children(func() {
+			a.terminalBackdrop(c, 0).Grow(1).Padding(4, 0, 0, 6).Children(func() {
 				view := terminal.View(c, s.term).Fill().AutoFocus()
 				a.findBar(c, s, view)
 			})

@@ -142,6 +142,7 @@ func (a *App) connect(s *Session, secret string) {
 				return
 			}
 			s.client, s.term, s.ip = client, term, ip
+			a.updateTerminal(term, topts)
 			s.status, s.err = statusConnected, nil
 			a.noteConnected(s.Host)
 			a.startTunnels(s, h.Tunnels)
@@ -184,15 +185,18 @@ func (a *App) terminalOptions(h *config.Host) terminal.Options {
 	o := terminal.Options{Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme}
 	a.mouseOptions(&o)
 	a.keyOptions(&o)
+	a.appearanceOptions(&o)
 	return o
 }
 
 // applyTerminalSettings gives every open terminal the settings that a
 // terminal can change as it runs; the rest apply as sessions connect.
 func (a *App) applyTerminalSettings() {
+	look := a.loadAppearance()
 	for _, s := range a.sessions {
 		if s.term != nil {
 			a.applyMouse(s.term)
+			a.applyAppearance(s.term, look)
 		}
 	}
 }

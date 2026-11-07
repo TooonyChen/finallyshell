@@ -73,6 +73,40 @@ type Settings struct {
 	// that Option+B sends Esc b, rather than the key that types ∫ and
 	// other symbols.
 	OptionAsAlt bool `json:"optionAsAlt,omitempty"`
+
+	// The terminal's look: the Font, Color scheme and Background image
+	// pages of the options. Zero is the default of each.
+	//
+	// TermFontFamily is the terminal's font, a comma-separated list of
+	// families of which the first installed one is used: "" for the app's
+	// list of coding fonts (DefaultTermFontFamily).
+	TermFontFamily string `json:"termFontFamily,omitempty"`
+	// TermFontSize is the font's size in DIPs: 0 for DefaultTermFontSize.
+	TermFontSize float32 `json:"termFontSize,omitempty"`
+	// TermLineHeight is the height of rows as a multiple of the font's
+	// own line height: 0 for 1.
+	TermLineHeight float32 `json:"termLineHeight,omitempty"`
+	// TermFontWeight is how heavy text is, from 100 to 900, of the
+	// weights the font has: 0 for 400. Bold text is 300 heavier, and at
+	// least 700.
+	TermFontWeight int `json:"termFontWeight,omitempty"`
+	// TermNoLigatures turns off the font's ligatures (OpenType calt and
+	// liga), which are on by default.
+	TermNoLigatures bool `json:"termNoLigatures,omitempty"`
+	// TermTheme is the color scheme, the name of a theme of Ghostty's: ""
+	// for DefaultTermTheme.
+	TermTheme string `json:"termTheme,omitempty"`
+	// TermBackground is the background image: the file name of the app's
+	// copy of it, in Dir(); "" for none.
+	TermBackground string `json:"termBackground,omitempty"`
+	// TermBackgroundFit is how the image fills the terminal: "" to cover
+	// it, cropped, BackgroundContain to fit inside it, BackgroundTile to
+	// repeat it at its own size.
+	TermBackgroundFit string `json:"termBackgroundFit,omitempty"`
+	// TermBackgroundOpacity is how much of the image shows through the
+	// color scheme's background, in percent from 1 to 100: 0 for
+	// DefaultBackgroundOpacity.
+	TermBackgroundOpacity float32 `json:"termBackgroundOpacity,omitempty"`
 }
 
 // RightClick is what a right click in a terminal does (Settings.RightClick).
@@ -85,6 +119,21 @@ const (
 	RightClickCopy        RightClick = "copy"          // copy the selection
 	RightClickCopyOrPaste RightClick = "copy-or-paste" // copy, or paste with no selection
 	RightClickIgnore      RightClick = "ignore"        // nothing
+)
+
+// The defaults of the terminal's look, which Settings leaves zero.
+const (
+	DefaultTermFontFamily    = "JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace"
+	DefaultTermFontSize      = 13.5
+	DefaultTermTheme         = "Tomorrow Night"
+	DefaultBackgroundOpacity = 30
+)
+
+// The values of Settings.TermBackgroundFit besides "", which covers the
+// terminal.
+const (
+	BackgroundContain = "contain"
+	BackgroundTile    = "tile"
 )
 
 func settingsPath() string { return filepath.Join(Dir(), "settings.json") }

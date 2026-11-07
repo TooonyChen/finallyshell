@@ -33,6 +33,9 @@ type Platform interface {
 	// dir ("" for the system's choice), over the window of parent, or the
 	// main window when that is not open: "" when canceled. It blocks too.
 	OpenFile(parent WindowKind, title, dir string) (string, error)
+	// OpenImage asks for an image file, over the window of parent as
+	// OpenFile does: "" when canceled. It blocks too.
+	OpenImage(parent WindowKind, title string) (string, error)
 	// DownloadsDir is where downloads go unless the user chooses.
 	DownloadsDir() string
 	// ShowInFolder shows a file in the system's file manager.
@@ -88,6 +91,7 @@ type App struct {
 	bottomTab   int // 0 files, 1 transfers, 2 tunnels
 	termFont    terminal.Font
 	termTheme   *terminal.Theme
+	look        appearance // the rest of the terminal's look
 
 	// The pane sizes changed since they were saved, last at layoutAt.
 	layoutDirty bool
@@ -148,15 +152,12 @@ func New(plat Platform) *App {
 		monitorPct:   defaultMonitorPct,
 		terminalPct:  defaultTerminalPct,
 		treeWidth:    defaultTreeWidth,
-		termFont:     terminal.Font{Family: "JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace", Size: 13.5},
 		saveHosts:    config.SaveHosts,
 		saveSettings: config.SaveSettings,
 	}
-	if t, err := terminal.GhosttyTheme("Tomorrow Night"); err == nil {
-		a.termTheme = t
-	}
 	a.hosts, _ = config.LoadHosts()
 	a.settings = config.LoadSettings()
+	a.loadAppearance()
 	a.restoreLayout()
 	a.transfers.init()
 	return a

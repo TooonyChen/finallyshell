@@ -34,6 +34,7 @@ type fakePlatform struct {
 	fakeSystem
 	fakeFilePicker
 	fakeFullScreen
+	fakeImagePicker
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {

@@ -63,22 +63,37 @@ func TestOptionsPages(t *testing.T) {
 	}
 	saveShot(t, tt, "options-general-en.png")
 
-	if err := tt.Click(locales.OptionsFont()); err != nil {
-		t.Fatal(err)
+	// A page still to come says so, while there is one.
+	var later *optionPage
+	for i := range optionPages {
+		if optionPages[i].view == nil {
+			later = &optionPages[i]
+			break
+		}
 	}
-	if a.optionsNav.Page != pageFont || !tt.HasText(locales.OptionsComingLater()) || tt.HasText(locales.OptionAutoSelectTab()) {
-		t.Fatalf("page %q; texts %q", a.optionsNav.Page, tt.Texts())
+	if later != nil {
+		if err := tt.Click(later.title()); err != nil {
+			t.Fatal(err)
+		}
+		if a.optionsNav.Page != later.id || !tt.HasText(locales.OptionsComingLater()) || tt.HasText(locales.OptionAutoSelectTab()) {
+			t.Fatalf("page %q; texts %q", a.optionsNav.Page, tt.Texts())
+		}
+		saveShot(t, tt, "options-placeholder-en.png")
 	}
-	saveShot(t, tt, "options-placeholder-en.png")
 
 	p.SetLocale("zh-Hans")
 	tt.Frame()
-	for _, s := range []string{"常规", "终端", "鼠标", "快捷键", "配色", "背景图片", "字体", "这些选项将在以后的版本中提供。"} {
+	for _, s := range []string{"常规", "终端", "鼠标", "快捷键", "配色", "背景图片", "字体"} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q in Chinese; texts %q", s, tt.Texts())
 		}
 	}
-	saveShot(t, tt, "options-placeholder-zh.png")
+	if later != nil {
+		if !tt.HasText("这些选项将在以后的版本中提供。") {
+			t.Errorf("no placeholder in Chinese; texts %q", tt.Texts())
+		}
+		saveShot(t, tt, "options-placeholder-zh.png")
+	}
 	if err := tt.Click("常规"); err != nil {
 		t.Fatal(err)
 	}
