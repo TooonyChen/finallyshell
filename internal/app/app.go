@@ -27,9 +27,9 @@ type Platform interface {
 	// OpenFiles asks for files to upload, or one folder with folder set:
 	// nil when canceled. It blocks; the app calls it on a goroutine.
 	OpenFiles(title string, folder bool) ([]string, error)
-	// ChooseFolder asks for a folder to download into: "" when canceled.
-	// It blocks too.
-	ChooseFolder(title string) (string, error)
+	// ChooseFolder asks for a folder to download into, over the window of
+	// parent as OpenFile does: "" when canceled. It blocks too.
+	ChooseFolder(parent WindowKind, title string) (string, error)
 	// OpenFile asks for one file to read, as a private key, starting in
 	// dir ("" for the system's choice), over the window of parent, or the
 	// main window when that is not open: "" when canceled. It blocks too.
@@ -45,6 +45,14 @@ type Platform interface {
 	DownloadsDir() string
 	// ShowInFolder shows a file in the system's file manager.
 	ShowInFolder(path string)
+	// OpenPath opens a file with the system's default app for it, or a
+	// folder in the file manager.
+	OpenPath(path string) error
+	// ShowTransfers shows on the app's icon (the Dock on macOS, the
+	// taskbar button on Windows) how many transfers are under way, and
+	// the fraction of their bytes done: -1 when none knows its size yet.
+	// Zero transfers clear both. See downloads.go.
+	ShowTransfers(count int, progress float64)
 	// SetLocale shows the language of tag, or the system's for "".
 	SetLocale(tag string)
 	// Languages are the languages the app is written in.

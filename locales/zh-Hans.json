@@ -432,5 +432,19 @@
   "problemNotSSH": "不是 SSH 连接，已跳过",
   "problemDeleted": "在 FinalShell 里已删除，已跳过",
   "importResult": "已导入 {imported} 个连接，跳过 {skipped} 个，失败 {failed} 个。",
-  "importKeysNote": "其中 {count} 个用私钥登录，请编辑连接选择私钥文件。"
+  "importKeysNote": "其中 {count} 个用私钥登录，请编辑连接选择私钥文件。",
+  "downloadsButton": "下载列表",
+  "downloadFolder": "下载目录",
+  "changeFolder": "更改…",
+  "showInFinder": "在访达中显示",
+  "showInExplorer": "在资源管理器中显示",
+  "openFile": "打开",
+  "transferProgressLeft": "{done} / {total}，{speed}/s，剩余 {left}",
+  "transfersUnderWay": "{count} 个传输进行中",
+  "chooseDefaultDownloadFolder": "选择下载目录",
+  "optionsTransfers": "传输",
+  "optionsDownloads": "下载",
+  "downloadFolderNote": "“下载”把文件保存在这里；文件列表右键菜单里的“下载到…”可以临时选择别的文件夹。",
+  "downloadFolderDefault": "使用默认",
+  "optionAskDownloadDir": "每次下载时询问保存位置"
 }

@@ -690,5 +690,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "downloadsButton": "Downloads",
+  "downloadFolder": "Download folder",
+  "changeFolder": "Change…",
+  "showInFinder": "Show in Finder",
+  "showInExplorer": "Show in Explorer",
+  "openFile": "Open",
+  "transferProgressLeft": "{done} of {total}, {speed}/s, {left} left",
+  "transfersUnderWay": "{count, plural, one {# transfer in progress} other {# transfers in progress}}",
+  "@transfersUnderWay": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseDefaultDownloadFolder": "Choose the download folder",
+  "optionsTransfers": "Transfers",
+  "optionsDownloads": "Downloads",
+  "downloadFolderNote": "Download saves files here. Download to… in the file list's menu chooses another folder for once.",
+  "downloadFolderDefault": "Use default",
+  "optionAskDownloadDir": "Ask where to save each download"
 }

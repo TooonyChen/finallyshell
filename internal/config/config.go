@@ -108,6 +108,15 @@ type Settings struct {
 	// DefaultBackgroundOpacity.
 	TermBackgroundOpacity float32 `json:"termBackgroundOpacity,omitempty"`
 
+	// The Transfers page of the options.
+	//
+	// DownloadDir is the folder downloads go into: "" for the system's
+	// downloads folder (~/Downloads).
+	DownloadDir string `json:"downloadDir,omitempty"`
+	// AskDownloadDir asks for the folder of each download, rather than
+	// putting it in DownloadDir.
+	AskDownloadDir bool `json:"askDownloadDir,omitempty"`
+
 	// KeepManagerOpen leaves the connection manager open after it
 	// connects; by default connecting from it closes it, as FinalShell's
 	// "Close window after connecting", checked, does.

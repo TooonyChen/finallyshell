@@ -4411,3 +4411,145 @@ func ImportKeysNote(count int) string { return In(i18n.Locale()).ImportKeysNote(
 func (msgs Messages) ImportKeysNote(count int) string {
 	return Catalog.Format(msgs.locale, "importKeysNote", map[string]any{"count": count})
 }
+
+// DownloadsButton says "Downloads"
+// in the language the app shows.
+func DownloadsButton() string { return In(i18n.Locale()).DownloadsButton() }
+
+// DownloadsButton says "Downloads"
+// in the language of msgs.
+func (msgs Messages) DownloadsButton() string {
+	return Catalog.Format(msgs.locale, "downloadsButton", nil)
+}
+
+// DownloadFolder says "Download folder"
+// in the language the app shows.
+func DownloadFolder() string { return In(i18n.Locale()).DownloadFolder() }
+
+// DownloadFolder says "Download folder"
+// in the language of msgs.
+func (msgs Messages) DownloadFolder() string {
+	return Catalog.Format(msgs.locale, "downloadFolder", nil)
+}
+
+// ChangeFolder says "Change…"
+// in the language the app shows.
+func ChangeFolder() string { return In(i18n.Locale()).ChangeFolder() }
+
+// ChangeFolder says "Change…"
+// in the language of msgs.
+func (msgs Messages) ChangeFolder() string {
+	return Catalog.Format(msgs.locale, "changeFolder", nil)
+}
+
+// ShowInFinder says "Show in Finder"
+// in the language the app shows.
+func ShowInFinder() string { return In(i18n.Locale()).ShowInFinder() }
+
+// ShowInFinder says "Show in Finder"
+// in the language of msgs.
+func (msgs Messages) ShowInFinder() string {
+	return Catalog.Format(msgs.locale, "showInFinder", nil)
+}
+
+// ShowInExplorer says "Show in Explorer"
+// in the language the app shows.
+func ShowInExplorer() string { return In(i18n.Locale()).ShowInExplorer() }
+
+// ShowInExplorer says "Show in Explorer"
+// in the language of msgs.
+func (msgs Messages) ShowInExplorer() string {
+	return Catalog.Format(msgs.locale, "showInExplorer", nil)
+}
+
+// OpenFile says "Open"
+// in the language the app shows.
+func OpenFile() string { return In(i18n.Locale()).OpenFile() }
+
+// OpenFile says "Open"
+// in the language of msgs.
+func (msgs Messages) OpenFile() string {
+	return Catalog.Format(msgs.locale, "openFile", nil)
+}
+
+// TransferProgressLeft says "{done} of {total}, {speed}/s, {left} left"
+// in the language the app shows.
+func TransferProgressLeft(done string, total string, speed string, left string) string {
+	return In(i18n.Locale()).TransferProgressLeft(done, total, speed, left)
+}
+
+// TransferProgressLeft says "{done} of {total}, {speed}/s, {left} left"
+// in the language of msgs.
+func (msgs Messages) TransferProgressLeft(done string, total string, speed string, left string) string {
+	return Catalog.Format(msgs.locale, "transferProgressLeft", map[string]any{"done": done, "total": total, "speed": speed, "left": left})
+}
+
+// TransfersUnderWay says "{count, plural, one {# transfer in progress} other {# transfers in progress}}"
+// in the language the app shows.
+func TransfersUnderWay(count int) string { return In(i18n.Locale()).TransfersUnderWay(count) }
+
+// TransfersUnderWay says "{count, plural, one {# transfer in progress} other {# transfers in progress}}"
+// in the language of msgs.
+func (msgs Messages) TransfersUnderWay(count int) string {
+	return Catalog.Format(msgs.locale, "transfersUnderWay", map[string]any{"count": count})
+}
+
+// ChooseDefaultDownloadFolder says "Choose the download folder"
+// in the language the app shows.
+func ChooseDefaultDownloadFolder() string { return In(i18n.Locale()).ChooseDefaultDownloadFolder() }
+
+// ChooseDefaultDownloadFolder says "Choose the download folder"
+// in the language of msgs.
+func (msgs Messages) ChooseDefaultDownloadFolder() string {
+	return Catalog.Format(msgs.locale, "chooseDefaultDownloadFolder", nil)
+}
+
+// OptionsTransfers says "Transfers"
+// in the language the app shows.
+func OptionsTransfers() string { return In(i18n.Locale()).OptionsTransfers() }
+
+// OptionsTransfers says "Transfers"
+// in the language of msgs.
+func (msgs Messages) OptionsTransfers() string {
+	return Catalog.Format(msgs.locale, "optionsTransfers", nil)
+}
+
+// OptionsDownloads says "Downloads"
+// in the language the app shows.
+func OptionsDownloads() string { return In(i18n.Locale()).OptionsDownloads() }
+
+// OptionsDownloads says "Downloads"
+// in the language of msgs.
+func (msgs Messages) OptionsDownloads() string {
+	return Catalog.Format(msgs.locale, "optionsDownloads", nil)
+}
+
+// DownloadFolderNote says "Download saves files here. Download to… in the file list's menu chooses another folder for once."
+// in the language the app shows.
+func DownloadFolderNote() string { return In(i18n.Locale()).DownloadFolderNote() }
+
+// DownloadFolderNote says "Download saves files here. Download to… in the file list's menu chooses another folder for once."
+// in the language of msgs.
+func (msgs Messages) DownloadFolderNote() string {
+	return Catalog.Format(msgs.locale, "downloadFolderNote", nil)
+}
+
+// DownloadFolderDefault says "Use default"
+// in the language the app shows.
+func DownloadFolderDefault() string { return In(i18n.Locale()).DownloadFolderDefault() }
+
+// DownloadFolderDefault says "Use default"
+// in the language of msgs.
+func (msgs Messages) DownloadFolderDefault() string {
+	return Catalog.Format(msgs.locale, "downloadFolderDefault", nil)
+}
+
+// OptionAskDownloadDir says "Ask where to save each download"
+// in the language the app shows.
+func OptionAskDownloadDir() string { return In(i18n.Locale()).OptionAskDownloadDir() }
+
+// OptionAskDownloadDir says "Ask where to save each download"
+// in the language of msgs.
+func (msgs Messages) OptionAskDownloadDir() string {
+	return Catalog.Format(msgs.locale, "optionAskDownloadDir", nil)
+}

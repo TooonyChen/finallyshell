@@ -36,6 +36,7 @@ type fakePlatform struct {
 	fakeFullScreen
 	fakeImagePicker
 	fakeFolderPicker
+	fakeDownloads
 	*fakeSecrets
 }
 
@@ -48,7 +49,6 @@ func newFakePlatform(t *testing.T) *fakePlatform {
 
 func (p *fakePlatform) Post(fn func())                           { p.posts <- fn }
 func (p *fakePlatform) OpenFiles(string, bool) ([]string, error) { return p.opened, nil }
-func (p *fakePlatform) ChooseFolder(string) (string, error)      { return p.downloads, nil }
 func (p *fakePlatform) DownloadsDir() string                     { return p.downloads }
 func (p *fakePlatform) ShowInFolder(path string)                 { p.shown = append(p.shown, path) }
 func (p *fakePlatform) Languages() []string                      { return []string{"en", "zh-Hans"} }

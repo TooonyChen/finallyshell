@@ -4,6 +4,7 @@ package widgets
 
 import (
 	"math"
+	"strconv"
 
 	"finalshelly/internal/icons"
 
@@ -13,6 +14,12 @@ import (
 // IconButton is a small square button showing an icon, named by label,
 // which is also its tooltip. Ask Clicked on what it returns.
 func IconButton(c *ui.Context, icon, label string) ui.Element {
+	return IconButtonBadge(c, icon, label, 0)
+}
+
+// IconButtonBadge is an IconButton with count in a small badge at its
+// top right corner, none for 0.
+func IconButtonBadge(c *ui.Context, icon, label string, count int) ui.Element {
 	b := ui.Box(c.Key(icon+"|"+label)).Size(24, 24).Center().Radius(5).
 		Role(ui.RoleButton).Label(label).Tooltip(label).Shrink(0)
 	if b.Hovered() {
@@ -20,6 +27,15 @@ func IconButton(c *ui.Context, icon, label string) ui.Element {
 	}
 	b.Children(func() {
 		ui.Icon(c, icons.Get(icon)).FontSize(15).TextColor(c.Theme().TextMuted)
+		if count > 0 {
+			text := strconv.Itoa(count)
+			if count > 99 {
+				text = "99+"
+			}
+			ui.Text(c, text).FontSize(9).Bold().TextColor(c.Theme().AccentText).Background(c.Theme().Accent).
+				MinWidth(13).Height(13).Radius(6.5).PaddingX(3).TextAlign(ui.Center).
+				Absolute().Top(-3).Right(-4).ZIndex(1).AccessHidden(true)
+		}
 	})
 	return b
 }
@@ -87,4 +103,48 @@ func Field(c *ui.Context, label string, fn func()) {
 // StatusDot is a small colored circle.
 func StatusDot(c *ui.Context, color ui.Color) ui.Element {
 	return ui.Box(c).Size(8, 8).Radius(4).Background(color).Shrink(0)
+}
+
+// MiddleEllipsis shortens s by its middle, with an ellipsis, to fit in
+// width DIPs at the font size size, as a long path keeps its start and
+// its last folder.
+func MiddleEllipsis(c *ui.Context, s string, width, size float32) string {
+	fits := func(t string) bool {
+		w, _ := c.MeasureText(0, ui.Span{Text: t, Size: size})
+		return w <= width
+	}
+	if fits(s) {
+		return s
+	}
+	r := []rune(s)
+	cut := func(keep int) string {
+		head := (keep + 1) / 2
+		return string(r[:head]) + "…" + string(r[len(r)-(keep-head):])
+	}
+	lo, hi := 0, len(r)-1 // the runes kept
+	for lo < hi {
+		mid := (lo + hi + 1) / 2
+		if fits(cut(mid)) {
+			lo = mid
+		} else {
+			hi = mid - 1
+		}
+	}
+	return cut(lo)
+}
+
+// MiddleText is s on one line, in a box that grows to the room its row
+// leaves, shortened by its middle (MiddleEllipsis) to the width the box
+// had in the last frame. Style the box with what it returns; padding
+// goes on the text, as pad DIPs on each side.
+func MiddleText(c *ui.Context, s string, size, pad float32) ui.Element {
+	box := ui.Box(c).Grow(1).MinWidth(0).Clip()
+	text := s
+	if w := box.Bounds().W - 2*pad - 1; w > 0 {
+		text = MiddleEllipsis(c, s, w, size)
+	}
+	box.Children(func() {
+		ui.Text(c, text).FontSize(size).SingleLine().PaddingX(pad)
+	})
+	return box
 }

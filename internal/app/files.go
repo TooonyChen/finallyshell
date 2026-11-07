@@ -216,6 +216,8 @@ func (a *App) filePanel(c *ui.Context) {
 			if f.loading {
 				ui.Spinner(c)
 			}
+			ui.Box(c).Size(1, 16).Background(ui.Hex("#e5e7eb")).Margin(0, 4)
+			a.downloadsButton(c)
 		})
 		if f.err != nil {
 			ui.Text(c, fileErrorText(f.err)).TextColor(theme.Danger).Padding(4, 10)

@@ -110,12 +110,8 @@ func (p *platform) OpenFiles(title string, folder bool) ([]string, error) {
 	return mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: p.win, Title: title, Directory: folder, Multiple: !folder})
 }
 
-func (p *platform) ChooseFolder(title string) (string, error) {
-	paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: p.win, Title: title, Directory: true, CreateDirectories: true})
-	if err != nil || len(paths) == 0 {
-		return "", err
-	}
-	return paths[0], nil
+func (p *platform) ChooseFolder(parent app.WindowKind, title string) (string, error) {
+	return p.openOne(parent, mygo.OpenDialogOptions{Title: title, Directory: true, CreateDirectories: true})
 }
 
 func (p *platform) OpenFile(parent app.WindowKind, title, dir string) (string, error) {
@@ -163,9 +159,25 @@ func (p *platform) DownloadsDir() string {
 	return filepath.Join(home, "Downloads")
 }
 
-func (p *platform) ShowInFolder(path string) { mygo.Shell.ShowItemInFolder(path) }
-func (p *platform) SetLocale(tag string)     { mygo.App.SetLocale(tag) }
-func (p *platform) Languages() []string      { return mygo.App.Languages() }
+func (p *platform) ShowInFolder(path string)   { mygo.Shell.ShowItemInFolder(path) }
+func (p *platform) OpenPath(path string) error { return mygo.Shell.OpenPath(path) }
+func (p *platform) SetLocale(tag string)       { mygo.App.SetLocale(tag) }
+func (p *platform) Languages() []string        { return mygo.App.Languages() }
+
+// ShowTransfers puts the count on the Dock icon (macOS; the launcher
+// entry on Linux docks that show one) and the progress under it, or on
+// the taskbar button (Windows), where MyGo shows SetProgressBar.
+func (p *platform) ShowTransfers(count int, progress float64) {
+	mygo.App.SetBadgeCount(count)
+	switch {
+	case count == 0:
+		p.win.SetProgressBar(mygo.ProgressBar{})
+	case progress < 0:
+		p.win.SetProgressBar(mygo.ProgressBar{State: mygo.ProgressIndeterminate})
+	default:
+		p.win.SetProgressBar(mygo.ProgressBar{State: mygo.ProgressNormal, Value: progress})
+	}
+}
 
 // SetFullScreen and IsFullScreen put the main window in the system's full
 // screen, for the app's (internal/app/fullscreen.go).

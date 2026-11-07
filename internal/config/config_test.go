@@ -18,6 +18,7 @@ func TestSettings(t *testing.T) {
 		Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180,
 		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
 		CopyOnSelect: true, RightClick: RightClickCopyOrPaste, NoLinkClick: true, WheelLines: 5, KeepManagerOpen: true,
+		DownloadDir: "/srv/incoming", AskDownloadDir: true,
 	}
 	if err := SaveSettings(want); err != nil {
 		t.Fatal(err)
@@ -26,9 +27,10 @@ func TestSettings(t *testing.T) {
 		t.Errorf("settings %+v, want %+v", s, want)
 	}
 
-	// A file written before the General and Mouse options reads as their
-	// defaults: new tabs selected, no tray, a question before closing, no
-	// copy on select, the context menu, links open, 3 lines a notch.
+	// A file written before the General, Mouse and Transfers options reads
+	// as their defaults: new tabs selected, no tray, a question before
+	// closing, no copy on select, the context menu, links open, 3 lines a
+	// notch, downloads into the system's folder without asking.
 	old := `{"language": "en", "sidebarWidth": 300}`
 	if err := os.WriteFile(filepath.Join(Dir(), "settings.json"), []byte(old), 0o600); err != nil {
 		t.Fatal(err)

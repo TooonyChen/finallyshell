@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -70,6 +72,9 @@ type transferQueue struct {
 	running int
 	nextID  int64
 	list    ui.ListState
+
+	popover downloadsPopover // the file panel's Downloads popover (downloads.go)
+	shown   taskbarState     // what the app's icon shows of them
 }
 
 func (q *transferQueue) init() {}
@@ -139,14 +144,19 @@ func (a *App) upload(s *Session, paths []string, dir string) {
 }
 
 // download fetches the names in s's current directory into the local
-// directory dir, the downloads folder when it is "".
+// directory dir; for "", into the download folder of the settings, or
+// where the user chooses when they ask for each download.
 func (a *App) download(s *Session, names []string, dir string) {
 	sc := s.sftp
 	if sc == nil || len(names) == 0 {
 		return
 	}
 	if dir == "" {
-		dir = a.plat.DownloadsDir()
+		if a.settings.AskDownloadDir {
+			a.pickAndDownload(s, names)
+			return
+		}
+		dir = a.downloadDir()
 	}
 	cwd := s.files.cwd
 	start := func() {
@@ -182,7 +192,7 @@ func (a *App) pickAndUpload(s *Session, folder bool) {
 func (a *App) pickAndDownload(s *Session, names []string) {
 	title := locales.ChooseDownloadFolder()
 	go func() {
-		dir, err := a.plat.ChooseFolder(title)
+		dir, err := a.plat.ChooseFolder(WindowMain, title)
 		if err != nil || dir == "" {
 			return
 		}
@@ -196,6 +206,7 @@ func (a *App) enqueue(t *transferJob) {
 	t.id, t.total = q.nextID, -1
 	q.jobs = append(q.jobs, t)
 	a.pump()
+	a.showTransfers()
 }
 
 // pump starts waiting transfers while fewer than maxRunning run.
@@ -224,16 +235,23 @@ func (a *App) run(t *transferJob) {
 		var err error
 		if t.dir == upload {
 			total, err = remotefs.LocalSize(t.src)
-		} else {
-			total, err = remotefs.RemoteSize(t.sftp, t.src)
+		} else if total, err = remotefs.RemoteSize(t.sftp, t.src); err == nil {
+			// The download folder of the settings may be gone.
+			err = os.MkdirAll(t.dstDir, 0o755)
 		}
 		if err == nil {
-			a.post(func() { t.total = total })
+			a.post(func() {
+				t.total = total
+				a.showTransfers()
+			})
 			var last time.Time
 			progress := func(done int64) {
 				if now := time.Now(); now.Sub(last) >= 150*time.Millisecond {
 					last = now
-					a.post(func() { t.progress(done, now) })
+					a.post(func() {
+						t.progress(done, now)
+						a.showTransfers()
+					})
 				}
 			}
 			if t.dir == upload {
@@ -257,6 +275,7 @@ func (a *App) run(t *transferJob) {
 				a.refreshIfShowing(t.sess, t.dstDir)
 			}
 			a.pump()
+			a.showTransfers()
 		})
 	}()
 }
@@ -295,6 +314,9 @@ func (a *App) transferPanel(c *ui.Context) {
 	})
 }
 
+// transferRow is a transfer in the Transfers tab and in the Downloads
+// popover: its name, where it goes, its progress or how it ended, and
+// what can be done with it.
 func (a *App) transferRow(c *ui.Context, t *transferJob) {
 	row := ui.Row(c).Gap(10).Padding(6, 10).BorderWidth(0, 0, 1, 0).BorderColor(ui.Hex("#f1f5f9"))
 	row.Children(func() {
@@ -318,9 +340,9 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 				} else if t.total == 0 {
 					frac = 1
 				}
-				ui.Progress(c, frac)
+				ui.Progress(c, frac).Label(t.name())
 				if t.total >= 0 {
-					widgets.Muted(c, locales.TransferProgress(formatSize(t.done), formatSize(t.total), formatSize(int64(t.speed)))).FontSize(11.5)
+					widgets.Muted(c, t.progressText()).FontSize(11.5).SingleLine()
 				}
 			case transferDone:
 				ui.Text(c, locales.TransferDone()).FontSize(11.5).TextColor(theme.Success)
@@ -330,14 +352,44 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 				ui.Text(c, locales.TransferFailed(t.err.Error())).FontSize(11.5).TextColor(theme.Danger).MaxLines(2)
 			}
 		})
-		if !t.finished() {
+		switch {
+		case !t.finished():
 			if widgets.IconButton(c, "x", locales.Cancel()).Clicked() {
-				t.stop()
+				a.cancelTransfer(t)
 			}
-		} else if t.state == transferDone && t.local != "" {
+		case t.state == transferFailed || t.state == transferCanceled:
+			ok := a.canRetry(t)
+			if widgets.IconButton(c, "rotate-cw", locales.Retry()).Disabled(!ok).Clicked() && ok {
+				a.retry(t)
+			}
+		case t.state == transferDone && t.local != "":
+			if widgets.IconButton(c, "external-link", locales.OpenFile()).Clicked() {
+				a.openDownload(t)
+			}
 			if widgets.IconButton(c, "folder", locales.ShowInFolder()).Clicked() {
 				a.plat.ShowInFolder(t.local)
 			}
 		}
 	})
+}
+
+// progressText is how far a running transfer is: the bytes done of all,
+// the speed, and the time left once there is a speed.
+func (t *transferJob) progressText() string {
+	done, total := formatSize(t.done), formatSize(t.total)
+	speed := formatSize(int64(t.speed))
+	if t.speed <= 0 || t.done >= t.total {
+		return locales.TransferProgress(done, total, speed)
+	}
+	left := time.Duration(float64(t.total-t.done) / t.speed * float64(time.Second))
+	return locales.TransferProgressLeft(done, total, speed, formatTimeLeft(left))
+}
+
+// formatTimeLeft is d as a clock: 0:07, 4:05, 1:02:03.
+func formatTimeLeft(d time.Duration) string {
+	s := int64(d.Round(time.Second) / time.Second)
+	if s < 3600 {
+		return fmt.Sprintf("%d:%02d", s/60, s%60)
+	}
+	return fmt.Sprintf("%d:%02d:%02d", s/3600, s/60%60, s%60)
 }
