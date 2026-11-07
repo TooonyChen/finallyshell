@@ -10,7 +10,6 @@ import (
 	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
-	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -300,41 +299,6 @@ func (a *App) replaceView(c *ui.Context, q *replaceQuestion) {
 			if ui.PrimaryButton(c, locales.Replace()).Clicked() {
 				a.replace = nil
 				q.yes()
-			}
-		})
-	})
-}
-
-// settingsWindow is how the settings window opens.
-var settingsWindow = WindowSpec{
-	Kind:  WindowSettings,
-	Title: locales.Settings,
-	Width: 400, Height: 220,
-	MinWidth: 340, MinHeight: 200,
-}
-
-// openSettings opens the settings window, or brings it to the front.
-func (a *App) openSettings() { a.openWindow(settingsWindow, a.settingsView) }
-
-// settingsView is the settings window: for now, the language.
-func (a *App) settingsView(c *ui.Context) {
-	ui.Column(c).Fill().Padding(16).Gap(14).Children(func() {
-		ui.Column(c).Gap(8).Grow(1).Children(func() {
-			ui.Text(c, locales.SettingsLanguage()).Bold()
-			chosen := a.settings.Language
-			ui.RadioGroup(c, func() {
-				ui.Radio(c, &chosen, "", locales.FollowSystem())
-				for _, tag := range a.plat.Languages() {
-					ui.Radio(c, &chosen, tag, i18n.Autonym(tag))
-				}
-			}).Label(locales.SettingsLanguage())
-			if chosen != a.settings.Language {
-				a.setLanguage(chosen)
-			}
-		})
-		ui.Row(c).Justify(ui.End).Children(func() {
-			if ui.PrimaryButton(c, locales.Done()).Clicked() {
-				a.closeWindow(WindowSettings)
 			}
 		})
 	})

@@ -95,7 +95,6 @@
   "connectionLost": "Connection lost",
   "connectingTo": "Connecting to {target}",
   "welcomeHint": "Ctrl+Shift+T opens the connection manager",
-  "settings": "Settings",
   "followSystem": "System language",
   "tabFiles": "Files",
   "tabTransfers": "Transfers",
@@ -202,5 +201,31 @@
   "errOpenShell": "Could not open a shell: {error}",
   "errTerminal": "Could not start the terminal: {error}",
   "done": "Done",
-  "settingsLanguage": "Language"
+  "settingsLanguage": "Language",
+  "options": "Options",
+  "optionsGeneral": "General",
+  "optionsTerminal": "Terminal",
+  "optionsMouse": "Mouse",
+  "optionsShortcuts": "Shortcuts",
+  "optionsColorScheme": "Color scheme",
+  "optionsBackground": "Background image",
+  "optionsFont": "Font",
+  "optionsComingLater": "These options are coming in a later version.",
+  "optionsTabsAndWindow": "Tabs and window",
+  "optionAutoSelectTab": "Select new tabs automatically",
+  "optionMinimizeToTray": "Minimize to tray when closed",
+  "optionConfirmClose": "Confirm before closing the window",
+  "optionConfirmCloseNote": "Asks only while sessions are connected or connecting.",
+  "confirmQuitTitle": "Quit Finalshelly?",
+  "confirmQuitBody": "{count, plural, one {# session is open. Quitting disconnects it.} other {# sessions are open. Quitting disconnects them.}}",
+  "@confirmQuitBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmQuitOK": "Quit",
+  "trayShow": "Show Finalshelly",
+  "trayQuit": "Quit"
 }

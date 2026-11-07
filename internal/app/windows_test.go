@@ -86,31 +86,31 @@ func (p *fakePlatform) show(t *testing.T, kind WindowKind) *ui.Tester {
 
 func TestWindowOpensOncePerKind(t *testing.T) {
 	a, p := testApp(t)
-	a.openSettings()
-	a.openSettings()
-	if len(p.windows) != 1 || !a.windowOpen(WindowSettings) {
+	a.openOptions()
+	a.openOptions()
+	if len(p.windows) != 1 || !a.windowOpen(WindowOptions) {
 		t.Fatalf("windows %v", p.windows)
 	}
-	if !slices.Equal(p.focused, []WindowKind{WindowSettings}) {
+	if !slices.Equal(p.focused, []WindowKind{WindowOptions}) {
 		t.Errorf("opening it again focused %v", p.focused)
 	}
-	spec := p.windows[WindowSettings].spec
-	if spec.Title() != locales.Settings() || spec.Parent != "" || spec.Modal || spec.MinWidth == 0 || spec.MinHeight == 0 {
+	spec := p.windows[WindowOptions].spec
+	if spec.Title() != locales.Options() || spec.Parent != "" || spec.Modal || spec.MinWidth == 0 || spec.MinHeight == 0 {
 		t.Errorf("spec %+v", spec)
 	}
 
-	a.closeWindow(WindowSettings)
-	if a.windowOpen(WindowSettings) || len(p.windows) != 0 {
+	a.closeWindow(WindowOptions)
+	if a.windowOpen(WindowOptions) || len(p.windows) != 0 {
 		t.Fatalf("still open: %v", p.windows)
 	}
-	a.openSettings()
-	if !a.windowOpen(WindowSettings) || len(p.focused) != 1 {
+	a.openOptions()
+	if !a.windowOpen(WindowOptions) || len(p.focused) != 1 {
 		t.Errorf("not opened again: windows %v, focused %v", p.windows, p.focused)
 	}
 }
 
 // windowSpecs are the windows the app opens: a new kind goes here too.
-var windowSpecs = []WindowSpec{settingsWindow}
+var windowSpecs = []WindowSpec{optionsWindow}
 
 func TestWindowSpecsFitTheirLeastSize(t *testing.T) {
 	kinds := map[WindowKind]bool{}
@@ -126,7 +126,7 @@ func TestWindowSpecsFitTheirLeastSize(t *testing.T) {
 
 	// A spec smaller than its least size opens at the least size.
 	a, p := testApp(t)
-	a.openWindow(WindowSpec{Kind: "test-small", Title: locales.Settings, Width: 100, Height: 50, MinWidth: 300, MinHeight: 200}, func(*ui.Context) {})
+	a.openWindow(WindowSpec{Kind: "test-small", Title: locales.Options, Width: 100, Height: 50, MinWidth: 300, MinHeight: 200}, func(*ui.Context) {})
 	if s := p.windows["test-small"].spec; s.Width != 300 || s.Height != 200 {
 		t.Errorf("opened at %dx%d", s.Width, s.Height)
 	}
@@ -158,11 +158,11 @@ func TestModalChildOfChild(t *testing.T) {
 
 func TestEscapeClosesWindow(t *testing.T) {
 	a, p := testApp(t)
-	a.openSettings()
-	tt := p.show(t, WindowSettings)
+	a.openOptions()
+	tt := p.show(t, WindowOptions)
 	tt.Key(0, ui.KeyEscape)
-	if a.windowOpen(WindowSettings) {
-		t.Error("Escape left the settings window open")
+	if a.windowOpen(WindowOptions) {
+		t.Error("Escape left the options window open")
 	}
 }
 
@@ -170,7 +170,7 @@ func TestClosingMainClosesWindows(t *testing.T) {
 	const manager, editor WindowKind = "test-manager", "test-editor"
 	a, p := testApp(t)
 	view := func(c *ui.Context) {}
-	a.openSettings()
+	a.openOptions()
 	a.openWindow(WindowSpec{Kind: manager, Title: locales.ManagerTitle, Width: 600, Height: 400}, view)
 	a.openWindow(WindowSpec{Kind: editor, Title: locales.EditConnection, Width: 500, Height: 400, Parent: manager, Modal: true}, view)
 	a.CloseAll()
@@ -179,29 +179,29 @@ func TestClosingMainClosesWindows(t *testing.T) {
 	}
 }
 
-func TestSettingsWindowChangesLanguage(t *testing.T) {
+func TestOptionsWindowChangesLanguage(t *testing.T) {
 	a, p := testApp(t)
 	demoSession(a, "web-1", "45.56.78.90")
 	a.active = 0
 	mainWin := ui.NewTester(a.View, 1280, 820)
 	mainWin.SetScale(2)
 	p.tt = mainWin
-	if err := mainWin.Click(locales.Settings()); err != nil {
+	if err := mainWin.Click(locales.Options()); err != nil {
 		t.Fatal(err)
 	}
-	if !a.windowOpen(WindowSettings) {
-		t.Fatal("settings window not opened")
+	if !a.windowOpen(WindowOptions) {
+		t.Fatal("options window not opened")
 	}
 	if mainWin.HasText(locales.FollowSystem()) {
-		t.Error("the settings show in the main window")
+		t.Error("the options show in the main window")
 	}
-	saveShot(t, mainWin, "main-with-settings-window.png")
+	saveShot(t, mainWin, "main-with-options-window.png")
 
-	tt := p.show(t, WindowSettings)
+	tt := p.show(t, WindowOptions)
 	if !tt.HasText(locales.FollowSystem()) || !tt.HasText("简体中文") {
-		t.Fatalf("settings not shown; texts %q", tt.Texts())
+		t.Fatalf("options not shown; texts %q", tt.Texts())
 	}
-	saveShot(t, tt, "settings-en.png")
+	saveShot(t, tt, "options-en.png")
 
 	redraws := p.redraws
 	if err := tt.Click("简体中文"); err != nil {
@@ -213,13 +213,13 @@ func TestSettingsWindowChangesLanguage(t *testing.T) {
 	if p.redraws == redraws {
 		t.Error("the other windows were not redrawn")
 	}
-	if got := p.windows[WindowSettings].spec.Title(); got != "设置" {
+	if got := p.windows[WindowOptions].spec.Title(); got != "选项" {
 		t.Errorf("title %q", got)
 	}
 	if !tt.HasText("界面语言") || !tt.HasText("完成") {
-		t.Errorf("settings not in Chinese; texts %q", tt.Texts())
+		t.Errorf("options not in Chinese; texts %q", tt.Texts())
 	}
-	saveShot(t, tt, "settings-zh.png")
+	saveShot(t, tt, "options-zh.png")
 	mainWin.Frame()
 	if !mainWin.HasText("会话 (1)") {
 		t.Errorf("main window not in Chinese; texts %q", mainWin.Texts())
@@ -228,14 +228,14 @@ func TestSettingsWindowChangesLanguage(t *testing.T) {
 	if err := tt.Click("完成"); err != nil {
 		t.Fatal(err)
 	}
-	if a.windowOpen(WindowSettings) {
-		t.Fatal("settings window still open")
+	if a.windowOpen(WindowOptions) {
+		t.Fatal("options window still open")
 	}
 
-	if err := mainWin.Click("设置"); err != nil {
+	if err := mainWin.Click("选项"); err != nil {
 		t.Fatal(err)
 	}
-	if err := p.show(t, WindowSettings).Click("跟随系统"); err != nil {
+	if err := p.show(t, WindowOptions).Click("跟随系统"); err != nil {
 		t.Fatal(err)
 	}
 	if a.settings.Language != "" || config.LoadSettings().Language != "" {

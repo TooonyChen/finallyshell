@@ -14,12 +14,32 @@ import (
 
 func TestSettings(t *testing.T) {
 	t.Setenv("FINALSHELLY_DIR", t.TempDir())
-	want := Settings{Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180}
+	want := Settings{
+		Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180,
+		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
+	}
 	if err := SaveSettings(want); err != nil {
 		t.Fatal(err)
 	}
 	if s := LoadSettings(); s != want {
 		t.Errorf("settings %+v, want %+v", s, want)
+	}
+
+	// A file written before the General options reads as their defaults:
+	// new tabs selected, no tray, a question before closing.
+	old := `{"language": "en", "sidebarWidth": 300}`
+	if err := os.WriteFile(filepath.Join(Dir(), "settings.json"), []byte(old), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if s := LoadSettings(); s != (Settings{Language: "en", SidebarWidth: 300}) {
+		t.Errorf("old file: %+v", s)
+	}
+	// The defaults are written as nothing.
+	if err := SaveSettings(Settings{}); err != nil {
+		t.Fatal(err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(Dir(), "settings.json")); string(data) != "{}" {
+		t.Errorf("defaults saved as %s", data)
 	}
 }
 

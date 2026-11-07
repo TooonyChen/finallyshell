@@ -31,6 +31,7 @@ type fakePlatform struct {
 	opened    []string // what OpenFiles returns
 	shown     []string
 	fakeWindows
+	fakeSystem
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {

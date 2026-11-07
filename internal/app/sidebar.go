@@ -164,8 +164,8 @@ func (a *App) sessionPanel(c *ui.Context) {
 	ui.Column(c).Fill().BorderWidth(1, 0, 0, 0).BorderColor(ui.Hex("#d1d5db")).Children(func() {
 		ui.Row(c).Padding(6, 6, 6, 10).Gap(2).Children(func() {
 			ui.Text(c, locales.SessionsTitle(len(a.sessions))).Bold().Grow(1)
-			if widgets.IconButton(c, "settings", locales.Settings()).Clicked() {
-				a.openSettings()
+			if widgets.IconButton(c, "settings", locales.Options()).Clicked() {
+				a.openOptions()
 			}
 			if widgets.IconButton(c, "plus", locales.NewConnection()).Clicked() {
 				a.openManager()

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"finalshelly/internal/config"
+	"finalshelly/internal/widgets"
 	"finalshelly/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
@@ -50,6 +51,18 @@ type Platform interface {
 	CloseWindow(kind WindowKind)
 	// Redraw draws every open window again, the main one included.
 	Redraw()
+
+	// HideToTray hides the main window to an
+	// icon in the tray (the menu bar on macOS) whose menu shows it again
+	// or quits. It returns false, leaving the window as it is, when the
+	// system has no tray.
+	HideToTray() bool
+	// Confirm asks q in a message box and tells whether the user chose OK.
+	// It blocks; the app calls it on a goroutine.
+	Confirm(q Confirmation) bool
+	// Quit quits the app, as the tray's Quit does: the platform asks
+	// QuitRequested first, then closes every window.
+	Quit()
 }
 
 // App is the state of the window.
@@ -94,6 +107,11 @@ type App struct {
 
 	// The secondary windows that are open.
 	windows map[WindowKind]bool
+
+	// The options window's page.
+	optionsNav widgets.NavState
+	// Quitting: asking whether to, or told to go ahead.
+	askingQuit, quitApproved bool
 
 	// The question before replacing files.
 	replace *replaceQuestion
@@ -236,7 +254,9 @@ func (a *App) openSession(h *config.Host) {
 	}
 	s := newSession(h)
 	a.sessions = append(a.sessions, s)
-	a.active = len(a.sessions) - 1
+	if !a.settings.NoAutoSelectTab || a.current() == nil {
+		a.active = len(a.sessions) - 1
+	}
 	a.connect(s, pw)
 }
 

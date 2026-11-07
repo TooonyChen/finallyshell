@@ -35,6 +35,19 @@ type Settings struct {
 	MonitorPercent  float32 `json:"monitorPercent,omitempty"`
 	TerminalPercent float32 `json:"terminalPercent,omitempty"`
 	TreeWidth       float32 `json:"treeWidth,omitempty"`
+
+	// The General page of the options. Each is named so that false, as a
+	// file without it reads, is the default.
+	//
+	// NoAutoSelectTab opens new sessions in the background, keeping the
+	// selected one; by default a new session is selected.
+	NoAutoSelectTab bool `json:"noAutoSelectTab,omitempty"`
+	// MinimizeToTray hides the main window to a tray icon when it is
+	// closed, rather than quitting.
+	MinimizeToTray bool `json:"minimizeToTray,omitempty"`
+	// NoConfirmClose quits without asking while sessions are open; by
+	// default closing the window, or quitting, asks first.
+	NoConfirmClose bool `json:"noConfirmClose,omitempty"`
 }
 
 func settingsPath() string { return filepath.Join(Dir(), "settings.json") }

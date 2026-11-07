@@ -6,14 +6,14 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// WindowKind names a secondary window: a dialog such as the settings,
+// WindowKind names a secondary window: a dialog such as the options,
 // which FinalShell opens in a window of its own. The app keeps at most one
 // window of each kind open; opening it again brings it to the front.
 type WindowKind string
 
 // The secondary windows.
 const (
-	WindowSettings WindowKind = "settings"
+	WindowOptions WindowKind = "options"
 )
 
 // WindowSpec says how a secondary window opens.

@@ -530,16 +530,6 @@ func (msgs Messages) WelcomeHint() string {
 	return Catalog.Format(msgs.locale, "welcomeHint", nil)
 }
 
-// Settings says "Settings"
-// in the language the app shows.
-func Settings() string { return In(i18n.Locale()).Settings() }
-
-// Settings says "Settings"
-// in the language of msgs.
-func (msgs Messages) Settings() string {
-	return Catalog.Format(msgs.locale, "settings", nil)
-}
-
 // FollowSystem says "System language"
 // in the language the app shows.
 func FollowSystem() string { return In(i18n.Locale()).FollowSystem() }
@@ -1444,4 +1434,194 @@ func SettingsLanguage() string { return In(i18n.Locale()).SettingsLanguage() }
 // in the language of msgs.
 func (msgs Messages) SettingsLanguage() string {
 	return Catalog.Format(msgs.locale, "settingsLanguage", nil)
+}
+
+// Options says "Options"
+// in the language the app shows.
+func Options() string { return In(i18n.Locale()).Options() }
+
+// Options says "Options"
+// in the language of msgs.
+func (msgs Messages) Options() string {
+	return Catalog.Format(msgs.locale, "options", nil)
+}
+
+// OptionsGeneral says "General"
+// in the language the app shows.
+func OptionsGeneral() string { return In(i18n.Locale()).OptionsGeneral() }
+
+// OptionsGeneral says "General"
+// in the language of msgs.
+func (msgs Messages) OptionsGeneral() string {
+	return Catalog.Format(msgs.locale, "optionsGeneral", nil)
+}
+
+// OptionsTerminal says "Terminal"
+// in the language the app shows.
+func OptionsTerminal() string { return In(i18n.Locale()).OptionsTerminal() }
+
+// OptionsTerminal says "Terminal"
+// in the language of msgs.
+func (msgs Messages) OptionsTerminal() string {
+	return Catalog.Format(msgs.locale, "optionsTerminal", nil)
+}
+
+// OptionsMouse says "Mouse"
+// in the language the app shows.
+func OptionsMouse() string { return In(i18n.Locale()).OptionsMouse() }
+
+// OptionsMouse says "Mouse"
+// in the language of msgs.
+func (msgs Messages) OptionsMouse() string {
+	return Catalog.Format(msgs.locale, "optionsMouse", nil)
+}
+
+// OptionsShortcuts says "Shortcuts"
+// in the language the app shows.
+func OptionsShortcuts() string { return In(i18n.Locale()).OptionsShortcuts() }
+
+// OptionsShortcuts says "Shortcuts"
+// in the language of msgs.
+func (msgs Messages) OptionsShortcuts() string {
+	return Catalog.Format(msgs.locale, "optionsShortcuts", nil)
+}
+
+// OptionsColorScheme says "Color scheme"
+// in the language the app shows.
+func OptionsColorScheme() string { return In(i18n.Locale()).OptionsColorScheme() }
+
+// OptionsColorScheme says "Color scheme"
+// in the language of msgs.
+func (msgs Messages) OptionsColorScheme() string {
+	return Catalog.Format(msgs.locale, "optionsColorScheme", nil)
+}
+
+// OptionsBackground says "Background image"
+// in the language the app shows.
+func OptionsBackground() string { return In(i18n.Locale()).OptionsBackground() }
+
+// OptionsBackground says "Background image"
+// in the language of msgs.
+func (msgs Messages) OptionsBackground() string {
+	return Catalog.Format(msgs.locale, "optionsBackground", nil)
+}
+
+// OptionsFont says "Font"
+// in the language the app shows.
+func OptionsFont() string { return In(i18n.Locale()).OptionsFont() }
+
+// OptionsFont says "Font"
+// in the language of msgs.
+func (msgs Messages) OptionsFont() string {
+	return Catalog.Format(msgs.locale, "optionsFont", nil)
+}
+
+// OptionsComingLater says "These options are coming in a later version."
+// in the language the app shows.
+func OptionsComingLater() string { return In(i18n.Locale()).OptionsComingLater() }
+
+// OptionsComingLater says "These options are coming in a later version."
+// in the language of msgs.
+func (msgs Messages) OptionsComingLater() string {
+	return Catalog.Format(msgs.locale, "optionsComingLater", nil)
+}
+
+// OptionsTabsAndWindow says "Tabs and window"
+// in the language the app shows.
+func OptionsTabsAndWindow() string { return In(i18n.Locale()).OptionsTabsAndWindow() }
+
+// OptionsTabsAndWindow says "Tabs and window"
+// in the language of msgs.
+func (msgs Messages) OptionsTabsAndWindow() string {
+	return Catalog.Format(msgs.locale, "optionsTabsAndWindow", nil)
+}
+
+// OptionAutoSelectTab says "Select new tabs automatically"
+// in the language the app shows.
+func OptionAutoSelectTab() string { return In(i18n.Locale()).OptionAutoSelectTab() }
+
+// OptionAutoSelectTab says "Select new tabs automatically"
+// in the language of msgs.
+func (msgs Messages) OptionAutoSelectTab() string {
+	return Catalog.Format(msgs.locale, "optionAutoSelectTab", nil)
+}
+
+// OptionMinimizeToTray says "Minimize to tray when closed"
+// in the language the app shows.
+func OptionMinimizeToTray() string { return In(i18n.Locale()).OptionMinimizeToTray() }
+
+// OptionMinimizeToTray says "Minimize to tray when closed"
+// in the language of msgs.
+func (msgs Messages) OptionMinimizeToTray() string {
+	return Catalog.Format(msgs.locale, "optionMinimizeToTray", nil)
+}
+
+// OptionConfirmClose says "Confirm before closing the window"
+// in the language the app shows.
+func OptionConfirmClose() string { return In(i18n.Locale()).OptionConfirmClose() }
+
+// OptionConfirmClose says "Confirm before closing the window"
+// in the language of msgs.
+func (msgs Messages) OptionConfirmClose() string {
+	return Catalog.Format(msgs.locale, "optionConfirmClose", nil)
+}
+
+// OptionConfirmCloseNote says "Asks only while sessions are connected or connecting."
+// in the language the app shows.
+func OptionConfirmCloseNote() string { return In(i18n.Locale()).OptionConfirmCloseNote() }
+
+// OptionConfirmCloseNote says "Asks only while sessions are connected or connecting."
+// in the language of msgs.
+func (msgs Messages) OptionConfirmCloseNote() string {
+	return Catalog.Format(msgs.locale, "optionConfirmCloseNote", nil)
+}
+
+// ConfirmQuitTitle says "Quit Finalshelly?"
+// in the language the app shows.
+func ConfirmQuitTitle() string { return In(i18n.Locale()).ConfirmQuitTitle() }
+
+// ConfirmQuitTitle says "Quit Finalshelly?"
+// in the language of msgs.
+func (msgs Messages) ConfirmQuitTitle() string {
+	return Catalog.Format(msgs.locale, "confirmQuitTitle", nil)
+}
+
+// ConfirmQuitBody says "{count, plural, one {# session is open. Quitting disconnects it.} other {# sessions are open. Quitting disconnects th…"
+// in the language the app shows.
+func ConfirmQuitBody(count int) string { return In(i18n.Locale()).ConfirmQuitBody(count) }
+
+// ConfirmQuitBody says "{count, plural, one {# session is open. Quitting disconnects it.} other {# sessions are open. Quitting disconnects th…"
+// in the language of msgs.
+func (msgs Messages) ConfirmQuitBody(count int) string {
+	return Catalog.Format(msgs.locale, "confirmQuitBody", map[string]any{"count": count})
+}
+
+// ConfirmQuitOK says "Quit"
+// in the language the app shows.
+func ConfirmQuitOK() string { return In(i18n.Locale()).ConfirmQuitOK() }
+
+// ConfirmQuitOK says "Quit"
+// in the language of msgs.
+func (msgs Messages) ConfirmQuitOK() string {
+	return Catalog.Format(msgs.locale, "confirmQuitOK", nil)
+}
+
+// TrayShow says "Show Finalshelly"
+// in the language the app shows.
+func TrayShow() string { return In(i18n.Locale()).TrayShow() }
+
+// TrayShow says "Show Finalshelly"
+// in the language of msgs.
+func (msgs Messages) TrayShow() string {
+	return Catalog.Format(msgs.locale, "trayShow", nil)
+}
+
+// TrayQuit says "Quit"
+// in the language the app shows.
+func TrayQuit() string { return In(i18n.Locale()).TrayQuit() }
+
+// TrayQuit says "Quit"
+// in the language of msgs.
+func (msgs Messages) TrayQuit() string {
+	return Catalog.Format(msgs.locale, "trayQuit", nil)
 }

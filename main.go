@@ -21,6 +21,7 @@ import (
 type platform struct {
 	win     *mygo.Window // the main window
 	windows map[app.WindowKind]*childWindow
+	tray    *mygo.Tray // while the main window is hidden in the tray
 }
 
 // childWindow is an open secondary window.
@@ -139,8 +140,32 @@ func main() {
 			MinHeight: 560,
 			Content:   ui.View(a.View),
 		})
+		// The close button may hide the window to the tray, or ask first;
+		// a quit may ask too (closing.go in internal/app).
+		plat.win.OnClose(func(e *mygo.CloseEvent) {
+			if !a.CloseRequested() {
+				e.PreventDefault()
+			}
+		})
+		mygo.App.OnBeforeQuit(func(e *mygo.QuitEvent) {
+			if !a.QuitRequested() {
+				e.PreventDefault()
+			}
+		})
 		// Its children close with it, before this runs.
-		plat.win.OnClosed(a.CloseAll)
+		plat.win.OnClosed(func() {
+			if plat.tray != nil {
+				plat.tray.Destroy()
+				plat.tray = nil
+			}
+			a.CloseAll()
+		})
+		// The Dock icon (macOS) shows the window hidden in the tray.
+		mygo.App.OnActivate(func(hasVisibleWindows bool) {
+			if !hasVisibleWindows {
+				plat.showMain()
+			}
+		})
 		mygo.App.OnLocaleChanged(func(string) { plat.retitle() })
 	})
 	if err := mygo.App.Run(); err != nil {
