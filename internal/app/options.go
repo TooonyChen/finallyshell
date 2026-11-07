@@ -57,7 +57,7 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageShortcuts, parent: pageTerminal, title: locales.OptionsShortcuts,
-		view: nil,
+		view: (*App).shortcutsPageView,
 	},
 	{
 		id: pageColors, parent: pageTerminal, title: locales.OptionsColorScheme,

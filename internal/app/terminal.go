@@ -20,17 +20,26 @@ func (a *App) terminalArea(c *ui.Context) {
 		a.startPage(c, s)
 		return
 	}
-	ui.Column(c.Key(s.ID)).Fill().Background(termBG).Children(func() {
+	area := ui.Column(c.Key(s.ID)).Fill().Background(termBG)
+	a.reconnectShortcut(area, s)
+	area.Children(func() {
 		if s.status != statusConnected {
 			a.statusBanner(c, s)
 		}
 		if s.term != nil {
 			ui.Box(c).Grow(1).Padding(4, 0, 0, 6).Children(func() {
-				terminal.View(c, s.term).Fill().AutoFocus()
+				view := terminal.View(c, s.term).Fill().AutoFocus()
+				a.findBar(c, s, view)
 			})
 			return
 		}
-		ui.Column(c).Grow(1).Center().Gap(12).Children(func() {
+		connecting := s.status == statusConnecting
+		msg := ui.Column(c.Key(connecting)).Grow(1).Center().Gap(12)
+		if !connecting {
+			// For the key that connects again.
+			msg.Focusable().FocusRing(false).AutoFocus()
+		}
+		msg.Children(func() {
 			if s.status == statusConnecting {
 				ui.Spinner(c).TextColor(termText).FontSize(22)
 				ui.Text(c, locales.ConnectingTo(s.Host.Target())).TextColor(termText)

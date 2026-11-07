@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"finalshelly/internal/app"
 	"finalshelly/internal/config"
@@ -142,6 +143,11 @@ func (p *platform) ShowInFolder(path string) { mygo.Shell.ShowItemInFolder(path)
 func (p *platform) SetLocale(tag string)     { mygo.App.SetLocale(tag) }
 func (p *platform) Languages() []string      { return mygo.App.Languages() }
 
+// SetFullScreen and IsFullScreen put the main window in the system's full
+// screen, for the app's (internal/app/fullscreen.go).
+func (p *platform) SetFullScreen(on bool) { p.win.SetFullScreen(on) }
+func (p *platform) IsFullScreen() bool    { return p.win.IsFullScreen() }
+
 func main() {
 	// One instance at a time: launching the app again brings the running
 	// one's window back, from the tray too (raise), and two instances never
@@ -153,6 +159,13 @@ func main() {
 	}
 	if lang := config.LoadSettings().Language; lang != "" {
 		mygo.App.SetLocale(lang)
+	}
+	if runtime.GOOS == "darwin" {
+		// MyGo's default menu bar but its File menu, whose Close Window
+		// takes Cmd+W before the window, where it closes the tab.
+		mygo.App.SetMenu(mygo.NewMenu([]*mygo.MenuItem{
+			{Role: mygo.RoleAppMenu}, {Role: mygo.RoleEditMenu}, {Role: mygo.RoleViewMenu}, {Role: mygo.RoleWindowMenu},
+		}))
 	}
 	mygo.App.WhenReady(func() {
 		plat := &platform{windows: map[app.WindowKind]*childWindow{}}
@@ -166,6 +179,7 @@ func main() {
 			MinHeight: 560,
 			Content:   ui.View(a.View),
 		})
+		plat.win.OnLeaveFullScreen(a.WindowLeftFullScreen)
 		// The close button may hide the window to the tray, or ask first;
 		// a quit may ask too (closing.go in internal/app).
 		plat.win.OnClose(func(e *mygo.CloseEvent) {

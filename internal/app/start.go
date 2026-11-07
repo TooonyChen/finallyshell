@@ -214,7 +214,7 @@ func (a *App) quickConnect(c *ui.Context, tab *Session, st *startState) {
 		if ui.Button(c, locales.ClearRecents()).Disabled(len(a.hosts.Recent(1)) == 0).Clicked() {
 			a.clearRecents()
 		}
-		widgets.Muted(c, locales.WelcomeHint()).FontSize(12).Grow(1).TextAlign(ui.End)
+		widgets.Muted(c, locales.WelcomeHint(a.shortcutLabel(scManager))).FontSize(12).Grow(1).TextAlign(ui.End)
 		if ui.Button(c, locales.ConnectionManager()).Clicked() {
 			a.openManager()
 		}

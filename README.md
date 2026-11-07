@@ -32,7 +32,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
   - 自动选中标签（默认开）：新连接打开后切换过去。关掉后新会话在后台打开，当前会话保持选中；没有选中的会话时仍然选中新的。
   - 关闭时最小化到托盘（默认关）：点主窗口的关闭按钮时隐藏到托盘图标（macOS 是菜单栏），图标菜单里有“显示主窗口”和“退出”。Windows 上左键单击图标也能显示窗口，macOS 上点 Dock 图标也能显示。系统没有托盘时（Linux 没装 `libayatana-appindicator3`）按没开这一项处理。
   - 关闭窗口前确认（默认开）：有会话已连接或正在连接时，关闭主窗口或退出（托盘菜单、macOS 的 Cmd+Q）之前用系统的消息框问一次。同时开了托盘：关闭按钮直接隐藏，不问；“退出”才问。
-  - “终端”下的快捷键、配色、背景图片、字体几页还没做，先显示“以后的版本提供”。
+  - “终端”下的配色、背景图片、字体几页还没做，先显示“以后的版本提供”。
   所有选项改了立刻保存在 `settings.json`，除了下面“鼠标”页说的两项，也立刻生效。
 - 选项的“终端 › 鼠标”页，用的都是 terminal 插件本身的功能：
   - 选中即复制（默认关）：用鼠标选中文字（还有“全选”）后自动复制到剪贴板。
@@ -42,6 +42,14 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
   - 选中即复制和滚动行数在已打开的终端里立刻生效（插件有 `SetCopyOnSelect`、`SetScrollMultiplier`）。右键和链接插件只在创建终端时读取，没有 setter，所以已打开的会话重新连接后才生效；重建正在用的终端会丢掉屏幕和滚动历史，所以不这么做。
   - 在 `settings.json` 里是 `copyOnSelect`、`rightClick`（`paste`、`copy`、`copy-or-paste`、`ignore`；没有或不认识的值是右键菜单）、`noLinkClick`、`wheelLines`（没有是 3，超过 20 按 20）。
   - 没有中键粘贴：插件只把中键交给接管鼠标的程序，自己不处理，也不公开程序是否接管了鼠标，应用另外处理中键的话，程序会同时收到中键和粘贴的文字。插件也没有 Linux 的 PRIMARY 选区。要做需要插件加一个像 `RightClick` 那样的中键选项。
+- 选项的“终端 › 快捷键”页：表格列出每个操作、现在的快捷键和默认的快捷键（见下面的快捷键表）。选中一行点“修改…”，在弹出的框里按下新的组合键，“确定”保存；“使用默认”填回默认键，“恢复默认”恢复选中的一行，“全部恢复默认”恢复所有。
+  - shell 需要的键不让用，框里用红字说明原因：不带修饰键（或只带 Shift）的键；只带 Ctrl 的字母、数字、标点、空格和方向键等（Ctrl+C、Ctrl+R、Ctrl+W、Ctrl+←……）；只带 Alt 的这些键（Alt+B、Alt+F 在 shell 里是 Meta，按词移动）；macOS 上只带 Option 的这些键（会输入字符）；Windows 上 Ctrl+Alt 加字母（就是 AltGr，很多键盘布局用它输入字符）；系统占用的键（macOS 的 Cmd+Q、Cmd+H、Cmd+M、Cmd+Tab、Cmd+空格等，Windows/Linux 的 Alt+Tab、Alt+F4，Windows 上的 Win 键组合）。例外：“切换到第 N 个标签”可以用 Alt 加数字（readline 的数字参数很少用，GNOME Terminal 也这样），“重新连接”可以用任何键（它只在会话断开、没有 shell 的时候起作用）。
+  - 和别的操作冲突时用黄字提示，“确定”后那个操作变成没有快捷键（显示“无”）。和终端自己的键（Ctrl+Shift+A 全选、Ctrl+= 缩放、Shift+PageUp 滚动、Ctrl+Insert / Shift+Insert 复制粘贴）冲突时也提示，确定后归这个快捷键。
+  - 窗口的快捷键立刻生效。终端的复制、粘贴是 terminal 插件的 `Keybinds`，插件只在创建终端时读取，所以改了之后新连接（包括重新连接）的会话才生效。
+  - macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，插件的 `OptionAsAlt`）：开了之后 Option+B 发送 Esc b，而不是输入 ∫。同样对之后连接的会话生效。
+  - 在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`，键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`），`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键；没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+- 终端查找（Ctrl+Shift+F，macOS 是 Cmd+F）：终端右上角出现查找栏（MyGo 的 `ui.FindBar`），边输入边用插件的 `Search` 搜屏幕和滚动历史，高亮所有匹配，显示“第几项，共几项”。回车到下一个（往上，更早的输出），Shift+回车到上一个，F3 / Shift+F3（macOS 是 Cmd+G / Shift+Cmd+G）也行；Esc 或“完成”关闭，结束搜索，键盘回到终端。再按一次快捷键时全选查找框里的文字。每个会话的查找栏分开。不区分 ASCII 字母大小写（插件就是这样）。
+- 全屏（Ctrl+Shift+Enter，macOS 是 Cmd+Enter）：隐藏左边栏和下面的文件面板，只留终端，窗口也进入系统的全屏；再按一次退出。Esc 只在没有 shell 接收它时退出全屏（新标签页、断开的会话），连接着的终端里 Esc 照常发给 shell（vi 要用）。窗口本来就是系统全屏的，退出时保持系统全屏；用系统的办法（macOS 的绿色按钮）退出系统全屏，也一起退出程序的全屏。
 - 连接管理器：新建、编辑、删除主机，密码或私钥登录。主机列表存在 `<用户配置目录>/finalshelly/hosts.json`，密码不落盘，只存在内存里。
 - 新标签页（启动时打开一个）：“快速连接”列出最近连接过的主机（名称、主机、用户名），最后连接的在最上面，点一下或按回车就在这个标签页里连接，同一行变成会话。搜索框边输入边过滤，按名称、地址、用户名、备注匹配所有主机（最近连接过的排在前面），上下方向键选择。“清空”清掉最近连接记录，不删主机。“连接管理器”按钮打开连接管理器；在新标签页选中时从连接管理器连接，也连在这个标签页里。一个主机都没有时显示“新建连接”按钮。
 - 连接编辑器（新建连接 / 编辑连接）是单独的窗口，左边是页面，下面是“确定”“取消”：
@@ -68,7 +76,27 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 右下“传输”页：进度、速度、取消；同时最多跑 3 个，其余排队。目标位置已有同名项目时先询问是否覆盖。下载完成后可以“在文件夹中显示”。
 - 拖动区域之间的分隔条调整大小（获得焦点后也可以用方向键），双击恢复默认大小。每个区域有最小尺寸，不会被拖到看不见；大小保存在 `finalshelly/settings.json`，下次启动恢复。
 
-快捷键：Ctrl+Shift+T 连接管理器（macOS 也可以 Cmd+T），Ctrl+Tab / Ctrl+Shift+Tab 切换会话（包括新标签页），Ctrl+Shift+W 关闭会话或新标签页。终端内复制粘贴是 Ctrl+Shift+C / Ctrl+Shift+V（macOS 是 Cmd+C / Cmd+V）。
+快捷键（默认，和 FinalShell 一样，都可以在“终端 › 快捷键”页修改）：
+
+| 操作 | macOS | Windows / Linux |
+|---|---|---|
+| 终端：复制 | Cmd+C | Ctrl+Shift+C |
+| 终端：粘贴 | Cmd+V | Ctrl+Shift+V |
+| 终端：查找 | Cmd+F | Ctrl+Shift+F |
+| 终端：全屏 | Cmd+Enter | Ctrl+Shift+Enter |
+| 终端：重新连接（会话断开时，焦点在终端区域） | Enter | Enter |
+| 上一个标签 | Cmd+[ | Ctrl+Shift+Tab |
+| 下一个标签 | Cmd+] | Ctrl+Tab |
+| 关闭标签 | Cmd+W | Ctrl+Shift+W |
+| 连接管理器 | Cmd+O | Ctrl+Shift+O |
+| 新标签页 | Cmd+T | Ctrl+Shift+T |
+| 切换到第 1–9 个标签 | Cmd+1…9 | Alt+1…9 |
+
+- 以前 Ctrl+Shift+T 打开连接管理器，现在和别的终端程序一样是新标签页；新标签页上就有最近的连接和“连接管理器”按钮。连接管理器改成 Ctrl+Shift+O。
+- 关闭标签在 macOS 上是 Cmd+W，不是 FinalShell 的 Cmd+Q（那是退出）。为了让 Cmd+W 到达窗口，macOS 上的菜单栏去掉了 MyGo 默认的“文件”菜单（里面的“关闭窗口”占着 Cmd+W）；关窗口用标题栏的按钮，子窗口按 Esc。
+- macOS 上切换标签只用 Cmd+数字：Option+数字会输入字符（¡™£……）。
+- Windows 上 terminal 插件默认还把 Ctrl+C（有选中时复制）和 Ctrl+V（剪贴板有内容时粘贴）绑成复制粘贴，这里去掉了，和 Linux 一样留给 shell（中断、原样输入下一个键）。复制粘贴用 Ctrl+Shift+C / Ctrl+Shift+V，或 Ctrl+Insert / Shift+Insert。
+- 只带 Ctrl 的字母键都是 shell 的（Ctrl+A……Ctrl+Z 等），在 Windows/Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
 
 ## 配置文件
 
@@ -112,11 +140,13 @@ internal/
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
   widgets/           可复用的小控件：图标按钮、用量条、折线图、表单行、左侧导航加页面（nav.go）
   app/               界面和状态
-    app.go           App 状态、整体布局、快捷键、打开/关闭会话
+    app.go           App 状态、整体布局、打开/关闭会话
     session.go       一个会话：连接、终端、监控、SFTP；错误信息的翻译
     sidebar.go       左侧：监控面板、竖向会话列表
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
     terminal.go      终端区域
+    findbar.go       终端上的查找栏，驱动插件的 Search
+    fullscreen.go    全屏：只显示终端区域，窗口进入系统全屏
     start.go         新标签页：快速连接、搜索、清空最近连接
     splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
     files.go         文件面板：目录树、文件表格、拖入上传
@@ -124,6 +154,9 @@ internal/
     dialogs.go       连接管理器、密码、主机指纹、覆盖确认
     options.go       选项窗口：页面列表和“常规”页
     mouse.go         “终端 › 鼠标”页，以及这些设置怎样变成终端的选项
+    shortcuts.go     快捷键：操作和各平台的默认键、哪些键不能用、冲突、窗口快捷键的分派、终端的 Keybinds
+    shortcutspage.go “终端 › 快捷键”页和按键录制框
+    keycombo.go      组合键：在 settings.json 里的写法和界面上的显示（macOS 用 ⌘⇧ 符号）
     editor.go        连接编辑器窗口：a.newConnection()、a.editConnection(h)，校验和保存
     editor_proxy.go  连接编辑器的“代理”页
     proxy.go         经过代理和跳板机连接：拨号用的选项、连接前要问的密码、各跳错误的翻译

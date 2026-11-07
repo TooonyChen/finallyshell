@@ -118,7 +118,7 @@ func TestEditorNewFromManager(t *testing.T) {
 	mainWin := ui.NewTester(a.View, 1280, 820)
 	p.tt = mainWin
 	// With no hosts, the manager opens on a new one.
-	mainWin.Key(ui.Ctrl|ui.Shift, ui.KeyT)
+	mainWin.Key(ui.Ctrl|ui.Shift, ui.KeyO)
 	if !a.managerOpen {
 		t.Fatal("manager not open")
 	}

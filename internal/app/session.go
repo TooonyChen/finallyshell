@@ -50,6 +50,7 @@ type Session struct {
 	cancel   context.CancelFunc
 
 	start startState // the start page, while it is a new tab
+	find  findState  // the find bar over the terminal
 }
 
 // errConnectionLost is a session whose shell ended.
@@ -178,6 +179,7 @@ func (a *App) connect(s *Session, secret string) {
 func (a *App) terminalOptions(h *config.Host) terminal.Options {
 	o := terminal.Options{Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme}
 	a.mouseOptions(&o)
+	a.keyOptions(&o)
 	return o
 }
 

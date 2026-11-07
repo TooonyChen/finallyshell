@@ -33,6 +33,7 @@ type fakePlatform struct {
 	fakeWindows
 	fakeSystem
 	fakeFilePicker
+	fakeFullScreen
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {
@@ -190,7 +191,7 @@ func TestConnectionManager(t *testing.T) {
 	a, p := testApp(t)
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyT) // with no hosts, on a new one
+	tt.Key(ui.Ctrl|ui.Shift, ui.KeyO) // with no hosts, on a new one
 	if !a.managerOpen || !a.windowOpen(WindowEditor) {
 		t.Fatalf("manager %v editor %v", a.managerOpen, a.windowOpen(WindowEditor))
 	}

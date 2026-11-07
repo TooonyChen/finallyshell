@@ -128,6 +128,11 @@ type App struct {
 	// The System info popover, and what reads it (readSysInfo when nil).
 	sysInfo     sysInfoPopover
 	readSysInfo sysInfoReader
+
+	// The shortcuts page (shortcutspage.go), and full screen, which shows
+	// the terminal alone (fullscreen.go).
+	shortcutsUI shortcutsPage
+	fullScreen  fullScreenState
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -184,28 +189,14 @@ func (a *App) View(c *ui.Context) {
 	c.SetTheme(theme)
 	a.shortcuts(c)
 	a.saveLayoutAtRest(c)
+	if a.fullScreen.on {
+		a.terminalArea(c)
+		a.dialogs(c)
+		return
+	}
 	split := ui.Split(c, &a.sideWidth, func() { a.sidebar(c) }, func() { a.mainArea(c) }).SplitReset(defaultSideWidth).Fill()
 	a.splitMoved(c, split, &a.sideWidth, sidebarLimits)
 	a.dialogs(c)
-}
-
-// shortcuts are the window's keys, which come before the terminal's: each
-// must be one no shell needs. Ctrl with a letter alone is the shell's, so
-// Cmd+T is Super, Command on macOS: ui.Cmd is Ctrl elsewhere, and Ctrl+T
-// transposes characters in readline.
-func (a *App) shortcuts(c *ui.Context) {
-	switch {
-	case c.Shortcut(ui.Ctrl|ui.Shift, ui.KeyT), c.Shortcut(ui.Super, ui.KeyT):
-		a.openManager()
-	case c.Shortcut(ui.Ctrl, ui.KeyTab):
-		a.cycle(1)
-	case c.Shortcut(ui.Ctrl|ui.Shift, ui.KeyTab):
-		a.cycle(-1)
-	case c.Shortcut(ui.Ctrl|ui.Shift, ui.KeyW):
-		if s := a.current(); s != nil {
-			a.closeSession(s)
-		}
-	}
 }
 
 func (a *App) cycle(d int) {

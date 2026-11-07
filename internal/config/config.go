@@ -63,6 +63,16 @@ type Settings struct {
 	// WheelLines is how many lines a notch of the mouse wheel scrolls a
 	// terminal: 3 when 0.
 	WheelLines int `json:"wheelLines,omitempty"`
+
+	// The Shortcuts page of the options (Terminal › Shortcuts).
+	//
+	// Shortcuts are the keys the user rebound; an action not there has
+	// its default.
+	Shortcuts Shortcuts `json:"shortcuts,omitzero"`
+	// OptionAsAlt makes Option the shell's Alt (Meta) key on macOS, so
+	// that Option+B sends Esc b, rather than the key that types ∫ and
+	// other symbols.
+	OptionAsAlt bool `json:"optionAsAlt,omitempty"`
 }
 
 // RightClick is what a right click in a terminal does (Settings.RightClick).

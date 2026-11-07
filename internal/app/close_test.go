@@ -124,7 +124,7 @@ func TestCloseSessionKeepsOneSelected(t *testing.T) {
 				if cur.label() != k.want {
 					t.Fatalf("selected %s, want %s", cur.label(), k.want)
 				}
-				if tt.HasText(locales.WelcomeHint()) {
+				if tt.HasText(locales.WelcomeHint(a.shortcutLabel(scManager))) {
 					t.Error("the welcome page shows")
 				}
 				if got := tt.Image().RGBAAt(termSpotX, termSpotY); got != shows[k.want] {

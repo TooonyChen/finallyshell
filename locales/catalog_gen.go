@@ -520,14 +520,14 @@ func (msgs Messages) ConnectingTo(target string) string {
 	return Catalog.Format(msgs.locale, "connectingTo", map[string]any{"target": target})
 }
 
-// WelcomeHint says "Ctrl+Shift+T opens the connection manager"
+// WelcomeHint says "{key} opens the connection manager"
 // in the language the app shows.
-func WelcomeHint() string { return In(i18n.Locale()).WelcomeHint() }
+func WelcomeHint(key string) string { return In(i18n.Locale()).WelcomeHint(key) }
 
-// WelcomeHint says "Ctrl+Shift+T opens the connection manager"
+// WelcomeHint says "{key} opens the connection manager"
 // in the language of msgs.
-func (msgs Messages) WelcomeHint() string {
-	return Catalog.Format(msgs.locale, "welcomeHint", nil)
+func (msgs Messages) WelcomeHint(key string) string {
+	return Catalog.Format(msgs.locale, "welcomeHint", map[string]any{"key": key})
 }
 
 // NewTab says "New tab"
@@ -2338,4 +2338,336 @@ func TrayQuit() string { return In(i18n.Locale()).TrayQuit() }
 // in the language of msgs.
 func (msgs Messages) TrayQuit() string {
 	return Catalog.Format(msgs.locale, "trayQuit", nil)
+}
+
+// ScTerminalCopy says "Terminal: copy"
+// in the language the app shows.
+func ScTerminalCopy() string { return In(i18n.Locale()).ScTerminalCopy() }
+
+// ScTerminalCopy says "Terminal: copy"
+// in the language of msgs.
+func (msgs Messages) ScTerminalCopy() string {
+	return Catalog.Format(msgs.locale, "scTerminalCopy", nil)
+}
+
+// ScTerminalPaste says "Terminal: paste"
+// in the language the app shows.
+func ScTerminalPaste() string { return In(i18n.Locale()).ScTerminalPaste() }
+
+// ScTerminalPaste says "Terminal: paste"
+// in the language of msgs.
+func (msgs Messages) ScTerminalPaste() string {
+	return Catalog.Format(msgs.locale, "scTerminalPaste", nil)
+}
+
+// ScTerminalFind says "Terminal: find"
+// in the language the app shows.
+func ScTerminalFind() string { return In(i18n.Locale()).ScTerminalFind() }
+
+// ScTerminalFind says "Terminal: find"
+// in the language of msgs.
+func (msgs Messages) ScTerminalFind() string {
+	return Catalog.Format(msgs.locale, "scTerminalFind", nil)
+}
+
+// ScTerminalFullScreen says "Terminal: full screen"
+// in the language the app shows.
+func ScTerminalFullScreen() string { return In(i18n.Locale()).ScTerminalFullScreen() }
+
+// ScTerminalFullScreen says "Terminal: full screen"
+// in the language of msgs.
+func (msgs Messages) ScTerminalFullScreen() string {
+	return Catalog.Format(msgs.locale, "scTerminalFullScreen", nil)
+}
+
+// ScTerminalReconnect says "Terminal: reconnect"
+// in the language the app shows.
+func ScTerminalReconnect() string { return In(i18n.Locale()).ScTerminalReconnect() }
+
+// ScTerminalReconnect says "Terminal: reconnect"
+// in the language of msgs.
+func (msgs Messages) ScTerminalReconnect() string {
+	return Catalog.Format(msgs.locale, "scTerminalReconnect", nil)
+}
+
+// ScPreviousTab says "Previous tab"
+// in the language the app shows.
+func ScPreviousTab() string { return In(i18n.Locale()).ScPreviousTab() }
+
+// ScPreviousTab says "Previous tab"
+// in the language of msgs.
+func (msgs Messages) ScPreviousTab() string {
+	return Catalog.Format(msgs.locale, "scPreviousTab", nil)
+}
+
+// ScNextTab says "Next tab"
+// in the language the app shows.
+func ScNextTab() string { return In(i18n.Locale()).ScNextTab() }
+
+// ScNextTab says "Next tab"
+// in the language of msgs.
+func (msgs Messages) ScNextTab() string {
+	return Catalog.Format(msgs.locale, "scNextTab", nil)
+}
+
+// ScCloseTab says "Close tab"
+// in the language the app shows.
+func ScCloseTab() string { return In(i18n.Locale()).ScCloseTab() }
+
+// ScCloseTab says "Close tab"
+// in the language of msgs.
+func (msgs Messages) ScCloseTab() string {
+	return Catalog.Format(msgs.locale, "scCloseTab", nil)
+}
+
+// ScSwitchTab says "Switch to tab 1–9"
+// in the language the app shows.
+func ScSwitchTab() string { return In(i18n.Locale()).ScSwitchTab() }
+
+// ScSwitchTab says "Switch to tab 1–9"
+// in the language of msgs.
+func (msgs Messages) ScSwitchTab() string {
+	return Catalog.Format(msgs.locale, "scSwitchTab", nil)
+}
+
+// ShortcutColAction says "Action"
+// in the language the app shows.
+func ShortcutColAction() string { return In(i18n.Locale()).ShortcutColAction() }
+
+// ShortcutColAction says "Action"
+// in the language of msgs.
+func (msgs Messages) ShortcutColAction() string {
+	return Catalog.Format(msgs.locale, "shortcutColAction", nil)
+}
+
+// ShortcutColKey says "Key"
+// in the language the app shows.
+func ShortcutColKey() string { return In(i18n.Locale()).ShortcutColKey() }
+
+// ShortcutColKey says "Key"
+// in the language of msgs.
+func (msgs Messages) ShortcutColKey() string {
+	return Catalog.Format(msgs.locale, "shortcutColKey", nil)
+}
+
+// ShortcutColDefault says "Default"
+// in the language the app shows.
+func ShortcutColDefault() string { return In(i18n.Locale()).ShortcutColDefault() }
+
+// ShortcutColDefault says "Default"
+// in the language of msgs.
+func (msgs Messages) ShortcutColDefault() string {
+	return Catalog.Format(msgs.locale, "shortcutColDefault", nil)
+}
+
+// ShortcutNone says "None"
+// in the language the app shows.
+func ShortcutNone() string { return In(i18n.Locale()).ShortcutNone() }
+
+// ShortcutNone says "None"
+// in the language of msgs.
+func (msgs Messages) ShortcutNone() string {
+	return Catalog.Format(msgs.locale, "shortcutNone", nil)
+}
+
+// ShortcutChange says "Change…"
+// in the language the app shows.
+func ShortcutChange() string { return In(i18n.Locale()).ShortcutChange() }
+
+// ShortcutChange says "Change…"
+// in the language of msgs.
+func (msgs Messages) ShortcutChange() string {
+	return Catalog.Format(msgs.locale, "shortcutChange", nil)
+}
+
+// ShortcutReset says "Reset"
+// in the language the app shows.
+func ShortcutReset() string { return In(i18n.Locale()).ShortcutReset() }
+
+// ShortcutReset says "Reset"
+// in the language of msgs.
+func (msgs Messages) ShortcutReset() string {
+	return Catalog.Format(msgs.locale, "shortcutReset", nil)
+}
+
+// ShortcutResetAll says "Reset all"
+// in the language the app shows.
+func ShortcutResetAll() string { return In(i18n.Locale()).ShortcutResetAll() }
+
+// ShortcutResetAll says "Reset all"
+// in the language of msgs.
+func (msgs Messages) ShortcutResetAll() string {
+	return Catalog.Format(msgs.locale, "shortcutResetAll", nil)
+}
+
+// ShortcutsNote says "New keys for copy and paste, and Option as Alt, apply to sessions connected from now on."
+// in the language the app shows.
+func ShortcutsNote() string { return In(i18n.Locale()).ShortcutsNote() }
+
+// ShortcutsNote says "New keys for copy and paste, and Option as Alt, apply to sessions connected from now on."
+// in the language of msgs.
+func (msgs Messages) ShortcutsNote() string {
+	return Catalog.Format(msgs.locale, "shortcutsNote", nil)
+}
+
+// OptionAsAlt says "Use Option as Alt (Meta)"
+// in the language the app shows.
+func OptionAsAlt() string { return In(i18n.Locale()).OptionAsAlt() }
+
+// OptionAsAlt says "Use Option as Alt (Meta)"
+// in the language of msgs.
+func (msgs Messages) OptionAsAlt() string {
+	return Catalog.Format(msgs.locale, "optionAsAlt", nil)
+}
+
+// OptionAsAltNote says "Option+B then sends Esc b, which moves back a word in the shell, instead of typing ∫."
+// in the language the app shows.
+func OptionAsAltNote() string { return In(i18n.Locale()).OptionAsAltNote() }
+
+// OptionAsAltNote says "Option+B then sends Esc b, which moves back a word in the shell, instead of typing ∫."
+// in the language of msgs.
+func (msgs Messages) OptionAsAltNote() string {
+	return Catalog.Format(msgs.locale, "optionAsAltNote", nil)
+}
+
+// ShortcutCaptureTitle says "Change shortcut: {action}"
+// in the language the app shows.
+func ShortcutCaptureTitle(action string) string {
+	return In(i18n.Locale()).ShortcutCaptureTitle(action)
+}
+
+// ShortcutCaptureTitle says "Change shortcut: {action}"
+// in the language of msgs.
+func (msgs Messages) ShortcutCaptureTitle(action string) string {
+	return Catalog.Format(msgs.locale, "shortcutCaptureTitle", map[string]any{"action": action})
+}
+
+// ShortcutCapturePrompt says "Press the new key combination."
+// in the language the app shows.
+func ShortcutCapturePrompt() string { return In(i18n.Locale()).ShortcutCapturePrompt() }
+
+// ShortcutCapturePrompt says "Press the new key combination."
+// in the language of msgs.
+func (msgs Messages) ShortcutCapturePrompt() string {
+	return Catalog.Format(msgs.locale, "shortcutCapturePrompt", nil)
+}
+
+// ShortcutCaptureDigits says "Press a digit with the modifiers to use, as Alt+1."
+// in the language the app shows.
+func ShortcutCaptureDigits() string { return In(i18n.Locale()).ShortcutCaptureDigits() }
+
+// ShortcutCaptureDigits says "Press a digit with the modifiers to use, as Alt+1."
+// in the language of msgs.
+func (msgs Messages) ShortcutCaptureDigits() string {
+	return Catalog.Format(msgs.locale, "shortcutCaptureDigits", nil)
+}
+
+// ShortcutCaptureWaiting says "Waiting for a key…"
+// in the language the app shows.
+func ShortcutCaptureWaiting() string { return In(i18n.Locale()).ShortcutCaptureWaiting() }
+
+// ShortcutCaptureWaiting says "Waiting for a key…"
+// in the language of msgs.
+func (msgs Messages) ShortcutCaptureWaiting() string {
+	return Catalog.Format(msgs.locale, "shortcutCaptureWaiting", nil)
+}
+
+// ShortcutUseDefault says "Use default"
+// in the language the app shows.
+func ShortcutUseDefault() string { return In(i18n.Locale()).ShortcutUseDefault() }
+
+// ShortcutUseDefault says "Use default"
+// in the language of msgs.
+func (msgs Messages) ShortcutUseDefault() string {
+	return Catalog.Format(msgs.locale, "shortcutUseDefault", nil)
+}
+
+// ShortcutPlain says "The shell needs this key. Use it with {mods}."
+// in the language the app shows.
+func ShortcutPlain(mods string) string { return In(i18n.Locale()).ShortcutPlain(mods) }
+
+// ShortcutPlain says "The shell needs this key. Use it with {mods}."
+// in the language of msgs.
+func (msgs Messages) ShortcutPlain(mods string) string {
+	return Catalog.Format(msgs.locale, "shortcutPlain", map[string]any{"mods": mods})
+}
+
+// ShortcutShellCtrl says "The shell needs Ctrl with this key, as Ctrl+C, Ctrl+R and Ctrl+W. Add Shift."
+// in the language the app shows.
+func ShortcutShellCtrl() string { return In(i18n.Locale()).ShortcutShellCtrl() }
+
+// ShortcutShellCtrl says "The shell needs Ctrl with this key, as Ctrl+C, Ctrl+R and Ctrl+W. Add Shift."
+// in the language of msgs.
+func (msgs Messages) ShortcutShellCtrl() string {
+	return Catalog.Format(msgs.locale, "shortcutShellCtrl", nil)
+}
+
+// ShortcutShellAlt says "Alt with this key is Meta in the shell, as Alt+B and Alt+F move by words."
+// in the language the app shows.
+func ShortcutShellAlt() string { return In(i18n.Locale()).ShortcutShellAlt() }
+
+// ShortcutShellAlt says "Alt with this key is Meta in the shell, as Alt+B and Alt+F move by words."
+// in the language of msgs.
+func (msgs Messages) ShortcutShellAlt() string {
+	return Catalog.Format(msgs.locale, "shortcutShellAlt", nil)
+}
+
+// ShortcutOption says "Option with this key types a character, or is Meta in the shell with Option as Alt."
+// in the language the app shows.
+func ShortcutOption() string { return In(i18n.Locale()).ShortcutOption() }
+
+// ShortcutOption says "Option with this key types a character, or is Meta in the shell with Option as Alt."
+// in the language of msgs.
+func (msgs Messages) ShortcutOption() string {
+	return Catalog.Format(msgs.locale, "shortcutOption", nil)
+}
+
+// ShortcutAltGr says "Ctrl+Alt with this key is AltGr, which types characters on many Windows keyboard layouts."
+// in the language the app shows.
+func ShortcutAltGr() string { return In(i18n.Locale()).ShortcutAltGr() }
+
+// ShortcutAltGr says "Ctrl+Alt with this key is AltGr, which types characters on many Windows keyboard layouts."
+// in the language of msgs.
+func (msgs Messages) ShortcutAltGr() string {
+	return Catalog.Format(msgs.locale, "shortcutAltGr", nil)
+}
+
+// ShortcutSystem says "The system uses this key."
+// in the language the app shows.
+func ShortcutSystem() string { return In(i18n.Locale()).ShortcutSystem() }
+
+// ShortcutSystem says "The system uses this key."
+// in the language of msgs.
+func (msgs Messages) ShortcutSystem() string {
+	return Catalog.Format(msgs.locale, "shortcutSystem", nil)
+}
+
+// ShortcutDigits says "Press a digit from 1 to 9."
+// in the language the app shows.
+func ShortcutDigits() string { return In(i18n.Locale()).ShortcutDigits() }
+
+// ShortcutDigits says "Press a digit from 1 to 9."
+// in the language of msgs.
+func (msgs Messages) ShortcutDigits() string {
+	return Catalog.Format(msgs.locale, "shortcutDigits", nil)
+}
+
+// ShortcutConflict says "“{action}” uses this key; it will have none."
+// in the language the app shows.
+func ShortcutConflict(action string) string { return In(i18n.Locale()).ShortcutConflict(action) }
+
+// ShortcutConflict says "“{action}” uses this key; it will have none."
+// in the language of msgs.
+func (msgs Messages) ShortcutConflict(action string) string {
+	return Catalog.Format(msgs.locale, "shortcutConflict", map[string]any{"action": action})
+}
+
+// ShortcutTerminalKey says "The terminal uses this key too (select all, zoom, scroll, or copy and paste with Insert); the shortcut takes it."
+// in the language the app shows.
+func ShortcutTerminalKey() string { return In(i18n.Locale()).ShortcutTerminalKey() }
+
+// ShortcutTerminalKey says "The terminal uses this key too (select all, zoom, scroll, or copy and paste with Insert); the shortcut takes it."
+// in the language of msgs.
+func (msgs Messages) ShortcutTerminalKey() string {
+	return Catalog.Format(msgs.locale, "shortcutTerminalKey", nil)
 }
