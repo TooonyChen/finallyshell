@@ -133,9 +133,13 @@ func (a *App) View(c *ui.Context) {
 	a.dialogs(c)
 }
 
+// shortcuts are the window's keys, which come before the terminal's: each
+// must be one no shell needs. Ctrl with a letter alone is the shell's, so
+// Cmd+T is Super, Command on macOS: ui.Cmd is Ctrl elsewhere, and Ctrl+T
+// transposes characters in readline.
 func (a *App) shortcuts(c *ui.Context) {
 	switch {
-	case c.Shortcut(ui.Ctrl|ui.Shift, ui.KeyT), c.Shortcut(ui.Cmd, ui.KeyT):
+	case c.Shortcut(ui.Ctrl|ui.Shift, ui.KeyT), c.Shortcut(ui.Super, ui.KeyT):
 		a.openManager()
 	case c.Shortcut(ui.Ctrl, ui.KeyTab):
 		a.cycle(1)

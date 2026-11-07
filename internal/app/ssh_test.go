@@ -19,36 +19,7 @@ import (
 //
 //	FINALSHELLY_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSH
 func TestSSH(t *testing.T) {
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
-	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
-	}
-	cred, addr, _ := strings.Cut(spec, "@")
-	user, pass, _ := strings.Cut(cred, ":")
-	hostname, portStr, _ := strings.Cut(addr, ":")
-	port, _ := strconv.Atoi(portStr)
-
-	a, p := testApp(t)
-	h := &config.Host{ID: "test", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
-	a.hosts = []*config.Host{h}
-	a.passwords[h.ID] = pass
-	a.openSession(h)
-	s := a.current()
-
-	p.until(t, "the host key question", func() bool { return s.hostKeyQ != nil || s.status == statusFailed })
-	if s.status == statusFailed {
-		t.Fatal(describeError(s.err))
-	}
-	if !strings.HasPrefix(s.hostKeyQ.Fingerprint, "SHA256:") {
-		t.Errorf("fingerprint %q", s.hostKeyQ.Fingerprint)
-	}
-	s.hostKeyQ.Answer <- true
-	s.hostKeyQ = nil
-
-	p.until(t, "the shell", func() bool { return s.status == statusConnected || s.status == statusFailed })
-	if s.status != statusConnected {
-		t.Fatal(describeError(s.err))
-	}
+	a, p, s := connectTestServer(t)
 	s.term.Send([]byte("echo hello-$((40+2))\r"))
 	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term.Text(), "hello-42") })
 	p.until(t, "the server's stats", func() bool { return s.stats.OK && s.stats.MemTotal > 0 && len(s.stats.LatHist) >= 2 })
@@ -86,7 +57,7 @@ func TestSSH(t *testing.T) {
 	}
 
 	// A wrong password fails with a message in the app's words.
-	bad := &config.Host{ID: "bad", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
+	bad := &config.Host{ID: "bad", Addr: s.Host.Addr, Port: s.Host.Port, User: s.Host.User, Auth: config.AuthPassword}
 	a.passwords[bad.ID] = "wrong"
 	a.openSession(bad)
 	b := a.current()
@@ -95,4 +66,42 @@ func TestSSH(t *testing.T) {
 		t.Errorf("wrong password: %q", got)
 	}
 	a.CloseAll()
+}
+
+// connectTestServer opens a session to the server FINALSHELLY_TEST_SSH
+// names, trusting its key, and waits for the shell; it skips the test
+// when the variable is not set.
+func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
+	t.Helper()
+	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	if spec == "" {
+		t.Skip("FINALSHELLY_TEST_SSH not set")
+	}
+	cred, addr, _ := strings.Cut(spec, "@")
+	user, pass, _ := strings.Cut(cred, ":")
+	hostname, portStr, _ := strings.Cut(addr, ":")
+	port, _ := strconv.Atoi(portStr)
+
+	a, p := testApp(t)
+	h := &config.Host{ID: "test", Addr: hostname, Port: port, User: user, Auth: config.AuthPassword}
+	a.hosts = []*config.Host{h}
+	a.passwords[h.ID] = pass
+	a.openSession(h)
+	s := a.current()
+
+	p.until(t, "the host key question", func() bool { return s.hostKeyQ != nil || s.status == statusFailed })
+	if s.status == statusFailed {
+		t.Fatal(describeError(s.err))
+	}
+	if !strings.HasPrefix(s.hostKeyQ.Fingerprint, "SHA256:") {
+		t.Errorf("fingerprint %q", s.hostKeyQ.Fingerprint)
+	}
+	s.hostKeyQ.Answer <- true
+	s.hostKeyQ = nil
+
+	p.until(t, "the shell", func() bool { return s.status == statusConnected || s.status == statusFailed })
+	if s.status != statusConnected {
+		t.Fatal(describeError(s.err))
+	}
+	return a, p, s
 }

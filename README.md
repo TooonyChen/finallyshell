@@ -37,7 +37,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 下载：选中文件或文件夹，点下载按钮（存到系统的“下载”文件夹），或右键“下载到…”自己选位置。
 - 右下“传输”页：进度、速度、取消；同时最多跑 3 个，其余排队。目标位置已有同名项目时先询问是否覆盖。下载完成后可以“在文件夹中显示”。
 
-快捷键：Ctrl+Shift+T 连接管理器，Ctrl+Tab / Ctrl+Shift+Tab 切换会话，Ctrl+Shift+W 关闭会话。终端内复制粘贴是 Ctrl+Shift+C / Ctrl+Shift+V（macOS 是 Cmd+C / Cmd+V）。
+快捷键：Ctrl+Shift+T 连接管理器（macOS 也可以 Cmd+T），Ctrl+Tab / Ctrl+Shift+Tab 切换会话，Ctrl+Shift+W 关闭会话。终端内复制粘贴是 Ctrl+Shift+C / Ctrl+Shift+V（macOS 是 Cmd+C / Cmd+V）。
 
 ## 代码结构
 
