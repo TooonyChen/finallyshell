@@ -52,6 +52,7 @@ func (p *fakePlatform) Post(fn func())                           { p.posts <- fn
 func (p *fakePlatform) OpenFiles(string, bool) ([]string, error) { return p.opened, nil }
 func (p *fakePlatform) DownloadsDir() string                     { return p.downloads }
 func (p *fakePlatform) ShowInFolder(path string)                 { p.shown = append(p.shown, path) }
+func (p *fakePlatform) TempDir() string                          { return filepath.Join(p.downloads, "opened") }
 func (p *fakePlatform) Languages() []string                      { return []string{"en", "zh-Hans"} }
 func (p *fakePlatform) SetLocale(tag string) {
 	p.locale = tag

@@ -27,8 +27,9 @@ type platform struct {
 
 // childWindow is an open secondary window.
 type childWindow struct {
-	win   *mygo.Window
-	title func() string
+	win     *mygo.Window
+	title   func() string
+	closing bool // the app is closing it
 }
 
 // Post runs fn on the UI thread and redraws every window: the state fn
@@ -73,13 +74,27 @@ func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), clo
 		DisableMinimize: true,
 		Content:         ui.View(view),
 	})
-	p.windows[spec.Kind] = &childWindow{win: win, title: spec.Title}
+	child := &childWindow{win: win, title: spec.Title}
+	p.windows[spec.Kind] = child
+	// The window may ask first, as the editor does with unsaved changes,
+	// when the user closes it; the app closing it does not ask.
+	win.OnClose(func(e *mygo.CloseEvent) {
+		if !child.closing && spec.CloseRequested != nil && !spec.CloseRequested() {
+			e.PreventDefault()
+		}
+	})
 	win.OnClosed(func() {
 		if w := p.windows[spec.Kind]; w != nil && w.win == win {
 			delete(p.windows, spec.Kind)
 		}
 		closed()
 	})
+}
+
+func (p *platform) RetitleWindow(kind app.WindowKind) {
+	if w := p.windows[kind]; w != nil {
+		w.win.SetTitle(w.title())
+	}
 }
 
 func (p *platform) FocusWindow(kind app.WindowKind) {
@@ -94,6 +109,7 @@ func (p *platform) FocusWindow(kind app.WindowKind) {
 
 func (p *platform) CloseWindow(kind app.WindowKind) {
 	if w := p.windows[kind]; w != nil {
+		w.closing = true
 		w.win.Close()
 	}
 }
@@ -184,6 +200,16 @@ func (p *platform) ShowTransfers(count int, progress float64) {
 	default:
 		p.win.SetProgressBar(mygo.ProgressBar{State: mygo.ProgressNormal, Value: progress})
 	}
+}
+
+// TempDir is in the app's cache folder: the copies of remote files
+// opened with other apps, which the app clears out after a day.
+func (p *platform) TempDir() string {
+	dir, err := mygo.App.Path(mygo.PathCache)
+	if err != nil || dir == "" {
+		dir = filepath.Join(os.TempDir(), "finallyshell")
+	}
+	return filepath.Join(dir, "opened")
 }
 
 // SetFullScreen and IsFullScreen put the main window in the system's full

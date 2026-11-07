@@ -442,6 +442,84 @@
     }
   },
   "confirmQuitOK": "Quit",
+  "confirmQuitUnsaved": "{count, plural, one {# file in the editor has unsaved changes. Quitting discards them.} other {# files in the editor have unsaved changes. Quitting discards them.}}",
+  "@confirmQuitUnsaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fileEditor": "Editor",
+  "save": "Save",
+  "saveAll": "Save All",
+  "dontSave": "Don't Save",
+  "undo": "Undo",
+  "redo": "Redo",
+  "find": "Find",
+  "overwrite": "Overwrite",
+  "editorReplace": "Replace",
+  "editorGoToLine": "Go to line",
+  "editorSoftWrap": "Soft wrap",
+  "editorReload": "Reload",
+  "editorReloadFromServer": "Reload from the server",
+  "editorReading": "Reading {name}…",
+  "editorProgress": "{done} of {total}",
+  "editorTooLarge": "{name} is {size}",
+  "editorTooLargeBody": "The editor reads a file into memory: one over {limit} takes a while to open and edit.",
+  "editorOpenAnyway": "Open Anyway",
+  "editorBinary": "{name} looks like a binary file",
+  "editorBinaryBody": "The editor opens text files only.",
+  "editorOpenWithApp": "Open with the Default App",
+  "editorOpeningWithApp": "Downloading to open it…",
+  "editorOpenedWithApp": "Opened a copy: {path}",
+  "editorOpenWithAppFailed": "Cannot open it: {error}",
+  "editorCannotOpen": "Cannot open {name}: {error}",
+  "editorPermissionDenied": "permission denied",
+  "editorNoSuchFile": "the file does not exist",
+  "editorDisconnected": "Not connected to {host}. Your changes are kept, and you can save them once the session reconnects.",
+  "editorNotConnected": "Not connected",
+  "editorNotUTF8": "This file is not valid UTF-8. It may be in GB18030 (or GBK).",
+  "editorReopenAs": "Reopen as {encoding}",
+  "editorSaving": "Saving…",
+  "editorSaved": "Saved",
+  "editorSaveFailed": "Cannot save: {error}",
+  "editorCannotEncode": "{encoding} has no “{char}” (line {line})",
+  "@editorCannotEncode": {
+    "placeholders": {
+      "line": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPlainText": "Plain Text",
+  "editorLanguage": "Language",
+  "editorLineCol": "Ln {line}, Col {col}",
+  "@editorLineCol": {
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "col": {
+        "type": "int"
+      }
+    }
+  },
+  "editorEncoding": "Encoding",
+  "editorLineEndings": "Line endings",
+  "editorUnsavedTitle": "Save the changes to {name}?",
+  "editorUnsavedFiles": "{count, plural, one {Save the changes to # file?} other {Save the changes to # files?}}",
+  "@editorUnsavedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorUnsavedBody": "Your changes are lost if you don't save them.",
+  "editorConflict": "{name} changed on the server",
+  "editorConflictGone": "{name} was removed from the server",
+  "editorConflictBody": "It changed after you opened it. Overwrite it with your text, or reload it from the server? Undo brings your text back after a reload.",
   "trayShow": "Show Finallyshell",
   "trayQuit": "Quit",
   "scTerminalCopy": "Terminal: copy",

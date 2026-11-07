@@ -56,6 +56,9 @@ type Platform interface {
 	// the fraction of their bytes done: -1 when none knows its size yet.
 	// Zero transfers clear both. See downloads.go.
 	ShowTransfers(count int, progress float64)
+	// TempDir is a folder of the app's for the copies of remote files it
+	// opens with other apps.
+	TempDir() string
 	// SetLocale shows the language of tag, or the system's for "".
 	SetLocale(tag string)
 	// Languages are the languages the app is written in.
@@ -67,6 +70,9 @@ type Platform interface {
 	// the user, by CloseWindow, or with its parent. Titles follow the
 	// language as it changes.
 	OpenWindow(spec WindowSpec, view func(c *ui.Context), closed func())
+	// RetitleWindow sets the title of the open window of kind again, from
+	// its spec's Title, as it changed.
+	RetitleWindow(kind WindowKind)
 	// FocusWindow brings the open window of kind to the front, with the
 	// keyboard; WindowMain the main window, out of the tray too.
 	FocusWindow(kind WindowKind)
@@ -154,6 +160,9 @@ type App struct {
 
 	// The secondary windows that are open.
 	windows map[WindowKind]bool
+
+	// The editor of remote files (fileeditor.go).
+	fe fileEditor
 
 	// The options window's page.
 	optionsNav widgets.NavState
@@ -361,6 +370,7 @@ func (a *App) closeSession(s *Session) {
 // CloseAll ends every connection, as the main window closes, closes the
 // secondary windows, and saves the pane sizes the user changed.
 func (a *App) CloseAll() {
+	a.fe.discard = true // the editor's changes go with the app
 	a.closeWindows()
 	if a.layoutDirty {
 		a.saveLayout()

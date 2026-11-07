@@ -2986,11 +2986,11 @@ func (msgs Messages) BackgroundOpacityHint() string {
 	return Catalog.Format(msgs.locale, "backgroundOpacityHint", nil)
 }
 
-// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Re…"
 // in the language the app shows.
 func BackgroundCopyNote() string { return In(i18n.Locale()).BackgroundCopyNote() }
 
-// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Re…"
 // in the language of msgs.
 func (msgs Messages) BackgroundCopyNote() string {
 	return Catalog.Format(msgs.locale, "backgroundCopyNote", nil)
@@ -3396,6 +3396,486 @@ func ConfirmQuitOK() string { return In(i18n.Locale()).ConfirmQuitOK() }
 // in the language of msgs.
 func (msgs Messages) ConfirmQuitOK() string {
 	return Catalog.Format(msgs.locale, "confirmQuitOK", nil)
+}
+
+// ConfirmQuitUnsaved says "{count, plural, one {# file in the editor has unsaved changes. Quitting discards them.} other {# files in the editor …"
+// in the language the app shows.
+func ConfirmQuitUnsaved(count int) string { return In(i18n.Locale()).ConfirmQuitUnsaved(count) }
+
+// ConfirmQuitUnsaved says "{count, plural, one {# file in the editor has unsaved changes. Quitting discards them.} other {# files in the editor …"
+// in the language of msgs.
+func (msgs Messages) ConfirmQuitUnsaved(count int) string {
+	return Catalog.Format(msgs.locale, "confirmQuitUnsaved", map[string]any{"count": count})
+}
+
+// FileEditor says "Editor"
+// in the language the app shows.
+func FileEditor() string { return In(i18n.Locale()).FileEditor() }
+
+// FileEditor says "Editor"
+// in the language of msgs.
+func (msgs Messages) FileEditor() string {
+	return Catalog.Format(msgs.locale, "fileEditor", nil)
+}
+
+// Save says "Save"
+// in the language the app shows.
+func Save() string { return In(i18n.Locale()).Save() }
+
+// Save says "Save"
+// in the language of msgs.
+func (msgs Messages) Save() string {
+	return Catalog.Format(msgs.locale, "save", nil)
+}
+
+// SaveAll says "Save All"
+// in the language the app shows.
+func SaveAll() string { return In(i18n.Locale()).SaveAll() }
+
+// SaveAll says "Save All"
+// in the language of msgs.
+func (msgs Messages) SaveAll() string {
+	return Catalog.Format(msgs.locale, "saveAll", nil)
+}
+
+// DontSave says "Don't Save"
+// in the language the app shows.
+func DontSave() string { return In(i18n.Locale()).DontSave() }
+
+// DontSave says "Don't Save"
+// in the language of msgs.
+func (msgs Messages) DontSave() string {
+	return Catalog.Format(msgs.locale, "dontSave", nil)
+}
+
+// Undo says "Undo"
+// in the language the app shows.
+func Undo() string { return In(i18n.Locale()).Undo() }
+
+// Undo says "Undo"
+// in the language of msgs.
+func (msgs Messages) Undo() string {
+	return Catalog.Format(msgs.locale, "undo", nil)
+}
+
+// Redo says "Redo"
+// in the language the app shows.
+func Redo() string { return In(i18n.Locale()).Redo() }
+
+// Redo says "Redo"
+// in the language of msgs.
+func (msgs Messages) Redo() string {
+	return Catalog.Format(msgs.locale, "redo", nil)
+}
+
+// Find says "Find"
+// in the language the app shows.
+func Find() string { return In(i18n.Locale()).Find() }
+
+// Find says "Find"
+// in the language of msgs.
+func (msgs Messages) Find() string {
+	return Catalog.Format(msgs.locale, "find", nil)
+}
+
+// Overwrite says "Overwrite"
+// in the language the app shows.
+func Overwrite() string { return In(i18n.Locale()).Overwrite() }
+
+// Overwrite says "Overwrite"
+// in the language of msgs.
+func (msgs Messages) Overwrite() string {
+	return Catalog.Format(msgs.locale, "overwrite", nil)
+}
+
+// EditorReplace says "Replace"
+// in the language the app shows.
+func EditorReplace() string { return In(i18n.Locale()).EditorReplace() }
+
+// EditorReplace says "Replace"
+// in the language of msgs.
+func (msgs Messages) EditorReplace() string {
+	return Catalog.Format(msgs.locale, "editorReplace", nil)
+}
+
+// EditorGoToLine says "Go to line"
+// in the language the app shows.
+func EditorGoToLine() string { return In(i18n.Locale()).EditorGoToLine() }
+
+// EditorGoToLine says "Go to line"
+// in the language of msgs.
+func (msgs Messages) EditorGoToLine() string {
+	return Catalog.Format(msgs.locale, "editorGoToLine", nil)
+}
+
+// EditorSoftWrap says "Soft wrap"
+// in the language the app shows.
+func EditorSoftWrap() string { return In(i18n.Locale()).EditorSoftWrap() }
+
+// EditorSoftWrap says "Soft wrap"
+// in the language of msgs.
+func (msgs Messages) EditorSoftWrap() string {
+	return Catalog.Format(msgs.locale, "editorSoftWrap", nil)
+}
+
+// EditorReload says "Reload"
+// in the language the app shows.
+func EditorReload() string { return In(i18n.Locale()).EditorReload() }
+
+// EditorReload says "Reload"
+// in the language of msgs.
+func (msgs Messages) EditorReload() string {
+	return Catalog.Format(msgs.locale, "editorReload", nil)
+}
+
+// EditorReloadFromServer says "Reload from the server"
+// in the language the app shows.
+func EditorReloadFromServer() string { return In(i18n.Locale()).EditorReloadFromServer() }
+
+// EditorReloadFromServer says "Reload from the server"
+// in the language of msgs.
+func (msgs Messages) EditorReloadFromServer() string {
+	return Catalog.Format(msgs.locale, "editorReloadFromServer", nil)
+}
+
+// EditorReading says "Reading {name}…"
+// in the language the app shows.
+func EditorReading(name string) string { return In(i18n.Locale()).EditorReading(name) }
+
+// EditorReading says "Reading {name}…"
+// in the language of msgs.
+func (msgs Messages) EditorReading(name string) string {
+	return Catalog.Format(msgs.locale, "editorReading", map[string]any{"name": name})
+}
+
+// EditorProgress says "{done} of {total}"
+// in the language the app shows.
+func EditorProgress(done string, total string) string {
+	return In(i18n.Locale()).EditorProgress(done, total)
+}
+
+// EditorProgress says "{done} of {total}"
+// in the language of msgs.
+func (msgs Messages) EditorProgress(done string, total string) string {
+	return Catalog.Format(msgs.locale, "editorProgress", map[string]any{"done": done, "total": total})
+}
+
+// EditorTooLarge says "{name} is {size}"
+// in the language the app shows.
+func EditorTooLarge(name string, size string) string {
+	return In(i18n.Locale()).EditorTooLarge(name, size)
+}
+
+// EditorTooLarge says "{name} is {size}"
+// in the language of msgs.
+func (msgs Messages) EditorTooLarge(name string, size string) string {
+	return Catalog.Format(msgs.locale, "editorTooLarge", map[string]any{"name": name, "size": size})
+}
+
+// EditorTooLargeBody says "The editor reads a file into memory: one over {limit} takes a while to open and edit."
+// in the language the app shows.
+func EditorTooLargeBody(limit string) string { return In(i18n.Locale()).EditorTooLargeBody(limit) }
+
+// EditorTooLargeBody says "The editor reads a file into memory: one over {limit} takes a while to open and edit."
+// in the language of msgs.
+func (msgs Messages) EditorTooLargeBody(limit string) string {
+	return Catalog.Format(msgs.locale, "editorTooLargeBody", map[string]any{"limit": limit})
+}
+
+// EditorOpenAnyway says "Open Anyway"
+// in the language the app shows.
+func EditorOpenAnyway() string { return In(i18n.Locale()).EditorOpenAnyway() }
+
+// EditorOpenAnyway says "Open Anyway"
+// in the language of msgs.
+func (msgs Messages) EditorOpenAnyway() string {
+	return Catalog.Format(msgs.locale, "editorOpenAnyway", nil)
+}
+
+// EditorBinary says "{name} looks like a binary file"
+// in the language the app shows.
+func EditorBinary(name string) string { return In(i18n.Locale()).EditorBinary(name) }
+
+// EditorBinary says "{name} looks like a binary file"
+// in the language of msgs.
+func (msgs Messages) EditorBinary(name string) string {
+	return Catalog.Format(msgs.locale, "editorBinary", map[string]any{"name": name})
+}
+
+// EditorBinaryBody says "The editor opens text files only."
+// in the language the app shows.
+func EditorBinaryBody() string { return In(i18n.Locale()).EditorBinaryBody() }
+
+// EditorBinaryBody says "The editor opens text files only."
+// in the language of msgs.
+func (msgs Messages) EditorBinaryBody() string {
+	return Catalog.Format(msgs.locale, "editorBinaryBody", nil)
+}
+
+// EditorOpenWithApp says "Open with the Default App"
+// in the language the app shows.
+func EditorOpenWithApp() string { return In(i18n.Locale()).EditorOpenWithApp() }
+
+// EditorOpenWithApp says "Open with the Default App"
+// in the language of msgs.
+func (msgs Messages) EditorOpenWithApp() string {
+	return Catalog.Format(msgs.locale, "editorOpenWithApp", nil)
+}
+
+// EditorOpeningWithApp says "Downloading to open it…"
+// in the language the app shows.
+func EditorOpeningWithApp() string { return In(i18n.Locale()).EditorOpeningWithApp() }
+
+// EditorOpeningWithApp says "Downloading to open it…"
+// in the language of msgs.
+func (msgs Messages) EditorOpeningWithApp() string {
+	return Catalog.Format(msgs.locale, "editorOpeningWithApp", nil)
+}
+
+// EditorOpenedWithApp says "Opened a copy: {path}"
+// in the language the app shows.
+func EditorOpenedWithApp(path string) string { return In(i18n.Locale()).EditorOpenedWithApp(path) }
+
+// EditorOpenedWithApp says "Opened a copy: {path}"
+// in the language of msgs.
+func (msgs Messages) EditorOpenedWithApp(path string) string {
+	return Catalog.Format(msgs.locale, "editorOpenedWithApp", map[string]any{"path": path})
+}
+
+// EditorOpenWithAppFailed says "Cannot open it: {error}"
+// in the language the app shows.
+func EditorOpenWithAppFailed(error string) string {
+	return In(i18n.Locale()).EditorOpenWithAppFailed(error)
+}
+
+// EditorOpenWithAppFailed says "Cannot open it: {error}"
+// in the language of msgs.
+func (msgs Messages) EditorOpenWithAppFailed(error string) string {
+	return Catalog.Format(msgs.locale, "editorOpenWithAppFailed", map[string]any{"error": error})
+}
+
+// EditorCannotOpen says "Cannot open {name}: {error}"
+// in the language the app shows.
+func EditorCannotOpen(name string, error string) string {
+	return In(i18n.Locale()).EditorCannotOpen(name, error)
+}
+
+// EditorCannotOpen says "Cannot open {name}: {error}"
+// in the language of msgs.
+func (msgs Messages) EditorCannotOpen(name string, error string) string {
+	return Catalog.Format(msgs.locale, "editorCannotOpen", map[string]any{"name": name, "error": error})
+}
+
+// EditorPermissionDenied says "permission denied"
+// in the language the app shows.
+func EditorPermissionDenied() string { return In(i18n.Locale()).EditorPermissionDenied() }
+
+// EditorPermissionDenied says "permission denied"
+// in the language of msgs.
+func (msgs Messages) EditorPermissionDenied() string {
+	return Catalog.Format(msgs.locale, "editorPermissionDenied", nil)
+}
+
+// EditorNoSuchFile says "the file does not exist"
+// in the language the app shows.
+func EditorNoSuchFile() string { return In(i18n.Locale()).EditorNoSuchFile() }
+
+// EditorNoSuchFile says "the file does not exist"
+// in the language of msgs.
+func (msgs Messages) EditorNoSuchFile() string {
+	return Catalog.Format(msgs.locale, "editorNoSuchFile", nil)
+}
+
+// EditorDisconnected says "Not connected to {host}. Your changes are kept, and you can save them once the session reconnects."
+// in the language the app shows.
+func EditorDisconnected(host string) string { return In(i18n.Locale()).EditorDisconnected(host) }
+
+// EditorDisconnected says "Not connected to {host}. Your changes are kept, and you can save them once the session reconnects."
+// in the language of msgs.
+func (msgs Messages) EditorDisconnected(host string) string {
+	return Catalog.Format(msgs.locale, "editorDisconnected", map[string]any{"host": host})
+}
+
+// EditorNotConnected says "Not connected"
+// in the language the app shows.
+func EditorNotConnected() string { return In(i18n.Locale()).EditorNotConnected() }
+
+// EditorNotConnected says "Not connected"
+// in the language of msgs.
+func (msgs Messages) EditorNotConnected() string {
+	return Catalog.Format(msgs.locale, "editorNotConnected", nil)
+}
+
+// EditorNotUTF8 says "This file is not valid UTF-8. It may be in GB18030 (or GBK)."
+// in the language the app shows.
+func EditorNotUTF8() string { return In(i18n.Locale()).EditorNotUTF8() }
+
+// EditorNotUTF8 says "This file is not valid UTF-8. It may be in GB18030 (or GBK)."
+// in the language of msgs.
+func (msgs Messages) EditorNotUTF8() string {
+	return Catalog.Format(msgs.locale, "editorNotUTF8", nil)
+}
+
+// EditorReopenAs says "Reopen as {encoding}"
+// in the language the app shows.
+func EditorReopenAs(encoding string) string { return In(i18n.Locale()).EditorReopenAs(encoding) }
+
+// EditorReopenAs says "Reopen as {encoding}"
+// in the language of msgs.
+func (msgs Messages) EditorReopenAs(encoding string) string {
+	return Catalog.Format(msgs.locale, "editorReopenAs", map[string]any{"encoding": encoding})
+}
+
+// EditorSaving says "Saving…"
+// in the language the app shows.
+func EditorSaving() string { return In(i18n.Locale()).EditorSaving() }
+
+// EditorSaving says "Saving…"
+// in the language of msgs.
+func (msgs Messages) EditorSaving() string {
+	return Catalog.Format(msgs.locale, "editorSaving", nil)
+}
+
+// EditorSaved says "Saved"
+// in the language the app shows.
+func EditorSaved() string { return In(i18n.Locale()).EditorSaved() }
+
+// EditorSaved says "Saved"
+// in the language of msgs.
+func (msgs Messages) EditorSaved() string {
+	return Catalog.Format(msgs.locale, "editorSaved", nil)
+}
+
+// EditorSaveFailed says "Cannot save: {error}"
+// in the language the app shows.
+func EditorSaveFailed(error string) string { return In(i18n.Locale()).EditorSaveFailed(error) }
+
+// EditorSaveFailed says "Cannot save: {error}"
+// in the language of msgs.
+func (msgs Messages) EditorSaveFailed(error string) string {
+	return Catalog.Format(msgs.locale, "editorSaveFailed", map[string]any{"error": error})
+}
+
+// EditorCannotEncode says "{encoding} has no “{char}” (line {line})"
+// in the language the app shows.
+func EditorCannotEncode(line int, encoding string, char string) string {
+	return In(i18n.Locale()).EditorCannotEncode(line, encoding, char)
+}
+
+// EditorCannotEncode says "{encoding} has no “{char}” (line {line})"
+// in the language of msgs.
+func (msgs Messages) EditorCannotEncode(line int, encoding string, char string) string {
+	return Catalog.Format(msgs.locale, "editorCannotEncode", map[string]any{"line": line, "encoding": encoding, "char": char})
+}
+
+// EditorPlainText says "Plain Text"
+// in the language the app shows.
+func EditorPlainText() string { return In(i18n.Locale()).EditorPlainText() }
+
+// EditorPlainText says "Plain Text"
+// in the language of msgs.
+func (msgs Messages) EditorPlainText() string {
+	return Catalog.Format(msgs.locale, "editorPlainText", nil)
+}
+
+// EditorLanguage says "Language"
+// in the language the app shows.
+func EditorLanguage() string { return In(i18n.Locale()).EditorLanguage() }
+
+// EditorLanguage says "Language"
+// in the language of msgs.
+func (msgs Messages) EditorLanguage() string {
+	return Catalog.Format(msgs.locale, "editorLanguage", nil)
+}
+
+// EditorLineCol says "Ln {line}, Col {col}"
+// in the language the app shows.
+func EditorLineCol(line int, col int) string { return In(i18n.Locale()).EditorLineCol(line, col) }
+
+// EditorLineCol says "Ln {line}, Col {col}"
+// in the language of msgs.
+func (msgs Messages) EditorLineCol(line int, col int) string {
+	return Catalog.Format(msgs.locale, "editorLineCol", map[string]any{"line": line, "col": col})
+}
+
+// EditorEncoding says "Encoding"
+// in the language the app shows.
+func EditorEncoding() string { return In(i18n.Locale()).EditorEncoding() }
+
+// EditorEncoding says "Encoding"
+// in the language of msgs.
+func (msgs Messages) EditorEncoding() string {
+	return Catalog.Format(msgs.locale, "editorEncoding", nil)
+}
+
+// EditorLineEndings says "Line endings"
+// in the language the app shows.
+func EditorLineEndings() string { return In(i18n.Locale()).EditorLineEndings() }
+
+// EditorLineEndings says "Line endings"
+// in the language of msgs.
+func (msgs Messages) EditorLineEndings() string {
+	return Catalog.Format(msgs.locale, "editorLineEndings", nil)
+}
+
+// EditorUnsavedTitle says "Save the changes to {name}?"
+// in the language the app shows.
+func EditorUnsavedTitle(name string) string { return In(i18n.Locale()).EditorUnsavedTitle(name) }
+
+// EditorUnsavedTitle says "Save the changes to {name}?"
+// in the language of msgs.
+func (msgs Messages) EditorUnsavedTitle(name string) string {
+	return Catalog.Format(msgs.locale, "editorUnsavedTitle", map[string]any{"name": name})
+}
+
+// EditorUnsavedFiles says "{count, plural, one {Save the changes to # file?} other {Save the changes to # files?}}"
+// in the language the app shows.
+func EditorUnsavedFiles(count int) string { return In(i18n.Locale()).EditorUnsavedFiles(count) }
+
+// EditorUnsavedFiles says "{count, plural, one {Save the changes to # file?} other {Save the changes to # files?}}"
+// in the language of msgs.
+func (msgs Messages) EditorUnsavedFiles(count int) string {
+	return Catalog.Format(msgs.locale, "editorUnsavedFiles", map[string]any{"count": count})
+}
+
+// EditorUnsavedBody says "Your changes are lost if you don't save them."
+// in the language the app shows.
+func EditorUnsavedBody() string { return In(i18n.Locale()).EditorUnsavedBody() }
+
+// EditorUnsavedBody says "Your changes are lost if you don't save them."
+// in the language of msgs.
+func (msgs Messages) EditorUnsavedBody() string {
+	return Catalog.Format(msgs.locale, "editorUnsavedBody", nil)
+}
+
+// EditorConflict says "{name} changed on the server"
+// in the language the app shows.
+func EditorConflict(name string) string { return In(i18n.Locale()).EditorConflict(name) }
+
+// EditorConflict says "{name} changed on the server"
+// in the language of msgs.
+func (msgs Messages) EditorConflict(name string) string {
+	return Catalog.Format(msgs.locale, "editorConflict", map[string]any{"name": name})
+}
+
+// EditorConflictGone says "{name} was removed from the server"
+// in the language the app shows.
+func EditorConflictGone(name string) string { return In(i18n.Locale()).EditorConflictGone(name) }
+
+// EditorConflictGone says "{name} was removed from the server"
+// in the language of msgs.
+func (msgs Messages) EditorConflictGone(name string) string {
+	return Catalog.Format(msgs.locale, "editorConflictGone", map[string]any{"name": name})
+}
+
+// EditorConflictBody says "It changed after you opened it. Overwrite it with your text, or reload it from the server? Undo brings your text back…"
+// in the language the app shows.
+func EditorConflictBody() string { return In(i18n.Locale()).EditorConflictBody() }
+
+// EditorConflictBody says "It changed after you opened it. Overwrite it with your text, or reload it from the server? Undo brings your text back…"
+// in the language of msgs.
+func (msgs Messages) EditorConflictBody() string {
+	return Catalog.Format(msgs.locale, "editorConflictBody", nil)
 }
 
 // TrayShow says "Show Finallyshell"

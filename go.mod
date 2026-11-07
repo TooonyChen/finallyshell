@@ -9,6 +9,7 @@ require (
 	golang.org/x/crypto v0.58.0
 	golang.org/x/image v0.46.0
 	golang.org/x/net v0.60.0
+	golang.org/x/text v0.43.0
 )
 
 require (
@@ -19,7 +20,6 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/tdewolff/parse/v2 v2.8.16 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
 )
 
 tool github.com/egoist/mygo/cmd/mygo

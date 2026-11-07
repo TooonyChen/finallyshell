@@ -306,11 +306,22 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 				ui.Text(c, fmt.Sprintf("%d/%d", e.UID, e.GID))
 			}
 		}).Grow(1)
-		if t.Submitted() && f.row >= 0 && f.row < len(entries) && entries[f.row].IsDir() {
-			a.openDir(s, path.Join(f.cwd, entries[f.row].Name))
+		// A double click or Enter opens a folder, or a file in the editor.
+		if t.Submitted() && f.row >= 0 && f.row < len(entries) {
+			if e := entries[f.row]; e.IsDir() {
+				a.openDir(s, path.Join(f.cwd, e.Name))
+			} else if editable(e) {
+				a.openRemoteFile(s, path.Join(f.cwd, e.Name))
+			}
 		}
 		t.ContextMenu(func(m *ui.Menu) {
 			names := f.chosenNames()
+			if e, ok := f.entry(names); ok && editable(e) {
+				if m.Item(locales.Edit()).Chosen() {
+					a.openRemoteFile(s, path.Join(f.cwd, e.Name))
+				}
+				m.Separator()
+			}
 			if m.Item(locales.Download()).Disabled(len(names) == 0).Chosen() {
 				a.download(s, names, "")
 			}
