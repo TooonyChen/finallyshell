@@ -17,7 +17,7 @@ func TestSettings(t *testing.T) {
 	want := Settings{
 		Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180,
 		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
-		CopyOnSelect: true, RightClick: RightClickCopyOrPaste, NoLinkClick: true, WheelLines: 5,
+		CopyOnSelect: true, RightClick: RightClickCopyOrPaste, NoLinkClick: true, WheelLines: 5, KeepManagerOpen: true,
 	}
 	if err := SaveSettings(want); err != nil {
 		t.Fatal(err)
@@ -284,6 +284,36 @@ func TestUnknownKeysKept(t *testing.T) {
 	again, err := LoadHosts()
 	if err != nil || !reflect.DeepEqual(again, s) {
 		t.Fatalf("reloaded %+v (%v)", again, err)
+	}
+
+}
+
+// A copy keeps every field and unknown key, the proxy's and the tunnels'
+// too, and shares none of them.
+func TestHostClone(t *testing.T) {
+	var h Host
+	err := json.Unmarshal([]byte(`{"id": "h1", "addr": "a", "color": "red",
+		"proxy": {"kind": "socks5", "addr": "p", "chain": [1]},
+		"tunnels": [{"kind": "local", "listenPort": 8080, "targetHost": "t", "targetPort": 80, "note": "admin"}, {"kind": "dynamic", "listenPort": 1080}]}`), &h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := h.Clone()
+	if c == &h || !reflect.DeepEqual(*c, h) || len(c.extra) == 0 || len(c.Proxy.extra) == 0 || len(c.Tunnels) != 2 || len(c.Tunnels[0].extra) == 0 {
+		t.Fatalf("clone %+v", c)
+	}
+	c.extra["color"] = []byte(`"blue"`)
+	c.Proxy.Addr = "changed"
+	c.Proxy.extra["chain"] = []byte(`[]`)
+	c.Tunnels[0].ListenPort = 9
+	c.Tunnels[0].extra["note"] = []byte(`"other"`)
+	c.Tunnels = append(c.Tunnels[:1], Tunnel{Kind: TunnelLocal})
+	if string(h.extra["color"]) != `"red"` || h.Proxy.Addr != "p" || string(h.Proxy.extra["chain"]) != `[1]` ||
+		h.Tunnels[0].ListenPort != 8080 || string(h.Tunnels[0].extra["note"]) != `"admin"` || h.Tunnels[1].Kind != TunnelDynamic {
+		t.Errorf("the clone shares with the host: %+v", h)
+	}
+	if (&Host{}).Clone().Tunnels != nil {
+		t.Error("a host without tunnels copied to an empty list")
 	}
 }
 

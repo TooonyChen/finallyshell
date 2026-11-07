@@ -17,6 +17,9 @@ const (
 	WindowOptions WindowKind = "options"
 )
 
+// WindowMain is the main window, as a Parent and for FocusWindow.
+const WindowMain WindowKind = ""
+
 // WindowSpec says how a secondary window opens.
 type WindowSpec struct {
 	Kind WindowKind
@@ -34,7 +37,8 @@ type WindowSpec struct {
 	// open.
 	Parent WindowKind
 	// Modal blocks the parent until this window closes. On macOS the
-	// window is then a sheet of its parent.
+	// window is then a sheet of its parent, which has no title bar: the
+	// view shows Title as a heading instead.
 	Modal bool
 }
 
@@ -56,6 +60,10 @@ func (a *App) closeWindowShortcut(c *ui.Context) bool {
 		!closeTab.none() && closeTab != (keyCombo{ui.Super, ui.KeyW}) && c.Shortcut(closeTab.Mods, closeTab.Key)
 }
 
+// sheets tells whether a modal window is a sheet of its parent, without a
+// title bar, as on macOS.
+var sheets = runtime.GOOS == "darwin"
+
 // openWindow opens the window of spec.Kind showing view, or brings it to
 // the front when it is open already. The view is the window's alone: it
 // has the app's theme, and Escape closes the window unless something in
@@ -70,13 +78,20 @@ func (a *App) openWindow(spec WindowSpec, view func(c *ui.Context)) {
 	}
 	spec.Width, spec.Height = max(spec.Width, spec.MinWidth), max(spec.Height, spec.MinHeight)
 	a.windows[spec.Kind] = true
-	kind := spec.Kind
+	kind, title, sheet := spec.Kind, spec.Title, spec.Modal && sheets
 	a.plat.OpenWindow(spec, func(c *ui.Context) {
 		c.SetTheme(theme)
 		if c.Shortcut(0, ui.KeyEscape) || a.closeWindowShortcut(c) {
 			a.closeWindow(kind)
 		}
-		view(c)
+		if !sheet {
+			view(c)
+			return
+		}
+		ui.Column(c).Fill().Children(func() {
+			ui.Text(c, title()).Bold().TextAlign(ui.Center).Padding(10, 16, 2, 16).Shrink(0)
+			ui.Column(c).Grow(1).MinHeight(0).Children(func() { view(c) })
+		})
 	}, func() { delete(a.windows, kind) })
 }
 

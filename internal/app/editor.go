@@ -21,12 +21,11 @@ import (
 const WindowEditor WindowKind = "editor"
 
 // editorSpec is how the connection editor opens, for a new host or, with
-// editing, one saved. It belongs to the main window and does not block
-// it, as the connection manager is still a dialog in the main window: a
-// modal window would be a sheet covering the main window on macOS, and
-// would block every window of the app on Linux (see README). Once the
-// manager is a window of its own, the editor can be modal to it, with
-// Parent set to the manager's kind.
+// editing, one saved. Opened from the main window, it belongs to it and
+// does not block it: a modal window would be a sheet covering the main
+// window on macOS, and would block every window of the app on Linux (see
+// README). Opened from the connection manager, openEditor makes it modal
+// to the manager, as FinalShell's is.
 func editorSpec(editing bool) WindowSpec {
 	title := locales.NewConnection
 	if editing {
@@ -86,6 +85,7 @@ type connEditor struct {
 	backspace               config.BackspaceKey
 	proxy                   proxyFields  // the Proxy page (editor_proxy.go)
 	tunnels                 tunnelEditor // see editor_tunnels.go
+	folder                  string       // a new host's, from the manager
 
 	// checked is set once OK was pressed: from then on the errors show,
 	// and follow the fields as they change.
@@ -97,7 +97,7 @@ type connEditor struct {
 // newConnection opens the connection editor for a new host, or brings
 // the open editor to the front. OK adds the host to the saved ones.
 func (a *App) newConnection() {
-	a.openEditor(nil)
+	a.openEditor(nil, WindowMain)
 }
 
 // editConnection opens the connection editor on h, a saved host, or
@@ -106,10 +106,12 @@ func (a *App) newConnection() {
 // the changes into h, which sessions open to it use the next time they
 // connect.
 func (a *App) editConnection(h *config.Host) {
-	a.openEditor(h)
+	a.openEditor(h, WindowMain)
 }
 
-func (a *App) openEditor(h *config.Host) {
+// openEditor opens the editor on h, nil for a new host, from the window of
+// kind from: modal to the connection manager when from is it.
+func (a *App) openEditor(h *config.Host, from WindowKind) {
 	if a.windowOpen(WindowEditor) {
 		a.plat.FocusWindow(WindowEditor)
 		return
@@ -134,7 +136,14 @@ func (a *App) openEditor(h *config.Host) {
 	ed.proxy = a.proxyFieldsOf(h)
 	ed.tunnels = newTunnelEditor(h)
 	a.editor = ed
-	a.openWindow(editorSpec(h != nil), a.editorView)
+	spec := editorSpec(h != nil)
+	if from == WindowManager && a.windowOpen(WindowManager) {
+		// A sheet of the manager on macOS, showing its title inside;
+		// on Linux GTK blocks the main window too while it is open, as
+		// FinalShell's own dialogs do. Saving shows in the manager.
+		spec.Parent, spec.Modal = WindowManager, true
+	}
+	a.openWindow(spec, a.editorView)
 }
 
 // validTermType tells whether s can be a terminal type, a terminfo
@@ -194,7 +203,7 @@ func (a *App) saveEditor() {
 			return
 		}
 	} else {
-		h = &config.Host{}
+		h = &config.Host{Folder: ed.folder}
 		a.hosts.Add(h)
 		ed.id = h.ID
 	}
@@ -218,7 +227,7 @@ func (a *App) saveEditor() {
 	}
 	a.saveProxy(h, &ed.proxy)
 	h.Tunnels = ed.tunnels.result()
-	a.hostRow = slices.Index(a.hosts.Live(), h)
+	a.manager.reveal(managerItem{host: h.ID})
 	a.redraw() // the manager and the sessions show the host
 	if err := a.saveHosts(a.hosts); err != nil {
 		ed.saveErr = func() string { return locales.ErrSaveFailed(err.Error()) }

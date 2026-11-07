@@ -3649,3 +3649,333 @@ func ShortcutTerminalKey() string { return In(i18n.Locale()).ShortcutTerminalKey
 func (msgs Messages) ShortcutTerminalKey() string {
 	return Catalog.Format(msgs.locale, "shortcutTerminalKey", nil)
 }
+
+// ProxyLater says "Connecting through a proxy is coming in a later version."
+// in the language the app shows.
+func ProxyLater() string { return In(i18n.Locale()).ProxyLater() }
+
+// ProxyLater says "Connecting through a proxy is coming in a later version."
+// in the language of msgs.
+func (msgs Messages) ProxyLater() string {
+	return Catalog.Format(msgs.locale, "proxyLater", nil)
+}
+
+// NewFolder says "New folder"
+// in the language the app shows.
+func NewFolder() string { return In(i18n.Locale()).NewFolder() }
+
+// NewFolder says "New folder"
+// in the language of msgs.
+func (msgs Messages) NewFolder() string {
+	return Catalog.Format(msgs.locale, "newFolder", nil)
+}
+
+// NewSubfolder says "New subfolder"
+// in the language the app shows.
+func NewSubfolder() string { return In(i18n.Locale()).NewSubfolder() }
+
+// NewSubfolder says "New subfolder"
+// in the language of msgs.
+func (msgs Messages) NewSubfolder() string {
+	return Catalog.Format(msgs.locale, "newSubfolder", nil)
+}
+
+// CollapseAll says "Collapse all"
+// in the language the app shows.
+func CollapseAll() string { return In(i18n.Locale()).CollapseAll() }
+
+// CollapseAll says "Collapse all"
+// in the language of msgs.
+func (msgs Messages) CollapseAll() string {
+	return Catalog.Format(msgs.locale, "collapseAll", nil)
+}
+
+// ExpandAll says "Expand all"
+// in the language the app shows.
+func ExpandAll() string { return In(i18n.Locale()).ExpandAll() }
+
+// ExpandAll says "Expand all"
+// in the language of msgs.
+func (msgs Messages) ExpandAll() string {
+	return Catalog.Format(msgs.locale, "expandAll", nil)
+}
+
+// ShowDeleted says "Show deleted"
+// in the language the app shows.
+func ShowDeleted() string { return In(i18n.Locale()).ShowDeleted() }
+
+// ShowDeleted says "Show deleted"
+// in the language of msgs.
+func (msgs Messages) ShowDeleted() string {
+	return Catalog.Format(msgs.locale, "showDeleted", nil)
+}
+
+// FolderFilter says "Folder"
+// in the language the app shows.
+func FolderFilter() string { return In(i18n.Locale()).FolderFilter() }
+
+// FolderFilter says "Folder"
+// in the language of msgs.
+func (msgs Messages) FolderFilter() string {
+	return Catalog.Format(msgs.locale, "folderFilter", nil)
+}
+
+// FilterAll says "All"
+// in the language the app shows.
+func FilterAll() string { return In(i18n.Locale()).FilterAll() }
+
+// FilterAll says "All"
+// in the language of msgs.
+func (msgs Messages) FilterAll() string {
+	return Catalog.Format(msgs.locale, "filterAll", nil)
+}
+
+// HostColPort says "Port"
+// in the language the app shows.
+func HostColPort() string { return In(i18n.Locale()).HostColPort() }
+
+// HostColPort says "Port"
+// in the language of msgs.
+func (msgs Messages) HostColPort() string {
+	return Catalog.Format(msgs.locale, "hostColPort", nil)
+}
+
+// HostColNotes says "Notes"
+// in the language the app shows.
+func HostColNotes() string { return In(i18n.Locale()).HostColNotes() }
+
+// HostColNotes says "Notes"
+// in the language of msgs.
+func (msgs Messages) HostColNotes() string {
+	return Catalog.Format(msgs.locale, "hostColNotes", nil)
+}
+
+// CloseAfterConnect says "Close window after connecting"
+// in the language the app shows.
+func CloseAfterConnect() string { return In(i18n.Locale()).CloseAfterConnect() }
+
+// CloseAfterConnect says "Close window after connecting"
+// in the language of msgs.
+func (msgs Messages) CloseAfterConnect() string {
+	return Catalog.Format(msgs.locale, "closeAfterConnect", nil)
+}
+
+// Duplicate says "Duplicate"
+// in the language the app shows.
+func Duplicate() string { return In(i18n.Locale()).Duplicate() }
+
+// Duplicate says "Duplicate"
+// in the language of msgs.
+func (msgs Messages) Duplicate() string {
+	return Catalog.Format(msgs.locale, "duplicate", nil)
+}
+
+// Rename says "Rename"
+// in the language the app shows.
+func Rename() string { return In(i18n.Locale()).Rename() }
+
+// Rename says "Rename"
+// in the language of msgs.
+func (msgs Messages) Rename() string {
+	return Catalog.Format(msgs.locale, "rename", nil)
+}
+
+// MoveToFolder says "Move to folder"
+// in the language the app shows.
+func MoveToFolder() string { return In(i18n.Locale()).MoveToFolder() }
+
+// MoveToFolder says "Move to folder"
+// in the language of msgs.
+func (msgs Messages) MoveToFolder() string {
+	return Catalog.Format(msgs.locale, "moveToFolder", nil)
+}
+
+// TopLevel says "Top level"
+// in the language the app shows.
+func TopLevel() string { return In(i18n.Locale()).TopLevel() }
+
+// TopLevel says "Top level"
+// in the language of msgs.
+func (msgs Messages) TopLevel() string {
+	return Catalog.Format(msgs.locale, "topLevel", nil)
+}
+
+// CopyHost says "Copy host"
+// in the language the app shows.
+func CopyHost() string { return In(i18n.Locale()).CopyHost() }
+
+// CopyHost says "Copy host"
+// in the language of msgs.
+func (msgs Messages) CopyHost() string {
+	return Catalog.Format(msgs.locale, "copyHost", nil)
+}
+
+// Restore says "Restore"
+// in the language the app shows.
+func Restore() string { return In(i18n.Locale()).Restore() }
+
+// Restore says "Restore"
+// in the language of msgs.
+func (msgs Messages) Restore() string {
+	return Catalog.Format(msgs.locale, "restore", nil)
+}
+
+// DeleteForever says "Delete permanently"
+// in the language the app shows.
+func DeleteForever() string { return In(i18n.Locale()).DeleteForever() }
+
+// DeleteForever says "Delete permanently"
+// in the language of msgs.
+func (msgs Messages) DeleteForever() string {
+	return Catalog.Format(msgs.locale, "deleteForever", nil)
+}
+
+// CopyOfName says "{name} (copy)"
+// in the language the app shows.
+func CopyOfName(name string) string { return In(i18n.Locale()).CopyOfName(name) }
+
+// CopyOfName says "{name} (copy)"
+// in the language of msgs.
+func (msgs Messages) CopyOfName(name string) string {
+	return Catalog.Format(msgs.locale, "copyOfName", map[string]any{"name": name})
+}
+
+// FolderName says "Name"
+// in the language the app shows.
+func FolderName() string { return In(i18n.Locale()).FolderName() }
+
+// FolderName says "Name"
+// in the language of msgs.
+func (msgs Messages) FolderName() string {
+	return Catalog.Format(msgs.locale, "folderName", nil)
+}
+
+// RenameFolder says "Rename folder"
+// in the language the app shows.
+func RenameFolder() string { return In(i18n.Locale()).RenameFolder() }
+
+// RenameFolder says "Rename folder"
+// in the language of msgs.
+func (msgs Messages) RenameFolder() string {
+	return Catalog.Format(msgs.locale, "renameFolder", nil)
+}
+
+// RenameConnection says "Rename connection"
+// in the language the app shows.
+func RenameConnection() string { return In(i18n.Locale()).RenameConnection() }
+
+// RenameConnection says "Rename connection"
+// in the language of msgs.
+func (msgs Messages) RenameConnection() string {
+	return Catalog.Format(msgs.locale, "renameConnection", nil)
+}
+
+// DeleteFolderTitle says "Delete the folder “{name}”?"
+// in the language the app shows.
+func DeleteFolderTitle(name string) string { return In(i18n.Locale()).DeleteFolderTitle(name) }
+
+// DeleteFolderTitle says "Delete the folder “{name}”?"
+// in the language of msgs.
+func (msgs Messages) DeleteFolderTitle(name string) string {
+	return Catalog.Format(msgs.locale, "deleteFolderTitle", map[string]any{"name": name})
+}
+
+// DeleteFolderBody says "Its connections and folders move to “{parent}”."
+// in the language the app shows.
+func DeleteFolderBody(parent string) string { return In(i18n.Locale()).DeleteFolderBody(parent) }
+
+// DeleteFolderBody says "Its connections and folders move to “{parent}”."
+// in the language of msgs.
+func (msgs Messages) DeleteFolderBody(parent string) string {
+	return Catalog.Format(msgs.locale, "deleteFolderBody", map[string]any{"parent": parent})
+}
+
+// DeleteFolderBodyTop says "Its connections and folders move to the top level."
+// in the language the app shows.
+func DeleteFolderBodyTop() string { return In(i18n.Locale()).DeleteFolderBodyTop() }
+
+// DeleteFolderBodyTop says "Its connections and folders move to the top level."
+// in the language of msgs.
+func (msgs Messages) DeleteFolderBodyTop() string {
+	return Catalog.Format(msgs.locale, "deleteFolderBodyTop", nil)
+}
+
+// DeleteForeverTitle says "Delete “{name}” permanently?"
+// in the language the app shows.
+func DeleteForeverTitle(name string) string { return In(i18n.Locale()).DeleteForeverTitle(name) }
+
+// DeleteForeverTitle says "Delete “{name}” permanently?"
+// in the language of msgs.
+func (msgs Messages) DeleteForeverTitle(name string) string {
+	return Catalog.Format(msgs.locale, "deleteForeverTitle", map[string]any{"name": name})
+}
+
+// DeleteForeverBody says "It cannot be restored afterwards."
+// in the language the app shows.
+func DeleteForeverBody() string { return In(i18n.Locale()).DeleteForeverBody() }
+
+// DeleteForeverBody says "It cannot be restored afterwards."
+// in the language of msgs.
+func (msgs Messages) DeleteForeverBody() string {
+	return Catalog.Format(msgs.locale, "deleteForeverBody", nil)
+}
+
+// ManagerEmpty says "No connections yet. Click New connection to add one."
+// in the language the app shows.
+func ManagerEmpty() string { return In(i18n.Locale()).ManagerEmpty() }
+
+// ManagerEmpty says "No connections yet. Click New connection to add one."
+// in the language of msgs.
+func (msgs Messages) ManagerEmpty() string {
+	return Catalog.Format(msgs.locale, "managerEmpty", nil)
+}
+
+// DeletedAt says "Deleted {when}"
+// in the language the app shows.
+func DeletedAt(when string) string { return In(i18n.Locale()).DeletedAt(when) }
+
+// DeletedAt says "Deleted {when}"
+// in the language of msgs.
+func (msgs Messages) DeletedAt(when string) string {
+	return Catalog.Format(msgs.locale, "deletedAt", map[string]any{"when": when})
+}
+
+// DeleteHostTitle says "Delete “{name}”?"
+// in the language the app shows.
+func DeleteHostTitle(name string) string { return In(i18n.Locale()).DeleteHostTitle(name) }
+
+// DeleteHostTitle says "Delete “{name}”?"
+// in the language of msgs.
+func (msgs Messages) DeleteHostTitle(name string) string {
+	return Catalog.Format(msgs.locale, "deleteHostTitle", map[string]any{"name": name})
+}
+
+// JumpHostInUse says "It is the jump host of {hosts}, which cannot connect until it is restored."
+// in the language the app shows.
+func JumpHostInUse(hosts string) string { return In(i18n.Locale()).JumpHostInUse(hosts) }
+
+// JumpHostInUse says "It is the jump host of {hosts}, which cannot connect until it is restored."
+// in the language of msgs.
+func (msgs Messages) JumpHostInUse(hosts string) string {
+	return Catalog.Format(msgs.locale, "jumpHostInUse", map[string]any{"hosts": hosts})
+}
+
+// JumpHostInUseForever says "It is the jump host of {hosts}, which cannot connect without it."
+// in the language the app shows.
+func JumpHostInUseForever(hosts string) string { return In(i18n.Locale()).JumpHostInUseForever(hosts) }
+
+// JumpHostInUseForever says "It is the jump host of {hosts}, which cannot connect without it."
+// in the language of msgs.
+func (msgs Messages) JumpHostInUseForever(hosts string) string {
+	return Catalog.Format(msgs.locale, "jumpHostInUseForever", map[string]any{"hosts": hosts})
+}
+
+// ListSeparator says ", "
+// in the language the app shows.
+func ListSeparator() string { return In(i18n.Locale()).ListSeparator() }
+
+// ListSeparator says ", "
+// in the language of msgs.
+func (msgs Messages) ListSeparator() string {
+	return Catalog.Format(msgs.locale, "listSeparator", nil)
+}

@@ -452,5 +452,94 @@
   "shortcutSystem": "The system uses this key.",
   "shortcutDigits": "Press a digit from 1 to 9.",
   "shortcutConflict": "“{action}” uses this key; it will have none.",
-  "shortcutTerminalKey": "The terminal uses this key too (select all, zoom, scroll, or copy and paste with Insert); the shortcut takes it."
+  "shortcutTerminalKey": "The terminal uses this key too (select all, zoom, scroll, or copy and paste with Insert); the shortcut takes it.",
+  "proxyLater": "Connecting through a proxy is coming in a later version.",
+  "newFolder": "New folder",
+  "newSubfolder": "New subfolder",
+  "collapseAll": "Collapse all",
+  "expandAll": "Expand all",
+  "showDeleted": "Show deleted",
+  "folderFilter": "Folder",
+  "filterAll": "All",
+  "hostColPort": "Port",
+  "hostColNotes": "Notes",
+  "closeAfterConnect": "Close window after connecting",
+  "duplicate": "Duplicate",
+  "rename": "Rename",
+  "moveToFolder": "Move to folder",
+  "topLevel": "Top level",
+  "copyHost": "Copy host",
+  "restore": "Restore",
+  "deleteForever": "Delete permanently",
+  "copyOfName": "{name} (copy)",
+  "@copyOfName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "folderName": "Name",
+  "renameFolder": "Rename folder",
+  "renameConnection": "Rename connection",
+  "deleteFolderTitle": "Delete the folder “{name}”?",
+  "@deleteFolderTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFolderBody": "Its connections and folders move to “{parent}”.",
+  "@deleteFolderBody": {
+    "placeholders": {
+      "parent": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFolderBodyTop": "Its connections and folders move to the top level.",
+  "deleteForeverTitle": "Delete “{name}” permanently?",
+  "@deleteForeverTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteForeverBody": "It cannot be restored afterwards.",
+  "managerEmpty": "No connections yet. Click New connection to add one.",
+  "deletedAt": "Deleted {when}",
+  "@deletedAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteHostTitle": "Delete “{name}”?",
+  "@deleteHostTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpHostInUse": "It is the jump host of {hosts}, which cannot connect until it is restored.",
+  "@jumpHostInUse": {
+    "placeholders": {
+      "hosts": {
+        "type": "String"
+      }
+    }
+  },
+  "jumpHostInUseForever": "It is the jump host of {hosts}, which cannot connect without it.",
+  "@jumpHostInUseForever": {
+    "placeholders": {
+      "hosts": {
+        "type": "String"
+      }
+    }
+  },
+  "listSeparator": ", "
 }

@@ -52,7 +52,7 @@ type Platform interface {
 	// language as it changes.
 	OpenWindow(spec WindowSpec, view func(c *ui.Context), closed func())
 	// FocusWindow brings the open window of kind to the front, with the
-	// keyboard.
+	// keyboard; WindowMain the main window, out of the tray too.
 	FocusWindow(kind WindowKind)
 	// CloseWindow closes the window of kind, and its children.
 	CloseWindow(kind WindowKind)
@@ -102,10 +102,8 @@ type App struct {
 
 	transfers transferQueue
 
-	// The connection manager.
-	managerOpen bool
-	hostRow     int
-	hostList    ui.ListState
+	// The connection manager's window.
+	manager managerState
 
 	// The connection editor's fields, while its window is open.
 	editor *connEditor
@@ -146,7 +144,7 @@ func New(plat Platform) *App {
 		passwords:    map[string]string{},
 		windows:      map[WindowKind]bool{},
 		active:       -1,
-		hostRow:      -1,
+		manager:      managerState{row: -1},
 		start:        startState{row: -1},
 		sideWidth:    defaultSideWidth,
 		monitorPct:   defaultMonitorPct,

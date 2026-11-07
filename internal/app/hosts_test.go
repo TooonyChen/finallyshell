@@ -12,9 +12,7 @@ import (
 	"time"
 
 	"finalshelly/internal/config"
-	"finalshelly/locales"
 
-	"github.com/egoist/mygo/ui"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -203,33 +201,5 @@ func TestMonitorSwitch(t *testing.T) {
 	p.until(t, "the monitor", func() bool { return srv.keepalives.Load() > 0 && srv.execs.Load() > 0 && len(sOn.stats.LatHist) > 0 })
 	if got := a.hosts.Recent(0); len(got) != 2 || got[0] != on {
 		t.Errorf("recent %v", got)
-	}
-}
-
-func TestManagerHidesDeletedHosts(t *testing.T) {
-	a, _ := testApp(t)
-	a.hosts.Add(&config.Host{ID: "gone", Name: "gone-host", Addr: "10.0.0.9", User: "root", Auth: config.AuthPassword, DeletedAt: time.Now()})
-	a.hosts.Add(&config.Host{ID: "kept", Name: "kept-host", Addr: "10.0.0.1", User: "root", Auth: config.AuthPassword})
-	tt := ui.NewTester(a.View, 1280, 820)
-	a.openManager()
-	tt.Frame()
-	if a.windowOpen(WindowEditor) || !tt.HasText("kept-host") || tt.HasText("gone-host") {
-		t.Fatalf("editor %v; texts %q", a.windowOpen(WindowEditor), tt.Texts())
-	}
-	// Row 0 is the first host shown, not the first saved.
-	a.hostRow = 0
-	tt.Frame()
-	if err := tt.Click(locales.Delete()); err != nil {
-		t.Fatal(err)
-	}
-	if len(a.hosts.Hosts) != 1 || a.hosts.Host("gone") == nil {
-		t.Fatalf("deleted the wrong host: %v", a.hosts.Hosts)
-	}
-	// With only deleted hosts left, the manager starts with a new host.
-	a.managerOpen = false
-	a.openManager()
-	tt.Frame()
-	if !a.windowOpen(WindowEditor) || a.editor.id != "" || tt.HasText("gone-host") {
-		t.Errorf("editor %v; texts %q", a.windowOpen(WindowEditor), tt.Texts())
 	}
 }

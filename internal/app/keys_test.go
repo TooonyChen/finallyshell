@@ -149,9 +149,9 @@ func TestTerminalKeysReachShell(t *testing.T) {
 		if got := conn.sent(t, term); got != k.want {
 			t.Errorf("%s sent %q, want %q", k.name, got, k.want)
 		}
-		if a.managerOpen {
+		if a.windowOpen(WindowManager) {
 			t.Errorf("%s opened the connection manager", k.name)
-			a.managerOpen = false
+			a.closeWindow(WindowManager)
 			tt.Frame()
 		}
 	}
@@ -191,14 +191,14 @@ func TestTerminalKeysReachShell(t *testing.T) {
 			t.Errorf("%s: sent %q, did not do its action (active %d of %d)", name, got, a.active, len(a.sessions))
 		}
 	}
-	window("Ctrl+Shift+O", ui.Ctrl|ui.Shift, ui.KeyO, func() bool { return a.managerOpen })
-	a.managerOpen = false
+	window("Ctrl+Shift+O", ui.Ctrl|ui.Shift, ui.KeyO, func() bool { return a.windowOpen(WindowManager) })
+	a.closeWindow(WindowManager)
 	tt.Frame()
 	focus()
 	press(keyCase{"Ctrl+C after the manager", ui.Ctrl, ui.KeyC, "\x03"})
 	// Super is the Windows key here, which the shell never gets; Cmd+T on
 	// macOS opens a tab.
-	window("Super+T", ui.Super, ui.KeyT, func() bool { return !a.managerOpen && len(a.sessions) == 2 })
+	window("Super+T", ui.Super, ui.KeyT, func() bool { return !a.windowOpen(WindowManager) && len(a.sessions) == 2 })
 
 	// The find bar takes the keyboard, and Escape gives it back to the
 	// terminal.
@@ -230,7 +230,7 @@ func TestTerminalKeysReachShell(t *testing.T) {
 	press(keyCase{"Ctrl+C after switching back", ui.Ctrl, ui.KeyC, "\x03"})
 
 	window("Ctrl+Shift+T", ui.Ctrl|ui.Shift, ui.KeyT, func() bool {
-		return len(a.sessions) == 3 && a.current().isNewTab() && !a.managerOpen
+		return len(a.sessions) == 3 && a.current().isNewTab() && !a.windowOpen(WindowManager)
 	})
 	tt.Key(ui.Ctrl|ui.Shift, ui.KeyW) // the new tab
 	tt.Key(ui.Alt, ui.Key1)

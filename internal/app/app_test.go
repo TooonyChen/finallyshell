@@ -193,8 +193,8 @@ func TestConnectionManager(t *testing.T) {
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
 	tt.Key(ui.Ctrl|ui.Shift, ui.KeyO) // with no hosts, on a new one
-	if !a.managerOpen || !a.windowOpen(WindowEditor) {
-		t.Fatalf("manager %v editor %v", a.managerOpen, a.windowOpen(WindowEditor))
+	if !a.windowOpen(WindowManager) || !a.windowOpen(WindowEditor) {
+		t.Fatalf("manager %v editor %v", a.windowOpen(WindowManager), a.windowOpen(WindowEditor))
 	}
 	editor := p.show(t, WindowEditor)
 	editor.Type("example.com")
@@ -204,11 +204,10 @@ func TestConnectionManager(t *testing.T) {
 	if hosts := a.hosts.Live(); len(hosts) != 1 || hosts[0].Addr != "example.com" || hosts[0].PortOr22() != 22 || !hosts[0].MonitorEnabled() {
 		t.Fatalf("hosts %+v", a.hosts.Hosts)
 	}
-	tt.Frame()
-	if !tt.HasText(locales.ManagerTitle()) || !tt.HasText("root@example.com") {
-		t.Errorf("list not shown; texts %q", tt.Texts())
+	manager := p.show(t, WindowManager)
+	if !manager.HasText("example.com") || !manager.HasText("root") || !manager.HasText("22") {
+		t.Errorf("list not shown; texts %q", manager.Texts())
 	}
-	saveShot(t, tt, "manager.png")
 }
 
 func TestMoveSessions(t *testing.T) {

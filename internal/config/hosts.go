@@ -132,6 +132,24 @@ func (h *Host) TermTypeOrDefault() string {
 // panel.
 func (h *Host) MonitorEnabled() bool { return !h.NoMonitor }
 
+// Clone is a copy of h, its proxy, its tunnels and the keys this build
+// does not know included, sharing nothing with h, with the same ID: give
+// it another before adding it.
+func (h *Host) Clone() *Host {
+	c := *h
+	c.extra = maps.Clone(h.extra)
+	if h.Proxy != nil {
+		p := *h.Proxy
+		p.extra = maps.Clone(h.Proxy.extra)
+		c.Proxy = &p
+	}
+	c.Tunnels = slices.Clone(h.Tunnels)
+	for i := range c.Tunnels {
+		c.Tunnels[i].extra = maps.Clone(h.Tunnels[i].extra)
+	}
+	return &c
+}
+
 // Deleted says whether h is soft-deleted.
 func (h *Host) Deleted() bool { return !h.DeletedAt.IsZero() }
 

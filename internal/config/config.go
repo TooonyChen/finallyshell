@@ -107,6 +107,11 @@ type Settings struct {
 	// color scheme's background, in percent from 1 to 100: 0 for
 	// DefaultBackgroundOpacity.
 	TermBackgroundOpacity float32 `json:"termBackgroundOpacity,omitempty"`
+
+	// KeepManagerOpen leaves the connection manager open after it
+	// connects; by default connecting from it closes it, as FinalShell's
+	// "Close window after connecting", checked, does.
+	KeepManagerOpen bool `json:"keepManagerOpen,omitempty"`
 }
 
 // RightClick is what a right click in a terminal does (Settings.RightClick).

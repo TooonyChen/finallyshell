@@ -184,10 +184,12 @@ func TestConnectFromNewTab(t *testing.T) {
 			if err := tt.Click(locales.ConnectionManager()); err != nil {
 				t.Fatal(err)
 			}
-			a.hostRow = slices.Index(a.hosts.Live(), a.hosts.Host("id-web-1"))
-			tt.Frame()
-			if err := tt.Click(locales.Connect()); err != nil {
-				t.Fatal(err)
+			manager := a.plat.(*fakePlatform).show(t, WindowManager)
+			manager.Frame()
+			manager.ClickAt(rowCenter(t, manager, "web-1"))
+			manager.Key(0, ui.KeyEnter)
+			if a.windowOpen(WindowManager) {
+				t.Error("the manager stayed open")
 			}
 		},
 	}

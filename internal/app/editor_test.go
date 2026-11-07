@@ -119,11 +119,12 @@ func TestEditorNewFromManager(t *testing.T) {
 	p.tt = mainWin
 	// With no hosts, the manager opens on a new one.
 	mainWin.Key(ui.Ctrl|ui.Shift, ui.KeyO)
-	if !a.managerOpen {
+	if !a.windowOpen(WindowManager) {
 		t.Fatal("manager not open")
 	}
+	// Modal to the manager, which it was opened from.
 	spec := p.windows[WindowEditor].spec
-	if spec.Title() != locales.NewConnection() || spec.Parent != "" || spec.Modal {
+	if spec.Title() != locales.NewConnection() || spec.Parent != WindowManager || !spec.Modal {
 		t.Errorf("spec %+v", spec)
 	}
 	tt := editorWindow(t, a, p)
@@ -187,16 +188,17 @@ func TestEditorNewFromManager(t *testing.T) {
 		t.Errorf("saved %s", *saved)
 	}
 	// The manager behind shows it, chosen.
-	if p.redraws == redraws || a.hostRow != 0 || !a.managerOpen {
-		t.Errorf("redraws %d, row %d, manager %v", p.redraws-redraws, a.hostRow, a.managerOpen)
+	if p.redraws == redraws || !a.windowOpen(WindowManager) {
+		t.Errorf("redraws %d, manager %v", p.redraws-redraws, a.windowOpen(WindowManager))
 	}
-	mainWin.Frame()
-	if !mainWin.HasText("deploy@example.com:2222") {
-		t.Errorf("manager does not list it; texts %q", mainWin.Texts())
+	manager := p.show(t, WindowManager)
+	manager.Frame()
+	if it, _ := a.managerChosen(); it.host != h.ID || !manager.HasText("example.com") || !manager.HasText("2222") || !manager.HasText("deploy") {
+		t.Errorf("manager does not list it (chosen %v); texts %q", it, manager.Texts())
 	}
 
 	// New from the manager opens an empty editor again.
-	if err := mainWin.Click(locales.NewHost()); err != nil {
+	if err := manager.Click(locales.NewConnection()); err != nil {
 		t.Fatal(err)
 	}
 	if tt := editorWindow(t, a, p); a.editor.id != "" || a.editor.port != "22" || fieldValue(t, tt, locales.FieldHost()) != "" {
@@ -221,12 +223,13 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	mainWin := ui.NewTester(a.View, 1280, 820)
 	p.tt = mainWin
 	a.openManager()
-	a.hostRow = 0
-	mainWin.Frame()
 	if a.windowOpen(WindowEditor) {
 		t.Fatal("the editor opened with hosts to list")
 	}
-	if err := mainWin.Click(locales.Edit()); err != nil {
+	manager := p.show(t, WindowManager)
+	manager.Frame()
+	manager.RightClickAt(rowCenter(t, manager, "web"))
+	if err := manager.ChooseMenuItem(locales.Edit()); err != nil {
 		t.Fatal(err)
 	}
 	if spec := p.windows[WindowEditor].spec; spec.Title() != locales.EditConnection() {

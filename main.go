@@ -83,6 +83,10 @@ func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), clo
 }
 
 func (p *platform) FocusWindow(kind app.WindowKind) {
+	if kind == app.WindowMain {
+		p.raise() // out of the tray, or restored, too
+		return
+	}
 	if w := p.windows[kind]; w != nil {
 		w.win.Focus() // restores it too, and makes it the key window
 	}
