@@ -1,6 +1,10 @@
 package app
 
-import "finalshelly/locales"
+import (
+	"strings"
+
+	"finalshelly/locales"
+)
 
 // Confirmation is a question with two answers, which the platform asks in
 // a message box of the system's.
@@ -41,22 +45,31 @@ func (a *App) CloseRequested() bool {
 // the system's (Cmd+Q on macOS) or the last window closing asks: the
 // platform calls it on the UI thread before the quit closes any window.
 // With sessions open it asks first, unless the options say not to, and
-// returns false; the app quits itself if the user says yes.
+// returns false; the app quits itself if the user says yes. Files with
+// changes in the editor it asks about whatever the options say, as the
+// changes would be lost.
 func (a *App) QuitRequested() bool {
 	if a.quitApproved {
 		return true
 	}
-	n := a.liveSessions()
-	if n == 0 || a.settings.NoConfirmClose {
+	n, unsaved := a.liveSessions(), a.unsavedFiles()
+	if n == 0 && unsaved == 0 || a.settings.NoConfirmClose && unsaved == 0 {
 		a.quitApproved = true
 		return true
 	}
 	if !a.askingQuit {
 		a.askingQuit = true
+		var detail []string
+		if n > 0 && !a.settings.NoConfirmClose {
+			detail = append(detail, locales.ConfirmQuitBody(n))
+		}
+		if unsaved > 0 {
+			detail = append(detail, locales.ConfirmQuitUnsaved(unsaved))
+		}
 		q := Confirmation{
 			Title:   locales.AppTitle(),
 			Message: locales.ConfirmQuitTitle(),
-			Detail:  locales.ConfirmQuitBody(n),
+			Detail:  strings.Join(detail, "\n"),
 			OK:      locales.ConfirmQuitOK(),
 			Cancel:  locales.Cancel(),
 		}
