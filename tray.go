@@ -56,6 +56,20 @@ func (p *platform) showMain() {
 	mygo.App.Focus()
 }
 
+// raise brings the main window to the front, as another launch of the
+// app asks: out of the tray, or out of the Dock or taskbar when it is
+// minimized. MyGo runs it with the right to take the focus that the launch
+// passed on: its activation token on Wayland, AllowSetForegroundWindow on
+// Windows.
+func (p *platform) raise() {
+	if p.tray != nil {
+		p.showMain()
+		return
+	}
+	p.win.Restore()
+	p.win.Focus()
+}
+
 func (p *platform) Confirm(q app.Confirmation) bool {
 	var parent *mygo.Window
 	if p.win.IsVisible() {

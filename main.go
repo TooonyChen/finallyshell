@@ -126,6 +126,14 @@ func (p *platform) SetLocale(tag string)     { mygo.App.SetLocale(tag) }
 func (p *platform) Languages() []string      { return mygo.App.Languages() }
 
 func main() {
+	// One instance at a time: launching the app again brings the running
+	// one's window back, from the tray too (raise), and two instances never
+	// write hosts.json and settings.json over each other. This runs before
+	// anything else, as MyGo reads the launch's Wayland activation token
+	// here, before GTK starts.
+	if !mygo.App.RequestSingleInstanceLock() {
+		return
+	}
 	if lang := config.LoadSettings().Language; lang != "" {
 		mygo.App.SetLocale(lang)
 	}
@@ -166,6 +174,7 @@ func main() {
 				plat.showMain()
 			}
 		})
+		mygo.App.OnSecondInstance(func([]string, string) { plat.raise() })
 		mygo.App.OnLocaleChanged(func(string) { plat.retitle() })
 	})
 	if err := mygo.App.Run(); err != nil {
