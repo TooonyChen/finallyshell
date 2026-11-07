@@ -124,21 +124,35 @@ func (a *App) sessionPanel(c *ui.Context) {
 				a.openManager()
 			}
 		})
+		// No Key: with one, the list follows the chosen session by it, and
+		// chooses none once that session is gone, even though a.active
+		// already holds the neighbor closeSession picked, which is on the
+		// same row. a.active is the app's: closeSession and moveSessions
+		// keep it on the right row.
 		a.sessList.Selected = &a.active
-		a.sessList.Key = func(i int) any { return a.sessions[i].ID }
 		a.sessList.Label = func(i int) string { return a.sessions[i].label() }
 		a.sessList.Reorder = a.moveSessions
+		// A row asks to close its session, which closes once the list is
+		// built: closing it in the row would leave the rows after it to
+		// build with fewer sessions than the list was given.
+		var closing *Session
 		ui.List(c, &a.sessList, len(a.sessions), func(i int) {
-			a.sessionRow(c, a.sessions[i], i == a.active)
+			if a.sessionRow(c, a.sessions[i], i == a.active) {
+				closing = a.sessions[i]
+			}
 		}).Grow(1).Padding(0, 4, 4, 4).Children(func() {
 			if len(a.sessions) == 0 {
 				widgets.Muted(c, locales.NoSessions()).Padding(8, 10)
 			}
 		})
+		if closing != nil {
+			a.closeSession(closing)
+		}
 	})
 }
 
-func (a *App) sessionRow(c *ui.Context, s *Session, active bool) {
+// sessionRow is the tab of s. It reports whether the user closed it.
+func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 	row := ui.Row(c).Gap(8).Padding(5, 4, 5, 8).Radius(5)
 	hovered := row.Hovered()
 	row.ContextMenu(func(m *ui.Menu) {
@@ -155,7 +169,7 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) {
 		}
 		m.Separator()
 		if m.Item(locales.Close()).Danger().Chosen() {
-			a.closeSession(s)
+			closed = true
 		}
 	})
 	if row.DoubleClicked() && s.status != statusConnected && s.status != statusConnecting {
@@ -183,7 +197,8 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) {
 			closeBtn.Invisible()
 		}
 		if closeBtn.Clicked() {
-			a.closeSession(s)
+			closed = true
 		}
 	})
+	return closed
 }
