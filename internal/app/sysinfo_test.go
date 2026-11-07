@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"finalshelly/internal/config"
 	"finalshelly/internal/monitor"
 	"finalshelly/locales"
 
@@ -149,7 +148,7 @@ func TestSysInfoPopover(t *testing.T) {
 	clickButton(t, tt, "系统信息")
 	f.next(t).reply <- sysInfoReply{info: debianSample(t)}
 	p.until(t, "the system info", func() bool { return !a.sysInfo.loading })
-	for _, want := range []string{"主机名", "内核", "2 核 4 线程", "410 天 0:17", "IP 地址", "硬盘"} {
+	for _, want := range []string{"主机名", "内核", "处理器", "2 核 4 线程", "410 天 0:17", "IP 地址", "硬盘"} {
 		if !tt.HasText(want) {
 			t.Errorf("Chinese: missing %q; texts %q", want, tt.Texts())
 		}
@@ -225,8 +224,6 @@ func TestSysInfoStaleReads(t *testing.T) {
 	}
 
 	// Switching sessions closes it too.
-	a.active = 0
-	tt.Frame()
 	clickButton(t, tt, locales.SystemInfo())
 	f.next(t).reply <- sysInfoReply{info: monitor.SysInfo{Hostname: "db"}}
 	demoSession(a, "web-2", "45.56.78.91")
@@ -241,18 +238,27 @@ func TestSysInfoStaleReads(t *testing.T) {
 	}
 }
 
-// A host without exec channels reads nothing.
-func TestSysInfoExecOff(t *testing.T) {
+// A host with the monitor off opens no exec channel: the side panel says
+// so over the skeleton, and the popover reads nothing.
+func TestSysInfoMonitorOff(t *testing.T) {
 	a, p := testApp(t)
-	demoSession(a, "web-1", "45.56.78.90")
+	s := demoSession(a, "web-1", "45.56.78.90")
+	s.Host.NoMonitor = true
+	s.stats = monitor.Stats{}
 	a.active = 0
 	f := newFakeSysInfo(a)
-	allowed := execAllowed
-	execAllowed = func(*config.Host) bool { return false }
-	t.Cleanup(func() { execAllowed = allowed })
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
 	tt.Frame()
+	for _, want := range []string{"IP 45.56.78.90", locales.MonitorOff(), "Up -", "Load -"} {
+		if !tt.HasText(want) {
+			t.Errorf("side panel: missing %q; texts %q", want, tt.Texts())
+		}
+	}
+	if tt.HasText(locales.ReadingServerInfo()) {
+		t.Error("waiting for stats that never come")
+	}
+	saveShot(t, tt, "monitor-off-en.png")
 	clickButton(t, tt, locales.SystemInfo())
 	if !tt.HasText(locales.SysInfoOff()) {
 		t.Errorf("no message; texts %q", tt.Texts())
@@ -260,4 +266,11 @@ func TestSysInfoExecOff(t *testing.T) {
 	if len(f.reads) != 0 {
 		t.Error("read with the monitor off")
 	}
+	tt.Key(0, ui.KeyEscape)
+	a.setLanguage("zh-Hans")
+	tt.Frame()
+	if !tt.HasText("此主机已关闭服务器监控") {
+		t.Errorf("Chinese: texts %q", tt.Texts())
+	}
+	saveShot(t, tt, "monitor-off-zh.png")
 }

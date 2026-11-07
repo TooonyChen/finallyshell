@@ -46,6 +46,8 @@ func (a *App) serverView(c *ui.Context, s *Session) {
 		case s == nil:
 		case s.status != statusConnected:
 			widgets.Muted(c, s.statusText())
+		case !execAllowed(s.Host):
+			widgets.Muted(c, locales.MonitorOff())
 		case !s.stats.OK:
 			widgets.Muted(c, locales.ReadingServerInfo())
 		default:

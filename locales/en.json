@@ -13,11 +13,13 @@
     }
   },
   "uptimeUnknown": "Up -",
+  "monitorOff": "Server monitor is off for this host",
   "systemInfo": "System info",
   "sysHostname": "Hostname",
   "sysOS": "OS",
   "sysKernel": "Kernel",
   "sysArch": "Architecture",
+  "sysCPU": "CPU",
   "sysCores": "{count, plural, one {# core} other {# cores}}",
   "@sysCores": {
     "placeholders": {

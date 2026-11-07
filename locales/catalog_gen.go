@@ -94,6 +94,16 @@ func (msgs Messages) UptimeUnknown() string {
 	return Catalog.Format(msgs.locale, "uptimeUnknown", nil)
 }
 
+// MonitorOff says "Server monitor is off for this host"
+// in the language the app shows.
+func MonitorOff() string { return In(i18n.Locale()).MonitorOff() }
+
+// MonitorOff says "Server monitor is off for this host"
+// in the language of msgs.
+func (msgs Messages) MonitorOff() string {
+	return Catalog.Format(msgs.locale, "monitorOff", nil)
+}
+
 // SystemInfo says "System info"
 // in the language the app shows.
 func SystemInfo() string { return In(i18n.Locale()).SystemInfo() }
@@ -142,6 +152,16 @@ func SysArch() string { return In(i18n.Locale()).SysArch() }
 // in the language of msgs.
 func (msgs Messages) SysArch() string {
 	return Catalog.Format(msgs.locale, "sysArch", nil)
+}
+
+// SysCPU says "CPU"
+// in the language the app shows.
+func SysCPU() string { return In(i18n.Locale()).SysCPU() }
+
+// SysCPU says "CPU"
+// in the language of msgs.
+func (msgs Messages) SysCPU() string {
+	return Catalog.Format(msgs.locale, "sysCPU", nil)
 }
 
 // SysCores says "{count, plural, one {# core} other {# cores}}"

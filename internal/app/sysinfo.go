@@ -34,10 +34,9 @@ type sysInfoPopover struct {
 }
 
 // execAllowed tells whether the app may open exec channels to h's server
-// besides the shell and SFTP: the server monitor and the system info. It
-// is the host's Monitor switch once hosts have it (#5); until then every
-// host allows them. Tests replace it.
-var execAllowed = func(h *config.Host) bool { return true }
+// besides the shell and SFTP: the server monitor and the system info.
+// It is the one place that decides, by the host's Monitor switch.
+func execAllowed(h *config.Host) bool { return h.MonitorEnabled() }
 
 var errNoClient = errors.New("not connected")
 
@@ -239,7 +238,7 @@ func sysInfoRows(info monitor.SysInfo) []sysInfoRow {
 		{locales.SysOS(), []string{or(info.OS)}},
 		{locales.SysKernel(), []string{or(info.Kernel)}},
 		{locales.SysArch(), []string{or(info.Arch)}},
-		{locales.Cpu(), cpu},
+		{locales.SysCPU(), cpu},
 		{locales.SysMemory(), []string{mem}},
 		{locales.Swap(), []string{swap}},
 		{locales.SysUptime(), []string{uptime}},
