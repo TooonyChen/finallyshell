@@ -1,4 +1,6 @@
-package main
+// Package monitor reads what the side panel shows about a Linux server:
+// uptime, load, CPU, memory, processes, network, latency and disks.
+package monitor
 
 import (
 	"bufio"
@@ -10,7 +12,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const historyLen = 60
+// HistoryLen is how many samples the graphs keep.
+const HistoryLen = 60
 
 // Stats is what the side panel shows about a server.
 type Stats struct {
@@ -59,9 +62,9 @@ df -kP -x tmpfs -x devtmpfs -x overlay -x squashfs 2>/dev/null || df -kP; echo `
 ps -eo rss=,pcpu=,comm= --sort=-rss 2>/dev/null | head -5
 `
 
-// monitor polls the server every interval and sends what it reads to
+// Run polls the server every interval and sends what it reads to
 // publish, until ctx ends.
-func monitor(ctx context.Context, client *ssh.Client, interval time.Duration, publish func(Stats)) {
+func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publish func(Stats)) {
 	var (
 		st          Stats
 		prevIdle    uint64
@@ -128,8 +131,8 @@ func runOutput(client *ssh.Client, script string) (string, error) {
 
 func pushHist(h []float64, v float64) []float64 {
 	h = append(h, v)
-	if len(h) > historyLen {
-		h = h[len(h)-historyLen:]
+	if len(h) > HistoryLen {
+		h = h[len(h)-HistoryLen:]
 	}
 	return h
 }

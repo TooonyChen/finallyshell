@@ -1,0 +1,156 @@
+{
+  "@@locale": "en",
+  "appTitle": "Finalshelly",
+  "notConnected": "Not connected",
+  "copy": "Copy",
+  "readingServerInfo": "Reading server info…",
+  "uptimeDays": "{days, plural, one {Up # day} other {Up # days}}",
+  "@uptimeDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "loadAverage": "Load {load}",
+  "cpu": "CPU",
+  "memory": "Mem",
+  "@memory": {
+    "description": "Short label beside the memory bar; about 4 characters."
+  },
+  "swap": "Swap",
+  "command": "Command",
+  "latency": "Latency",
+  "diskPath": "Path",
+  "diskFreeSize": "Free/Size",
+  "sessionsTitle": "Sessions ({count})",
+  "@sessionsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newConnection": "New connection",
+  "noSessions": "No open sessions",
+  "reconnect": "Reconnect",
+  "duplicateSession": "Duplicate session",
+  "disconnect": "Disconnect",
+  "close": "Close",
+  "closeSession": "Close session",
+  "statusConnecting": "Connecting…",
+  "statusFailed": "Connection failed",
+  "statusDisconnected": "Disconnected",
+  "statusConnected": "Connected",
+  "connectionLost": "Connection lost",
+  "connectingTo": "Connecting to {target}",
+  "welcomeHint": "Ctrl+Shift+T opens the connection manager",
+  "settings": "Settings",
+  "language": "Language",
+  "followSystem": "System language",
+  "tabFiles": "Files",
+  "tabTransfers": "Transfers",
+  "tabTransfersActive": "Transfers ({count})",
+  "@tabTransfersActive": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "colName": "Name",
+  "colSize": "Size",
+  "colType": "Type",
+  "colModified": "Modified",
+  "colPermissions": "Permissions",
+  "colOwner": "Owner/Group",
+  "kindFolder": "Folder",
+  "kindLink": "Link",
+  "kindFile": "File",
+  "kindExtFile": "{ext} file",
+  "parentFolder": "Parent folder",
+  "refresh": "Refresh",
+  "homeFolder": "Home folder",
+  "copyPath": "Copy path",
+  "sftpUnavailable": "SFTP unavailable: {error}",
+  "cannotOpenFolder": "Cannot open {dir}: {error}",
+  "uploadFiles": "Upload files…",
+  "uploadFolder": "Upload folder…",
+  "download": "Download",
+  "downloadTo": "Download to…",
+  "dropToUpload": "Drop to upload to {dir}",
+  "chooseDownloadFolder": "Choose where to download",
+  "chooseUploadFiles": "Choose files to upload",
+  "chooseUploadFolder": "Choose a folder to upload",
+  "transfersEmpty": "No transfers yet. Drop files on the file list to upload them.",
+  "clearFinished": "Clear finished",
+  "transferWaiting": "Waiting",
+  "transferDone": "Done",
+  "transferCanceled": "Canceled",
+  "transferFailed": "Failed: {error}",
+  "transferProgress": "{done} of {total}, {speed}/s",
+  "cancel": "Cancel",
+  "showInFolder": "Show in folder",
+  "dragOutHint": "Drag to copy the downloaded file elsewhere",
+  "replaceTitle": "Replace existing items?",
+  "replaceBody": "{count, plural, one {# item with the same name already exists in {dir}.} other {# items with the same names already exist in {dir}.}}",
+  "@replaceBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "dir": {
+        "type": "String"
+      }
+    }
+  },
+  "replace": "Replace",
+  "uploadDirection": "Upload",
+  "downloadDirection": "Download",
+  "managerTitle": "Connections",
+  "newHost": "New",
+  "edit": "Edit",
+  "delete": "Delete",
+  "connect": "Connect",
+  "back": "Back",
+  "save": "Save",
+  "saveAndConnect": "Save and connect",
+  "editConnection": "Edit connection",
+  "fieldName": "Name",
+  "fieldNamePlaceholder": "Optional, e.g. Production",
+  "fieldHost": "Host",
+  "fieldHostPlaceholder": "IP address or domain",
+  "fieldPort": "Port",
+  "fieldUser": "User",
+  "fieldAuth": "Log in with",
+  "authPassword": "Password",
+  "authKey": "Private key",
+  "fieldKeyFile": "Key file",
+  "fieldPassphrase": "Passphrase",
+  "passphrasePlaceholder": "Leave empty if none",
+  "fieldPassword": "Password",
+  "passwordNote": "Passwords are kept in memory only: enter them again after restarting.",
+  "errHostRequired": "Enter the host",
+  "errUserRequired": "Enter the user",
+  "errPortInvalid": "The port is not valid",
+  "errKeyFileRequired": "Enter the key file",
+  "errSaveFailed": "Could not save: {error}",
+  "enterPassword": "Enter password",
+  "hostKeyTitle": "First connection to this host",
+  "hostKeyBody": "The identity of {host} cannot be verified. Check that this fingerprint matches the server's before trusting it.",
+  "reject": "Reject",
+  "trustAndConnect": "Trust and connect",
+  "errHostKeyChanged": "The host key does not match the saved one ({fingerprint}). Someone may be intercepting the connection. If the server was reinstalled, remove its old entry from {file}.",
+  "errHostKeyRejected": "The host key was rejected",
+  "errHostKeyTimeout": "Timed out waiting for the host key to be confirmed",
+  "errReadKey": "Could not read the private key: {error}",
+  "errParseKey": "Could not parse the private key: {error}",
+  "errNeedPassphrase": "The private key is protected: enter its passphrase",
+  "errNoAuth": "No way to log in: enter a password or a key",
+  "errAuthFailed": "Authentication failed: wrong user, password or key",
+  "errRefused": "Connection refused: no SSH service on that port",
+  "errTimeout": "Connection timed out: check the address, port and network",
+  "errNoSuchHost": "Host not found: the name does not resolve",
+  "errOpenShell": "Could not open a shell: {error}",
+  "errTerminal": "Could not start the terminal: {error}"
+}
