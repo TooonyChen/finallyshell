@@ -84,7 +84,8 @@ type connEditor struct {
 	monitor                 bool
 	termType                string
 	backspace               config.BackspaceKey
-	proxy                   proxyFields // the Proxy page (editor_proxy.go)
+	proxy                   proxyFields  // the Proxy page (editor_proxy.go)
+	tunnels                 tunnelEditor // see editor_tunnels.go
 
 	// checked is set once OK was pressed: from then on the errors show,
 	// and follow the fields as they change.
@@ -131,6 +132,7 @@ func (a *App) openEditor(h *config.Host) {
 		ed.termType, ed.backspace = h.TermType, h.Backspace
 	}
 	ed.proxy = a.proxyFieldsOf(h)
+	ed.tunnels = newTunnelEditor(h)
 	a.editor = ed
 	a.openWindow(editorSpec(h != nil), a.editorView)
 }
@@ -215,6 +217,7 @@ func (a *App) saveEditor() {
 		h.TermType = ""
 	}
 	a.saveProxy(h, &ed.proxy)
+	h.Tunnels = ed.tunnels.result()
 	a.hostRow = slices.Index(a.hosts.Live(), h)
 	a.redraw() // the manager and the sessions show the host
 	if err := a.saveHosts(a.hosts); err != nil {
@@ -277,7 +280,7 @@ func (a *App) editorView(c *ui.Context) {
 		{ID: editorSSH, Title: locales.EditorPageSSH, View: func(c *ui.Context) { a.sshPage(c, ed, errs, input) }},
 		{ID: editorTerminal, Title: locales.EditorPageTerminal, View: func(c *ui.Context) { a.terminalPage(c, ed, errs, input) }},
 		{ID: editorProxy, Title: locales.EditorPageProxy, View: func(c *ui.Context) { a.proxyPage(c, ed, errs, input) }},
-		{ID: editorTunnels, Title: locales.EditorPageTunnels, View: func(c *ui.Context) { widgets.Muted(c, locales.TunnelsLater()) }},
+		{ID: editorTunnels, Title: locales.EditorPageTunnels, View: func(c *ui.Context) { a.tunnelsPage(c, ed) }},
 	}
 	ui.Column(c).Fill().Children(func() {
 		widgets.NavPages(c, &ed.nav, pages).Grow(1).MinHeight(0)

@@ -1748,14 +1748,568 @@ func (msgs Messages) PasswordOnTheWay(host string) string {
 	return Catalog.Format(msgs.locale, "passwordOnTheWay", map[string]any{"host": host})
 }
 
-// TunnelsLater says "Tunnels (port forwarding) are coming in a later version."
+// TunnelsIntro says "Ports forwarded through this host's connection. Enabled tunnels start when a session to it connects, and stop when it…"
 // in the language the app shows.
-func TunnelsLater() string { return In(i18n.Locale()).TunnelsLater() }
+func TunnelsIntro() string { return In(i18n.Locale()).TunnelsIntro() }
 
-// TunnelsLater says "Tunnels (port forwarding) are coming in a later version."
+// TunnelsIntro says "Ports forwarded through this host's connection. Enabled tunnels start when a session to it connects, and stop when it…"
 // in the language of msgs.
-func (msgs Messages) TunnelsLater() string {
-	return Catalog.Format(msgs.locale, "tunnelsLater", nil)
+func (msgs Messages) TunnelsIntro() string {
+	return Catalog.Format(msgs.locale, "tunnelsIntro", nil)
+}
+
+// ColTunnelType says "Type"
+// in the language the app shows.
+func ColTunnelType() string { return In(i18n.Locale()).ColTunnelType() }
+
+// ColTunnelType says "Type"
+// in the language of msgs.
+func (msgs Messages) ColTunnelType() string {
+	return Catalog.Format(msgs.locale, "colTunnelType", nil)
+}
+
+// ColTunnelListen says "Listen on"
+// in the language the app shows.
+func ColTunnelListen() string { return In(i18n.Locale()).ColTunnelListen() }
+
+// ColTunnelListen says "Listen on"
+// in the language of msgs.
+func (msgs Messages) ColTunnelListen() string {
+	return Catalog.Format(msgs.locale, "colTunnelListen", nil)
+}
+
+// ColTunnelTarget says "Forward to"
+// in the language the app shows.
+func ColTunnelTarget() string { return In(i18n.Locale()).ColTunnelTarget() }
+
+// ColTunnelTarget says "Forward to"
+// in the language of msgs.
+func (msgs Messages) ColTunnelTarget() string {
+	return Catalog.Format(msgs.locale, "colTunnelTarget", nil)
+}
+
+// ColTunnelEnabled says "Enabled"
+// in the language the app shows.
+func ColTunnelEnabled() string { return In(i18n.Locale()).ColTunnelEnabled() }
+
+// ColTunnelEnabled says "Enabled"
+// in the language of msgs.
+func (msgs Messages) ColTunnelEnabled() string {
+	return Catalog.Format(msgs.locale, "colTunnelEnabled", nil)
+}
+
+// ColTunnelStatus says "Status"
+// in the language the app shows.
+func ColTunnelStatus() string { return In(i18n.Locale()).ColTunnelStatus() }
+
+// ColTunnelStatus says "Status"
+// in the language of msgs.
+func (msgs Messages) ColTunnelStatus() string {
+	return Catalog.Format(msgs.locale, "colTunnelStatus", nil)
+}
+
+// ColTunnelConnections says "Connections"
+// in the language the app shows.
+func ColTunnelConnections() string { return In(i18n.Locale()).ColTunnelConnections() }
+
+// ColTunnelConnections says "Connections"
+// in the language of msgs.
+func (msgs Messages) ColTunnelConnections() string {
+	return Catalog.Format(msgs.locale, "colTunnelConnections", nil)
+}
+
+// ColTunnelTraffic says "Traffic"
+// in the language the app shows.
+func ColTunnelTraffic() string { return In(i18n.Locale()).ColTunnelTraffic() }
+
+// ColTunnelTraffic says "Traffic"
+// in the language of msgs.
+func (msgs Messages) ColTunnelTraffic() string {
+	return Catalog.Format(msgs.locale, "colTunnelTraffic", nil)
+}
+
+// TunnelKindLocal says "Local (-L)"
+// in the language the app shows.
+func TunnelKindLocal() string { return In(i18n.Locale()).TunnelKindLocal() }
+
+// TunnelKindLocal says "Local (-L)"
+// in the language of msgs.
+func (msgs Messages) TunnelKindLocal() string {
+	return Catalog.Format(msgs.locale, "tunnelKindLocal", nil)
+}
+
+// TunnelKindRemote says "Remote (-R)"
+// in the language the app shows.
+func TunnelKindRemote() string { return In(i18n.Locale()).TunnelKindRemote() }
+
+// TunnelKindRemote says "Remote (-R)"
+// in the language of msgs.
+func (msgs Messages) TunnelKindRemote() string {
+	return Catalog.Format(msgs.locale, "tunnelKindRemote", nil)
+}
+
+// TunnelKindDynamic says "Dynamic (-D)"
+// in the language the app shows.
+func TunnelKindDynamic() string { return In(i18n.Locale()).TunnelKindDynamic() }
+
+// TunnelKindDynamic says "Dynamic (-D)"
+// in the language of msgs.
+func (msgs Messages) TunnelKindDynamic() string {
+	return Catalog.Format(msgs.locale, "tunnelKindDynamic", nil)
+}
+
+// TunnelSocks says "SOCKS5 proxy"
+// in the language the app shows.
+func TunnelSocks() string { return In(i18n.Locale()).TunnelSocks() }
+
+// TunnelSocks says "SOCKS5 proxy"
+// in the language of msgs.
+func (msgs Messages) TunnelSocks() string {
+	return Catalog.Format(msgs.locale, "tunnelSocks", nil)
+}
+
+// TunnelsEmpty says "No tunnels. Add one to forward a port."
+// in the language the app shows.
+func TunnelsEmpty() string { return In(i18n.Locale()).TunnelsEmpty() }
+
+// TunnelsEmpty says "No tunnels. Add one to forward a port."
+// in the language of msgs.
+func (msgs Messages) TunnelsEmpty() string {
+	return Catalog.Format(msgs.locale, "tunnelsEmpty", nil)
+}
+
+// TunnelAdd says "Add…"
+// in the language the app shows.
+func TunnelAdd() string { return In(i18n.Locale()).TunnelAdd() }
+
+// TunnelAdd says "Add…"
+// in the language of msgs.
+func (msgs Messages) TunnelAdd() string {
+	return Catalog.Format(msgs.locale, "tunnelAdd", nil)
+}
+
+// TunnelEdit says "Edit…"
+// in the language the app shows.
+func TunnelEdit() string { return In(i18n.Locale()).TunnelEdit() }
+
+// TunnelEdit says "Edit…"
+// in the language of msgs.
+func (msgs Messages) TunnelEdit() string {
+	return Catalog.Format(msgs.locale, "tunnelEdit", nil)
+}
+
+// TunnelRemove says "Remove"
+// in the language the app shows.
+func TunnelRemove() string { return In(i18n.Locale()).TunnelRemove() }
+
+// TunnelRemove says "Remove"
+// in the language of msgs.
+func (msgs Messages) TunnelRemove() string {
+	return Catalog.Format(msgs.locale, "tunnelRemove", nil)
+}
+
+// TunnelNew says "New tunnel"
+// in the language the app shows.
+func TunnelNew() string { return In(i18n.Locale()).TunnelNew() }
+
+// TunnelNew says "New tunnel"
+// in the language of msgs.
+func (msgs Messages) TunnelNew() string {
+	return Catalog.Format(msgs.locale, "tunnelNew", nil)
+}
+
+// TunnelChange says "Edit tunnel"
+// in the language the app shows.
+func TunnelChange() string { return In(i18n.Locale()).TunnelChange() }
+
+// TunnelChange says "Edit tunnel"
+// in the language of msgs.
+func (msgs Messages) TunnelChange() string {
+	return Catalog.Format(msgs.locale, "tunnelChange", nil)
+}
+
+// FieldTunnelType says "Type"
+// in the language the app shows.
+func FieldTunnelType() string { return In(i18n.Locale()).FieldTunnelType() }
+
+// FieldTunnelType says "Type"
+// in the language of msgs.
+func (msgs Messages) FieldTunnelType() string {
+	return Catalog.Format(msgs.locale, "fieldTunnelType", nil)
+}
+
+// TunnelHintLocal says "Programs on this computer connect to the listening port; the server opens the connection to the target."
+// in the language the app shows.
+func TunnelHintLocal() string { return In(i18n.Locale()).TunnelHintLocal() }
+
+// TunnelHintLocal says "Programs on this computer connect to the listening port; the server opens the connection to the target."
+// in the language of msgs.
+func (msgs Messages) TunnelHintLocal() string {
+	return Catalog.Format(msgs.locale, "tunnelHintLocal", nil)
+}
+
+// TunnelHintRemote says "Programs on the server connect to the listening port there; this computer opens the connection to the target."
+// in the language the app shows.
+func TunnelHintRemote() string { return In(i18n.Locale()).TunnelHintRemote() }
+
+// TunnelHintRemote says "Programs on the server connect to the listening port there; this computer opens the connection to the target."
+// in the language of msgs.
+func (msgs Messages) TunnelHintRemote() string {
+	return Catalog.Format(msgs.locale, "tunnelHintRemote", nil)
+}
+
+// TunnelHintDynamic says "Programs on this computer use the port as a SOCKS5 proxy; the server opens the connections they ask for."
+// in the language the app shows.
+func TunnelHintDynamic() string { return In(i18n.Locale()).TunnelHintDynamic() }
+
+// TunnelHintDynamic says "Programs on this computer use the port as a SOCKS5 proxy; the server opens the connections they ask for."
+// in the language of msgs.
+func (msgs Messages) TunnelHintDynamic() string {
+	return Catalog.Format(msgs.locale, "tunnelHintDynamic", nil)
+}
+
+// FieldListenPort says "Listen port"
+// in the language the app shows.
+func FieldListenPort() string { return In(i18n.Locale()).FieldListenPort() }
+
+// FieldListenPort says "Listen port"
+// in the language of msgs.
+func (msgs Messages) FieldListenPort() string {
+	return Catalog.Format(msgs.locale, "fieldListenPort", nil)
+}
+
+// FieldListenAddr says "Listen address"
+// in the language the app shows.
+func FieldListenAddr() string { return In(i18n.Locale()).FieldListenAddr() }
+
+// FieldListenAddr says "Listen address"
+// in the language of msgs.
+func (msgs Messages) FieldListenAddr() string {
+	return Catalog.Format(msgs.locale, "fieldListenAddr", nil)
+}
+
+// TunnelOtherHosts says "Let other computers connect"
+// in the language the app shows.
+func TunnelOtherHosts() string { return In(i18n.Locale()).TunnelOtherHosts() }
+
+// TunnelOtherHosts says "Let other computers connect"
+// in the language of msgs.
+func (msgs Messages) TunnelOtherHosts() string {
+	return Catalog.Format(msgs.locale, "tunnelOtherHosts", nil)
+}
+
+// TunnelLoopbackNote says "Listens on 127.0.0.1: only this computer can connect."
+// in the language the app shows.
+func TunnelLoopbackNote() string { return In(i18n.Locale()).TunnelLoopbackNote() }
+
+// TunnelLoopbackNote says "Listens on 127.0.0.1: only this computer can connect."
+// in the language of msgs.
+func (msgs Messages) TunnelLoopbackNote() string {
+	return Catalog.Format(msgs.locale, "tunnelLoopbackNote", nil)
+}
+
+// TunnelLoopbackNoteRemote says "Listens on the server's 127.0.0.1: only the server itself can connect."
+// in the language the app shows.
+func TunnelLoopbackNoteRemote() string { return In(i18n.Locale()).TunnelLoopbackNoteRemote() }
+
+// TunnelLoopbackNoteRemote says "Listens on the server's 127.0.0.1: only the server itself can connect."
+// in the language of msgs.
+func (msgs Messages) TunnelLoopbackNoteRemote() string {
+	return Catalog.Format(msgs.locale, "tunnelLoopbackNoteRemote", nil)
+}
+
+// TunnelPublicWarnLocal says "Anyone who can reach this computer on this port can use the tunnel, without logging in."
+// in the language the app shows.
+func TunnelPublicWarnLocal() string { return In(i18n.Locale()).TunnelPublicWarnLocal() }
+
+// TunnelPublicWarnLocal says "Anyone who can reach this computer on this port can use the tunnel, without logging in."
+// in the language of msgs.
+func (msgs Messages) TunnelPublicWarnLocal() string {
+	return Catalog.Format(msgs.locale, "tunnelPublicWarnLocal", nil)
+}
+
+// TunnelPublicWarnRemote says "Anyone who can reach the server on this port can connect through it to the target. The server must also allow it (Gat…"
+// in the language the app shows.
+func TunnelPublicWarnRemote() string { return In(i18n.Locale()).TunnelPublicWarnRemote() }
+
+// TunnelPublicWarnRemote says "Anyone who can reach the server on this port can connect through it to the target. The server must also allow it (Gat…"
+// in the language of msgs.
+func (msgs Messages) TunnelPublicWarnRemote() string {
+	return Catalog.Format(msgs.locale, "tunnelPublicWarnRemote", nil)
+}
+
+// FieldTargetHost says "Target host"
+// in the language the app shows.
+func FieldTargetHost() string { return In(i18n.Locale()).FieldTargetHost() }
+
+// FieldTargetHost says "Target host"
+// in the language of msgs.
+func (msgs Messages) FieldTargetHost() string {
+	return Catalog.Format(msgs.locale, "fieldTargetHost", nil)
+}
+
+// FieldTargetPort says "Target port"
+// in the language the app shows.
+func FieldTargetPort() string { return In(i18n.Locale()).FieldTargetPort() }
+
+// FieldTargetPort says "Target port"
+// in the language of msgs.
+func (msgs Messages) FieldTargetPort() string {
+	return Catalog.Format(msgs.locale, "fieldTargetPort", nil)
+}
+
+// TargetHostPlaceholderLocal says "As the server reaches it, e.g. 127.0.0.1"
+// in the language the app shows.
+func TargetHostPlaceholderLocal() string { return In(i18n.Locale()).TargetHostPlaceholderLocal() }
+
+// TargetHostPlaceholderLocal says "As the server reaches it, e.g. 127.0.0.1"
+// in the language of msgs.
+func (msgs Messages) TargetHostPlaceholderLocal() string {
+	return Catalog.Format(msgs.locale, "targetHostPlaceholderLocal", nil)
+}
+
+// TargetHostPlaceholderRemote says "As this computer reaches it, e.g. 127.0.0.1"
+// in the language the app shows.
+func TargetHostPlaceholderRemote() string { return In(i18n.Locale()).TargetHostPlaceholderRemote() }
+
+// TargetHostPlaceholderRemote says "As this computer reaches it, e.g. 127.0.0.1"
+// in the language of msgs.
+func (msgs Messages) TargetHostPlaceholderRemote() string {
+	return Catalog.Format(msgs.locale, "targetHostPlaceholderRemote", nil)
+}
+
+// TunnelStartWithSession says "Start with the session"
+// in the language the app shows.
+func TunnelStartWithSession() string { return In(i18n.Locale()).TunnelStartWithSession() }
+
+// TunnelStartWithSession says "Start with the session"
+// in the language of msgs.
+func (msgs Messages) TunnelStartWithSession() string {
+	return Catalog.Format(msgs.locale, "tunnelStartWithSession", nil)
+}
+
+// ErrTargetHostRequired says "Enter the target host"
+// in the language the app shows.
+func ErrTargetHostRequired() string { return In(i18n.Locale()).ErrTargetHostRequired() }
+
+// ErrTargetHostRequired says "Enter the target host"
+// in the language of msgs.
+func (msgs Messages) ErrTargetHostRequired() string {
+	return Catalog.Format(msgs.locale, "errTargetHostRequired", nil)
+}
+
+// ErrListenAddrInvalid says "Enter an IP address or a host name"
+// in the language the app shows.
+func ErrListenAddrInvalid() string { return In(i18n.Locale()).ErrListenAddrInvalid() }
+
+// ErrListenAddrInvalid says "Enter an IP address or a host name"
+// in the language of msgs.
+func (msgs Messages) ErrListenAddrInvalid() string {
+	return Catalog.Format(msgs.locale, "errListenAddrInvalid", nil)
+}
+
+// ErrTunnelDuplicate says "Another tunnel already listens on this port"
+// in the language the app shows.
+func ErrTunnelDuplicate() string { return In(i18n.Locale()).ErrTunnelDuplicate() }
+
+// ErrTunnelDuplicate says "Another tunnel already listens on this port"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelDuplicate() string {
+	return Catalog.Format(msgs.locale, "errTunnelDuplicate", nil)
+}
+
+// TabTunnels says "Tunnels"
+// in the language the app shows.
+func TabTunnels() string { return In(i18n.Locale()).TabTunnels() }
+
+// TabTunnels says "Tunnels"
+// in the language of msgs.
+func (msgs Messages) TabTunnels() string {
+	return Catalog.Format(msgs.locale, "tabTunnels", nil)
+}
+
+// TabTunnelsActive says "Tunnels ({count})"
+// in the language the app shows.
+func TabTunnelsActive(count int) string { return In(i18n.Locale()).TabTunnelsActive(count) }
+
+// TabTunnelsActive says "Tunnels ({count})"
+// in the language of msgs.
+func (msgs Messages) TabTunnelsActive(count int) string {
+	return Catalog.Format(msgs.locale, "tabTunnelsActive", map[string]any{"count": count})
+}
+
+// TunnelStarting says "Starting…"
+// in the language the app shows.
+func TunnelStarting() string { return In(i18n.Locale()).TunnelStarting() }
+
+// TunnelStarting says "Starting…"
+// in the language of msgs.
+func (msgs Messages) TunnelStarting() string {
+	return Catalog.Format(msgs.locale, "tunnelStarting", nil)
+}
+
+// TunnelListening says "Listening"
+// in the language the app shows.
+func TunnelListening() string { return In(i18n.Locale()).TunnelListening() }
+
+// TunnelListening says "Listening"
+// in the language of msgs.
+func (msgs Messages) TunnelListening() string {
+	return Catalog.Format(msgs.locale, "tunnelListening", nil)
+}
+
+// TunnelStopped says "Stopped"
+// in the language the app shows.
+func TunnelStopped() string { return In(i18n.Locale()).TunnelStopped() }
+
+// TunnelStopped says "Stopped"
+// in the language of msgs.
+func (msgs Messages) TunnelStopped() string {
+	return Catalog.Format(msgs.locale, "tunnelStopped", nil)
+}
+
+// TunnelConnectionsCount says "{active} open, {total} in all"
+// in the language the app shows.
+func TunnelConnectionsCount(active int, total int) string {
+	return In(i18n.Locale()).TunnelConnectionsCount(active, total)
+}
+
+// TunnelConnectionsCount says "{active} open, {total} in all"
+// in the language of msgs.
+func (msgs Messages) TunnelConnectionsCount(active int, total int) string {
+	return Catalog.Format(msgs.locale, "tunnelConnectionsCount", map[string]any{"active": active, "total": total})
+}
+
+// TunnelTraffic says "↑ {up}  ↓ {down}"
+// in the language the app shows.
+func TunnelTraffic(up string, down string) string { return In(i18n.Locale()).TunnelTraffic(up, down) }
+
+// TunnelTraffic says "↑ {up}  ↓ {down}"
+// in the language of msgs.
+func (msgs Messages) TunnelTraffic(up string, down string) string {
+	return Catalog.Format(msgs.locale, "tunnelTraffic", map[string]any{"up": up, "down": down})
+}
+
+// TunnelDialFailed says "Last connection failed: {error}"
+// in the language the app shows.
+func TunnelDialFailed(error string) string { return In(i18n.Locale()).TunnelDialFailed(error) }
+
+// TunnelDialFailed says "Last connection failed: {error}"
+// in the language of msgs.
+func (msgs Messages) TunnelDialFailed(error string) string {
+	return Catalog.Format(msgs.locale, "tunnelDialFailed", map[string]any{"error": error})
+}
+
+// TunnelStart says "Start"
+// in the language the app shows.
+func TunnelStart() string { return In(i18n.Locale()).TunnelStart() }
+
+// TunnelStart says "Start"
+// in the language of msgs.
+func (msgs Messages) TunnelStart() string {
+	return Catalog.Format(msgs.locale, "tunnelStart", nil)
+}
+
+// TunnelStop says "Stop"
+// in the language the app shows.
+func TunnelStop() string { return In(i18n.Locale()).TunnelStop() }
+
+// TunnelStop says "Stop"
+// in the language of msgs.
+func (msgs Messages) TunnelStop() string {
+	return Catalog.Format(msgs.locale, "tunnelStop", nil)
+}
+
+// TunnelsNone says "This host has no tunnels."
+// in the language the app shows.
+func TunnelsNone() string { return In(i18n.Locale()).TunnelsNone() }
+
+// TunnelsNone says "This host has no tunnels."
+// in the language of msgs.
+func (msgs Messages) TunnelsNone() string {
+	return Catalog.Format(msgs.locale, "tunnelsNone", nil)
+}
+
+// TunnelsOffline says "Tunnels start when the session connects."
+// in the language the app shows.
+func TunnelsOffline() string { return In(i18n.Locale()).TunnelsOffline() }
+
+// TunnelsOffline says "Tunnels start when the session connects."
+// in the language of msgs.
+func (msgs Messages) TunnelsOffline() string {
+	return Catalog.Format(msgs.locale, "tunnelsOffline", nil)
+}
+
+// TunnelsConfigure says "Edit tunnels…"
+// in the language the app shows.
+func TunnelsConfigure() string { return In(i18n.Locale()).TunnelsConfigure() }
+
+// TunnelsConfigure says "Edit tunnels…"
+// in the language of msgs.
+func (msgs Messages) TunnelsConfigure() string {
+	return Catalog.Format(msgs.locale, "tunnelsConfigure", nil)
+}
+
+// ErrTunnelInUse says "Port {addr} is already in use"
+// in the language the app shows.
+func ErrTunnelInUse(addr string) string { return In(i18n.Locale()).ErrTunnelInUse(addr) }
+
+// ErrTunnelInUse says "Port {addr} is already in use"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelInUse(addr string) string {
+	return Catalog.Format(msgs.locale, "errTunnelInUse", map[string]any{"addr": addr})
+}
+
+// ErrTunnelRemoteDenied says "The server did not listen on {addr}: the port is in use there, or forwarding is not allowed"
+// in the language the app shows.
+func ErrTunnelRemoteDenied(addr string) string { return In(i18n.Locale()).ErrTunnelRemoteDenied(addr) }
+
+// ErrTunnelRemoteDenied says "The server did not listen on {addr}: the port is in use there, or forwarding is not allowed"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelRemoteDenied(addr string) string {
+	return Catalog.Format(msgs.locale, "errTunnelRemoteDenied", map[string]any{"addr": addr})
+}
+
+// ErrTunnelListen says "Could not listen on {addr}: {error}"
+// in the language the app shows.
+func ErrTunnelListen(addr string, error string) string {
+	return In(i18n.Locale()).ErrTunnelListen(addr, error)
+}
+
+// ErrTunnelListen says "Could not listen on {addr}: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelListen(addr string, error string) string {
+	return Catalog.Format(msgs.locale, "errTunnelListen", map[string]any{"addr": addr, "error": error})
+}
+
+// ErrTunnelUnknown says "This version does not support this kind of tunnel"
+// in the language the app shows.
+func ErrTunnelUnknown() string { return In(i18n.Locale()).ErrTunnelUnknown() }
+
+// ErrTunnelUnknown says "This version does not support this kind of tunnel"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelUnknown() string {
+	return Catalog.Format(msgs.locale, "errTunnelUnknown", nil)
+}
+
+// ErrTunnelLost says "Stopped: the connection to the server closed"
+// in the language the app shows.
+func ErrTunnelLost() string { return In(i18n.Locale()).ErrTunnelLost() }
+
+// ErrTunnelLost says "Stopped: the connection to the server closed"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelLost() string {
+	return Catalog.Format(msgs.locale, "errTunnelLost", nil)
+}
+
+// ErrTunnelStopped says "Stopped: {error}"
+// in the language the app shows.
+func ErrTunnelStopped(error string) string { return In(i18n.Locale()).ErrTunnelStopped(error) }
+
+// ErrTunnelStopped says "Stopped: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelStopped(error string) string {
+	return Catalog.Format(msgs.locale, "errTunnelStopped", map[string]any{"error": error})
 }
 
 // BackspaceDEL says "ASCII DEL (^?)"

@@ -85,7 +85,7 @@ type App struct {
 	monitorPct  float32
 	terminalPct float32
 	treeWidth   float32
-	bottomTab   int // 0 files, 1 transfers
+	bottomTab   int // 0 files, 1 transfers, 2 tunnels
 	termFont    terminal.Font
 	termTheme   *terminal.Theme
 
@@ -234,13 +234,19 @@ func (a *App) bottomPanel(c *ui.Context) {
 			if n := a.transfers.active(); n > 0 {
 				transfersLabel = locales.TabTransfersActive(n)
 			}
-			ui.Tabs(c, &a.bottomTab, locales.TabFiles(), transfersLabel)
+			tunnelsLabel := locales.TabTunnels()
+			if s := a.current(); s != nil && s.listening() > 0 {
+				tunnelsLabel = locales.TabTunnelsActive(s.listening())
+			}
+			ui.Tabs(c, &a.bottomTab, locales.TabFiles(), transfersLabel, tunnelsLabel)
 		})
 		switch a.bottomTab {
 		case 0:
 			a.filePanel(c)
 		case 1:
 			a.transferPanel(c)
+		case 2:
+			a.tunnelPanel(c)
 		}
 	})
 }

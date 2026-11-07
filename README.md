@@ -24,6 +24,8 @@ go test ./...
 FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH -v
 ```
 
+隧道的测试（`internal/sshx` 的 `TestTunnels`、`internal/app` 的 `TestSSHTunnels`）也用这个变量，服务器要在本机（远程隧道的端口从本机去连）并允许 TCP 转发（`AllowTcpForwarding yes`）。不设变量时它们用进程内的测试服务器（`internal/sshtest`）。
+
 ## 功能
 
 - 中文和英文界面。默认跟随系统语言，点左下角“会话”标题旁的齿轮按钮打开“选项”窗口，在“常规”页切换，选择会保存。
@@ -54,7 +56,12 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
     - 代理密码和主机密码一样只存在内存里，不写进 `hosts.json`。
     - 出错时说明是哪一跳：“代理 1.2.3.4:1080：连接被拒绝：端口没有开放代理服务”“跳板机 web-1：认证失败：…”“跳板机 web-1：无法连接到 10.0.0.5:22：…”。
     - 关闭或断开会话时，跳板机的连接一起关闭。
-  - “隧道”：以后的版本提供。
+  - “隧道”：SSH 端口转发，表格列出类型、监听地址、转发目标和“启用”，下面是“添加…”“编辑…”“移除”（双击一行也是编辑）。添加和编辑在一个对话框里：
+    - 本地（`-L`）：在本机监听，每个连接经服务器转发到目标（目标地址按服务器那边解析）。
+    - 远程（`-R`）：在服务器上监听，每个连接转回本机，再由本机连到目标。
+    - 动态（`-D`）：本机的 SOCKS5 代理，由服务器去连客户端要访问的地址。只支持 CONNECT、不需要认证，地址可以是 IPv4、IPv6 或域名（域名由服务器解析）。SOCKS5 服务端是自己写的一小段（`sshx/forward.go`），现有依赖里没有现成的。
+    - 默认只监听 `127.0.0.1`（远程隧道是服务器的 `127.0.0.1`），只有同一台机器能连。勾选“允许其他计算机连接”才能填别的监听地址（默认 `0.0.0.0`），同时显示警告：谁都能用这条隧道，不需要登录；远程隧道还要服务器的 `GatewayPorts` 允许。表格里这样的隧道带一个警告图标。
+    - 端口必须是 1 到 65535，目标主机必填；同一台机器上已有隧道监听同一个端口时提示“已有另一条隧道监听这个端口”。“随会话启动”关掉的隧道不自动启动，但可以在“隧道”页手动启动。
   - 回车等于“确定”（备注里回车是换行），Esc 等于“取消”。同时只开一个编辑器：已经开着时再点新建或编辑，只会把开着的那个提到前面，里面没保存的内容不会丢。修改已经打开会话的主机，下次连接时生效。编辑期间主机在连接管理器里被删除了，“确定”只提示“此连接已被删除”，不会把它存回去。
 - 连接成功时记下时间，供“最近连接”使用。主机的 `noMonitor` 为 `true` 时不轮询服务器状态，也就不开额外的 exec 通道（有些跳板机不允许）。
 - 第一次连接时弹窗显示主机指纹，信任后记入 `finalshelly/known_hosts`；指纹变化时拒绝连接。
@@ -65,6 +72,7 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
 - 右下“文件”页：SFTP 浏览，左边目录树，右边文件表格（可多选），路径栏可以直接输入路径。
 - 上传：把文件或文件夹从资源管理器 / Finder 拖到文件表格（传到当前目录）或目录树的某个文件夹上；也可以用工具栏的上传按钮或右键菜单选文件、选文件夹。
 - 下载：选中文件或文件夹，点下载按钮（存到系统的“下载”文件夹），或右键“下载到…”自己选位置。
+- 右下“隧道”页：当前会话的隧道，每条显示状态（正在启动、监听中、已停止，或出错的原因，比如“端口 127.0.0.1:8080 已被占用”“服务器没有监听 …：端口在服务器上已被占用，或不允许转发”）、当前和累计连接数、上下行字节数，以及上一个连不上目标的连接的原因。每行有“启动”/“停止”。标签上的数字是正在监听的隧道数。会话连接成功后启动已启用的隧道，某条隧道失败（比如端口被占用）只影响它自己，会话照常连接；断开、连接断掉或关闭会话时全部停止并释放端口，重新连接时按主机当前的设置重新启动。经过代理或跳板机连接时，隧道走的是到这台主机本身的连接。“编辑隧道…”打开连接编辑器的“隧道”页。
 - 右下“传输”页：进度、速度、取消；同时最多跑 3 个，其余排队。目标位置已有同名项目时先询问是否覆盖。下载完成后可以“在文件夹中显示”。
 - 拖动区域之间的分隔条调整大小（获得焦点后也可以用方向键），双击恢复默认大小。每个区域有最小尺寸，不会被拖到看不见；大小保存在 `finalshelly/settings.json`，下次启动恢复。
 
@@ -84,6 +92,11 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
     "folder": "f2", "notes": "备注", "noMonitor": true,
     "termType": "vt220", "backspace": "ctrl-h",
     "proxy": {"kind": "jump", "jumpHost": "h2"},
+    "tunnels": [
+      {"kind": "local", "listenPort": 15432, "targetHost": "db.internal", "targetPort": 5432},
+      {"kind": "remote", "listenHost": "0.0.0.0", "listenPort": 8080, "targetHost": "127.0.0.1", "targetPort": 3000, "disabled": true},
+      {"kind": "dynamic", "listenPort": 1080}
+    ],
     "lastConnectedAt": "2026-11-07T10:00:00+08:00"
   }, {
     "id": "h2", "name": "bastion", "addr": "198.51.100.1", "user": "jump", "auth": "password",
@@ -91,6 +104,8 @@ FINALSHELLY_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH 
   }]
 }
 ```
+
+`tunnels` 是端口转发：`kind` 为 `local`（`-L`）、`remote`（`-R`）或 `dynamic`（`-D`，没有 `targetHost`、`targetPort`）；没有 `listenHost` 就是只监听 `127.0.0.1`；`disabled` 为 `true` 时不随会话启动。隧道里不认识的字段也原样保留。
 
 `proxy` 是怎么连到这台主机：`kind` 为 `socks5`、`http`（这两种有 `addr`、`port`，需要认证时有 `user`）或 `jump`（`jumpHost` 是跳板机的主机 ID）；没有 `proxy` 就是直接连接。代理密码不写进文件。
 
@@ -105,8 +120,9 @@ main.go              启动 MyGo、开主窗口，把系统功能（子窗口、
 tray.go              托盘图标、确认用的消息框、退出
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 internal/
-  config/            主机和文件夹（hosts.json）、设置的读写，配置目录；proxy.go 是代理设置和跳板机链（找循环）
-  sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接
+  config/            主机和文件夹（hosts.json）、设置的读写，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置
+  sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
+  sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发
   monitor/           服务器状态采集和解析
   remotefs/          SFTP 列目录、上传、下载（带进度和取消）
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
@@ -121,11 +137,13 @@ internal/
     splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
     files.go         文件面板：目录树、文件表格、拖入上传
     transfers.go     传输队列和“传输”页
+    tunnels.go       会话的隧道：连接后启动、断开时停止，“隧道”页
     dialogs.go       连接管理器、密码、主机指纹、覆盖确认
     options.go       选项窗口：页面列表和“常规”页
     mouse.go         “终端 › 鼠标”页，以及这些设置怎样变成终端的选项
     editor.go        连接编辑器窗口：a.newConnection()、a.editConnection(h)，校验和保存
     editor_proxy.go  连接编辑器的“代理”页
+    editor_tunnels.go 连接编辑器的“隧道”页：表格和添加/编辑对话框
     proxy.go         经过代理和跳板机连接：拨号用的选项、连接前要问的密码、各跳错误的翻译
     closing.go       关闭主窗口、退出时做什么：隐藏到托盘、先确认
     windows.go       子窗口：按种类打开/聚焦/关闭，重绘所有窗口

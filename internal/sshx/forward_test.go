@@ -143,18 +143,6 @@ func socksDial(t *testing.T, addr net.Addr, cmd, atyp byte, host string, port in
 	return c, reply[1]
 }
 
-// waitFor polls cond for a few seconds.
-func waitFor(t *testing.T, what string, cond func() bool) {
-	t.Helper()
-	deadline := time.Now().Add(10 * time.Second)
-	for !cond() {
-		if time.Now().After(deadline) {
-			t.Fatalf("timed out waiting for %s", what)
-		}
-		time.Sleep(10 * time.Millisecond)
-	}
-}
-
 // noLeaks waits until the goroutines are back to base, as before the
 // tunnels started.
 func noLeaks(t *testing.T, base int) {

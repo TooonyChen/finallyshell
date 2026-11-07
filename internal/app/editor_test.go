@@ -237,7 +237,8 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	want := connEditor{id: "h1", name: "web", addr: "10.0.0.1", port: "2200", notes: "main box\nrack 4",
 		auth: config.AuthKey, user: "root", keyPath: "~/.ssh/id_rsa", passphrase: "phrase",
 		monitor: false, termType: "vt220", backspace: config.BackspaceCtrlH,
-		proxy: proxyFields{kind: config.ProxySOCKS5, addr: "10.0.0.9", port: "1081", user: "alice", password: "pp", saved: h.Proxy, hosts: a.hosts}}
+		proxy:   proxyFields{kind: config.ProxySOCKS5, addr: "10.0.0.9", port: "1081", user: "alice", password: "pp", saved: h.Proxy, hosts: a.hosts},
+		tunnels: newTunnelEditor(&h)}
 	fields := *ed
 	fields.nav = widgets.NavState{}
 	if !reflect.DeepEqual(fields, want) || ed.nav.Page != editorSSH {
@@ -618,7 +619,7 @@ func TestEditorPages(t *testing.T) {
 				editorSSH:      {locales.SectionGeneral(), locales.SectionAuth(), locales.SectionAdvanced(), locales.FieldNotes(), locales.MonitorChannel()},
 				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), "UTF-8", locales.BackspaceDEL()},
 				editorProxy:    {locales.FieldProxyType(), locales.ProxyNone(), locales.ProxyNoneHint()},
-				editorTunnels:  {locales.TunnelsLater()},
+				editorTunnels:  {locales.TunnelsIntro(), locales.TunnelsEmpty(), locales.TunnelAdd()},
 			}
 			labels := map[string]string{
 				editorSSH: locales.EditorPageSSH(), editorTerminal: locales.EditorPageTerminal(),
