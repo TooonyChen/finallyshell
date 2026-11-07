@@ -33,6 +33,9 @@ func (p *fakeWindows) OpenWindow(spec WindowSpec, view func(c *ui.Context), clos
 	if p.windows[spec.Kind] != nil {
 		panic("a second window of kind " + string(spec.Kind))
 	}
+	if spec.Width < spec.MinWidth || spec.Height < spec.MinHeight {
+		panic("window " + string(spec.Kind) + " opens below its least size")
+	}
 	p.windows[spec.Kind] = &fakeWindow{spec: spec, view: view, closed: closed}
 }
 
@@ -92,7 +95,7 @@ func TestWindowOpensOncePerKind(t *testing.T) {
 		t.Errorf("opening it again focused %v", p.focused)
 	}
 	spec := p.windows[WindowSettings].spec
-	if spec.Title() != locales.Settings() || spec.Parent != "" || spec.Modal || spec.Width < spec.MinWidth || spec.MinWidth == 0 {
+	if spec.Title() != locales.Settings() || spec.Parent != "" || spec.Modal || spec.MinWidth == 0 || spec.MinHeight == 0 {
 		t.Errorf("spec %+v", spec)
 	}
 
@@ -103,6 +106,29 @@ func TestWindowOpensOncePerKind(t *testing.T) {
 	a.openSettings()
 	if !a.windowOpen(WindowSettings) || len(p.focused) != 1 {
 		t.Errorf("not opened again: windows %v, focused %v", p.windows, p.focused)
+	}
+}
+
+// windowSpecs are the windows the app opens: a new kind goes here too.
+var windowSpecs = []WindowSpec{settingsWindow}
+
+func TestWindowSpecsFitTheirLeastSize(t *testing.T) {
+	kinds := map[WindowKind]bool{}
+	for _, s := range windowSpecs {
+		if s.Kind == "" || kinds[s.Kind] || s.Title == nil || s.Title() == "" {
+			t.Errorf("%s: kind or title missing, or the kind twice", s.Kind)
+		}
+		kinds[s.Kind] = true
+		if s.Width < s.MinWidth || s.Height < s.MinHeight || s.Width <= 0 || s.Height <= 0 {
+			t.Errorf("%s opens at %dx%d, its least size %dx%d", s.Kind, s.Width, s.Height, s.MinWidth, s.MinHeight)
+		}
+	}
+
+	// A spec smaller than its least size opens at the least size.
+	a, p := testApp(t)
+	a.openWindow(WindowSpec{Kind: "test-small", Title: locales.Settings, Width: 100, Height: 50, MinWidth: 300, MinHeight: 200}, func(*ui.Context) {})
+	if s := p.windows["test-small"].spec; s.Width != 300 || s.Height != 200 {
+		t.Errorf("opened at %dx%d", s.Width, s.Height)
 	}
 }
 

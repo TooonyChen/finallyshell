@@ -24,7 +24,8 @@ type WindowSpec struct {
 	Title func() string
 	// Width and Height are the size the window's view opens at, without
 	// the title bar; MinWidth and MinHeight the least the user can make
-	// the window, 0 for no limit.
+	// the window, 0 for no limit. A window never opens smaller than its
+	// least size.
 	Width, Height       int
 	MinWidth, MinHeight int
 	// Parent is the window this one belongs to: it stays above it and
@@ -48,6 +49,7 @@ func (a *App) openWindow(spec WindowSpec, view func(c *ui.Context)) {
 	if spec.Parent != "" && !a.windows[spec.Parent] {
 		spec.Parent = ""
 	}
+	spec.Width, spec.Height = max(spec.Width, spec.MinWidth), max(spec.Height, spec.MinHeight)
 	a.windows[spec.Kind] = true
 	kind := spec.Kind
 	a.plat.OpenWindow(spec, func(c *ui.Context) {

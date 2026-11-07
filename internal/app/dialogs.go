@@ -304,15 +304,16 @@ func (a *App) replaceView(c *ui.Context, q *replaceQuestion) {
 	})
 }
 
-// openSettings opens the settings window, or brings it to the front.
-func (a *App) openSettings() {
-	a.openWindow(WindowSpec{
-		Kind:  WindowSettings,
-		Title: locales.Settings,
-		Width: 400, Height: 210,
-		MinWidth: 340, MinHeight: 220,
-	}, a.settingsView)
+// settingsWindow is how the settings window opens.
+var settingsWindow = WindowSpec{
+	Kind:  WindowSettings,
+	Title: locales.Settings,
+	Width: 400, Height: 220,
+	MinWidth: 340, MinHeight: 200,
 }
+
+// openSettings opens the settings window, or brings it to the front.
+func (a *App) openSettings() { a.openWindow(settingsWindow, a.settingsView) }
 
 // settingsView is the settings window: for now, the language.
 func (a *App) settingsView(c *ui.Context) {
