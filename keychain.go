@@ -11,7 +11,7 @@ import (
 // `mygo dev` (whose identifier ends in ".dev"), `go run` and the
 // installed app share the secrets, as they share hosts.json, whose host
 // IDs the keys hold.
-var secrets = mygo.Secrets.Service("finalshelly")
+var secrets = mygo.Secrets.Service("finallyshell")
 
 // SecretGet and the others block while the system asks the user; the app
 // calls them on a goroutine, where MyGo calls the store directly.

@@ -5,10 +5,10 @@ import (
 	"os"
 	"slices"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/fileicons"
-	"finalshelly/internal/icons"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/fileicons"
+	"finallyshell/internal/icons"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

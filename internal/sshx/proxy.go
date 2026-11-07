@@ -29,7 +29,7 @@ import (
 	"sync"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/proxy"

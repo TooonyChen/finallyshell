@@ -45,7 +45,7 @@ type BlockDevice struct {
 }
 
 // sysInfoMark starts each section of sysInfoScript's output.
-const sysInfoMark = "---FINALSHELLY:"
+const sysInfoMark = "---FINALLYSHELL:"
 
 // sysInfoScript reads everything in one round trip. It is POSIX sh, and
 // runs with BusyBox's tools: what a server lacks (lscpu, nproc, ip, an

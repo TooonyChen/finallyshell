@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshtest"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshtest"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )
@@ -310,10 +310,10 @@ func TestTunnelPanelEmpty(t *testing.T) {
 	}
 }
 
-// TestSSHTunnels forwards through the real server FINALSHELLY_TEST_SSH
+// TestSSHTunnels forwards through the real server FINALLYSHELL_TEST_SSH
 // names, which has to be this machine, with TCP forwarding allowed:
 //
-//	FINALSHELLY_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSHTunnels
+//	FINALLYSHELL_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSHTunnels
 func TestSSHTunnels(t *testing.T) {
 	a, p, s := connectTestServer(t)
 	t.Cleanup(a.CloseAll)

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 
 	"github.com/egoist/mygo/ui"
 )

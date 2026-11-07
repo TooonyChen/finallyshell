@@ -8,16 +8,16 @@ import (
 	"strings"
 	"testing"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/remotefs"
+	"finallyshell/internal/config"
+	"finallyshell/internal/remotefs"
 
 	"github.com/egoist/mygo/ui"
 )
 
 // TestSSH runs against a real server, named as user:password@host:port
-// by FINALSHELLY_TEST_SSH:
+// by FINALLYSHELL_TEST_SSH:
 //
-//	FINALSHELLY_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSH
+//	FINALLYSHELL_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSH
 func TestSSH(t *testing.T) {
 	a, p, s := connectTestServer(t)
 	s.term.Send([]byte("echo hello-$((40+2))\r"))
@@ -36,7 +36,7 @@ func TestSSH(t *testing.T) {
 
 	// Upload by dropping on the table, then download it back.
 	local := filepath.Join(t.TempDir(), "hello.txt")
-	os.WriteFile(local, []byte("hi from finalshelly"), 0o644)
+	os.WriteFile(local, []byte("hi from finallyshell"), 0o644)
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
 	box, _ := tt.Find("Name")
@@ -52,7 +52,7 @@ func TestSSH(t *testing.T) {
 	})
 	a.download(s, []string{"hello.txt"}, "")
 	p.until(t, "the download", func() bool { return len(a.transfers.jobs) == 2 && a.transfers.active() == 0 })
-	if data, _ := os.ReadFile(filepath.Join(p.downloads, "hello.txt")); string(data) != "hi from finalshelly" {
+	if data, _ := os.ReadFile(filepath.Join(p.downloads, "hello.txt")); string(data) != "hi from finallyshell" {
 		t.Errorf("round trip %q", data)
 	}
 	s.sftp.Remove(home + "/hello.txt")
@@ -87,14 +87,14 @@ func TestSSH(t *testing.T) {
 	a.CloseAll()
 }
 
-// connectTestServer opens a session to the server FINALSHELLY_TEST_SSH
+// connectTestServer opens a session to the server FINALLYSHELL_TEST_SSH
 // names, trusting its key, and waits for the shell; it skips the test
 // when the variable is not set.
 func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
 	t.Helper()
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
+		t.Skip("FINALLYSHELL_TEST_SSH not set")
 	}
 	cred, addr, _ := strings.Cut(spec, "@")
 	user, pass, _ := strings.Cut(cred, ":")

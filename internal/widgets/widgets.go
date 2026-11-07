@@ -6,7 +6,7 @@ import (
 	"math"
 	"strconv"
 
-	"finalshelly/internal/icons"
+	"finallyshell/internal/icons"
 
 	"github.com/egoist/mygo/ui"
 )

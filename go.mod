@@ -1,4 +1,4 @@
-module finalshelly
+module finallyshell
 
 go 1.27.3
 

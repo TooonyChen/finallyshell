@@ -1,13 +1,13 @@
----FINALSHELLY:hostname---
+---FINALLYSHELL:hostname---
 db-legacy.example.com
----FINALSHELLY:uname---
+---FINALLYSHELL:uname---
 Linux
 2.6.32-754.35.1.el6.x86_64
 x86_64
----FINALSHELLY:os-release---
----FINALSHELLY:release---
+---FINALLYSHELL:os-release---
+---FINALLYSHELL:release---
 CentOS release 6.10 (Final)
----FINALSHELLY:cpuinfo---
+---FINALLYSHELL:cpuinfo---
 processor	: 0
 model name	: Intel(R) Xeon(R) CPU           E5620  @ 2.40GHz
 physical id	: 0
@@ -40,22 +40,22 @@ processor	: 7
 model name	: Intel(R) Xeon(R) CPU           E5620  @ 2.40GHz
 physical id	: 1
 core id		: 1
----FINALSHELLY:lscpu---
+---FINALLYSHELL:lscpu---
 Core(s) per socket:    2
 Socket(s):             2
----FINALSHELLY:nproc---
+---FINALLYSHELL:nproc---
 8
----FINALSHELLY:meminfo---
+---FINALLYSHELL:meminfo---
 MemTotal:       16330708 kB
 SwapTotal:       8191996 kB
----FINALSHELLY:uptime---
+---FINALLYSHELL:uptime---
 4021.18 31502.77
----FINALSHELLY:addr---
+---FINALLYSHELL:addr---
 1: lo    inet 127.0.0.1/8 scope host lo
 2: eth0    inet 10.10.1.20/24 brd 10.10.1.255 scope global eth0
 2: eth0    inet 10.10.1.21/24 brd 10.10.1.255 scope global secondary eth0:1
 2: eth0    inet6 fe80::250:56ff:fe9a:1c2d/64 scope link
----FINALSHELLY:disks---
+---FINALLYSHELL:disks---
 sda 209715200 Virtual disk
 sdb 1073741824 Virtual disk
----FINALSHELLY:end---
+---FINALLYSHELL:end---

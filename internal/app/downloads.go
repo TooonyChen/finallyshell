@@ -6,9 +6,9 @@ import (
 	"slices"
 	"time"
 
-	"finalshelly/internal/icons"
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/icons"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -649,12 +649,12 @@ func TestDialJumpHost(t *testing.T) {
 	})
 }
 
-// TestJumpHostLive goes through the server FINALSHELLY_TEST_SSH names to
+// TestJumpHostLive goes through the server FINALLYSHELL_TEST_SSH names to
 // itself: the server is its own jump host. It needs TCP forwarding on.
 func TestJumpHostLive(t *testing.T) {
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
+		t.Skip("FINALLYSHELL_TEST_SSH not set")
 	}
 	cred, addr, _ := strings.Cut(spec, "@")
 	user, pass, _ := strings.Cut(cred, ":")

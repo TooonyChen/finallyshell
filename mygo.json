@@ -1,6 +1,6 @@
 {
-  "name": "Finalshelly",
-  "identifier": "dev.finalshelly.app",
+  "name": "Finallyshell",
+  "identifier": "dev.finallyshell.app",
   "version": "0.2.0",
   "out": "build",
   "i18n": { "dir": "locales", "source": "en" }

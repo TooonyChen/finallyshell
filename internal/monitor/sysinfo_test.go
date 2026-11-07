@@ -58,10 +58,10 @@ func TestParseSysInfoSamples(t *testing.T) {
 
 // A server without most tools still gives what it has.
 func TestParseSysInfoMissingTools(t *testing.T) {
-	out := "---FINALSHELLY:hostname---\nbox\n---FINALSHELLY:uname---\nLinux\n5.10.0\nmips\n" +
-		"---FINALSHELLY:os-release---\n---FINALSHELLY:release---\n---FINALSHELLY:cpuinfo---\n" +
-		"processor\t: 0\ncpu model\t: MIPS 24Kc V7.4\n---FINALSHELLY:nproc---\n---FINALSHELLY:addr---\n" +
-		"---FINALSHELLY:disks---\n---FINALSHELLY:end---\n"
+	out := "---FINALLYSHELL:hostname---\nbox\n---FINALLYSHELL:uname---\nLinux\n5.10.0\nmips\n" +
+		"---FINALLYSHELL:os-release---\n---FINALLYSHELL:release---\n---FINALLYSHELL:cpuinfo---\n" +
+		"processor\t: 0\ncpu model\t: MIPS 24Kc V7.4\n---FINALLYSHELL:nproc---\n---FINALLYSHELL:addr---\n" +
+		"---FINALLYSHELL:disks---\n---FINALLYSHELL:end---\n"
 	got := ParseSysInfo(out)
 	want := SysInfo{Hostname: "box", OS: "Linux", KernelOS: "Linux", Kernel: "5.10.0", Arch: "mips", CPUModel: "MIPS 24Kc V7.4", CPUs: 1}
 	if !reflect.DeepEqual(got, want) {

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 )
 
 // The samples in testdata are made up, in the shape other importers found

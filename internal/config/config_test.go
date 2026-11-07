@@ -13,7 +13,7 @@ import (
 )
 
 func TestSettings(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	want := Settings{
 		Language: "zh-Hans", SidebarWidth: 312.5, MonitorPercent: 48, TerminalPercent: 70.25, TreeWidth: 180,
 		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
@@ -62,7 +62,7 @@ func TestHostHelpers(t *testing.T) {
 }
 
 func TestLoadNoFile(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	s, err := LoadHosts()
 	if err != nil || s == nil || s.Version != HostsVersion || len(s.Hosts) != 0 || len(s.Folders) != 0 {
 		t.Fatalf("no file: %+v %v", s, err)
@@ -71,7 +71,7 @@ func TestLoadNoFile(t *testing.T) {
 
 func TestLoadBadFile(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("FINALSHELLY_DIR", dir)
+	t.Setenv("FINALLYSHELL_DIR", dir)
 	at := time.Date(2026, 11, 7, 9, 5, 3, 0, time.Local)
 	now = func() time.Time { return at }
 	t.Cleanup(func() { now = time.Now })
@@ -112,7 +112,7 @@ func TestLoadBadFile(t *testing.T) {
 
 func TestLoadMigratesV1(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("FINALSHELLY_DIR", dir)
+	t.Setenv("FINALLYSHELL_DIR", dir)
 	v1, err := os.ReadFile("testdata/hosts_v1.json")
 	if err != nil {
 		t.Fatal(err)
@@ -197,7 +197,7 @@ func fullHost() *Host {
 }
 
 func TestRoundTripEveryField(t *testing.T) {
-	t.Setenv("FINALSHELLY_DIR", t.TempDir())
+	t.Setenv("FINALLYSHELL_DIR", t.TempDir())
 	h := fullHost()
 	v := reflect.ValueOf(h).Elem()
 	for i := range v.NumField() {
@@ -235,7 +235,7 @@ func TestRoundTripEveryField(t *testing.T) {
 
 func TestUnknownKeysKept(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("FINALSHELLY_DIR", dir)
+	t.Setenv("FINALLYSHELL_DIR", dir)
 	newer, err := os.ReadFile("testdata/hosts_newer.json")
 	if err != nil {
 		t.Fatal(err)

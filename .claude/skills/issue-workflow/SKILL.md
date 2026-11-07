@@ -1,7 +1,7 @@
 ---
 name: issue-workflow
 description: >-
-  The owner's issue-driven workflow for this repository. Research a problem's possible solutions, write them into a GitHub issue, then branch, implement (yourself or with parallel subagents), open a PR that links the issue with "Closes #N", review it and squash-merge it. Use it whenever the owner describes a bug, a feature, a problem or an idea for finalshelly, asks to open or plan issues, asks what can be done next or in parallel, asks to fix or build something, to dispatch or "send" agents, or to review or merge PRs, even if they don't mention issues or this workflow by name.
+  The owner's issue-driven workflow for this repository. Research a problem's possible solutions, write them into a GitHub issue, then branch, implement (yourself or with parallel subagents), open a PR that links the issue with "Closes #N", review it and squash-merge it. Use it whenever the owner describes a bug, a feature, a problem or an idea for finallyshell, asks to open or plan issues, asks what can be done next or in parallel, asks to fix or build something, to dispatch or "send" agents, or to review or merge PRs, even if they don't mention issues or this workflow by name.
 ---
 
 # Issue-driven workflow
@@ -100,7 +100,7 @@ Tell the owner the plan in a short table before dispatching.
   `go tool mygo vet`, `go test -race ./...`, new UI text in both locales
   plus `go tool mygo generate`, goroutines change state only through
   `App.post`. Run the live SSH tests when a test sshd is available
-  (`FINALSHELLY_TEST_SSH`).
+  (`FINALLYSHELL_TEST_SSH`).
 - For UI changes, take tester screenshots in English and Simplified
   Chinese and look at them yourself before calling it done.
 

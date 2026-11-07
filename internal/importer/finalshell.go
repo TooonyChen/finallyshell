@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"finalshelly/internal/config"
+	"finallyshell/internal/config"
 )
 
 // FinalShell keeps its data in a folder of its own, its 数据目录: the

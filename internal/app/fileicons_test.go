@@ -11,10 +11,10 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/fileicons"
-	"finalshelly/internal/remotefs"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/fileicons"
+	"finallyshell/internal/remotefs"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

@@ -34,11 +34,11 @@ type Messages struct{ locale string }
 // source language.
 func In(locale string) Messages { return Messages{locale} }
 
-// AppTitle says "Finalshelly"
+// AppTitle says "Finallyshell"
 // in the language the app shows.
 func AppTitle() string { return In(i18n.Locale()).AppTitle() }
 
-// AppTitle says "Finalshelly"
+// AppTitle says "Finallyshell"
 // in the language of msgs.
 func (msgs Messages) AppTitle() string {
 	return Catalog.Format(msgs.locale, "appTitle", nil)
@@ -2986,11 +2986,11 @@ func (msgs Messages) BackgroundOpacityHint() string {
 	return Catalog.Format(msgs.locale, "backgroundOpacityHint", nil)
 }
 
-// BackgroundCopyNote says "Finalshelly keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
 // in the language the app shows.
 func BackgroundCopyNote() string { return In(i18n.Locale()).BackgroundCopyNote() }
 
-// BackgroundCopyNote says "Finalshelly keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
+// BackgroundCopyNote says "Finallyshell keeps a copy of the image in its settings folder, so moving or deleting the original changes nothing. Rem…"
 // in the language of msgs.
 func (msgs Messages) BackgroundCopyNote() string {
 	return Catalog.Format(msgs.locale, "backgroundCopyNote", nil)
@@ -3006,11 +3006,11 @@ func (msgs Messages) ErrImageRead(error string) string {
 	return Catalog.Format(msgs.locale, "errImageRead", map[string]any{"error": error})
 }
 
-// ErrImageFormat says "Finalshelly cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
+// ErrImageFormat says "Finallyshell cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
 // in the language the app shows.
 func ErrImageFormat() string { return In(i18n.Locale()).ErrImageFormat() }
 
-// ErrImageFormat says "Finalshelly cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
+// ErrImageFormat says "Finallyshell cannot show this file: choose a PNG, JPEG, GIF, WebP or BMP image."
 // in the language of msgs.
 func (msgs Messages) ErrImageFormat() string {
 	return Catalog.Format(msgs.locale, "errImageFormat", nil)
@@ -3368,11 +3368,11 @@ func (msgs Messages) OptionWheelLinesWindows() string {
 	return Catalog.Format(msgs.locale, "optionWheelLinesWindows", nil)
 }
 
-// ConfirmQuitTitle says "Quit Finalshelly?"
+// ConfirmQuitTitle says "Quit Finallyshell?"
 // in the language the app shows.
 func ConfirmQuitTitle() string { return In(i18n.Locale()).ConfirmQuitTitle() }
 
-// ConfirmQuitTitle says "Quit Finalshelly?"
+// ConfirmQuitTitle says "Quit Finallyshell?"
 // in the language of msgs.
 func (msgs Messages) ConfirmQuitTitle() string {
 	return Catalog.Format(msgs.locale, "confirmQuitTitle", nil)
@@ -3398,11 +3398,11 @@ func (msgs Messages) ConfirmQuitOK() string {
 	return Catalog.Format(msgs.locale, "confirmQuitOK", nil)
 }
 
-// TrayShow says "Show Finalshelly"
+// TrayShow says "Show Finallyshell"
 // in the language the app shows.
 func TrayShow() string { return In(i18n.Locale()).TrayShow() }
 
-// TrayShow says "Show Finalshelly"
+// TrayShow says "Show Finallyshell"
 // in the language of msgs.
 func (msgs Messages) TrayShow() string {
 	return Catalog.Format(msgs.locale, "trayShow", nil)

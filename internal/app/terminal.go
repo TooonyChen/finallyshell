@@ -1,7 +1,7 @@
 package app
 
 import (
-	"finalshelly/locales"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"

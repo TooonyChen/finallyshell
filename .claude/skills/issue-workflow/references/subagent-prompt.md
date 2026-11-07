@@ -37,7 +37,7 @@ resumes with its context intact.
 - Isolated git worktree. Start: `git fetch origin main && git checkout -b <type>/<short-name> origin/main`.
 - Conventional Commits, English, PR title like `<type>(<scope>): <description>`. End every commit message with the session's attribution trailer lines (copy them in). No model names anywhere else.
 - Before pushing: `gofmt -l .` empty; `go build ./...`, `go vet ./...` (also `GOOS=windows go vet .` and `GOOS=darwin go vet .`), `go tool mygo vet`, `go test -race ./...` all pass. New UI text in both locales/en.json and locales/zh-Hans.json, then `go tool mygo generate`, commit locales/catalog_gen.go. Goroutines change app state only through App.post.
-- Live tests: if a test sshd runs (e.g. 127.0.0.1:2222, user/password given here), also run `FINALSHELLY_TEST_SSH=user:password@127.0.0.1:2222 go test -race ./...`. Don't stop or reconfigure it; other agents share it.
+- Live tests: if a test sshd runs (e.g. 127.0.0.1:2222, user/password given here), also run `FINALLYSHELL_TEST_SSH=user:password@127.0.0.1:2222 go test -race ./...`. Don't stop or reconfigure it; other agents share it.
 - Screenshots in English and Simplified Chinese to <scratchpad>/shots/<issue>/ (don't commit); look at them with Read and fix layout; list them in the PR.
 - Update README when behavior or layout changes.
 - Push `git push -u origin <branch>` (retry with backoff on network errors only). Open the PR with the GitHub MCP tool (ToolSearch "select:mcp__github__create_pull_request"), base main. Body per .github/pull_request_template.md: `## Summary` with "Closes #<issue>" (or "Refs #<issue>" if it doesn't resolve all of it), `## Testing` including what was not tested. Plain writing. End with the session's PR attribution footer (copy it in).

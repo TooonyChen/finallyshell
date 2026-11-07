@@ -1,6 +1,6 @@
 package app
 
-import "finalshelly/locales"
+import "finallyshell/locales"
 
 // Confirmation is a question with two answers, which the platform asks in
 // a message box of the system's.

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"finalshelly/internal/widgets"
-	"finalshelly/locales"
+	"finallyshell/internal/widgets"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

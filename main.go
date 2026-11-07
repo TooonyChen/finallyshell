@@ -1,4 +1,4 @@
-// Finalshelly is an SSH client laid out as FinalShell, with its session
+// Finallyshell is an SSH client laid out as FinalShell, with its session
 // tabs down the side.
 package main
 
@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"finalshelly/internal/app"
-	"finalshelly/internal/config"
-	"finalshelly/locales"
+	"finallyshell/internal/app"
+	"finallyshell/internal/config"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/ui"

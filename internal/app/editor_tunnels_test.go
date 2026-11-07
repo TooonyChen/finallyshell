@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"finalshelly/internal/config"
-	"finalshelly/internal/sshx"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/internal/sshx"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )

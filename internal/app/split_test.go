@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"finalshelly/internal/config"
-	"finalshelly/locales"
+	"finallyshell/internal/config"
+	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"
@@ -380,11 +380,11 @@ func TestSplitSizesOutOfRangeIgnored(t *testing.T) {
 // TestSSHResize drags dividers in a live session and checks that the
 // server's terminal takes the new size:
 //
-//	FINALSHELLY_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSHResize
+//	FINALLYSHELL_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSHResize
 func TestSSHResize(t *testing.T) {
-	spec := os.Getenv("FINALSHELLY_TEST_SSH")
+	spec := os.Getenv("FINALLYSHELL_TEST_SSH")
 	if spec == "" {
-		t.Skip("FINALSHELLY_TEST_SSH not set")
+		t.Skip("FINALLYSHELL_TEST_SSH not set")
 	}
 	cred, addr, _ := strings.Cut(spec, "@")
 	user, pass, _ := strings.Cut(cred, ":")
