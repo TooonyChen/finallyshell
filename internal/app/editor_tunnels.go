@@ -213,6 +213,9 @@ func (f *tunnelForm) tunnel() config.Tunnel {
 	if f.public {
 		t.ListenHost = strings.TrimSpace(f.listenHost)
 	}
+	if remoteSide(f.kind) && strings.EqualFold(t.ListenHost, "localhost") {
+		t.ListenHost = "" // the server's 127.0.0.1
+	}
 	t.TargetHost, t.TargetPort = "", 0
 	if f.kind != config.TunnelDynamic {
 		t.TargetHost = strings.TrimSpace(f.targetHost)
@@ -244,8 +247,12 @@ func (te *tunnelEditor) problems() map[tunnelField]string {
 	if _, ok := validPort(f.listenPort); !ok {
 		errs[fieldListenPort] = locales.ErrPortInvalid()
 	}
-	if f.public && !validHost(strings.TrimSpace(f.listenHost)) {
+	if host := strings.TrimSpace(f.listenHost); f.public && !validHost(host) {
 		errs[fieldListenHost] = locales.ErrListenAddrInvalid()
+	} else if f.public && remoteSide(f.kind) && !strings.EqualFold(host, "localhost") && net.ParseIP(host) == nil {
+		// Sent to the server as an IP address: x/crypto would look a
+		// name up on this computer.
+		errs[fieldListenHost] = locales.ErrRemoteListenAddrIP()
 	}
 	if f.kind != config.TunnelDynamic {
 		if strings.TrimSpace(f.targetHost) == "" {

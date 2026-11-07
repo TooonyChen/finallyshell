@@ -2108,6 +2108,28 @@ func (msgs Messages) ErrListenAddrInvalid() string {
 	return Catalog.Format(msgs.locale, "errListenAddrInvalid", nil)
 }
 
+// ErrRemoteListenAddrIP says "Enter an IP address, such as 0.0.0.0 or ::, or localhost: a host name would be looked up on this computer, not on the…"
+// in the language the app shows.
+func ErrRemoteListenAddrIP() string { return In(i18n.Locale()).ErrRemoteListenAddrIP() }
+
+// ErrRemoteListenAddrIP says "Enter an IP address, such as 0.0.0.0 or ::, or localhost: a host name would be looked up on this computer, not on the…"
+// in the language of msgs.
+func (msgs Messages) ErrRemoteListenAddrIP() string {
+	return Catalog.Format(msgs.locale, "errRemoteListenAddrIP", nil)
+}
+
+// ErrTunnelRemoteHostName says "The server listens on an IP address, not the host name in {addr}: change it to an IP address, or localhost"
+// in the language the app shows.
+func ErrTunnelRemoteHostName(addr string) string {
+	return In(i18n.Locale()).ErrTunnelRemoteHostName(addr)
+}
+
+// ErrTunnelRemoteHostName says "The server listens on an IP address, not the host name in {addr}: change it to an IP address, or localhost"
+// in the language of msgs.
+func (msgs Messages) ErrTunnelRemoteHostName(addr string) string {
+	return Catalog.Format(msgs.locale, "errTunnelRemoteHostName", map[string]any{"addr": addr})
+}
+
 // ErrTunnelDuplicate says "Another tunnel already listens on this port"
 // in the language the app shows.
 func ErrTunnelDuplicate() string { return In(i18n.Locale()).ErrTunnelDuplicate() }

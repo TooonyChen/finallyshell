@@ -127,6 +127,8 @@ func describeTunnelError(err error) string {
 		switch {
 		case te.InUse:
 			return locales.ErrTunnelInUse(te.Addr)
+		case errors.Is(te.Err, sshx.ErrRemoteListenHost):
+			return locales.ErrTunnelRemoteHostName(te.Addr)
 		case te.Remote && strings.Contains(te.Err.Error(), "denied"):
 			return locales.ErrTunnelRemoteDenied(te.Addr)
 		}

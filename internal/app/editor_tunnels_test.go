@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"finalshelly/internal/config"
+	"finalshelly/internal/sshx"
 	"finalshelly/locales"
 
 	"github.com/egoist/mygo/ui"
@@ -231,6 +232,11 @@ func TestTunnelFormChecks(t *testing.T) {
 		{"same port on another address", tunnelForm{kind: config.TunnelDynamic, listenPort: "1080", public: true, listenHost: "192.168.1.5"}, nil},
 		{"same port on the server", tunnelForm{kind: config.TunnelRemote, listenPort: "8080", targetHost: "x", targetPort: "1"},
 			map[tunnelField]string{fieldListenPort: locales.ErrTunnelDuplicate()}},
+		{"remote on a host name", tunnelForm{kind: config.TunnelRemote, listenPort: "9000", public: true, listenHost: "myserver.example", targetHost: "x", targetPort: "1"},
+			map[tunnelField]string{fieldListenHost: locales.ErrRemoteListenAddrIP()}},
+		{"remote on an IPv6 address", tunnelForm{kind: config.TunnelRemote, listenPort: "9000", public: true, listenHost: "::", targetHost: "x", targetPort: "1"}, nil},
+		{"remote on localhost", tunnelForm{kind: config.TunnelRemote, listenPort: "9000", public: true, listenHost: "localhost", targetHost: "x", targetPort: "1"}, nil},
+		{"local on a host name", tunnelForm{kind: config.TunnelLocal, listenPort: "9000", public: true, listenHost: "myhost.lan", targetHost: "x", targetPort: "1"}, nil},
 	} {
 		te.form = tc.form
 		got := te.problems()
@@ -238,6 +244,23 @@ func TestTunnelFormChecks(t *testing.T) {
 			t.Errorf("%s: %v, want %v", tc.name, got, tc.want)
 		}
 	}
+	// A remote tunnel on localhost listens on the server's loopback, as
+	// one without an address does.
+	f := tunnelForm{kind: config.TunnelRemote, listenPort: "9000", public: true, listenHost: "localhost", targetHost: "x", targetPort: "1"}
+	if got := f.tunnel(); got.ListenHost != "" {
+		t.Errorf("localhost kept as %q", got.ListenHost)
+	}
+	f.kind = config.TunnelLocal
+	if got := f.tunnel(); got.ListenHost != "localhost" {
+		t.Errorf("a local tunnel's localhost became %q", got.ListenHost)
+	}
+	// A hand-written remote tunnel on a host name says why it cannot
+	// start.
+	err := &sshx.TunnelError{Addr: "myserver:9000", Remote: true, Err: sshx.ErrRemoteListenHost}
+	if got := describeTunnelError(err); got != locales.ErrTunnelRemoteHostName("myserver:9000") {
+		t.Errorf("described as %q", got)
+	}
+
 	// A tunnel edited is not the same as itself.
 	te.editing = 0
 	te.form = tunnelForm{kind: config.TunnelLocal, listenPort: "15432", targetHost: "db", targetPort: "1"}

@@ -269,6 +269,8 @@
   "tunnelStartWithSession": "Start with the session",
   "errTargetHostRequired": "Enter the target host",
   "errListenAddrInvalid": "Enter an IP address or a host name",
+  "errRemoteListenAddrIP": "Enter an IP address, such as 0.0.0.0 or ::, or localhost: a host name would be looked up on this computer, not on the server",
+  "errTunnelRemoteHostName": "The server listens on an IP address, not the host name in {addr}: change it to an IP address, or localhost",
   "errTunnelDuplicate": "Another tunnel already listens on this port",
   "tabTunnels": "Tunnels",
   "tabTunnelsActive": "Tunnels ({count})",

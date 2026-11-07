@@ -317,6 +317,41 @@ func TestTunnels(t *testing.T) {
 			tun.Close()
 		})
 
+		t.Run("remote listen host", func(t *testing.T) {
+			// A name is refused before the server is asked: x/crypto would
+			// look it up here. localhost is the loopback.
+			for _, host := range []string{"example.com", "my-server", "localhost.localdomain"} {
+				_, err := StartTunnel(client, config.Tunnel{Kind: config.TunnelRemote, ListenHost: host, TargetHost: "127.0.0.1", TargetPort: echo.Port}, nil)
+				var te *TunnelError
+				if !errors.Is(err, ErrRemoteListenHost) || !errors.As(err, &te) || !te.Remote || te.Addr != net.JoinHostPort(host, "0") {
+					t.Errorf("%s: %#v", host, err)
+				}
+			}
+			for _, host := range []string{"localhost", "LOCALHOST", "127.0.0.1", ""} {
+				tun, err := StartTunnel(client, config.Tunnel{Kind: config.TunnelRemote, ListenHost: host, TargetHost: "127.0.0.1", TargetPort: echo.Port}, nil)
+				if err != nil {
+					t.Fatalf("%q: %v", host, err)
+				}
+				if a := tun.Addr().(*net.TCPAddr); !a.IP.Equal(net.IPv4(127, 0, 0, 1)) {
+					t.Errorf("%q listens on %v", host, a)
+				}
+				echoThrough(t, dial(t, tun.Addr()), "hello "+host)
+				tun.Close()
+			}
+			for host, want := range map[string]string{"::": "[::]:9000", "0.0.0.0": "0.0.0.0:9000", "localhost": "127.0.0.1:9000"} {
+				if got, err := RemoteListenAddr(config.Tunnel{ListenHost: host, ListenPort: 9000}); got != want || err != nil {
+					t.Errorf("%q: %q, %v", host, got, err)
+				}
+			}
+			// Local tunnels listen here: a name is looked up where it is
+			// meant.
+			tun, err := StartTunnel(client, config.Tunnel{Kind: config.TunnelLocal, ListenHost: "localhost", TargetHost: "127.0.0.1", TargetPort: echo.Port}, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tun.Close()
+		})
+
 		t.Run("close", func(t *testing.T) {
 			// Closing ends the connections open through the tunnel, and
 			// frees the port.

@@ -24,6 +24,25 @@ import (
 // newer one may write.
 var ErrUnknownTunnel = errors.New("unknown kind of tunnel")
 
+// ErrRemoteListenHost is a remote tunnel whose listen address is a host
+// name: the address is sent to the server as an IP address, and a name
+// would be looked up here, not on the server.
+var ErrRemoteListenHost = errors.New("a remote tunnel listens on an IP address or localhost, not a host name")
+
+// RemoteListenAddr is host:port that a remote tunnel asks the server to
+// listen on: its ListenHost, an IP address, or the loopback for "" and
+// localhost. It fails with ErrRemoteListenHost for a host name.
+func RemoteListenAddr(t config.Tunnel) (string, error) {
+	host := t.ListenHost
+	if host == "" || strings.EqualFold(host, "localhost") {
+		host = config.LoopbackHost
+	}
+	if net.ParseIP(host) == nil {
+		return "", ErrRemoteListenHost
+	}
+	return net.JoinHostPort(host, strconv.Itoa(t.ListenPort)), nil
+}
+
 // TunnelError is a tunnel that could not start listening.
 type TunnelError struct {
 	// Addr is where it was to listen.
@@ -91,6 +110,13 @@ func StartTunnel(client *ssh.Client, t config.Tunnel, notify func()) (*Tunnel, e
 			return nil, &TunnelError{Addr: addr, InUse: addrInUse(err), Err: err}
 		}
 	case config.TunnelRemote:
+		// x/crypto resolves the address on this computer: only an IP
+		// address means the same on the server.
+		var raddr string
+		if raddr, err = RemoteListenAddr(t); err != nil {
+			return nil, &TunnelError{Addr: addr, Remote: true, Err: err}
+		}
+		addr = raddr
 		ln, err = client.Listen("tcp", addr)
 		if err != nil {
 			return nil, &TunnelError{Addr: addr, Remote: true, Err: err}
