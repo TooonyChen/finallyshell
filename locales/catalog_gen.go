@@ -1906,6 +1906,166 @@ func (msgs Messages) OptionConfirmCloseNote() string {
 	return Catalog.Format(msgs.locale, "optionConfirmCloseNote", nil)
 }
 
+// MouseSelection says "Selection"
+// in the language the app shows.
+func MouseSelection() string { return In(i18n.Locale()).MouseSelection() }
+
+// MouseSelection says "Selection"
+// in the language of msgs.
+func (msgs Messages) MouseSelection() string {
+	return Catalog.Format(msgs.locale, "mouseSelection", nil)
+}
+
+// OptionCopyOnSelect says "Copy on select"
+// in the language the app shows.
+func OptionCopyOnSelect() string { return In(i18n.Locale()).OptionCopyOnSelect() }
+
+// OptionCopyOnSelect says "Copy on select"
+// in the language of msgs.
+func (msgs Messages) OptionCopyOnSelect() string {
+	return Catalog.Format(msgs.locale, "optionCopyOnSelect", nil)
+}
+
+// OptionCopyOnSelectNote says "Text you select with the mouse is copied to the clipboard."
+// in the language the app shows.
+func OptionCopyOnSelectNote() string { return In(i18n.Locale()).OptionCopyOnSelectNote() }
+
+// OptionCopyOnSelectNote says "Text you select with the mouse is copied to the clipboard."
+// in the language of msgs.
+func (msgs Messages) OptionCopyOnSelectNote() string {
+	return Catalog.Format(msgs.locale, "optionCopyOnSelectNote", nil)
+}
+
+// MouseRightClick says "Right click"
+// in the language the app shows.
+func MouseRightClick() string { return In(i18n.Locale()).MouseRightClick() }
+
+// MouseRightClick says "Right click"
+// in the language of msgs.
+func (msgs Messages) MouseRightClick() string {
+	return Catalog.Format(msgs.locale, "mouseRightClick", nil)
+}
+
+// RightClickMenu says "Show the context menu"
+// in the language the app shows.
+func RightClickMenu() string { return In(i18n.Locale()).RightClickMenu() }
+
+// RightClickMenu says "Show the context menu"
+// in the language of msgs.
+func (msgs Messages) RightClickMenu() string {
+	return Catalog.Format(msgs.locale, "rightClickMenu", nil)
+}
+
+// RightClickPaste says "Paste"
+// in the language the app shows.
+func RightClickPaste() string { return In(i18n.Locale()).RightClickPaste() }
+
+// RightClickPaste says "Paste"
+// in the language of msgs.
+func (msgs Messages) RightClickPaste() string {
+	return Catalog.Format(msgs.locale, "rightClickPaste", nil)
+}
+
+// RightClickCopy says "Copy the selection"
+// in the language the app shows.
+func RightClickCopy() string { return In(i18n.Locale()).RightClickCopy() }
+
+// RightClickCopy says "Copy the selection"
+// in the language of msgs.
+func (msgs Messages) RightClickCopy() string {
+	return Catalog.Format(msgs.locale, "rightClickCopy", nil)
+}
+
+// RightClickCopyOrPaste says "Copy if text is selected, else paste"
+// in the language the app shows.
+func RightClickCopyOrPaste() string { return In(i18n.Locale()).RightClickCopyOrPaste() }
+
+// RightClickCopyOrPaste says "Copy if text is selected, else paste"
+// in the language of msgs.
+func (msgs Messages) RightClickCopyOrPaste() string {
+	return Catalog.Format(msgs.locale, "rightClickCopyOrPaste", nil)
+}
+
+// RightClickIgnore says "Do nothing"
+// in the language the app shows.
+func RightClickIgnore() string { return In(i18n.Locale()).RightClickIgnore() }
+
+// RightClickIgnore says "Do nothing"
+// in the language of msgs.
+func (msgs Messages) RightClickIgnore() string {
+	return Catalog.Format(msgs.locale, "rightClickIgnore", nil)
+}
+
+// MouseNextConnect says "Open sessions pick up a change when they reconnect."
+// in the language the app shows.
+func MouseNextConnect() string { return In(i18n.Locale()).MouseNextConnect() }
+
+// MouseNextConnect says "Open sessions pick up a change when they reconnect."
+// in the language of msgs.
+func (msgs Messages) MouseNextConnect() string {
+	return Catalog.Format(msgs.locale, "mouseNextConnect", nil)
+}
+
+// MouseLinks says "Links"
+// in the language the app shows.
+func MouseLinks() string { return In(i18n.Locale()).MouseLinks() }
+
+// MouseLinks says "Links"
+// in the language of msgs.
+func (msgs Messages) MouseLinks() string {
+	return Catalog.Format(msgs.locale, "mouseLinks", nil)
+}
+
+// OptionOpenLinks says "{key}+click opens links"
+// in the language the app shows.
+func OptionOpenLinks(key string) string { return In(i18n.Locale()).OptionOpenLinks(key) }
+
+// OptionOpenLinks says "{key}+click opens links"
+// in the language of msgs.
+func (msgs Messages) OptionOpenLinks(key string) string {
+	return Catalog.Format(msgs.locale, "optionOpenLinks", map[string]any{"key": key})
+}
+
+// OptionOpenLinksNote says "Web addresses in the terminal open in the browser. Open sessions pick up a change when they reconnect."
+// in the language the app shows.
+func OptionOpenLinksNote() string { return In(i18n.Locale()).OptionOpenLinksNote() }
+
+// OptionOpenLinksNote says "Web addresses in the terminal open in the browser. Open sessions pick up a change when they reconnect."
+// in the language of msgs.
+func (msgs Messages) OptionOpenLinksNote() string {
+	return Catalog.Format(msgs.locale, "optionOpenLinksNote", nil)
+}
+
+// MouseScrolling says "Scrolling"
+// in the language the app shows.
+func MouseScrolling() string { return In(i18n.Locale()).MouseScrolling() }
+
+// MouseScrolling says "Scrolling"
+// in the language of msgs.
+func (msgs Messages) MouseScrolling() string {
+	return Catalog.Format(msgs.locale, "mouseScrolling", nil)
+}
+
+// OptionWheelLines says "Lines per mouse wheel notch"
+// in the language the app shows.
+func OptionWheelLines() string { return In(i18n.Locale()).OptionWheelLines() }
+
+// OptionWheelLines says "Lines per mouse wheel notch"
+// in the language of msgs.
+func (msgs Messages) OptionWheelLines() string {
+	return Catalog.Format(msgs.locale, "optionWheelLines", nil)
+}
+
+// OptionWheelLinesWindows says "On Windows, 3 means the lines set in the system mouse settings; other values scale from it."
+// in the language the app shows.
+func OptionWheelLinesWindows() string { return In(i18n.Locale()).OptionWheelLinesWindows() }
+
+// OptionWheelLinesWindows says "On Windows, 3 means the lines set in the system mouse settings; other values scale from it."
+// in the language of msgs.
+func (msgs Messages) OptionWheelLinesWindows() string {
+	return Catalog.Format(msgs.locale, "optionWheelLinesWindows", nil)
+}
+
 // ConfirmQuitTitle says "Quit Finalshelly?"
 // in the language the app shows.
 func ConfirmQuitTitle() string { return In(i18n.Locale()).ConfirmQuitTitle() }

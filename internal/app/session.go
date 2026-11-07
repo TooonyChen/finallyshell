@@ -92,6 +92,7 @@ func (a *App) connect(s *Session, secret string) {
 		opts.Password = secret
 	}
 	h := *s.Host
+	topts := a.terminalOptions(&h) // here, on the UI thread, which owns the settings
 	fail := func(err error) { a.post(func() { s.status, s.err = statusFailed, err }) }
 	go func() {
 		client, err := sshx.Dial(&h, opts)
@@ -109,20 +110,16 @@ func (a *App) connect(s *Session, secret string) {
 			fail(&stepError{"shell", err})
 			return
 		}
-		term, err := terminal.New(terminal.Options{
-			Conn:      shell,
-			Font:      a.termFont,
-			Theme:     a.termTheme,
-			DarkTheme: a.termTheme,
-			OnKey:     backspaceKey(h.Backspace, func() *terminal.Terminal { return s.term }),
-			OnExit: func(int) {
-				a.post(func() {
-					if s.status == statusConnected && s.cancel != nil {
-						s.status, s.err = statusClosed, errConnectionLost
-					}
-				})
-			},
-		})
+		topts.Conn = shell
+		topts.OnKey = backspaceKey(h.Backspace, func() *terminal.Terminal { return s.term })
+		topts.OnExit = func(int) {
+			a.post(func() {
+				if s.status == statusConnected && s.cancel != nil {
+					s.status, s.err = statusClosed, errConnectionLost
+				}
+			})
+		}
+		term, err := terminal.New(topts)
 		if err != nil {
 			shell.Close()
 			client.Close()
@@ -172,6 +169,25 @@ func (a *App) connect(s *Session, secret string) {
 			a.openDir(s, home)
 		})
 	}()
+}
+
+// terminalOptions are the options of a new terminal for h as the
+// settings have them; connect adds the shell and its hooks. It reads the
+// settings, so it runs on the UI thread.
+func (a *App) terminalOptions(h *config.Host) terminal.Options {
+	o := terminal.Options{Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme}
+	a.mouseOptions(&o)
+	return o
+}
+
+// applyTerminalSettings gives every open terminal the settings that a
+// terminal can change as it runs; the rest apply as sessions connect.
+func (a *App) applyTerminalSettings() {
+	for _, s := range a.sessions {
+		if s.term != nil {
+			a.applyMouse(s.term)
+		}
+	}
 }
 
 // eraseChar is the character Backspace sends with bs.

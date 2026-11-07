@@ -48,7 +48,34 @@ type Settings struct {
 	// NoConfirmClose quits without asking while sessions are open; by
 	// default closing the window, or quitting, asks first.
 	NoConfirmClose bool `json:"noConfirmClose,omitempty"`
+
+	// The Mouse page of the terminal options, zero by default too.
+	//
+	// CopyOnSelect copies what the mouse selects in a terminal to the
+	// clipboard as the selection ends.
+	CopyOnSelect bool `json:"copyOnSelect,omitempty"`
+	// RightClick is what a right click in a terminal does: the context
+	// menu when "".
+	RightClick RightClick `json:"rightClick,omitempty"`
+	// NoLinkClick keeps Ctrl+click (Cmd+click on macOS) from opening the
+	// links a terminal shows.
+	NoLinkClick bool `json:"noLinkClick,omitempty"`
+	// WheelLines is how many lines a notch of the mouse wheel scrolls a
+	// terminal: 3 when 0.
+	WheelLines int `json:"wheelLines,omitempty"`
 }
+
+// RightClick is what a right click in a terminal does (Settings.RightClick).
+// A value this version does not know shows the context menu.
+type RightClick string
+
+const (
+	RightClickMenu        RightClick = ""              // the context menu
+	RightClickPaste       RightClick = "paste"         // paste the clipboard
+	RightClickCopy        RightClick = "copy"          // copy the selection
+	RightClickCopyOrPaste RightClick = "copy-or-paste" // copy, or paste with no selection
+	RightClickIgnore      RightClick = "ignore"        // nothing
+)
 
 func settingsPath() string { return filepath.Join(Dir(), "settings.json") }
 

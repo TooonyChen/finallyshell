@@ -53,7 +53,7 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageMouse, parent: pageTerminal, title: locales.OptionsMouse,
-		view: nil,
+		view: (*App).mousePage,
 	},
 	{
 		id: pageShortcuts, parent: pageTerminal, title: locales.OptionsShortcuts,
