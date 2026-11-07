@@ -27,8 +27,9 @@ type platform struct {
 
 // childWindow is an open secondary window.
 type childWindow struct {
-	win   *mygo.Window
-	title func() string
+	win     *mygo.Window
+	title   func() string
+	closing bool // the app is closing it
 }
 
 // Post runs fn on the UI thread and redraws every window: the state fn
@@ -73,13 +74,27 @@ func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), clo
 		DisableMinimize: true,
 		Content:         ui.View(view),
 	})
-	p.windows[spec.Kind] = &childWindow{win: win, title: spec.Title}
+	child := &childWindow{win: win, title: spec.Title}
+	p.windows[spec.Kind] = child
+	// The window may ask first, as the editor does with unsaved changes,
+	// when the user closes it; the app closing it does not ask.
+	win.OnClose(func(e *mygo.CloseEvent) {
+		if !child.closing && spec.CloseRequested != nil && !spec.CloseRequested() {
+			e.PreventDefault()
+		}
+	})
 	win.OnClosed(func() {
 		if w := p.windows[spec.Kind]; w != nil && w.win == win {
 			delete(p.windows, spec.Kind)
 		}
 		closed()
 	})
+}
+
+func (p *platform) RetitleWindow(kind app.WindowKind) {
+	if w := p.windows[kind]; w != nil {
+		w.win.SetTitle(w.title())
+	}
 }
 
 func (p *platform) FocusWindow(kind app.WindowKind) {
@@ -94,6 +109,7 @@ func (p *platform) FocusWindow(kind app.WindowKind) {
 
 func (p *platform) CloseWindow(kind app.WindowKind) {
 	if w := p.windows[kind]; w != nil {
+		w.closing = true
 		w.win.Close()
 	}
 }
@@ -110,12 +126,8 @@ func (p *platform) OpenFiles(title string, folder bool) ([]string, error) {
 	return mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: p.win, Title: title, Directory: folder, Multiple: !folder})
 }
 
-func (p *platform) ChooseFolder(title string) (string, error) {
-	paths, err := mygo.Dialog.Open(mygo.OpenDialogOptions{Parent: p.win, Title: title, Directory: true, CreateDirectories: true})
-	if err != nil || len(paths) == 0 {
-		return "", err
-	}
-	return paths[0], nil
+func (p *platform) ChooseFolder(parent app.WindowKind, title string) (string, error) {
+	return p.openOne(parent, mygo.OpenDialogOptions{Title: title, Directory: true, CreateDirectories: true})
 }
 
 func (p *platform) OpenFile(parent app.WindowKind, title, dir string) (string, error) {
@@ -163,9 +175,35 @@ func (p *platform) DownloadsDir() string {
 	return filepath.Join(home, "Downloads")
 }
 
-func (p *platform) ShowInFolder(path string) { mygo.Shell.ShowItemInFolder(path) }
-func (p *platform) SetLocale(tag string)     { mygo.App.SetLocale(tag) }
-func (p *platform) Languages() []string      { return mygo.App.Languages() }
+func (p *platform) ShowInFolder(path string)   { mygo.Shell.ShowItemInFolder(path) }
+func (p *platform) OpenPath(path string) error { return mygo.Shell.OpenPath(path) }
+func (p *platform) SetLocale(tag string)       { mygo.App.SetLocale(tag) }
+func (p *platform) Languages() []string        { return mygo.App.Languages() }
+
+// ShowTransfers puts the count on the Dock icon (macOS; the launcher
+// entry on Linux docks that show one) and the progress under it, or on
+// the taskbar button (Windows), where MyGo shows SetProgressBar.
+func (p *platform) ShowTransfers(count int, progress float64) {
+	mygo.App.SetBadgeCount(count)
+	switch {
+	case count == 0:
+		p.win.SetProgressBar(mygo.ProgressBar{})
+	case progress < 0:
+		p.win.SetProgressBar(mygo.ProgressBar{State: mygo.ProgressIndeterminate})
+	default:
+		p.win.SetProgressBar(mygo.ProgressBar{State: mygo.ProgressNormal, Value: progress})
+	}
+}
+
+// TempDir is in the app's cache folder: the copies of remote files
+// opened with other apps, which the app clears out after a day.
+func (p *platform) TempDir() string {
+	dir, err := mygo.App.Path(mygo.PathCache)
+	if err != nil || dir == "" {
+		dir = filepath.Join(os.TempDir(), "finallyshell")
+	}
+	return filepath.Join(dir, "opened")
+}
 
 // SetFullScreen and IsFullScreen put the main window in the system's full
 // screen, for the app's (internal/app/fullscreen.go).

@@ -40,6 +40,15 @@ type WindowSpec struct {
 	// window is then a sheet of its parent, which has no title bar: the
 	// view shows Title as a heading instead.
 	Modal bool
+	// OwnKeys leaves Escape and Cmd+W to the view, which closes the
+	// window itself, as the file editor closes a tab with Cmd+W.
+	OwnKeys bool
+	// CloseRequested, when set, is asked as the user closes the window
+	// with the system's close button: false keeps it open, as when the
+	// window asks first. Closing it from the app does not ask.
+	CloseRequested func() bool
+	// Closed, when set, is called once the window is gone.
+	Closed func()
 }
 
 // macOS tells whether the app runs on macOS, where Cmd+W closes a
@@ -78,10 +87,10 @@ func (a *App) openWindow(spec WindowSpec, view func(c *ui.Context)) {
 	}
 	spec.Width, spec.Height = max(spec.Width, spec.MinWidth), max(spec.Height, spec.MinHeight)
 	a.windows[spec.Kind] = true
-	kind, title, sheet := spec.Kind, spec.Title, spec.Modal && sheets
+	kind, title, sheet, ownKeys, closed := spec.Kind, spec.Title, spec.Modal && sheets, spec.OwnKeys, spec.Closed
 	a.plat.OpenWindow(spec, func(c *ui.Context) {
 		c.SetTheme(theme)
-		if c.Shortcut(0, ui.KeyEscape) || a.closeWindowShortcut(c) {
+		if !ownKeys && (c.Shortcut(0, ui.KeyEscape) || a.closeWindowShortcut(c)) {
 			a.closeWindow(kind)
 		}
 		if !sheet {
@@ -92,7 +101,12 @@ func (a *App) openWindow(spec WindowSpec, view func(c *ui.Context)) {
 			ui.Text(c, title()).Bold().TextAlign(ui.Center).Padding(10, 16, 2, 16).Shrink(0)
 			ui.Column(c).Grow(1).MinHeight(0).Children(func() { view(c) })
 		})
-	}, func() { delete(a.windows, kind) })
+	}, func() {
+		delete(a.windows, kind)
+		if closed != nil {
+			closed()
+		}
+	})
 }
 
 // closeWindow closes the window of kind, as its Close button does.
@@ -105,11 +119,16 @@ func (a *App) closeWindow(kind WindowKind) {
 // windowOpen tells whether the window of kind is open.
 func (a *App) windowOpen(kind WindowKind) bool { return a.windows[kind] }
 
-// closeWindows closes every secondary window. A parent takes its
-// children with it, so the order does not matter.
+// closeWindows closes every secondary window, as the main one hides to
+// the tray, but the file editor's while it has changes to save, unless
+// the app quits. A parent takes its children with it, so the order does
+// not matter.
 func (a *App) closeWindows() {
 	kinds := make([]WindowKind, 0, len(a.windows))
 	for k := range a.windows {
+		if k == WindowFileEditor && !a.quitApproved && !a.fe.discard && a.unsavedFiles() > 0 {
+			continue
+		}
 		kinds = append(kinds, k)
 	}
 	slices.Sort(kinds)

@@ -1,7 +1,8 @@
 // Package sshtest is an SSH server for tests, in the test's process: it
-// logs in with a password, opens shells that read and print nothing, and
+// logs in with a password, opens shells that read and print nothing,
 // forwards ports as OpenSSH does with AllowTcpForwarding on and
-// GatewayPorts off.
+// GatewayPorts off, and, started with StartSFTP, serves the local file
+// system over SFTP.
 package sshtest
 
 import (
@@ -14,6 +15,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -28,6 +30,9 @@ type Server struct {
 
 	ln  net.Listener
 	cfg *ssh.ServerConfig
+	// sftpDir is the SFTP subsystem's working directory, the user's home;
+	// "" turns the subsystem off.
+	sftpDir string
 
 	mu    sync.Mutex
 	conns map[*ssh.ServerConn]bool
@@ -38,8 +43,21 @@ type Server struct {
 }
 
 // Start starts a server, which stops as the test ends, with every
-// connection it has.
+// connection it has. It refuses SFTP, as servers without it do.
 func Start(t testing.TB) *Server {
+	t.Helper()
+	return start(t, "")
+}
+
+// StartSFTP starts a server as Start does, which also serves the local
+// file system over SFTP, as the user running the test, with home as the
+// working directory.
+func StartSFTP(t testing.TB, home string) *Server {
+	t.Helper()
+	return start(t, home)
+}
+
+func start(t testing.TB, sftpDir string) *Server {
 	t.Helper()
 	_, key, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -60,7 +78,7 @@ func Start(t testing.TB) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := &Server{ln: ln, cfg: cfg, conns: map[*ssh.ServerConn]bool{}, forwards: map[*ssh.ServerConn]map[string]net.Listener{}}
+	s := &Server{ln: ln, cfg: cfg, sftpDir: sftpDir, conns: map[*ssh.ServerConn]bool{}, forwards: map[*ssh.ServerConn]map[string]net.Listener{}}
 	addr := ln.Addr().(*net.TCPAddr)
 	s.Host, s.Port = addr.IP.String(), addr.Port
 	s.wg.Add(1)
@@ -169,28 +187,57 @@ func (s *Server) serve(conn net.Conn) {
 	}
 }
 
-// session opens a shell that reads what comes and prints nothing.
+// session opens a shell that reads what comes and prints nothing, or
+// the SFTP subsystem.
 func (s *Server) session(nc ssh.NewChannel) {
 	ch, reqs, err := nc.Accept()
 	if err != nil {
 		return
 	}
-	s.wg.Add(2)
+	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
-		io.Copy(io.Discard, ch)
-	}()
-	go func() {
-		defer s.wg.Done()
+		started := false
+		start := func(serve func()) {
+			started = true
+			s.wg.Add(1)
+			go func() {
+				defer s.wg.Done()
+				serve()
+			}()
+		}
 		for r := range reqs {
 			switch r.Type {
-			case "pty-req", "shell", "window-change":
+			case "pty-req", "window-change":
 				r.Reply(true, nil)
-			default: // env, exec, subsystem (SFTP)
+			case "shell":
+				r.Reply(!started, nil)
+				if !started {
+					start(func() { io.Copy(io.Discard, ch) })
+				}
+			case "subsystem":
+				var name struct{ Name string }
+				ok := s.sftpDir != "" && !started && ssh.Unmarshal(r.Payload, &name) == nil && name.Name == "sftp"
+				r.Reply(ok, nil)
+				if ok {
+					start(func() { s.serveSFTP(ch) })
+				}
+			default: // env, exec
 				r.Reply(false, nil)
 			}
 		}
 	}()
+}
+
+// serveSFTP serves the local file system on ch until the client is done.
+func (s *Server) serveSFTP(ch ssh.Channel) {
+	defer ch.Close()
+	srv, err := sftp.NewServer(ch, sftp.WithServerWorkingDirectory(s.sftpDir))
+	if err != nil {
+		return
+	}
+	srv.Serve()
+	srv.Close()
 }
 
 // directTCPIP connects to what the client asks for, as -L and -D need.

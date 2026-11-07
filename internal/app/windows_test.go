@@ -24,6 +24,7 @@ type fakeWindow struct {
 	view   func(c *ui.Context)
 	closed func()
 	tt     *ui.Tester // the window's view, once a test shows it
+	title  string     // as RetitleWindow last set it
 }
 
 func (p *fakeWindows) OpenWindow(spec WindowSpec, view func(c *ui.Context), closed func()) {
@@ -40,6 +41,23 @@ func (p *fakeWindows) OpenWindow(spec WindowSpec, view func(c *ui.Context), clos
 }
 
 func (p *fakeWindows) FocusWindow(kind WindowKind) { p.focused = append(p.focused, kind) }
+
+func (p *fakeWindows) RetitleWindow(kind WindowKind) {
+	if w := p.windows[kind]; w != nil {
+		w.title = w.spec.Title()
+	}
+}
+
+// userClose closes the window of kind as its close button does, which
+// the window may refuse, and tells whether it closed.
+func (p *fakeWindows) userClose(kind WindowKind) bool {
+	w := p.windows[kind]
+	if w == nil || w.spec.CloseRequested != nil && !w.spec.CloseRequested() {
+		return false
+	}
+	p.CloseWindow(kind)
+	return true
+}
 
 // CloseWindow closes the window and its children, children first, as
 // MyGo does.

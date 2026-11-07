@@ -20,6 +20,7 @@ var optionsWindow = WindowSpec{
 // The pages of the options window.
 const (
 	pageGeneral    = "general"
+	pageTransfers  = "transfers"
 	pageTerminal   = "terminal"
 	pageMouse      = "terminal/mouse"
 	pageShortcuts  = "terminal/shortcuts"
@@ -46,6 +47,10 @@ var optionPages = []optionPage{
 	{
 		id: pageGeneral, title: locales.OptionsGeneral,
 		view: (*App).generalPage,
+	},
+	{
+		id: pageTransfers, title: locales.OptionsTransfers,
+		view: (*App).transfersPage,
 	},
 	{
 		id: pageTerminal, title: locales.OptionsTerminal,
