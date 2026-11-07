@@ -180,6 +180,7 @@ func fullHost() *Host {
 		DeletedAt:       time.Date(2026, 11, 8, 1, 2, 3, 0, time.UTC),
 		TermType:        "vt220",
 		Backspace:       BackspaceCtrlH,
+		Proxy:           &ProxyConfig{Kind: ProxySOCKS5, Addr: "198.51.100.7", Port: 1081, User: "proxyuser", JumpHost: "h9"},
 	}
 }
 
@@ -213,7 +214,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}

@@ -67,6 +67,11 @@ type Host struct {
 	// most terminals send, or BackspaceCtrlH.
 	Backspace BackspaceKey `json:"backspace,omitempty"`
 
+	// Proxy is how the host is reached: through a SOCKS5 or HTTP proxy,
+	// or through another saved host, a jump host. nil connects directly.
+	// Its password is not saved, as the host's is not.
+	Proxy *ProxyConfig `json:"proxy,omitempty"`
+
 	extra extras
 }
 
