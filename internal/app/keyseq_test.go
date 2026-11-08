@@ -20,7 +20,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 	if a.optionsNav.Page != pageTerminal {
 		t.Fatalf("page %q", a.optionsNav.Page)
 	}
-	for _, s := range []string{locales.KeySequences(), locales.FieldBackspace(), locales.FieldDelete(),
+	for _, s := range []string{locales.FieldEncoding(), "UTF-8", locales.EncodingHint(), locales.FieldBackspace(), locales.FieldDelete(),
 		locales.KeySeqDEL(), locales.KeySeqVT220(), locales.KeySequencesNote(), locales.LookRestoreDefaults()} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q; texts %q", s, tt.Texts())
@@ -33,7 +33,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 
 	p.SetLocale("zh-Hans")
 	tt.Frame()
-	for _, s := range []string{"按键序列", "退格键发送", "删除键发送", "ASCII 删除 (^?)", "VT220 (ESC [3~)", "恢复默认"} {
+	for _, s := range []string{"字符编码", "退格键发送", "删除键发送", "ASCII 删除 (^?)", "VT220 (ESC [3~)", "恢复默认"} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q in Chinese; texts %q", s, tt.Texts())
 		}
@@ -43,6 +43,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 	tt.Frame()
 
 	for _, k := range [][2]string{
+		{"UTF-8", "GBK"},
 		{locales.KeySeqDEL(), locales.KeySeqCtrlH()},
 		{locales.KeySeqVT220(), locales.KeySeqDEL()},
 	} {
@@ -53,7 +54,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	want := config.Settings{TermBackspace: config.BackspaceCtrlH, TermDelete: config.DeleteDEL}
+	want := config.Settings{TermEncoding: config.EncodingGBK, TermBackspace: config.BackspaceCtrlH, TermDelete: config.DeleteDEL}
 	if a.settings != want || config.LoadSettings() != want {
 		t.Fatalf("settings %+v, saved %+v", a.settings, config.LoadSettings())
 	}
@@ -67,7 +68,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 	if err := ed.Click(locales.EditorPageTerminal()); err != nil {
 		t.Fatal(err)
 	}
-	for _, s := range []string{locales.KeySeqDefault(locales.KeySeqCtrlH()), locales.KeySeqDefault(locales.KeySeqDEL())} {
+	for _, s := range []string{locales.KeySeqDefault("GBK"), locales.KeySeqDefault(locales.KeySeqCtrlH()), locales.KeySeqDefault(locales.KeySeqDEL())} {
 		if !ed.HasText(s) {
 			t.Errorf("editor: no %q; texts %q", s, ed.Texts())
 		}
@@ -77,6 +78,7 @@ func TestTerminalDefaultsPage(t *testing.T) {
 	// Restore defaults. Delete first, so that each label clicked shows
 	// once.
 	for _, k := range [][2]string{
+		{"GBK", "UTF-8"},
 		{locales.KeySeqDEL(), locales.KeySeqVT220()},
 		{locales.KeySeqCtrlH(), locales.KeySeqDEL()},
 	} {

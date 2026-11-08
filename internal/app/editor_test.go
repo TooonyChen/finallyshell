@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"os"
@@ -265,7 +266,7 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	if err := tt.Click(locales.EditorPageTerminal()); err != nil {
 		t.Fatal(err)
 	}
-	if fieldValue(t, tt, locales.FieldTermType()) != "vt220" || !tt.HasText(locales.KeySeqCtrlH()) || !tt.HasText("UTF-8") {
+	if fieldValue(t, tt, locales.FieldTermType()) != "vt220" || !tt.HasText(locales.KeySeqCtrlH()) || !tt.HasText(locales.KeySeqDefault("UTF-8")) {
 		t.Errorf("terminal page; texts %q", tt.Texts())
 	}
 
@@ -344,6 +345,7 @@ func TestEditorChangesEveryField(t *testing.T) {
 	}
 	// Both keys start at "Default", naming what the settings send.
 	for _, k := range [][2]string{
+		{locales.KeySeqDefault("UTF-8"), "GBK"},
 		{locales.KeySeqDefault(locales.KeySeqDEL()), locales.KeySeqCtrlH()},
 		{locales.KeySeqDefault(locales.KeySeqVT220()), locales.KeySeqDEL()},
 	} {
@@ -354,14 +356,14 @@ func TestEditorChangesEveryField(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if a.editor.backspace != config.BackspaceCtrlH || a.editor.delete != config.DeleteDEL {
-		t.Fatalf("backspace %q, delete %q", a.editor.backspace, a.editor.delete)
+	if a.editor.backspace != config.BackspaceCtrlH || a.editor.delete != config.DeleteDEL || a.editor.encoding != config.EncodingGBK {
+		t.Fatalf("backspace %q, delete %q, encoding %q", a.editor.backspace, a.editor.delete, a.editor.encoding)
 	}
 	if err := tt.Click(locales.Ok()); err != nil {
 		t.Fatal(err)
 	}
 	want := &config.Host{ID: "h1", Name: "db", Addr: "db.example.com", Port: 2201, User: "admin", Auth: config.AuthPassword,
-		Folder: "f1", Notes: "line 1\nline 2", NoMonitor: true, TermType: "vt100", Backspace: config.BackspaceCtrlH, Delete: config.DeleteDEL}
+		Folder: "f1", Notes: "line 1\nline 2", NoMonitor: true, TermType: "vt100", Backspace: config.BackspaceCtrlH, Delete: config.DeleteDEL, Encoding: config.EncodingGBK}
 	if a.windowOpen(WindowEditor) || !reflect.DeepEqual(h, want) || a.passwords["h1"] != "s3cret" {
 		t.Errorf("host\n%+v\nwant\n%+v", h, want)
 	}
@@ -626,7 +628,7 @@ func TestEditorPages(t *testing.T) {
 			}
 			wants := map[string][]string{
 				editorSSH: {locales.SectionGeneral(), locales.SectionAuth(), locales.SectionAdvanced(), locales.FieldNotes(), locales.MonitorChannel()},
-				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), locales.FieldDelete(), "UTF-8",
+				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), locales.FieldDelete(), locales.KeySeqDefault("UTF-8"), locales.EncodingHint(),
 					locales.KeySeqDefault(locales.KeySeqDEL()), locales.KeySeqDefault(locales.KeySeqVT220())},
 				editorProxy:   {locales.FieldProxyType(), locales.ProxyNone(), locales.ProxyNoneHint()},
 				editorTunnels: {locales.TunnelsIntro(), locales.TunnelsEmpty(), locales.TunnelAdd()},
@@ -750,4 +752,29 @@ func TestTerminalOptionsReachServer(t *testing.T) {
 	if pty := srv.lastPTY(); pty.erase != 0x7f {
 		t.Errorf("host that chose ^?: pty %+v", pty)
 	}
+}
+
+// A host's encoding converts what the server writes before the terminal
+// shows it, and what is typed and pasted before the server reads it.
+func TestEncodingReachesServer(t *testing.T) {
+	srv := startFakeSSH(t)
+	// "你好，世界" in GBK.
+	srv.greet([]byte{0xc4, 0xe3, 0xba, 0xc3, 0xa3, 0xac, 0xca, 0xc0, 0xbd, 0xe7, '\r', '\n'})
+	a, p := testApp(t)
+	t.Cleanup(a.CloseAll)
+	a.settings.TermEncoding = config.EncodingGBK
+	h := &config.Host{ID: "gbk", Addr: srv.host, Port: srv.port, User: "u", Auth: config.AuthPassword, NoMonitor: true}
+	a.hosts.Add(h)
+	s := connectFake(t, a, p, h)
+	p.until(t, "the greeting", func() bool { return strings.Contains(s.term.Text(), "你好，世界") })
+
+	s.term.Send([]byte("中文"))
+	want := []byte{0xd6, 0xd0, 0xce, 0xc4}
+	p.until(t, "the input", func() bool { return bytes.Contains(srv.typed(), want) })
+
+	// A host that chose UTF-8 is not converted.
+	srv.greet([]byte("é\r\n"))
+	h.Encoding = config.EncodingUTF8
+	s = connectFake(t, a, p, h)
+	p.until(t, "the UTF-8 greeting", func() bool { return strings.Contains(s.term.Text(), "é") })
 }

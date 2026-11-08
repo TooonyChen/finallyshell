@@ -12,6 +12,7 @@ import (
 	"finallyshell/internal/monitor"
 	"finallyshell/internal/remotefs"
 	"finallyshell/internal/sshx"
+	"finallyshell/internal/termenc"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
@@ -100,7 +101,7 @@ func (a *App) connect(s *Session, secret string) {
 	}
 	h := *s.Host
 	topts := a.terminalOptions(&h) // here, on the UI thread, which owns the settings
-	bs, del := a.settings.HostBackspace(&h), a.settings.HostDelete(&h)
+	bs, del, enc := a.settings.HostBackspace(&h), a.settings.HostDelete(&h), a.settings.HostEncoding(&h)
 	passphrase := a.storedPassphrase(s.Host)
 	fail := func(err error) {
 		a.post(func() {
@@ -130,7 +131,7 @@ func (a *App) connect(s *Session, secret string) {
 			fail(&stepError{"shell", err})
 			return
 		}
-		topts.Conn = shell
+		topts.Conn = termenc.Wrap(shell, enc)
 		topts.OnKey = keySequences(bs, del, func() *terminal.Terminal { return s.term })
 		topts.OnExit = func(int) {
 			a.post(func() {

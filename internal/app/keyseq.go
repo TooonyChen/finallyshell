@@ -2,36 +2,45 @@ package app
 
 import (
 	"finallyshell/internal/config"
+	"finallyshell/internal/termenc"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"
 )
 
-// keySeqChoice is a choice of what Backspace or Delete sends, as the
-// Terminal page and the connection editor list it.
-type keySeqChoice[K ~string] struct {
+// choice is a choice of the Terminal page and the connection editor's
+// terminal options: what Backspace or Delete sends, or the encoding.
+type choice[K ~string] struct {
 	value K
 	label func() string
 }
 
-var backspaceChoices = []keySeqChoice[config.BackspaceKey]{
+var backspaceChoices = []choice[config.BackspaceKey]{
 	{config.BackspaceDEL, locales.KeySeqDEL},
 	{config.BackspaceCtrlH, locales.KeySeqCtrlH},
 }
 
-var deleteChoices = []keySeqChoice[config.DeleteKey]{
+var encodingChoices = func() []choice[config.Encoding] {
+	cs := make([]choice[config.Encoding], len(config.Encodings))
+	for i, e := range config.Encodings {
+		cs[i] = choice[config.Encoding]{e, func() string { return termenc.Label(e) }}
+	}
+	return cs
+}()
+
+var deleteChoices = []choice[config.DeleteKey]{
 	{config.DeleteVT220, locales.KeySeqVT220},
 	{config.DeleteDEL, locales.KeySeqDEL},
 	{config.DeleteCtrlH, locales.KeySeqCtrlH},
 }
 
-// keySeqSelect is a select of choices showing *value, named name for
+// choiceSelect is a select of choices showing *value, named name for
 // screen readers, and reports whether the user changed *value. With def,
 // the first choice is "Default: <def>", which stands for the zero value:
 // a host's choice to follow the settings. A value not among the choices,
 // as a newer version may have written, shows the first.
-func keySeqSelect[K ~string](c *ui.Context, name string, value *K, choices []keySeqChoice[K], def *K) bool {
+func choiceSelect[K ~string](c *ui.Context, name string, value *K, choices []choice[K], def *K) bool {
 	labels := make([]string, 0, len(choices)+1)
 	values := make([]K, 0, len(choices)+1)
 	if def != nil {
@@ -63,35 +72,43 @@ func keySeqSelect[K ~string](c *ui.Context, name string, value *K, choices []key
 	return true
 }
 
-// terminalDefaultsPage is the Terminal page of the options: what
-// Backspace and Delete send to the hosts whose own choice is "Default".
+// terminalDefaultsPage is the Terminal page of the options: the encoding
+// of the hosts whose own choice is "Default", and what Backspace and
+// Delete send to them.
 func (a *App) terminalDefaultsPage(c *ui.Context) {
-	ui.Column(c).Gap(8).Children(func() {
-		ui.Text(c, locales.KeySequences()).Bold()
-		ui.Form(c, func() {
-			ui.Field(c, locales.FieldBackspace(), func() {
-				bs := a.settings.TermBackspaceKey()
-				if keySeqSelect(c, locales.FieldBackspace(), &bs, backspaceChoices, nil) {
-					if bs == config.BackspaceDEL {
-						bs = "" // the default, written as nothing
-					}
-					a.changeSettings(func() { a.settings.TermBackspace = bs })
+	ui.Form(c, func() {
+		ui.Field(c, locales.FieldEncoding(), func() {
+			e := a.settings.TermEncodingName()
+			if choiceSelect(c, locales.FieldEncoding(), &e, encodingChoices, nil) {
+				if e == config.EncodingUTF8 {
+					e = "" // the default, written as nothing
 				}
-			})
-			ui.Field(c, locales.FieldDelete(), func() {
-				del := a.settings.TermDeleteKey()
-				if keySeqSelect(c, locales.FieldDelete(), &del, deleteChoices, nil) {
-					if del == config.DeleteVT220 {
-						del = ""
-					}
-					a.changeSettings(func() { a.settings.TermDelete = del })
+				a.changeSettings(func() { a.settings.TermEncoding = e })
+			}
+		}).Description(locales.EncodingHint())
+		ui.Field(c, locales.FieldBackspace(), func() {
+			bs := a.settings.TermBackspaceKey()
+			if choiceSelect(c, locales.FieldBackspace(), &bs, backspaceChoices, nil) {
+				if bs == config.BackspaceDEL {
+					bs = ""
 				}
-			})
+				a.changeSettings(func() { a.settings.TermBackspace = bs })
+			}
+		})
+		ui.Field(c, locales.FieldDelete(), func() {
+			del := a.settings.TermDeleteKey()
+			if choiceSelect(c, locales.FieldDelete(), &del, deleteChoices, nil) {
+				if del == config.DeleteVT220 {
+					del = ""
+				}
+				a.changeSettings(func() { a.settings.TermDelete = del })
+			}
 		})
 	})
-	defaults := a.settings.TermBackspaceKey() == config.BackspaceDEL && a.settings.TermDeleteKey() == config.DeleteVT220
+	defaults := a.settings.TermEncodingName() == config.EncodingUTF8 &&
+		a.settings.TermBackspaceKey() == config.BackspaceDEL && a.settings.TermDeleteKey() == config.DeleteVT220
 	a.lookFooter(c, locales.KeySequencesNote(), func() {
-		a.settings.TermBackspace, a.settings.TermDelete = "", ""
+		a.settings.TermEncoding, a.settings.TermBackspace, a.settings.TermDelete = "", "", ""
 	}, defaults)
 }
 

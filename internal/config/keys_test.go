@@ -31,3 +31,27 @@ func TestHostKeySequences(t *testing.T) {
 		})
 	}
 }
+
+// A host's encoding is its own choice, else the settings', else UTF-8;
+// names this version does not know count as unset.
+func TestHostEncoding(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		settings Settings
+		host     Host
+		want     Encoding
+	}{
+		{"default", Settings{}, Host{}, EncodingUTF8},
+		{"from the settings", Settings{TermEncoding: EncodingGBK}, Host{}, EncodingGBK},
+		{"the host's own", Settings{TermEncoding: EncodingGBK}, Host{Encoding: EncodingUTF8}, EncodingUTF8},
+		{"host over the default", Settings{}, Host{Encoding: EncodingEUCKR}, EncodingEUCKR},
+		{"unknown names", Settings{TermEncoding: "koi8-r"}, Host{Encoding: "utf-7"}, EncodingUTF8},
+		{"unknown host name follows the settings", Settings{TermEncoding: EncodingBig5}, Host{Encoding: "x"}, EncodingBig5},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.settings.HostEncoding(&tc.host); got != tc.want {
+				t.Errorf("encoding %q, want %q", got, tc.want)
+			}
+		})
+	}
+}

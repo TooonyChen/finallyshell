@@ -30,6 +30,33 @@ type fakeSSH struct {
 	// authorized is the public key the server lets in, besides the
 	// password "secret"; nil for none.
 	authorized ssh.PublicKey
+	// greeting is what a shell writes as it starts.
+	greeting []byte
+	// input is what the clients wrote to their shells.
+	input bytes.Buffer
+}
+
+// greet makes the shells the server opens from now on write b first.
+func (srv *fakeSSH) greet(b []byte) {
+	srv.mu.Lock()
+	srv.greeting = b
+	srv.mu.Unlock()
+}
+
+// typed is what the clients wrote to their shells so far.
+func (srv *fakeSSH) typed() []byte {
+	srv.mu.Lock()
+	defer srv.mu.Unlock()
+	return bytes.Clone(srv.input.Bytes())
+}
+
+// inputWriter keeps what is written to a shell in fakeSSH.input.
+type inputWriter struct{ srv *fakeSSH }
+
+func (w inputWriter) Write(p []byte) (int, error) {
+	w.srv.mu.Lock()
+	defer w.srv.mu.Unlock()
+	return w.srv.input.Write(p)
 }
 
 // authorize lets the key in.
@@ -142,14 +169,20 @@ func (srv *fakeSSH) serve(conn net.Conn, cfg *ssh.ServerConfig) {
 		if err != nil {
 			continue
 		}
-		go io.Copy(io.Discard, ch)
+		go io.Copy(inputWriter{srv}, ch)
 		go func() {
 			for r := range chReqs {
 				switch r.Type {
 				case "pty-req":
 					srv.notePTY(r.Payload)
 					r.Reply(true, nil)
-				case "shell", "window-change":
+				case "shell":
+					r.Reply(true, nil)
+					srv.mu.Lock()
+					greeting := srv.greeting
+					srv.mu.Unlock()
+					ch.Write(greeting)
+				case "window-change":
 					r.Reply(true, nil)
 				case "exec":
 					srv.execs.Add(1)

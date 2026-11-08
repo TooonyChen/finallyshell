@@ -83,6 +83,10 @@ type Settings struct {
 	// TermDelete is what Delete sends: "" for ESC [ 3 ~, DeleteDEL or
 	// DeleteCtrlH. Read it with TermDeleteKey or HostDelete.
 	TermDelete DeleteKey `json:"termDelete,omitempty"`
+	// TermEncoding is the character encoding of the terminal: "" for
+	// UTF-8, else one of Encodings. Read it with TermEncodingName or
+	// HostEncoding.
+	TermEncoding Encoding `json:"termEncoding,omitempty"`
 
 	// The terminal's look: the Font, Color scheme and Background image
 	// pages of the options. Zero is the default of each.

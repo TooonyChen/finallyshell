@@ -90,6 +90,10 @@ type Host struct {
 	// (Settings.TermDelete), else DeleteVT220, DeleteDEL or DeleteCtrlH.
 	// Read it with Settings.HostDelete.
 	Delete DeleteKey `json:"delete,omitempty"`
+	// Encoding is the character encoding of the host's terminal: "" for
+	// what the settings say (Settings.TermEncoding), else one of
+	// Encodings. Read it with Settings.HostEncoding.
+	Encoding Encoding `json:"encoding,omitempty"`
 
 	// CreatedAt is when the host was added: made in the connection
 	// editor, duplicated or imported. Zero for a host saved before this

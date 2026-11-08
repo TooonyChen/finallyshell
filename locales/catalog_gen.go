@@ -1564,11 +1564,11 @@ func (msgs Messages) FieldEncoding() string {
 	return Catalog.Format(msgs.locale, "fieldEncoding", nil)
 }
 
-// EncodingHint says "Only UTF-8 for now."
+// EncodingHint says "The encoding the server's programs read and write, its locale. If text shows garbled, try GBK, GB18030 or Big5."
 // in the language the app shows.
 func EncodingHint() string { return In(i18n.Locale()).EncodingHint() }
 
-// EncodingHint says "Only UTF-8 for now."
+// EncodingHint says "The encoding the server's programs read and write, its locale. If text shows garbled, try GBK, GB18030 or Big5."
 // in the language of msgs.
 func (msgs Messages) EncodingHint() string {
 	return Catalog.Format(msgs.locale, "encodingHint", nil)
@@ -3386,16 +3386,6 @@ func OptionWheelLinesWindows() string { return In(i18n.Locale()).OptionWheelLine
 // in the language of msgs.
 func (msgs Messages) OptionWheelLinesWindows() string {
 	return Catalog.Format(msgs.locale, "optionWheelLinesWindows", nil)
-}
-
-// KeySequences says "Key sequences"
-// in the language the app shows.
-func KeySequences() string { return In(i18n.Locale()).KeySequences() }
-
-// KeySequences says "Key sequences"
-// in the language of msgs.
-func (msgs Messages) KeySequences() string {
-	return Catalog.Format(msgs.locale, "keySequences", nil)
 }
 
 // KeySeqVT220 says "VT220 (ESC [3~)"

@@ -86,6 +86,7 @@ type connEditor struct {
 	termType                string
 	backspace               config.BackspaceKey
 	delete                  config.DeleteKey
+	encoding                config.Encoding
 	proxy                   proxyFields  // the Proxy page (editor_proxy.go)
 	tunnels                 tunnelEditor // see editor_tunnels.go
 	folder                  string       // a new host's, from the manager
@@ -141,7 +142,7 @@ func (a *App) openEditor(h *config.Host, from WindowKind) {
 		}
 		ed.remember = h.RemembersPassword()
 		ed.monitor = h.MonitorEnabled()
-		ed.termType, ed.backspace, ed.delete = h.TermType, h.Backspace, h.Delete
+		ed.termType, ed.backspace, ed.delete, ed.encoding = h.TermType, h.Backspace, h.Delete, h.Encoding
 	}
 	ed.proxy = a.proxyFieldsOf(h)
 	ed.tunnels = newTunnelEditor(h)
@@ -228,7 +229,7 @@ func (a *App) saveEditor() {
 	}
 	a.keepLogin(h, secret, ed.remember, ed.readingSecret)
 	h.NoMonitor = !ed.monitor
-	h.TermType, h.Backspace, h.Delete = strings.TrimSpace(ed.termType), ed.backspace, ed.delete
+	h.TermType, h.Backspace, h.Delete, h.Encoding = strings.TrimSpace(ed.termType), ed.backspace, ed.delete, ed.encoding
 	if h.TermType == config.DefaultTermType {
 		h.TermType = ""
 	}
@@ -390,18 +391,16 @@ func (a *App) terminalPage(c *ui.Context, ed *connEditor, errs map[editorField]s
 			input(ui.Autocomplete(c, &ed.termType, termTypes).Placeholder(config.DefaultTermType).Width(240))
 		}).Error(errs[fieldTermType])
 		ui.Field(c, locales.FieldEncoding(), func() {
-			// The terminal reads and writes UTF-8 alone: libghostty-vt
-			// decodes nothing else, and the app converts nothing.
-			utf8 := "UTF-8"
-			ui.Select(c, &utf8, []string{utf8}).Width(240).Disabled(true)
+			def := a.settings.TermEncodingName()
+			choiceSelect(c, locales.FieldEncoding(), &ed.encoding, encodingChoices, &def)
 		}).Description(locales.EncodingHint())
 		ui.Field(c, locales.FieldBackspace(), func() {
 			def := a.settings.TermBackspaceKey()
-			keySeqSelect(c, locales.FieldBackspace(), &ed.backspace, backspaceChoices, &def)
+			choiceSelect(c, locales.FieldBackspace(), &ed.backspace, backspaceChoices, &def)
 		})
 		ui.Field(c, locales.FieldDelete(), func() {
 			def := a.settings.TermDeleteKey()
-			keySeqSelect(c, locales.FieldDelete(), &ed.delete, deleteChoices, &def)
+			choiceSelect(c, locales.FieldDelete(), &ed.delete, deleteChoices, &def)
 		})
 	})
 	widgets.Muted(c, locales.TerminalNextConnect()).FontSize(12)

@@ -73,3 +73,59 @@ func (s Settings) HostDelete(h *Host) DeleteKey {
 	}
 	return s.TermDeleteKey()
 }
+
+// Encoding is the character encoding of a host's terminal: what the
+// server's programs read and write (Settings.TermEncoding,
+// Host.Encoding). Package termenc converts it to and from UTF-8.
+type Encoding string
+
+const (
+	// EncodingDefault is a host's "Default": what the settings say. In
+	// the settings it is UTF-8.
+	EncodingDefault Encoding = ""
+	EncodingUTF8    Encoding = "utf-8"
+	EncodingGBK     Encoding = "gbk"
+	EncodingGB18030 Encoding = "gb18030"
+	EncodingBig5    Encoding = "big5"
+	EncodingSJIS    Encoding = "shift_jis"
+	EncodingEUCJP   Encoding = "euc-jp"
+	EncodingEUCKR   Encoding = "euc-kr"
+	EncodingLatin1  Encoding = "iso-8859-1"
+	EncodingWin1252 Encoding = "windows-1252"
+)
+
+// Encodings are the encodings a host can have, in the order the Terminal
+// page and the connection editor list them.
+var Encodings = []Encoding{
+	EncodingUTF8, EncodingGBK, EncodingGB18030, EncodingBig5,
+	EncodingSJIS, EncodingEUCJP, EncodingEUCKR, EncodingLatin1, EncodingWin1252,
+}
+
+// known says whether e is one of Encodings.
+func (e Encoding) known() bool {
+	for _, k := range Encodings {
+		if e == k {
+			return true
+		}
+	}
+	return false
+}
+
+// TermEncodingName is the encoding of a host whose own setting is
+// "Default": never EncodingDefault. A name this version does not know
+// is UTF-8.
+func (s Settings) TermEncodingName() Encoding {
+	if s.TermEncoding.known() {
+		return s.TermEncoding
+	}
+	return EncodingUTF8
+}
+
+// HostEncoding is the encoding of h's terminal: its own choice, else the
+// settings'. It is never EncodingDefault.
+func (s Settings) HostEncoding(h *Host) Encoding {
+	if h.Encoding.known() {
+		return h.Encoding
+	}
+	return s.TermEncodingName()
+}
