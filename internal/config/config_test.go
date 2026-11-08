@@ -196,6 +196,7 @@ func fullHost() *Host {
 
 		NoRememberPassword: true,
 		CreatedAt:          time.Date(2026, 10, 1, 8, 0, 0, 0, time.UTC),
+		MonitorIfaces:      []string{"eth0", "wg0"},
 	}
 }
 
@@ -229,7 +230,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "delete", "encoding", "proxy", "tunnels", "noRememberPassword", "createdAt"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "delete", "encoding", "proxy", "tunnels", "noRememberPassword", "createdAt", "monitorIfaces"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}
@@ -319,6 +320,10 @@ func TestHostClone(t *testing.T) {
 	if string(h.extra["color"]) != `"red"` || h.Proxy.Addr != "p" || string(h.Proxy.extra["chain"]) != `[1]` ||
 		h.Tunnels[0].ListenPort != 8080 || string(h.Tunnels[0].extra["note"]) != `"admin"` || h.Tunnels[1].Kind != TunnelDynamic {
 		t.Errorf("the clone shares with the host: %+v", h)
+	}
+	h.MonitorIfaces = []string{"eth0"}
+	if c = h.Clone(); &c.MonitorIfaces[0] == &h.MonitorIfaces[0] {
+		t.Error("the clone shares the monitor's interfaces")
 	}
 	if (&Host{}).Clone().Tunnels != nil {
 		t.Error("a host without tunnels copied to an empty list")

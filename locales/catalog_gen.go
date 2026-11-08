@@ -360,6 +360,78 @@ func (msgs Messages) Latency() string {
 	return Catalog.Format(msgs.locale, "latency", nil)
 }
 
+// NetIfaces says "Network interfaces"
+// in the language the app shows.
+func NetIfaces() string { return In(i18n.Locale()).NetIfaces() }
+
+// NetIfaces says "Network interfaces"
+// in the language of msgs.
+func (msgs Messages) NetIfaces() string {
+	return Catalog.Format(msgs.locale, "netIfaces", nil)
+}
+
+// NetIfaceAutomatic says "Automatic (busiest)"
+// in the language the app shows.
+func NetIfaceAutomatic() string { return In(i18n.Locale()).NetIfaceAutomatic() }
+
+// NetIfaceAutomatic says "Automatic (busiest)"
+// in the language of msgs.
+func (msgs Messages) NetIfaceAutomatic() string {
+	return Catalog.Format(msgs.locale, "netIfaceAutomatic", nil)
+}
+
+// NetIfaceAuto says "Auto"
+// in the language the app shows.
+func NetIfaceAuto() string { return In(i18n.Locale()).NetIfaceAuto() }
+
+// NetIfaceAuto says "Auto"
+// in the language of msgs.
+func (msgs Messages) NetIfaceAuto() string {
+	return Catalog.Format(msgs.locale, "netIfaceAuto", nil)
+}
+
+// NetIfaceFallback says "{iface} (auto)"
+// in the language the app shows.
+func NetIfaceFallback(iface string) string { return In(i18n.Locale()).NetIfaceFallback(iface) }
+
+// NetIfaceFallback says "{iface} (auto)"
+// in the language of msgs.
+func (msgs Messages) NetIfaceFallback(iface string) string {
+	return Catalog.Format(msgs.locale, "netIfaceFallback", map[string]any{"iface": iface})
+}
+
+// NetIfacesMissing says "Not on this server: {names}. Showing the busiest interface."
+// in the language the app shows.
+func NetIfacesMissing(names string) string { return In(i18n.Locale()).NetIfacesMissing(names) }
+
+// NetIfacesMissing says "Not on this server: {names}. Showing the busiest interface."
+// in the language of msgs.
+func (msgs Messages) NetIfacesMissing(names string) string {
+	return Catalog.Format(msgs.locale, "netIfacesMissing", map[string]any{"names": names})
+}
+
+// NetIfacesPartlyMissing says "Not on this server: {names}"
+// in the language the app shows.
+func NetIfacesPartlyMissing(names string) string {
+	return In(i18n.Locale()).NetIfacesPartlyMissing(names)
+}
+
+// NetIfacesPartlyMissing says "Not on this server: {names}"
+// in the language of msgs.
+func (msgs Messages) NetIfacesPartlyMissing(names string) string {
+	return Catalog.Format(msgs.locale, "netIfacesPartlyMissing", map[string]any{"names": names})
+}
+
+// NetIfaceNotFound says "not found"
+// in the language the app shows.
+func NetIfaceNotFound() string { return In(i18n.Locale()).NetIfaceNotFound() }
+
+// NetIfaceNotFound says "not found"
+// in the language of msgs.
+func (msgs Messages) NetIfaceNotFound() string {
+	return Catalog.Format(msgs.locale, "netIfaceNotFound", nil)
+}
+
 // DiskPath says "Path"
 // in the language the app shows.
 func DiskPath() string { return In(i18n.Locale()).DiskPath() }

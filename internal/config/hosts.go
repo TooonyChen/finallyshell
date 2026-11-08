@@ -100,6 +100,11 @@ type Host struct {
 	// was kept.
 	CreatedAt time.Time `json:"createdAt,omitzero"`
 
+	// MonitorIfaces are the network interfaces the side panel's graph
+	// shows, summed: empty for the busiest. Interface names are the
+	// server's, so they sync with the host.
+	MonitorIfaces []string `json:"monitorIfaces,omitempty"`
+
 	extra extras
 }
 
@@ -161,6 +166,7 @@ func (h *Host) Clone() *Host {
 		c.Proxy = &p
 	}
 	c.Tunnels = slices.Clone(h.Tunnels)
+	c.MonitorIfaces = slices.Clone(h.MonitorIfaces)
 	for i := range c.Tunnels {
 		c.Tunnels[i].extra = maps.Clone(h.Tunnels[i].extra)
 	}

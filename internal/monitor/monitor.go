@@ -34,6 +34,10 @@ type Stats struct {
 	Latency   time.Duration
 	LatHist   []float64 // milliseconds
 	Disks     []Disk
+
+	// Ifaces are every network interface, the loopback last; Net sums
+	// those chosen. Iface and its rates and history are the busiest.
+	Ifaces []Iface
 }
 
 type Proc struct {
@@ -66,12 +70,10 @@ ps -eo rss=,pcpu=,comm= --sort=-rss 2>/dev/null | head -5
 // publish, until ctx ends.
 func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publish func(Stats)) {
 	var (
-		st          Stats
-		prevIdle    uint64
-		prevTotal   uint64
-		prevRx      uint64
-		prevTx      uint64
-		prevNetTime time.Time
+		st        Stats
+		prevIdle  uint64
+		prevTotal uint64
+		net       netState
 	)
 	tick := time.NewTicker(interval)
 	defer tick.Stop()
@@ -95,16 +97,7 @@ func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publis
 				}
 				prevIdle, prevTotal = idle, total
 				st.MemTotal, st.MemUsed, st.SwapTotal, st.SwapUsed = parseMem(parts[3])
-				iface, rx, tx := parseNet(parts[4])
-				now := time.Now()
-				if !prevNetTime.IsZero() && iface == st.Iface && rx >= prevRx && tx >= prevTx {
-					secs := now.Sub(prevNetTime).Seconds()
-					st.RxRate = float64(rx-prevRx) / secs
-					st.TxRate = float64(tx-prevTx) / secs
-					st.RxHist = pushHist(st.RxHist, st.RxRate)
-					st.TxHist = pushHist(st.TxHist, st.TxRate)
-				}
-				st.Iface, prevRx, prevTx, prevNetTime = iface, rx, tx, now
+				net.update(&st, parts[4], time.Now())
 				st.Disks = parseDisks(parts[5])
 				st.Procs = parseProcs(parts[6])
 			}
@@ -141,6 +134,7 @@ func pushHist(h []float64, v float64) []float64 {
 // is about to change.
 func cloneStats(s Stats) Stats {
 	s.Procs = append([]Proc(nil), s.Procs...)
+	s.Ifaces = cloneIfaces(s.Ifaces)
 	s.RxHist = append([]float64(nil), s.RxHist...)
 	s.TxHist = append([]float64(nil), s.TxHist...)
 	s.LatHist = append([]float64(nil), s.LatHist...)
@@ -202,32 +196,6 @@ func parseMem(s string) (memTotal, memUsed, swapTotal, swapUsed uint64) {
 	swapTotal = vals["SwapTotal"]
 	if f := vals["SwapFree"]; f <= swapTotal {
 		swapUsed = swapTotal - f
-	}
-	return
-}
-
-// parseNet returns the interface with the most traffic, as the one the
-// server talks through, and its byte counters.
-func parseNet(s string) (iface string, rx, tx uint64) {
-	sc := bufio.NewScanner(strings.NewReader(s))
-	for sc.Scan() {
-		name, rest, ok := strings.Cut(sc.Text(), ":")
-		if !ok {
-			continue
-		}
-		name = strings.TrimSpace(name)
-		if name == "lo" {
-			continue
-		}
-		f := strings.Fields(rest)
-		if len(f) < 9 {
-			continue
-		}
-		r, _ := strconv.ParseUint(f[0], 10, 64)
-		t, _ := strconv.ParseUint(f[8], 10, 64)
-		if r+t > rx+tx {
-			iface, rx, tx = name, r, t
-		}
 	}
 	return
 }

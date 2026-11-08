@@ -120,6 +120,7 @@ func TestSyncTwoDevices(t *testing.T) {
 	one.addHost("h2", "db")
 	f := one.a.hosts.AddFolder("prod", "")
 	web.Folder = f.ID
+	web.MonitorIfaces = []string{"eth0", "wg0"}
 	one.a.settings.TermTheme, one.a.settings.SidebarWidth = "Nord", 333
 	one.a.hosts.MarkConnected("h1", web.CreatedAt.AddDate(1, 0, 0))
 	one.sync(t)
@@ -138,7 +139,7 @@ func TestSyncTwoDevices(t *testing.T) {
 		t.Fatalf("hosts %v", got)
 	}
 	h := two.a.hosts.Host("h1")
-	if h.Folder != f.ID || two.a.hosts.Folder(f.ID) == nil || !h.LastConnectedAt.IsZero() {
+	if h.Folder != f.ID || two.a.hosts.Folder(f.ID) == nil || !h.LastConnectedAt.IsZero() || !slices.Equal(h.MonitorIfaces, web.MonitorIfaces) {
 		t.Fatalf("host %+v", h)
 	}
 	if two.a.settings.TermTheme != "Nord" || two.a.settings.SidebarWidth != 0 {

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"finallyshell/internal/config"
+	"finallyshell/internal/monitor"
 	"finallyshell/internal/remotefs"
 
 	"github.com/egoist/mygo/ui"
@@ -23,6 +24,12 @@ func TestSSH(t *testing.T) {
 	s.term.Send([]byte("echo hello-$((40+2))\r"))
 	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term.Text(), "hello-42") })
 	p.until(t, "the server's stats", func() bool { return s.stats.OK && s.stats.MemTotal > 0 && len(s.stats.LatHist) >= 2 })
+	// Every network interface, each with a history of its own, lo last
+	// and never the busiest.
+	p.until(t, "the interfaces' history", func() bool { return len(s.stats.Ifaces) > 0 && len(s.stats.Ifaces[0].RxHist) > 0 })
+	if ifs := s.stats.Ifaces; s.stats.Iface == "lo" || slices.IndexFunc(ifs, func(it monitor.Iface) bool { return it.Name == "lo" }) > 0 && ifs[len(ifs)-1].Name != "lo" {
+		t.Errorf("interfaces %+v, busiest %q", ifs, s.stats.Iface)
+	}
 	p.until(t, "the home directory", func() bool { return s.files.cwd != "" && !s.files.loading })
 	home := s.files.cwd
 

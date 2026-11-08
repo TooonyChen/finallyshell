@@ -57,12 +57,13 @@ func (a *App) serverView(c *ui.Context, s *Session) {
 		default:
 			st = &s.stats
 		}
-		serverStats(c, st)
+		serverStats(c, st, a.netPicker(s))
 	})
 }
 
-// serverStats shows st, or the skeleton for nil.
-func serverStats(c *ui.Context, st *monitor.Stats) {
+// serverStats shows st, or the skeleton for nil; net is the choice of
+// network interfaces.
+func serverStats(c *ui.Context, st *monitor.Stats, net netPicker) {
 	if st == nil {
 		ui.Text(c, locales.UptimeUnknown())
 		ui.Text(c, locales.LoadAverage("-"))
@@ -70,7 +71,7 @@ func serverStats(c *ui.Context, st *monitor.Stats) {
 		widgets.UsageBar(c, locales.Memory(), 0, "0%", colors.mem)
 		widgets.UsageBar(c, locales.Swap(), 0, "0%", colors.swap)
 		procTable(c, nil)
-		netRow(c, 0, 0, "")
+		netRow(c, 0, 0, "", "", nil)
 		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatBytes)
 		latencyRow(c, "-")
 		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatMillis)
@@ -85,8 +86,7 @@ func serverStats(c *ui.Context, st *monitor.Stats) {
 
 	procTable(c, st.Procs)
 
-	netRow(c, st.TxRate, st.RxRate, st.Iface)
-	widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.TxHist, st.RxHist}, []ui.Color{txChart, rxChart}, formatBytes)
+	netGraph(c, st, net)
 
 	latencyRow(c, formatLatency(st.Latency))
 	widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.LatHist}, []ui.Color{latencyChart}, formatMillis)
@@ -96,12 +96,18 @@ func serverStats(c *ui.Context, st *monitor.Stats) {
 
 func formatMillis(v float64) string { return fmt.Sprintf("%.0f", v) }
 
-func netRow(c *ui.Context, tx, rx float64, iface string) {
+// netRow is the speeds above the network graph and, at the right, label:
+// the button of the interfaces' menu when there is a menu.
+func netRow(c *ui.Context, tx, rx float64, label, tip string, menu func(m *ui.Menu)) {
 	ui.Row(c).Gap(8).Margin(4, 0, 0, 0).Children(func() {
-		ui.Text(c, "↑"+formatBytes(tx)).TextColor(colors.tx)
-		ui.Text(c, "↓"+formatBytes(rx)).TextColor(colors.rx)
+		ui.Text(c, "↑"+formatBytes(tx)).TextColor(colors.tx).Shrink(0)
+		ui.Text(c, "↓"+formatBytes(rx)).TextColor(colors.rx).Shrink(0)
 		ui.Spacer(c)
-		widgets.Muted(c, iface)
+		if menu != nil {
+			netLabelButton(c, label, tip, menu)
+		} else {
+			widgets.Muted(c, label)
+		}
 	})
 }
 
