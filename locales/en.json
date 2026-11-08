@@ -107,7 +107,7 @@
   "clearRecents": "Clear",
   "connectionManager": "Connection manager",
   "noHostsTitle": "No connections yet",
-  "noHostsBody": "Add a server, then connect to it from here.",
+  "noHostsBody": "Add a server, or import your connections from FinalShell, Xshell and other clients in the connection manager.",
   "followSystem": "System language",
   "tabFiles": "Files",
   "tabTransfers": "Transfers",

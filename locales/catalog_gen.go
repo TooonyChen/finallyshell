@@ -650,11 +650,11 @@ func (msgs Messages) NoHostsTitle() string {
 	return Catalog.Format(msgs.locale, "noHostsTitle", nil)
 }
 
-// NoHostsBody says "Add a server, then connect to it from here."
+// NoHostsBody says "Add a server, or import your connections from FinalShell, Xshell and other clients in the connection manager."
 // in the language the app shows.
 func NoHostsBody() string { return In(i18n.Locale()).NoHostsBody() }
 
-// NoHostsBody says "Add a server, then connect to it from here."
+// NoHostsBody says "Add a server, or import your connections from FinalShell, Xshell and other clients in the connection manager."
 // in the language of msgs.
 func (msgs Messages) NoHostsBody() string {
 	return Catalog.Format(msgs.locale, "noHostsBody", nil)

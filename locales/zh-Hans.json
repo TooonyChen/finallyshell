@@ -60,7 +60,7 @@
   "clearRecents": "清空",
   "connectionManager": "连接管理器",
   "noHostsTitle": "还没有连接",
-  "noHostsBody": "添加一台服务器，之后就能在这里连接。",
+  "noHostsBody": "添加一台服务器，或者在连接管理器里从 FinalShell、Xshell 等客户端导入连接。",
   "followSystem": "跟随系统",
   "tabFiles": "文件",
   "tabTransfers": "传输",

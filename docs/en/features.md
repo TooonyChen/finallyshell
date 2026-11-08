@@ -109,7 +109,10 @@ away, without having to be connected once first.
 - The "Connection manager" button opens the connection manager. While a
   new tab is selected, connecting from the connection manager also
   connects in that tab.
-- When there are no hosts at all, a "New connection" button is shown.
+- When there are no hosts at all, the page shows a "New connection"
+  button and, under it, a "Connection manager" button, so a new user can
+  import their connections from another client (see below) before adding
+  any.
 
 ## Connection manager
 

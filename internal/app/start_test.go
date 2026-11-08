@@ -501,6 +501,18 @@ func TestStartPageWithoutHosts(t *testing.T) {
 	if spec := p.windows[WindowEditor].spec; spec.Title() != locales.NewConnection() {
 		t.Errorf("title %q", spec.Title())
 	}
+
+	// The connection manager, where a new user imports hosts, is a click
+	// away too.
+	if a.windowOpen(WindowManager) {
+		t.Fatal("the manager is open before its button is clicked")
+	}
+	if err := tt.Click(locales.ConnectionManager()); err != nil {
+		t.Fatalf("no connection manager button: %v; texts %q", err, tt.Texts())
+	}
+	if !a.windowOpen(WindowManager) {
+		t.Error("the connection manager button did not open the manager")
+	}
 }
 
 // TestStartPageShots draws the start page in both languages, for

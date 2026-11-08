@@ -175,15 +175,22 @@ func (a *App) startPage(c *ui.Context, tab *Session) {
 	})
 }
 
-// startEmpty is the page while there are no hosts at all.
+// startEmpty is the page while there are no hosts at all. The connection
+// manager's button is there too, as it is where a new user imports the
+// hosts of another client.
 func (a *App) startEmpty(c *ui.Context) {
 	ui.Column(c).Fill().Center().Gap(12).Children(func() {
 		ui.Icon(c, icons.Get("server")).FontSize(40).TextColor(theme.TextMuted)
 		ui.Text(c, locales.NoHostsTitle()).FontSize(16)
-		widgets.Muted(c, locales.NoHostsBody())
-		if ui.PrimaryButton(c, locales.NewConnection()).AutoFocus().Clicked() {
-			a.startNewConnection()
-		}
+		widgets.Muted(c, locales.NoHostsBody()).TextAlign(ui.Center).MaxWidth(480)
+		ui.Column(c).Gap(8).Width(200).Children(func() {
+			if ui.PrimaryButton(c, locales.NewConnection()).AutoFocus().Clicked() {
+				a.startNewConnection()
+			}
+			if ui.Button(c, locales.ConnectionManager()).Clicked() {
+				a.openManager()
+			}
+		})
 	})
 }
 
