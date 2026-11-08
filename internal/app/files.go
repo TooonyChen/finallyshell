@@ -154,6 +154,8 @@ func entryKind(e remotefs.Entry) string {
 	switch {
 	case e.IsDir():
 		return locales.KindFolder()
+	case e.Broken:
+		return locales.KindBrokenLink()
 	case e.Link:
 		return locales.KindLink()
 	}
@@ -288,12 +290,26 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 			e := entries[row]
 			switch col {
 			case 0:
+				// A chosen row keeps the table's text color, which shows on
+				// the accent.
+				chosen := f.chosen.Has(e.Name)
 				ui.Row(c).Gap(6).Children(func() {
-					a.fileIcon(c, e.Name, e.IsDir(), false, false)
-					ui.Text(c, e.Name).SingleLine()
+					a.entryIcon(c, e)
+					name := ui.Text(c, e.Name).SingleLine()
+					if e.Broken && !chosen {
+						name.TextColor(theme.Danger)
+					}
+					if e.Target != "" {
+						// As ls -l shows it; cut before the name.
+						target := ui.Text(c, "→ "+e.Target).SingleLine().Shrink(1).MinWidth(0)
+						if !chosen {
+							target.TextColor(theme.TextMuted)
+						}
+					}
 				})
 			case 1:
-				if !e.IsDir() {
+				// A broken link has no file to measure.
+				if !e.IsDir() && !e.Broken {
 					ui.Text(c, formatSize(e.Size))
 				}
 			case 2:

@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/pkg/sftp"
@@ -153,5 +154,66 @@ func TestIsInside(t *testing.T) {
 		if got := isInside(dir, filepath.FromSlash(p)); got != want {
 			t.Errorf("isInside(%s) = %v", p, got)
 		}
+	}
+}
+
+func TestReadDirLinks(t *testing.T) {
+	c := newTestClient(t)
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "real.conf"), []byte("hello, world"))
+	if err := os.Mkdir(filepath.Join(dir, "sub"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	for link, target := range map[string]string{
+		"conf":    "real.conf",
+		"abs":     filepath.Join(dir, "real.conf"),
+		"subdir":  "sub",
+		"gone":    "missing.txt",
+		"loop":    "loop",
+		"subdir2": "./sub/",
+	} {
+		if err := os.Symlink(target, filepath.Join(dir, link)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	entries, err := ReadDir(c, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]Entry{}
+	var names []string
+	for _, e := range entries {
+		got[e.Name] = e
+		names = append(names, e.Name)
+	}
+	// Links to directories sort with the directories.
+	if want := []string{"sub", "subdir", "subdir2", "abs", "conf", "gone", "loop", "real.conf"}; !slices.Equal(names, want) {
+		t.Errorf("order %q, want %q", names, want)
+	}
+	for _, tc := range []struct {
+		name, target string
+		size         int64
+		dir, broken  bool
+	}{
+		{"conf", "real.conf", 12, false, false},
+		{"abs", filepath.Join(dir, "real.conf"), 12, false, false},
+		{"subdir", "sub", -1, true, false},
+		{"subdir2", "./sub/", -1, true, false},
+		{"gone", "missing.txt", -1, false, true},
+		{"loop", "loop", -1, false, true},
+	} {
+		e := got[tc.name]
+		if !e.Link || e.Target != tc.target || e.IsDir() != tc.dir || e.Broken != tc.broken {
+			t.Errorf("%s: %+v", tc.name, e)
+		}
+		if tc.size >= 0 && e.Size != tc.size {
+			t.Errorf("%s: size %d, want the target's %d", tc.name, e.Size, tc.size)
+		}
+		if tc.dir && e.Mode.Perm() != 0o750 {
+			t.Errorf("%s: mode %v, want the directory's", tc.name, e.Mode)
+		}
+	}
+	if e := got["real.conf"]; e.Link || e.Target != "" || e.Broken {
+		t.Errorf("a file: %+v", e)
 	}
 }

@@ -160,9 +160,9 @@ func (a *App) unsavedFiles() int {
 }
 
 // editable tells whether the file panel opens e in the editor: a file
-// or a link to one, not a device or a pipe.
+// or a link to one, not a device, a pipe or a broken link.
 func editable(e remotefs.Entry) bool {
-	return !e.IsDir() && (e.Mode.IsRegular() || e.Link)
+	return !e.IsDir() && (e.Mode.IsRegular() || e.Link && !e.Broken)
 }
 
 // entry is the entry of the file panel's names when it is one name, as

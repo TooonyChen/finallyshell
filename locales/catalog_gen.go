@@ -780,6 +780,16 @@ func (msgs Messages) KindLink() string {
 	return Catalog.Format(msgs.locale, "kindLink", nil)
 }
 
+// KindBrokenLink says "Broken link"
+// in the language the app shows.
+func KindBrokenLink() string { return In(i18n.Locale()).KindBrokenLink() }
+
+// KindBrokenLink says "Broken link"
+// in the language of msgs.
+func (msgs Messages) KindBrokenLink() string {
+	return Catalog.Format(msgs.locale, "kindBrokenLink", nil)
+}
+
 // KindFile says "File"
 // in the language the app shows.
 func KindFile() string { return In(i18n.Locale()).KindFile() }

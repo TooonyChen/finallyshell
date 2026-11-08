@@ -127,6 +127,7 @@
   "colOwner": "Owner/Group",
   "kindFolder": "Folder",
   "kindLink": "Link",
+  "kindBrokenLink": "Broken link",
   "kindFile": "File",
   "kindExtFile": "{ext} file",
   "parentFolder": "Parent folder",

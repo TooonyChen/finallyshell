@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -27,16 +28,28 @@ func NewClient(client *ssh.Client) (*sftp.Client, error) {
 
 // Entry is a file or directory on the server.
 type Entry struct {
-	Name    string
+	Name string
+	// Size is the size of the file, or of the file a link points to.
 	Size    int64
 	Mode    fs.FileMode // of the target, for a link to a directory
 	ModTime time.Time
 	UID     uint32
 	GID     uint32
 	Link    bool
+	// Target is where a link points, as readlink gives it: relative or
+	// absolute, not resolved. Empty when it can't be read.
+	Target string
+	// Broken is a link whose target is not there, or a loop of links. A
+	// target the user may not look at is not broken.
+	Broken bool
 }
 
 func (e Entry) IsDir() bool { return e.Mode.IsDir() }
+
+// linkWorkers is how many links ReadDir resolves at once. Each takes two
+// round trips, and SFTP answers requests in parallel, so a directory with
+// hundreds of links doesn't wait for them one after another.
+const linkWorkers = 16
 
 // ReadDir lists dir, directories first, then by name.
 func ReadDir(c *sftp.Client, dir string) ([]Entry, error) {
@@ -45,6 +58,7 @@ func ReadDir(c *sftp.Client, dir string) ([]Entry, error) {
 		return nil, err
 	}
 	entries := make([]Entry, 0, len(infos))
+	var links []int
 	for _, fi := range infos {
 		e := Entry{Name: fi.Name(), Size: fi.Size(), Mode: fi.Mode(), ModTime: fi.ModTime()}
 		if st, ok := fi.Sys().(*sftp.FileStat); ok {
@@ -52,12 +66,24 @@ func ReadDir(c *sftp.Client, dir string) ([]Entry, error) {
 		}
 		if fi.Mode()&fs.ModeSymlink != 0 {
 			e.Link = true
-			if target, err := c.Stat(path.Join(dir, fi.Name())); err == nil && target.IsDir() {
-				e.Mode = target.Mode()
-			}
+			links = append(links, len(entries))
 		}
 		entries = append(entries, e)
 	}
+	jobs := make(chan *Entry)
+	var wg sync.WaitGroup
+	for range min(linkWorkers, len(links)) {
+		wg.Go(func() {
+			for e := range jobs {
+				resolveLink(c, path.Join(dir, e.Name), e)
+			}
+		})
+	}
+	for _, i := range links {
+		jobs <- &entries[i]
+	}
+	close(jobs)
+	wg.Wait()
 	slices.SortFunc(entries, func(x, y Entry) int {
 		if x.IsDir() != y.IsDir() {
 			if x.IsDir() {
@@ -68,6 +94,22 @@ func ReadDir(c *sftp.Client, dir string) ([]Entry, error) {
 		return strings.Compare(strings.ToLower(x.Name), strings.ToLower(y.Name))
 	})
 	return entries, nil
+}
+
+// resolveLink fills in where the link e at p points, and what is there.
+func resolveLink(c *sftp.Client, p string, e *Entry) {
+	if target, err := c.ReadLink(p); err == nil {
+		e.Target = target
+	}
+	target, err := c.Stat(p)
+	switch {
+	case err != nil:
+		e.Broken = !errors.Is(err, fs.ErrPermission)
+	case target.IsDir():
+		e.Mode = target.Mode()
+	default:
+		e.Size = target.Size()
+	}
 }
 
 // RemoteExisting returns which of names are in the remote directory dir.

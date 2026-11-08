@@ -8,6 +8,7 @@ import (
 	"finallyshell/internal/config"
 	"finallyshell/internal/fileicons"
 	"finallyshell/internal/icons"
+	"finallyshell/internal/remotefs"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
@@ -111,6 +112,20 @@ func (a *App) fileIcon(c *ui.Context, name string, dir, open, root bool) {
 		}
 	}
 	drawFileIcon(c, ic, dir)
+}
+
+// entryIcon shows the icon of an entry of the file panel, with an arrow
+// at its corner for a link, as Finder and Windows Explorer show one.
+func (a *App) entryIcon(c *ui.Context, e remotefs.Entry) {
+	ui.Box(c).Shrink(0).Children(func() {
+		a.fileIcon(c, e.Name, e.IsDir(), false, false)
+		if e.Link {
+			ui.Box(c).Absolute().Left(-2).Bottom(-1).Size(10, 10).Center().
+				Background(theme.Background).Border(1, theme.Border).Radius(2).Children(func() {
+				ui.Icon(c, icons.Get("arrow-up-right")).FontSize(9).TextColor(theme.Text)
+			})
+		}
+	})
 }
 
 // drawFileIcon shows ic, or the app's own icon of a folder or a file for

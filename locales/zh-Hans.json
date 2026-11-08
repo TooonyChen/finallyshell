@@ -73,6 +73,7 @@
   "colOwner": "用户/用户组",
   "kindFolder": "文件夹",
   "kindLink": "链接",
+  "kindBrokenLink": "失效的链接",
   "kindFile": "文件",
   "kindExtFile": "{ext} 文件",
   "parentFolder": "上级目录",
