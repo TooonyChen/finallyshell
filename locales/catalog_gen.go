@@ -1166,6 +1166,128 @@ func (msgs Messages) DownloadDirection() string {
 	return Catalog.Format(msgs.locale, "downloadDirection", nil)
 }
 
+// UploadAsArchive says "Upload as archive…"
+// in the language the app shows.
+func UploadAsArchive() string { return In(i18n.Locale()).UploadAsArchive() }
+
+// UploadAsArchive says "Upload as archive…"
+// in the language of msgs.
+func (msgs Messages) UploadAsArchive() string {
+	return Catalog.Format(msgs.locale, "uploadAsArchive", nil)
+}
+
+// DownloadAsArchive says "Download as archive"
+// in the language the app shows.
+func DownloadAsArchive() string { return In(i18n.Locale()).DownloadAsArchive() }
+
+// DownloadAsArchive says "Download as archive"
+// in the language of msgs.
+func (msgs Messages) DownloadAsArchive() string {
+	return Catalog.Format(msgs.locale, "downloadAsArchive", nil)
+}
+
+// ChooseArchiveUpload says "Choose folders to upload as an archive"
+// in the language the app shows.
+func ChooseArchiveUpload() string { return In(i18n.Locale()).ChooseArchiveUpload() }
+
+// ChooseArchiveUpload says "Choose folders to upload as an archive"
+// in the language of msgs.
+func (msgs Messages) ChooseArchiveUpload() string {
+	return Catalog.Format(msgs.locale, "chooseArchiveUpload", nil)
+}
+
+// UploadArchiveDirection says "Upload as archive"
+// in the language the app shows.
+func UploadArchiveDirection() string { return In(i18n.Locale()).UploadArchiveDirection() }
+
+// UploadArchiveDirection says "Upload as archive"
+// in the language of msgs.
+func (msgs Messages) UploadArchiveDirection() string {
+	return Catalog.Format(msgs.locale, "uploadArchiveDirection", nil)
+}
+
+// DownloadArchiveDirection says "Download as archive"
+// in the language the app shows.
+func DownloadArchiveDirection() string { return In(i18n.Locale()).DownloadArchiveDirection() }
+
+// DownloadArchiveDirection says "Download as archive"
+// in the language of msgs.
+func (msgs Messages) DownloadArchiveDirection() string {
+	return Catalog.Format(msgs.locale, "downloadArchiveDirection", nil)
+}
+
+// ArchiveItems says "{name} and {count} more"
+// in the language the app shows.
+func ArchiveItems(name string, count int) string { return In(i18n.Locale()).ArchiveItems(name, count) }
+
+// ArchiveItems says "{name} and {count} more"
+// in the language of msgs.
+func (msgs Messages) ArchiveItems(name string, count int) string {
+	return Catalog.Format(msgs.locale, "archiveItems", map[string]any{"name": name, "count": count})
+}
+
+// ArchivePacking says "Packing {file}"
+// in the language the app shows.
+func ArchivePacking(file string) string { return In(i18n.Locale()).ArchivePacking(file) }
+
+// ArchivePacking says "Packing {file}"
+// in the language of msgs.
+func (msgs Messages) ArchivePacking(file string) string {
+	return Catalog.Format(msgs.locale, "archivePacking", map[string]any{"file": file})
+}
+
+// ArchiveUnpacking says "Unpacking {file}"
+// in the language the app shows.
+func ArchiveUnpacking(file string) string { return In(i18n.Locale()).ArchiveUnpacking(file) }
+
+// ArchiveUnpacking says "Unpacking {file}"
+// in the language of msgs.
+func (msgs Messages) ArchiveUnpacking(file string) string {
+	return Catalog.Format(msgs.locale, "archiveUnpacking", map[string]any{"file": file})
+}
+
+// RetryOverSftp says "Retry over SFTP"
+// in the language the app shows.
+func RetryOverSftp() string { return In(i18n.Locale()).RetryOverSftp() }
+
+// RetryOverSftp says "Retry over SFTP"
+// in the language of msgs.
+func (msgs Messages) RetryOverSftp() string {
+	return Catalog.Format(msgs.locale, "retryOverSftp", nil)
+}
+
+// ArchiveSkippedLinks says "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the fol…"
+// in the language the app shows.
+func ArchiveSkippedLinks(count int, names string) string {
+	return In(i18n.Locale()).ArchiveSkippedLinks(count, names)
+}
+
+// ArchiveSkippedLinks says "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the fol…"
+// in the language of msgs.
+func (msgs Messages) ArchiveSkippedLinks(count int, names string) string {
+	return Catalog.Format(msgs.locale, "archiveSkippedLinks", map[string]any{"count": count, "names": names})
+}
+
+// ArchiveWindowsName says "{name} is not a valid file name on Windows"
+// in the language the app shows.
+func ArchiveWindowsName(name string) string { return In(i18n.Locale()).ArchiveWindowsName(name) }
+
+// ArchiveWindowsName says "{name} is not a valid file name on Windows"
+// in the language of msgs.
+func (msgs Messages) ArchiveWindowsName(name string) string {
+	return Catalog.Format(msgs.locale, "archiveWindowsName", map[string]any{"name": name})
+}
+
+// ArchiveNoShell says "No SSH connection to run tar over"
+// in the language the app shows.
+func ArchiveNoShell() string { return In(i18n.Locale()).ArchiveNoShell() }
+
+// ArchiveNoShell says "No SSH connection to run tar over"
+// in the language of msgs.
+func (msgs Messages) ArchiveNoShell() string {
+	return Catalog.Format(msgs.locale, "archiveNoShell", nil)
+}
+
 // ManagerTitle says "Connections"
 // in the language the app shows.
 func ManagerTitle() string { return In(i18n.Locale()).ManagerTitle() }

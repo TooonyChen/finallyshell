@@ -64,6 +64,9 @@ func TestSSH(t *testing.T) {
 	}
 	s.sftp.Remove(home + "/hello.txt")
 
+	// A folder of many small files as an archive, both ways.
+	testArchiveTransfers(t, a, p, s, home)
+
 	// The shell's TERM is the host's terminal type.
 	s.term.Send([]byte("echo term-$TERM\r"))
 	p.until(t, "the default TERM", func() bool { return strings.Contains(s.term.Text(), "term-xterm-256color") })

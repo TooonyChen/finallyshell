@@ -91,7 +91,7 @@ While a session is connected, the panel at the top left shows the server's uptim
 
 ### Files
 
-The file panel under the terminal browses the server over SFTP. Right-click a file, or a folder in the tree beside it, to rename or delete it or to create a file or folder. Drag files or folders from Finder or Explorer to upload them; download to your Downloads folder or anywhere else. Transfers run three at a time, show progress, speed and time left, and can be canceled and retried. The count and overall progress also show on the Dock icon or taskbar button.
+The file panel under the terminal browses the server over SFTP. Right-click a file, or a folder in the tree beside it, to rename or delete it or to create a file or folder. Drag files or folders from Finder or Explorer to upload them; download to your Downloads folder or anywhere else. Transfers run three at a time, show progress, speed and time left, and can be canceled and retried. A folder of many small files can also go as one archive, packed with tar and gzip as it streams. The count and overall progress also show on the Dock icon or taskbar button.
 
 <p align="center">
   <img src="docs/screenshots/transfers-en.png" width="560" alt="The downloads popover with transfers in progress">

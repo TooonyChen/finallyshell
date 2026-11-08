@@ -282,7 +282,7 @@ internal/
   termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
   sshtest/           in-process SSH server for tests: password login, an empty shell, port forwarding; StartSFTP also serves SFTP (the local file system)
   monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen
-  remotefs/          SFTP listing, upload, download (with progress and cancel), rename, mkdir, create and delete (ops.go); textfile.go is the editor's reading (detecting binary files) and safe saving
+  remotefs/          SFTP listing, upload, download (with progress and cancel), rename, mkdir, create and delete (ops.go); textfile.go is the editor's reading (detecting binary files) and safe saving; archive.go is archive transfers: packing and safely unpacking tar.gz streams, and running tar over an exec channel
   icons/             embedded SVG icons (Lucide, ISC license)
   fileicons/         VS Code file icon themes: reading VSIX files and extension folders, finding icons by name, font conversion, installing and finding installed themes; bundled/ has the built-in Material and Seti, languages_gen.go is VS Code's language table, internal/gen generates them
   widgets/           small reusable widgets: icon buttons, usage bars, line charts, form rows, side navigation with pages (nav.go)
@@ -302,6 +302,7 @@ internal/
     fileicons.go     icon themes in the file panel: background loading, showing icons, installing and removing
     options_fileicons.go the File manager › File icon theme page
     transfers.go     transfer queue, the Transfers tab, and transferRow shared by both places
+    archive.go       archive transfers in the file panel: their menu items, their transfer rows, "Retry over SFTP"
     downloads.go     the Downloads popover, download folder, retry and open, count and progress on the app icon (Platform.ShowTransfers), the Transfers page of the options
     fileeditor.go    editing remote files: tabs, reading, saving, conflicts, asking before closing, opening with the default app
     fileeditor_view.go, fileeditor_text.go

@@ -212,14 +212,17 @@ func (a *App) filePanel(c *ui.Context) {
 				}
 			}
 			ui.Box(c).Size(1, 16).Background(colors.line).Margin(0, 4)
-			if widgets.IconButton(c, "upload", locales.UploadFiles()).Clicked() {
+			// Their context menus also have the archive transfers.
+			uploadMenu := func(m *ui.Menu) { a.uploadMenuItems(m, s, f.cwd) }
+			if widgets.IconButton(c, "upload", locales.UploadFiles()).ContextMenu(uploadMenu).Clicked() {
 				a.pickAndUpload(s, f.cwd, false)
 			}
-			if widgets.IconButton(c, "folder-up", locales.UploadFolder()).Clicked() {
+			if widgets.IconButton(c, "folder-up", locales.UploadFolder()).ContextMenu(uploadMenu).Clicked() {
 				a.pickAndUpload(s, f.cwd, true)
 			}
 			names := f.chosenNames()
 			dl := widgets.IconButton(c, "download", locales.Download())
+			dl.ContextMenu(func(m *ui.Menu) { a.downloadMenuItems(m, s, f.chosenNames()) })
 			if len(names) == 0 {
 				dl.Opacity(0.4)
 			}
@@ -362,19 +365,9 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 				}
 				m.Separator()
 			}
-			if m.Item(locales.Download()).Disabled(len(names) == 0).Chosen() {
-				a.download(s, names, "")
-			}
-			if m.Item(locales.DownloadTo()).Disabled(len(names) == 0).Chosen() {
-				a.pickAndDownload(s, names)
-			}
+			a.downloadMenuItems(m, s, names)
 			m.Separator()
-			if m.Item(locales.UploadFiles()).Chosen() {
-				a.pickAndUpload(s, f.cwd, false)
-			}
-			if m.Item(locales.UploadFolder()).Chosen() {
-				a.pickAndUpload(s, f.cwd, true)
-			}
+			a.uploadMenuItems(m, s, f.cwd)
 			m.Separator()
 			if m.Item(locales.NewFolder()).Chosen() {
 				a.askNew(s, f.cwd, opMkdir)

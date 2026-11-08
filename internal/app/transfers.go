@@ -16,6 +16,7 @@ import (
 
 	"github.com/egoist/mygo/ui"
 	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh"
 )
 
 type direction int
@@ -48,6 +49,13 @@ type transferJob struct {
 	dstDir string // the remote or local directory it goes into
 	local  string // the local copy of a finished download
 
+	// archive packs srcs, all in one folder, with tar on the server,
+	// over an exec channel of ssh (archive.go); src is the first.
+	archive bool
+	srcs    []string
+	ssh     *ssh.Client
+	current string // the file an archive transfer is at
+
 	state      transferState
 	err        error
 	done       int64
@@ -59,10 +67,14 @@ type transferJob struct {
 }
 
 func (t *transferJob) name() string {
+	name := path.Base(t.src)
 	if t.dir == upload {
-		return filepath.Base(t.src)
+		name = filepath.Base(t.src)
 	}
-	return path.Base(t.src)
+	if len(t.srcs) > 1 {
+		return locales.ArchiveItems(name, len(t.srcs)-1)
+	}
+	return name
 }
 
 func (t *transferJob) finished() bool { return t.state >= transferDone }
@@ -116,7 +128,11 @@ type replaceQuestion struct {
 
 // upload sends local files and folders into the remote directory dir of
 // s, asking first when names are taken.
-func (a *App) upload(s *Session, paths []string, dir string) {
+func (a *App) upload(s *Session, paths []string, dir string) { a.uploadAs(s, paths, dir, false) }
+
+// uploadAs uploads as upload does; with archive, all of paths in one
+// transfer, packed with tar.
+func (a *App) uploadAs(s *Session, paths []string, dir string, archive bool) {
 	sc := s.sftp
 	if sc == nil || len(paths) == 0 {
 		return
@@ -126,7 +142,12 @@ func (a *App) upload(s *Session, paths []string, dir string) {
 	for i, p := range paths {
 		names[i] = filepath.Base(p)
 	}
+	client := s.client
 	start := func() {
+		if archive {
+			a.enqueue(&transferJob{sess: s, sftp: sc, ssh: client, dir: upload, archive: true, src: paths[0], srcs: paths, dstDir: dir})
+			return
+		}
 		for _, p := range paths {
 			a.enqueue(&transferJob{sess: s, sftp: sc, dir: upload, src: p, dstDir: dir})
 		}
@@ -147,21 +168,36 @@ func (a *App) upload(s *Session, paths []string, dir string) {
 // directory dir; for "", into the download folder of the settings, or
 // where the user chooses when they ask for each download.
 func (a *App) download(s *Session, names []string, dir string) {
+	a.downloadFrom(s, s.files.cwd, names, dir, false)
+}
+
+// downloadFrom downloads as download does, the names in the remote
+// directory from; with archive, all of them in one transfer, packed with
+// tar.
+func (a *App) downloadFrom(s *Session, from string, names []string, dir string, archive bool) {
 	sc := s.sftp
-	if sc == nil || len(names) == 0 {
+	if sc == nil || len(names) == 0 || from == "" {
 		return
 	}
 	if dir == "" {
 		if a.settings.AskDownloadDir {
-			a.pickAndDownload(s, names)
+			a.pickAndDownloadFrom(s, from, names, archive)
 			return
 		}
 		dir = a.downloadDir()
 	}
-	cwd := s.files.cwd
+	client := s.client
 	start := func() {
-		for _, n := range names {
-			a.enqueue(&transferJob{sess: s, sftp: sc, dir: download, src: path.Join(cwd, n), dstDir: dir})
+		srcs := make([]string, len(names))
+		for i, n := range names {
+			srcs[i] = path.Join(from, n)
+		}
+		if archive {
+			a.enqueue(&transferJob{sess: s, sftp: sc, ssh: client, dir: download, archive: true, src: srcs[0], srcs: srcs, dstDir: dir})
+			return
+		}
+		for _, src := range srcs {
+			a.enqueue(&transferJob{sess: s, sftp: sc, dir: download, src: src, dstDir: dir})
 		}
 	}
 	if taken := remotefs.LocalExisting(dir, names); len(taken) > 0 {
@@ -191,13 +227,17 @@ func (a *App) pickAndUpload(s *Session, dir string, folder bool) {
 }
 
 func (a *App) pickAndDownload(s *Session, names []string) {
+	a.pickAndDownloadFrom(s, s.files.cwd, names, false)
+}
+
+func (a *App) pickAndDownloadFrom(s *Session, from string, names []string, archive bool) {
 	title := locales.ChooseDownloadFolder()
 	go func() {
 		dir, err := a.plat.ChooseFolder(WindowMain, title)
 		if err != nil || dir == "" {
 			return
 		}
-		a.post(func() { a.download(s, names, dir) })
+		a.post(func() { a.downloadFrom(s, from, names, dir, archive) })
 	}()
 }
 
@@ -230,40 +270,26 @@ func (a *App) run(t *transferJob) {
 	t.sampleAt = time.Now()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.cancel = cancel
-	go func() {
-		var total int64
-		var local string
-		var err error
-		if t.dir == upload {
-			total, err = remotefs.LocalSize(t.src)
-		} else if total, err = remotefs.RemoteSize(t.sftp, t.src); err == nil {
-			// The download folder of the settings may be gone.
-			err = os.MkdirAll(t.dstDir, 0o755)
-		}
-		if err == nil {
+	var last time.Time
+	report := func(done int64, file string) {
+		if now := time.Now(); now.Sub(last) >= 150*time.Millisecond {
+			last = now
 			a.post(func() {
-				t.total = total
+				t.progress(done, now)
+				t.current = file
 				a.showTransfers()
 			})
-			var last time.Time
-			progress := func(done int64) {
-				if now := time.Now(); now.Sub(last) >= 150*time.Millisecond {
-					last = now
-					a.post(func() {
-						t.progress(done, now)
-						a.showTransfers()
-					})
-				}
-			}
-			if t.dir == upload {
-				err = remotefs.Upload(ctx, t.sftp, t.src, t.dstDir, progress)
-			} else {
-				local, err = remotefs.Download(ctx, t.sftp, t.src, t.dstDir, progress)
-			}
 		}
+	}
+	go func() {
+		local, err := a.transfer(ctx, t, report)
 		a.post(func() {
 			cancel()
 			q.running--
+			t.current = ""
+			if t.total < 0 { // an archive done before it was measured
+				t.total = t.done
+			}
 			switch {
 			case err == nil:
 				t.state, t.done, t.local = transferDone, t.total, local
@@ -279,6 +305,64 @@ func (a *App) run(t *transferJob) {
 			a.showTransfers()
 		})
 	}()
+}
+
+// transfer measures t and copies it, on its goroutine, telling report
+// how far it is, and returns the local copy of a download.
+func (a *App) transfer(ctx context.Context, t *transferJob, report remotefs.ArchiveProgress) (string, error) {
+	if t.archive {
+		if t.dir == download {
+			// The download folder of the settings may be gone.
+			if err := os.MkdirAll(t.dstDir, 0o755); err != nil {
+				return "", err
+			}
+		}
+		// Measured while tar runs already, as walking many folders takes
+		// round trips of its own.
+		go func() {
+			if total, err := t.measure(ctx); err == nil {
+				a.post(func() {
+					if t.state == transferRunning && t.total < 0 {
+						t.total = total
+						a.showTransfers()
+					}
+				})
+			}
+		}()
+		if t.dir == upload {
+			return "", remotefs.UploadArchive(ctx, t.ssh, t.srcs, t.dstDir, report)
+		}
+		return remotefs.DownloadArchive(ctx, t.ssh, t.srcs, t.dstDir, report)
+	}
+	total, err := t.measure(ctx)
+	if err == nil && t.dir == download {
+		err = os.MkdirAll(t.dstDir, 0o755)
+	}
+	if err != nil {
+		return "", err
+	}
+	a.post(func() {
+		t.total = total
+		a.showTransfers()
+	})
+	progress := func(done int64) { report(done, "") }
+	if t.dir == upload {
+		return "", remotefs.Upload(ctx, t.sftp, t.src, t.dstDir, progress)
+	}
+	return remotefs.Download(ctx, t.sftp, t.src, t.dstDir, progress)
+}
+
+// measure counts the bytes t copies.
+func (t *transferJob) measure(ctx context.Context) (int64, error) {
+	switch {
+	case t.archive && t.dir == upload:
+		return remotefs.LocalArchiveSize(t.srcs)
+	case t.archive:
+		return remotefs.RemoteArchiveSize(ctx, t.sftp, t.srcs)
+	case t.dir == upload:
+		return remotefs.LocalSize(t.src)
+	}
+	return remotefs.RemoteSize(t.sftp, t.src)
 }
 
 // progress records done bytes, and the speed over the last second.
@@ -325,6 +409,9 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 		if t.dir == download {
 			ic, dirLabel, dest = icons.Get("download"), locales.DownloadDirection(), t.dstDir
 		}
+		if t.archive {
+			dirLabel = t.archiveLabel()
+		}
 		ui.Icon(c, ic).FontSize(16).TextColor(theme.TextMuted)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(3).Children(func() {
 			ui.Row(c).Gap(8).Children(func() {
@@ -345,12 +432,15 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 				if t.total >= 0 {
 					widgets.Muted(c, t.progressText()).FontSize(11.5).SingleLine()
 				}
+				if t.current != "" {
+					t.currentLine(c)
+				}
 			case transferDone:
 				ui.Text(c, locales.TransferDone()).FontSize(11.5).TextColor(theme.Success)
 			case transferCanceled:
 				widgets.Muted(c, locales.TransferCanceled()).FontSize(11.5)
 			case transferFailed:
-				ui.Text(c, locales.TransferFailed(t.err.Error())).FontSize(11.5).TextColor(theme.Danger).MaxLines(2)
+				ui.Text(c, locales.TransferFailed(transferErrorText(t.err))).FontSize(11.5).TextColor(theme.Danger).MaxLines(2)
 			}
 		})
 		switch {
@@ -359,6 +449,9 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 				a.cancelTransfer(t)
 			}
 		case t.state == transferFailed || t.state == transferCanceled:
+			if a.canRetryOverSFTP(t) && smallButton(c, locales.RetryOverSftp()).Clicked() {
+				a.retryOverSFTP(t)
+			}
 			ok := a.canRetry(t)
 			if widgets.IconButton(c, "rotate-cw", locales.Retry()).Disabled(!ok).Clicked() && ok {
 				a.retry(t)

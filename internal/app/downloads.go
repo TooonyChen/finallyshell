@@ -147,7 +147,8 @@ func (a *App) cancelTransfer(t *transferJob) {
 func (a *App) canRetry(t *transferJob) bool {
 	s := t.sess
 	return (t.state == transferFailed || t.state == transferCanceled) &&
-		slices.Contains(a.sessions, s) && s.status == statusConnected && s.sftp != nil
+		slices.Contains(a.sessions, s) && s.status == statusConnected && s.sftp != nil &&
+		(!t.archive || s.client != nil)
 }
 
 // retry queues t again, the same files to the same place, over its
@@ -160,8 +161,8 @@ func (a *App) retry(t *transferJob) {
 		return
 	}
 	q.jobs = slices.Delete(q.jobs, i, i+1)
-	t.sftp = t.sess.sftp
-	t.state, t.err, t.local, t.cancel = transferWaiting, nil, "", nil
+	t.sftp, t.ssh = t.sess.sftp, t.sess.client
+	t.state, t.err, t.local, t.cancel, t.current = transferWaiting, nil, "", nil, ""
 	t.done, t.total, t.speed, t.sampleDone = 0, -1, 0, 0
 	q.jobs = append(q.jobs, t)
 	a.pump()

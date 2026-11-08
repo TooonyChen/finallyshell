@@ -175,6 +175,38 @@
   "replace": "Replace",
   "uploadDirection": "Upload",
   "downloadDirection": "Download",
+  "uploadAsArchive": "Upload as archive…",
+  "downloadAsArchive": "Download as archive",
+  "chooseArchiveUpload": "Choose folders to upload as an archive",
+  "uploadArchiveDirection": "Upload as archive",
+  "downloadArchiveDirection": "Download as archive",
+  "archiveItems": "{name} and {count} more",
+  "@archiveItems": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "archivePacking": "Packing {file}",
+  "archiveUnpacking": "Unpacking {file}",
+  "retryOverSftp": "Retry over SFTP",
+  "archiveSkippedLinks": "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the folder and were not made: {names}}}",
+  "@archiveSkippedLinks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "archiveWindowsName": "{name} is not a valid file name on Windows",
+  "archiveNoShell": "No SSH connection to run tar over",
   "managerTitle": "Connections",
   "newHost": "New",
   "edit": "Edit",

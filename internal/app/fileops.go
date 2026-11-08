@@ -315,11 +315,9 @@ func (a *App) treeMenu(c *ui.Context, m *ui.Menu, s *Session, dir string) {
 		a.openDir(s, dir)
 	}
 	m.Separator()
-	if m.Item(locales.UploadFiles()).Chosen() {
-		a.pickAndUpload(s, dir, false)
-	}
-	if m.Item(locales.UploadFolder()).Chosen() {
-		a.pickAndUpload(s, dir, true)
+	a.uploadMenuItems(m, s, dir)
+	if dir != "/" && m.Item(locales.DownloadAsArchive()).Chosen() {
+		a.downloadDirArchive(s, dir)
 	}
 	m.Separator()
 	if m.Item(locales.NewFolder()).Chosen() {
