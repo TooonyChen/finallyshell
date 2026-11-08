@@ -19,7 +19,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Tunnels](#tunnels-page)
   - [Keys and other behavior](#keys-and-other-behavior)
 - [Server monitor and system info](#server-monitor-and-system-info)
-- [Terminal](#terminal)
+- [Terminal](#terminal-section)
   - [Find](#find)
   - [Full screen](#full-screen)
   - [Appearance: font, color scheme, background image](#appearance-font-color-scheme-background-image)
@@ -381,6 +381,8 @@ uptime, IP addresses and disks. "Copy" copies them as plain text. They are
 read once each time the popover opens, over an exec channel, by a POSIX sh
 script that also runs on BusyBox. When tools such as `lscpu`, `nproc` or
 `ip` are missing, it skips them or uses something else.
+
+<a id="terminal-section"></a>
 
 ## Terminal
 
