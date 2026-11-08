@@ -6075,3 +6075,503 @@ func FileNameTaken(name string) string { return In(i18n.Locale()).FileNameTaken(
 func (msgs Messages) FileNameTaken(name string) string {
 	return Catalog.Format(msgs.locale, "fileNameTaken", map[string]any{"name": name})
 }
+
+// OptionsSync says "Sync"
+// in the language the app shows.
+func OptionsSync() string { return In(i18n.Locale()).OptionsSync() }
+
+// OptionsSync says "Sync"
+// in the language of msgs.
+func (msgs Messages) OptionsSync() string {
+	return Catalog.Format(msgs.locale, "optionsSync", nil)
+}
+
+// SyncIntro says "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted o…"
+// in the language the app shows.
+func SyncIntro() string { return In(i18n.Locale()).SyncIntro() }
+
+// SyncIntro says "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted o…"
+// in the language of msgs.
+func (msgs Messages) SyncIntro() string {
+	return Catalog.Format(msgs.locale, "syncIntro", nil)
+}
+
+// SyncService says "Sync with"
+// in the language the app shows.
+func SyncService() string { return In(i18n.Locale()).SyncService() }
+
+// SyncService says "Sync with"
+// in the language of msgs.
+func (msgs Messages) SyncService() string {
+	return Catalog.Format(msgs.locale, "syncService", nil)
+}
+
+// SyncOff says "Off"
+// in the language the app shows.
+func SyncOff() string { return In(i18n.Locale()).SyncOff() }
+
+// SyncOff says "Off"
+// in the language of msgs.
+func (msgs Messages) SyncOff() string {
+	return Catalog.Format(msgs.locale, "syncOff", nil)
+}
+
+// SyncGist says "GitHub Gist"
+// in the language the app shows.
+func SyncGist() string { return In(i18n.Locale()).SyncGist() }
+
+// SyncGist says "GitHub Gist"
+// in the language of msgs.
+func (msgs Messages) SyncGist() string {
+	return Catalog.Format(msgs.locale, "syncGist", nil)
+}
+
+// SyncWebDAV says "WebDAV"
+// in the language the app shows.
+func SyncWebDAV() string { return In(i18n.Locale()).SyncWebDAV() }
+
+// SyncWebDAV says "WebDAV"
+// in the language of msgs.
+func (msgs Messages) SyncWebDAV() string {
+	return Catalog.Format(msgs.locale, "syncWebDAV", nil)
+}
+
+// SyncS3 says "S3-compatible storage"
+// in the language the app shows.
+func SyncS3() string { return In(i18n.Locale()).SyncS3() }
+
+// SyncS3 says "S3-compatible storage"
+// in the language of msgs.
+func (msgs Messages) SyncS3() string {
+	return Catalog.Format(msgs.locale, "syncS3", nil)
+}
+
+// SyncGistToken says "Token"
+// in the language the app shows.
+func SyncGistToken() string { return In(i18n.Locale()).SyncGistToken() }
+
+// SyncGistToken says "Token"
+// in the language of msgs.
+func (msgs Messages) SyncGistToken() string {
+	return Catalog.Format(msgs.locale, "syncGistToken", nil)
+}
+
+// SyncGistTokenHint says "A GitHub personal access token with the gist scope. The file goes in a secret gist of your account."
+// in the language the app shows.
+func SyncGistTokenHint() string { return In(i18n.Locale()).SyncGistTokenHint() }
+
+// SyncGistTokenHint says "A GitHub personal access token with the gist scope. The file goes in a secret gist of your account."
+// in the language of msgs.
+func (msgs Messages) SyncGistTokenHint() string {
+	return Catalog.Format(msgs.locale, "syncGistTokenHint", nil)
+}
+
+// SyncGistNewToken says "Create a token on GitHub"
+// in the language the app shows.
+func SyncGistNewToken() string { return In(i18n.Locale()).SyncGistNewToken() }
+
+// SyncGistNewToken says "Create a token on GitHub"
+// in the language of msgs.
+func (msgs Messages) SyncGistNewToken() string {
+	return Catalog.Format(msgs.locale, "syncGistNewToken", nil)
+}
+
+// SyncGistID says "Gist ID"
+// in the language the app shows.
+func SyncGistID() string { return In(i18n.Locale()).SyncGistID() }
+
+// SyncGistID says "Gist ID"
+// in the language of msgs.
+func (msgs Messages) SyncGistID() string {
+	return Catalog.Format(msgs.locale, "syncGistID", nil)
+}
+
+// SyncGistIDPlaceholder says "Found or created automatically"
+// in the language the app shows.
+func SyncGistIDPlaceholder() string { return In(i18n.Locale()).SyncGistIDPlaceholder() }
+
+// SyncGistIDPlaceholder says "Found or created automatically"
+// in the language of msgs.
+func (msgs Messages) SyncGistIDPlaceholder() string {
+	return Catalog.Format(msgs.locale, "syncGistIDPlaceholder", nil)
+}
+
+// SyncGistIDHint says "Leave it empty: the first sync finds the gist by its file name, or creates one."
+// in the language the app shows.
+func SyncGistIDHint() string { return In(i18n.Locale()).SyncGistIDHint() }
+
+// SyncGistIDHint says "Leave it empty: the first sync finds the gist by its file name, or creates one."
+// in the language of msgs.
+func (msgs Messages) SyncGistIDHint() string {
+	return Catalog.Format(msgs.locale, "syncGistIDHint", nil)
+}
+
+// SyncWebDAVURL says "Folder URL"
+// in the language the app shows.
+func SyncWebDAVURL() string { return In(i18n.Locale()).SyncWebDAVURL() }
+
+// SyncWebDAVURL says "Folder URL"
+// in the language of msgs.
+func (msgs Messages) SyncWebDAVURL() string {
+	return Catalog.Format(msgs.locale, "syncWebDAVURL", nil)
+}
+
+// SyncUser says "User"
+// in the language the app shows.
+func SyncUser() string { return In(i18n.Locale()).SyncUser() }
+
+// SyncUser says "User"
+// in the language of msgs.
+func (msgs Messages) SyncUser() string {
+	return Catalog.Format(msgs.locale, "syncUser", nil)
+}
+
+// SyncWebDAVPassword says "Password"
+// in the language the app shows.
+func SyncWebDAVPassword() string { return In(i18n.Locale()).SyncWebDAVPassword() }
+
+// SyncWebDAVPassword says "Password"
+// in the language of msgs.
+func (msgs Messages) SyncWebDAVPassword() string {
+	return Catalog.Format(msgs.locale, "syncWebDAVPassword", nil)
+}
+
+// SyncWebDAVPasswordHint says "Use an app password where the service has them, as Jianguoyun and Nextcloud do."
+// in the language the app shows.
+func SyncWebDAVPasswordHint() string { return In(i18n.Locale()).SyncWebDAVPasswordHint() }
+
+// SyncWebDAVPasswordHint says "Use an app password where the service has them, as Jianguoyun and Nextcloud do."
+// in the language of msgs.
+func (msgs Messages) SyncWebDAVPasswordHint() string {
+	return Catalog.Format(msgs.locale, "syncWebDAVPasswordHint", nil)
+}
+
+// SyncS3Endpoint says "Endpoint"
+// in the language the app shows.
+func SyncS3Endpoint() string { return In(i18n.Locale()).SyncS3Endpoint() }
+
+// SyncS3Endpoint says "Endpoint"
+// in the language of msgs.
+func (msgs Messages) SyncS3Endpoint() string {
+	return Catalog.Format(msgs.locale, "syncS3Endpoint", nil)
+}
+
+// SyncS3EndpointHint says "Cloudflare R2, Backblaze B2, MinIO, AWS S3 or another S3-compatible service. For R2, set the region to auto."
+// in the language the app shows.
+func SyncS3EndpointHint() string { return In(i18n.Locale()).SyncS3EndpointHint() }
+
+// SyncS3EndpointHint says "Cloudflare R2, Backblaze B2, MinIO, AWS S3 or another S3-compatible service. For R2, set the region to auto."
+// in the language of msgs.
+func (msgs Messages) SyncS3EndpointHint() string {
+	return Catalog.Format(msgs.locale, "syncS3EndpointHint", nil)
+}
+
+// SyncS3Region says "Region"
+// in the language the app shows.
+func SyncS3Region() string { return In(i18n.Locale()).SyncS3Region() }
+
+// SyncS3Region says "Region"
+// in the language of msgs.
+func (msgs Messages) SyncS3Region() string {
+	return Catalog.Format(msgs.locale, "syncS3Region", nil)
+}
+
+// SyncS3Bucket says "Bucket"
+// in the language the app shows.
+func SyncS3Bucket() string { return In(i18n.Locale()).SyncS3Bucket() }
+
+// SyncS3Bucket says "Bucket"
+// in the language of msgs.
+func (msgs Messages) SyncS3Bucket() string {
+	return Catalog.Format(msgs.locale, "syncS3Bucket", nil)
+}
+
+// SyncS3Key says "File name"
+// in the language the app shows.
+func SyncS3Key() string { return In(i18n.Locale()).SyncS3Key() }
+
+// SyncS3Key says "File name"
+// in the language of msgs.
+func (msgs Messages) SyncS3Key() string {
+	return Catalog.Format(msgs.locale, "syncS3Key", nil)
+}
+
+// SyncS3AccessKey says "Access key ID"
+// in the language the app shows.
+func SyncS3AccessKey() string { return In(i18n.Locale()).SyncS3AccessKey() }
+
+// SyncS3AccessKey says "Access key ID"
+// in the language of msgs.
+func (msgs Messages) SyncS3AccessKey() string {
+	return Catalog.Format(msgs.locale, "syncS3AccessKey", nil)
+}
+
+// SyncS3SecretKey says "Secret access key"
+// in the language the app shows.
+func SyncS3SecretKey() string { return In(i18n.Locale()).SyncS3SecretKey() }
+
+// SyncS3SecretKey says "Secret access key"
+// in the language of msgs.
+func (msgs Messages) SyncS3SecretKey() string {
+	return Catalog.Format(msgs.locale, "syncS3SecretKey", nil)
+}
+
+// SyncPassword says "Sync password"
+// in the language the app shows.
+func SyncPassword() string { return In(i18n.Locale()).SyncPassword() }
+
+// SyncPassword says "Sync password"
+// in the language of msgs.
+func (msgs Messages) SyncPassword() string {
+	return Catalog.Format(msgs.locale, "syncPassword", nil)
+}
+
+// SyncPasswordHint says "Encrypts what is synced. Use the same one on each computer. It cannot be recovered: if you forget it, replace the rem…"
+// in the language the app shows.
+func SyncPasswordHint() string { return In(i18n.Locale()).SyncPasswordHint() }
+
+// SyncPasswordHint says "Encrypts what is synced. Use the same one on each computer. It cannot be recovered: if you forget it, replace the rem…"
+// in the language of msgs.
+func (msgs Messages) SyncPasswordHint() string {
+	return Catalog.Format(msgs.locale, "syncPasswordHint", nil)
+}
+
+// SyncIncludePasswords says "Include saved passwords"
+// in the language the app shows.
+func SyncIncludePasswords() string { return In(i18n.Locale()).SyncIncludePasswords() }
+
+// SyncIncludePasswords says "Include saved passwords"
+// in the language of msgs.
+func (msgs Messages) SyncIncludePasswords() string {
+	return Catalog.Format(msgs.locale, "syncIncludePasswords", nil)
+}
+
+// SyncIncludePasswordsHint says "The passwords and key passphrases kept in the system's credential store, encrypted with the rest. Private key files a…"
+// in the language the app shows.
+func SyncIncludePasswordsHint() string { return In(i18n.Locale()).SyncIncludePasswordsHint() }
+
+// SyncIncludePasswordsHint says "The passwords and key passphrases kept in the system's credential store, encrypted with the rest. Private key files a…"
+// in the language of msgs.
+func (msgs Messages) SyncIncludePasswordsHint() string {
+	return Catalog.Format(msgs.locale, "syncIncludePasswordsHint", nil)
+}
+
+// SyncAutomatically says "Sync automatically"
+// in the language the app shows.
+func SyncAutomatically() string { return In(i18n.Locale()).SyncAutomatically() }
+
+// SyncAutomatically says "Sync automatically"
+// in the language of msgs.
+func (msgs Messages) SyncAutomatically() string {
+	return Catalog.Format(msgs.locale, "syncAutomatically", nil)
+}
+
+// SyncEveryMinutes says "{minutes, plural, one {Every # minute} other {Every # minutes}}"
+// in the language the app shows.
+func SyncEveryMinutes(minutes int) string { return In(i18n.Locale()).SyncEveryMinutes(minutes) }
+
+// SyncEveryMinutes says "{minutes, plural, one {Every # minute} other {Every # minutes}}"
+// in the language of msgs.
+func (msgs Messages) SyncEveryMinutes(minutes int) string {
+	return Catalog.Format(msgs.locale, "syncEveryMinutes", map[string]any{"minutes": minutes})
+}
+
+// SyncAutomaticallyHint says "At start, a minute after changes here, and at this interval for changes made elsewhere."
+// in the language the app shows.
+func SyncAutomaticallyHint() string { return In(i18n.Locale()).SyncAutomaticallyHint() }
+
+// SyncAutomaticallyHint says "At start, a minute after changes here, and at this interval for changes made elsewhere."
+// in the language of msgs.
+func (msgs Messages) SyncAutomaticallyHint() string {
+	return Catalog.Format(msgs.locale, "syncAutomaticallyHint", nil)
+}
+
+// SyncNow says "Sync Now"
+// in the language the app shows.
+func SyncNow() string { return In(i18n.Locale()).SyncNow() }
+
+// SyncNow says "Sync Now"
+// in the language of msgs.
+func (msgs Messages) SyncNow() string {
+	return Catalog.Format(msgs.locale, "syncNow", nil)
+}
+
+// SyncRunning says "Syncing…"
+// in the language the app shows.
+func SyncRunning() string { return In(i18n.Locale()).SyncRunning() }
+
+// SyncRunning says "Syncing…"
+// in the language of msgs.
+func (msgs Messages) SyncRunning() string {
+	return Catalog.Format(msgs.locale, "syncRunning", nil)
+}
+
+// SyncIncomplete says "Fill in every field and the sync password to sync."
+// in the language the app shows.
+func SyncIncomplete() string { return In(i18n.Locale()).SyncIncomplete() }
+
+// SyncIncomplete says "Fill in every field and the sync password to sync."
+// in the language of msgs.
+func (msgs Messages) SyncIncomplete() string {
+	return Catalog.Format(msgs.locale, "syncIncomplete", nil)
+}
+
+// SyncLastSynced says "Last synced {time}"
+// in the language the app shows.
+func SyncLastSynced(time_ string) string { return In(i18n.Locale()).SyncLastSynced(time_) }
+
+// SyncLastSynced says "Last synced {time}"
+// in the language of msgs.
+func (msgs Messages) SyncLastSynced(time_ string) string {
+	return Catalog.Format(msgs.locale, "syncLastSynced", map[string]any{"time": time_})
+}
+
+// SyncCreated says "created the remote file"
+// in the language the app shows.
+func SyncCreated() string { return In(i18n.Locale()).SyncCreated() }
+
+// SyncCreated says "created the remote file"
+// in the language of msgs.
+func (msgs Messages) SyncCreated() string {
+	return Catalog.Format(msgs.locale, "syncCreated", nil)
+}
+
+// SyncUploaded says "sent this computer's changes"
+// in the language the app shows.
+func SyncUploaded() string { return In(i18n.Locale()).SyncUploaded() }
+
+// SyncUploaded says "sent this computer's changes"
+// in the language of msgs.
+func (msgs Messages) SyncUploaded() string {
+	return Catalog.Format(msgs.locale, "syncUploaded", nil)
+}
+
+// SyncDownloaded says "received changes"
+// in the language the app shows.
+func SyncDownloaded() string { return In(i18n.Locale()).SyncDownloaded() }
+
+// SyncDownloaded says "received changes"
+// in the language of msgs.
+func (msgs Messages) SyncDownloaded() string {
+	return Catalog.Format(msgs.locale, "syncDownloaded", nil)
+}
+
+// SyncMerged says "merged changes from both sides"
+// in the language the app shows.
+func SyncMerged() string { return In(i18n.Locale()).SyncMerged() }
+
+// SyncMerged says "merged changes from both sides"
+// in the language of msgs.
+func (msgs Messages) SyncMerged() string {
+	return Catalog.Format(msgs.locale, "syncMerged", nil)
+}
+
+// SyncUpToDate says "already up to date"
+// in the language the app shows.
+func SyncUpToDate() string { return In(i18n.Locale()).SyncUpToDate() }
+
+// SyncUpToDate says "already up to date"
+// in the language of msgs.
+func (msgs Messages) SyncUpToDate() string {
+	return Catalog.Format(msgs.locale, "syncUpToDate", nil)
+}
+
+// SyncConflicts says "{count, plural, one {# item changed on both sides, this computer's kept} other {# items changed on both sides, this c…"
+// in the language the app shows.
+func SyncConflicts(count int) string { return In(i18n.Locale()).SyncConflicts(count) }
+
+// SyncConflicts says "{count, plural, one {# item changed on both sides, this computer's kept} other {# items changed on both sides, this c…"
+// in the language of msgs.
+func (msgs Messages) SyncConflicts(count int) string {
+	return Catalog.Format(msgs.locale, "syncConflicts", map[string]any{"count": count})
+}
+
+// SyncReplaceRemote says "Replace the Remote with This Computer's Data…"
+// in the language the app shows.
+func SyncReplaceRemote() string { return In(i18n.Locale()).SyncReplaceRemote() }
+
+// SyncReplaceRemote says "Replace the Remote with This Computer's Data…"
+// in the language of msgs.
+func (msgs Messages) SyncReplaceRemote() string {
+	return Catalog.Format(msgs.locale, "syncReplaceRemote", nil)
+}
+
+// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. Wh…"
+// in the language the app shows.
+func SyncReplaceRemoteConfirm() string { return In(i18n.Locale()).SyncReplaceRemoteConfirm() }
+
+// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. Wh…"
+// in the language of msgs.
+func (msgs Messages) SyncReplaceRemoteConfirm() string {
+	return Catalog.Format(msgs.locale, "syncReplaceRemoteConfirm", nil)
+}
+
+// SyncReplaceRemoteYes says "Replace"
+// in the language the app shows.
+func SyncReplaceRemoteYes() string { return In(i18n.Locale()).SyncReplaceRemoteYes() }
+
+// SyncReplaceRemoteYes says "Replace"
+// in the language of msgs.
+func (msgs Messages) SyncReplaceRemoteYes() string {
+	return Catalog.Format(msgs.locale, "syncReplaceRemoteYes", nil)
+}
+
+// SyncErrWrongPassword says "The sync password does not match the one the remote file was encrypted with."
+// in the language the app shows.
+func SyncErrWrongPassword() string { return In(i18n.Locale()).SyncErrWrongPassword() }
+
+// SyncErrWrongPassword says "The sync password does not match the one the remote file was encrypted with."
+// in the language of msgs.
+func (msgs Messages) SyncErrWrongPassword() string {
+	return Catalog.Format(msgs.locale, "syncErrWrongPassword", nil)
+}
+
+// SyncErrAuth says "The service refused the credentials. Check the token, user, password or keys."
+// in the language the app shows.
+func SyncErrAuth() string { return In(i18n.Locale()).SyncErrAuth() }
+
+// SyncErrAuth says "The service refused the credentials. Check the token, user, password or keys."
+// in the language of msgs.
+func (msgs Messages) SyncErrAuth() string {
+	return Catalog.Format(msgs.locale, "syncErrAuth", nil)
+}
+
+// SyncErrNotEnvelope says "The remote file is not a Finallyshell sync file."
+// in the language the app shows.
+func SyncErrNotEnvelope() string { return In(i18n.Locale()).SyncErrNotEnvelope() }
+
+// SyncErrNotEnvelope says "The remote file is not a Finallyshell sync file."
+// in the language of msgs.
+func (msgs Messages) SyncErrNotEnvelope() string {
+	return Catalog.Format(msgs.locale, "syncErrNotEnvelope", nil)
+}
+
+// SyncErrNewerFormat says "The remote file was written by a newer version of Finallyshell. Update to sync."
+// in the language the app shows.
+func SyncErrNewerFormat() string { return In(i18n.Locale()).SyncErrNewerFormat() }
+
+// SyncErrNewerFormat says "The remote file was written by a newer version of Finallyshell. Update to sync."
+// in the language of msgs.
+func (msgs Messages) SyncErrNewerFormat() string {
+	return Catalog.Format(msgs.locale, "syncErrNewerFormat", nil)
+}
+
+// SyncErrTimeout says "The service did not answer in time."
+// in the language the app shows.
+func SyncErrTimeout() string { return In(i18n.Locale()).SyncErrTimeout() }
+
+// SyncErrTimeout says "The service did not answer in time."
+// in the language of msgs.
+func (msgs Messages) SyncErrTimeout() string {
+	return Catalog.Format(msgs.locale, "syncErrTimeout", nil)
+}
+
+// SyncErrOther says "Could not sync: {error}"
+// in the language the app shows.
+func SyncErrOther(error string) string { return In(i18n.Locale()).SyncErrOther(error) }
+
+// SyncErrOther says "Could not sync: {error}"
+// in the language of msgs.
+func (msgs Messages) SyncErrOther(error string) string {
+	return Catalog.Format(msgs.locale, "syncErrOther", map[string]any{"error": error})
+}

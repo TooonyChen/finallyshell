@@ -145,6 +145,10 @@ type Settings struct {
 	// "<publisher>.<extension>/<theme>" for one installed from a VSIX or in
 	// an editor such as VS Code.
 	FileIconTheme string `json:"fileIconTheme,omitempty"`
+
+	// Sync is the Sync page of the options: where connections and
+	// settings are synced, if anywhere (sync.go).
+	Sync SyncSettings `json:"sync,omitzero"`
 }
 
 // IconThemesDir is where the VSIX files of the icon themes the user

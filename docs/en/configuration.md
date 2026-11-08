@@ -14,6 +14,7 @@ behind each setting.
   - [Folders, deleted hosts and other fields](#folders-deleted-hosts-and-other-fields)
   - [Safety](#safety)
 - [settings.json](#settingsjson)
+- [Sync](#sync)
 - [updater.json](#updaterjson)
 - [Updates in mygo.json](#updates-in-mygojson)
 - [Where passwords are stored](#where-passwords-are-stored)
@@ -35,6 +36,8 @@ instead.
 | `known_hosts` | Host keys you have trusted. |
 | `background-<time>.<extension>` | The copy of the terminal background image. |
 | `icon-themes/` | File icon themes installed from VSIX files, as `<publisher>.<name>.vsix`. |
+| `sync-state.json` | What the last sync synced (see [Sync](#sync)). |
+| `hosts.before-sync.json` | `hosts.json` as it was before the last sync that changed it. |
 
 `mygo dev`, `go run` and the installed app all use the same directory, so
 they share hosts and settings.
@@ -170,6 +173,7 @@ default.
 | `fileIconTheme` | `minimal`, `bundled:seti`, or `<publisher>.<name>/<theme ID>`. | Material Icon Theme |
 | `sidebarWidth`, `treeWidth` | Widths of the sidebar and the file panel's folder tree, as last dragged. | The app's defaults. |
 | `monitorPercent`, `terminalPercent` | The server monitor's share of the sidebar and the terminal's share of the main area, in percent. | The app's defaults. |
+| `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
 
 Details of each option are in [features.md](features.md): see
 [General](features.md#general), [Transfers](features.md#transfers),
@@ -180,6 +184,45 @@ Details of each option are in [features.md](features.md): see
 [File icon themes](features.md#file-icon-themes),
 [Connection manager](features.md#connection-manager) and
 [Layout and split dividers](features.md#layout-and-split-dividers).
+
+## Sync
+
+The Sync page of the options (see [Sync](features.md#sync)) is the `sync`
+object of `settings.json`, missing while sync has never been set up:
+
+| Key | Meaning | Default (when missing) |
+|---|---|---|
+| `provider` | `gist`, `webdav` or `s3`. | Sync is off. |
+| `gistId` | The gist holding the file, found or created by the first sync. | Find or create one. |
+| `webdavUrl`, `webdavUser` | The WebDAV folder and user. | None. |
+| `s3Endpoint`, `s3Region`, `s3Bucket`, `s3Key`, `s3AccessKeyId` | The S3-compatible bucket, the file's key in it and the access key's ID. | Region `us-east-1`, key `finallyshell-sync.json`. |
+| `passwords` | `true` includes saved passwords. | Not included. |
+| `auto` | `true` syncs automatically. | Off. |
+| `interval` | Minutes between automatic syncs: 5, 15, 30 or 60. | 15 |
+
+Each settings key is either synced or kept on each computer; the lists are
+`syncedSettings` and `localSettings` in `internal/config/sync.go`. Kept
+local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
+`termBackground`, `downloadDir`, `askDownloadDir` and `sync`, and a
+`fileIconTheme` installed from a VSIX or found in an editor's extensions.
+
+Two more files belong to sync, next to `hosts.json`:
+
+- `sync-state.json`: where the last sync synced (`remote`), when (`at`),
+  the computer that wrote the file it read (`device`), and the file as it
+  was after that sync (`base`), still encrypted with the sync password: the
+  next sync compares both sides with it. Deleting it makes the next sync
+  keep what either side has, as a first sync does.
+- `hosts.before-sync.json`: `hosts.json` as it was before the last sync
+  that changed it.
+
+The file on the service, `finallyshell-sync.json`, is JSON:
+`{"app": "finallyshell", "format": 1, "kdf": "argon2id", "salt": ..., "t": 3, "m": 65536, "p": 4, "cipher": "aes-256-gcm", "nonce": ..., "data": ...}`,
+the binary fields in base64. Decrypted, `data` is
+`{"schema": 1, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "settings": {...}, "secrets": {...}}`,
+where folders and hosts are those of `hosts.json`, settings the synced
+keys of `settings.json`, and secrets the saved passwords by their key in
+the credential store.
 
 ## updater.json
 
@@ -230,7 +273,10 @@ same entries, as they share `hosts.json`. The keys are:
 - `host/<host ID>/password`: the password;
 - `host/<host ID>/passphrase`: the private key passphrase;
 - `host/<host ID>/proxy-password`: the password of this host's SOCKS5 or
-  HTTP proxy.
+  HTTP proxy;
+- `sync/password`: the sync password (see [Sync](features.md#sync));
+- `sync/<service>/credential`: the token, password or secret access key of
+  the sync service (`gist`, `webdav` or `s3`).
 
 "Remember password" is a per-host setting and covers all of these for the
 host.

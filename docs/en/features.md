@@ -45,6 +45,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Terminal](#terminal-defaults)
   - [Terminal › Mouse](#terminal--mouse)
   - [Terminal › Shortcuts](#terminal--shortcuts)
+  - [Sync](#sync)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Layout and split dividers](#layout-and-split-dividers)
 - [Language](#language)
@@ -1286,6 +1287,80 @@ are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
 value looks like `"Alt+1-9"`). `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
+
+### Sync
+
+Options › Sync keeps connections and settings the same on several
+computers, through storage you already have. Finallyshell runs no server
+for it, and it is off until you choose a service:
+
+| Service | What you enter | Free for personal use |
+|---|---|---|
+| GitHub Gist | A personal access token with the `gist` scope ("Create a token on GitHub" opens the page with the scope chosen). The Gist ID can stay empty: the first sync finds a gist of yours holding `finallyshell-sync.json`, or creates a secret one, and keeps its ID. | Any GitHub account. |
+| WebDAV | The folder's URL, a user and a password (an app password where the service has them). A missing folder is created. | Jianguoyun (坚果云), Nextcloud, Synology, Box and others. |
+| S3-compatible storage | The endpoint, region (`auto` for Cloudflare R2; `us-east-1` when empty), bucket, file name (`finallyshell-sync.json` when empty), access key ID and secret access key. Requests are path-style and signed with AWS Signature Version 4. | Cloudflare R2 and Backblaze B2 have free tiers; MinIO runs anywhere. |
+
+The service keeps one file. Before it leaves the computer, its content is
+encrypted with AES-256-GCM, with a key derived by Argon2id (3 passes,
+64 MiB, 4 lanes, a random salt) from the **sync password**, which you
+choose and enter on each computer. The service sees only that the file is
+an encrypted Finallyshell file and the key derivation's parameters; host
+names, addresses and the computer's name are inside the ciphertext. The
+sync password cannot be recovered. With a wrong one, sync says so and
+changes nothing.
+
+What is synced:
+
+- Folders and connections, deleted ones included (so a delete reaches the
+  other computers), but not each host's last connection time, which keeps
+  the recent list of each computer its own.
+- Settings that mean the same on another computer: language, appearance,
+  the General, Mouse, Shortcuts and Terminal pages, the font, the color
+  scheme, the background's fit and opacity, and the file icon theme when
+  it is one every copy has (Material, Seti or minimal). Pane sizes, the
+  download folder, the background image itself and icon themes installed
+  from a VSIX stay on each computer.
+- With "Include saved passwords" checked, off by default, the passwords and
+  key passphrases of the hosts that remember theirs. A computer that has it
+  off keeps the passwords already in the file as they are. Private key
+  files are not synced; hosts keep their key's path.
+
+Each sync merges three ways: this computer's data, the file's, and the
+data both had after the last sync, kept in `sync-state.json`, still
+encrypted. Each folder, host, setting and password is merged on its own.
+What changed on one side only is kept; what was deleted on one side and
+not changed on the other is deleted; what changed on both sides keeps this
+computer's version, and the status says how many there were. The first
+sync with a service (or after the sync password changed) deletes nothing:
+it keeps what either side has. When another computer writes the file
+during a sync, the sync reads it again and merges again (WebDAV and S3 send
+`If-Match`, for the servers that support it; a gist is checked just before
+writing). Before a sync changes
+local connections, `hosts.json` is copied to `hosts.before-sync.json`.
+Changes made while a sync is under way are merged on top of what it
+brought, and synced next.
+
+"Sync Now" syncs at once. "Sync automatically" syncs at start, a minute
+after changes here (they are looked for once a minute) and every 5, 15
+(the default), 30 or 60 minutes for changes made elsewhere. After an error
+it waits for the interval. The status line shows the last sync's time and
+what it did, or why it failed.
+
+"Replace the Remote with This Computer's Data…" asks first, then writes
+this computer's data to the file without merging, encrypted with the sync
+password entered: the way to start over, or to change the sync password
+(enter the new one, replace, then enter the new one on the other
+computers). Without "Include saved passwords", the file then has no
+passwords.
+
+The sync password and the service's token, password or secret key are kept
+in the system's credential store (see
+[Where passwords are stored](configuration.md#where-passwords-are-stored));
+in memory only when the system has none. The other fields are the `sync`
+key of `settings.json` (see [Sync](configuration.md#sync)).
+
+Not supported yet: Google Drive, OneDrive, signing in to GitHub in the
+browser instead of a token, and restoring older versions of the file.
 
 ## Keyboard shortcuts
 

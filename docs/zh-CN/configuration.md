@@ -11,6 +11,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
   - [文件夹、已删除的主机和其他字段](#文件夹已删除的主机和其他字段)
   - [安全](#安全)
 - [settings.json](#settingsjson)
+- [同步](#同步)
 - [updater.json](#updaterjson)
 - [mygo.json 里的 updates](#mygojson-里的-updates)
 - [密码存在哪里](#密码存在哪里)
@@ -28,6 +29,8 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `known_hosts` | 信任过的主机指纹。 |
 | `background-<时间>.<扩展名>` | 终端背景图片的副本。 |
 | `icon-themes/` | 从 VSIX 文件安装的文件图标主题，存成 `<发布者>.<名称>.vsix`。 |
+| `sync-state.json` | 上次同步的状态（见[同步](#同步)）。 |
+| `hosts.before-sync.json` | 上次改动了它的同步之前的 `hosts.json`。 |
 
 `mygo dev`、`go run` 和安装版用的是同一个目录，所以共用主机和设置。
 
@@ -140,8 +143,32 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `fileIconTheme` | `minimal`、`bundled:seti` 或 `<发布者>.<名称>/<主题 ID>`。 | Material Icon Theme |
 | `sidebarWidth`、`treeWidth` | 左边栏和文件面板目录树的宽度，最后一次拖动的结果。 | 程序的默认值。 |
 | `monitorPercent`、`terminalPercent` | 服务器监控占左边栏的比例、终端占主区域的比例，单位是百分比。 | 程序的默认值。 |
+| `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
 
 每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)和[布局和分隔条](features.md#布局和分隔条)。
+
+## 同步
+
+选项里的“同步”页（见[同步](features.md#同步)）是 `settings.json` 的 `sync` 对象，从没设置过同步时没有这个键：
+
+| 键 | 含义 | 默认值（没有这个键时） |
+|---|---|---|
+| `provider` | `gist`、`webdav` 或 `s3`。 | 不同步。 |
+| `gistId` | 存放文件的 gist，第一次同步时找到或创建。 | 自动查找或创建。 |
+| `webdavUrl`、`webdavUser` | WebDAV 文件夹和用户。 | 无。 |
+| `s3Endpoint`、`s3Region`、`s3Bucket`、`s3Key`、`s3AccessKeyId` | S3 兼容的存储桶、文件在其中的键和访问密钥 ID。 | 区域 `us-east-1`，键 `finallyshell-sync.json`。 |
+| `passwords` | `true` 时包括已保存的密码。 | 不包括。 |
+| `auto` | `true` 时自动同步。 | 关闭。 |
+| `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
+
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`termBackground`、`downloadDir`、`askDownloadDir` 和 `sync`，以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+
+另有两个文件属于同步，和 `hosts.json` 放在一起：
+
+- `sync-state.json`：上次同步到哪里（`remote`）、什么时候（`at`）、读到的文件是哪台电脑写的（`device`），以及那次同步后的文件（`base`），仍用同步密码加密：下次同步拿它和两边比较。删掉它，下次同步会像第一次同步一样保留两边都有的内容。
+- `hosts.before-sync.json`：上次改动了 `hosts.json` 的同步之前的 `hosts.json`。
+
+服务上的文件 `finallyshell-sync.json` 是 JSON：`{"app": "finallyshell", "format": 1, "kdf": "argon2id", "salt": ..., "t": 3, "m": 65536, "p": 4, "cipher": "aes-256-gcm", "nonce": ..., "data": ...}`，二进制字段是 base64。`data` 解密后是 `{"schema": 1, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "settings": {...}, "secrets": {...}}`：folders 和 hosts 就是 `hosts.json` 里的，settings 是 `settings.json` 里同步的键，secrets 是已保存的密码，按它们在凭据存储里的键存放。
 
 ## updater.json
 
@@ -176,7 +203,9 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 - `host/<主机 ID>/password`：密码；
 - `host/<主机 ID>/passphrase`：私钥密码；
-- `host/<主机 ID>/proxy-password`：这台主机的 SOCKS5 或 HTTP 代理的密码。
+- `host/<主机 ID>/proxy-password`：这台主机的 SOCKS5 或 HTTP 代理的密码；
+- `sync/password`：同步密码（见[同步](features.md#同步)）；
+- `sync/<服务>/credential`：同步服务（`gist`、`webdav` 或 `s3`）的令牌、密码或私有访问密钥。
 
 “记住密码”按主机设置，管这台主机的这几个密码。
 

@@ -131,6 +131,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 - 同时只运行一个：再打开一次会把已经运行的窗口提到前面。
 - 自行更新：每天检查一次，也可以手动检查，原地安装签过名的更新。
 - 拖动面板之间的分隔条调整大小，下次启动还是这个大小。
+- 可选的多台电脑同步：连接和设置通过你自己的 GitHub gist、WebDAV 文件夹（坚果云、Nextcloud 等）或 S3 兼容存储（Cloudflare R2、Backblaze B2 等）同步，在本机用只有你知道的密码加密。不用注册账号，没有服务器，不用付费。
 
 每个功能的细节见 [docs/zh-CN/features.md](docs/zh-CN/features.md)，程序保存的文件见 [docs/zh-CN/configuration.md](docs/zh-CN/configuration.md)。
 

@@ -9,6 +9,7 @@ import (
 	"slices"
 	"time"
 
+	"finallyshell/internal/cloudsync"
 	"finallyshell/internal/config"
 	"finallyshell/internal/importer"
 	"finallyshell/internal/widgets"
@@ -214,6 +215,11 @@ type App struct {
 	// replace.
 	iconThemes iconThemeState
 	home       func() string
+
+	// Sync (sync.go), and how it makes its remote: syncRemote, which
+	// tests replace.
+	sync      syncState
+	newRemote func(config.SyncSettings, string) (cloudsync.Remote, error)
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -234,6 +240,7 @@ func New(plat Platform) *App {
 
 		importSources: allImportSources(),
 		home:          homeDir,
+		newRemote:     syncRemote,
 	}
 	a.hosts, _ = config.LoadHosts()
 	a.settings = config.LoadSettings()
@@ -257,6 +264,7 @@ func (a *App) View(c *ui.Context) {
 	useTheme(c)
 	a.shortcuts(c)
 	a.saveLayoutAtRest(c)
+	a.syncTick(c)
 	if a.fullScreen.on {
 		a.terminalArea(c)
 		a.dialogs(c)

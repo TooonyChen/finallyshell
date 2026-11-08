@@ -131,6 +131,7 @@ Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, B
 - Only one copy runs at a time: opening it again brings the running window forward.
 - Updates itself: it checks once a day, or when you ask, and installs a signed update in place.
 - Drag the dividers between panels to resize them; the sizes are remembered.
+- Optional sync of connections and settings between computers, through a GitHub gist, a WebDAV folder (Jianguoyun, Nextcloud...) or S3-compatible storage (Cloudflare R2, Backblaze B2...) of your own, encrypted on your computer with a password only you know. No account with us, no server, nothing to pay.
 
 [docs/en/features.md](docs/en/features.md) describes every feature in detail, and [docs/en/configuration.md](docs/en/configuration.md) the files the app keeps.
 

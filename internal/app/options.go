@@ -29,6 +29,7 @@ const (
 	pageFont       = "terminal/font"
 	pageFiles      = "files"
 	pageFileIcons  = "files/icons"
+	pageSync       = "sync"
 )
 
 // optionPage is a page of the options window.
@@ -85,6 +86,10 @@ var optionPages = []optionPage{
 	{
 		id: pageFileIcons, parent: pageFiles, title: locales.OptionsFileIcons,
 		view: (*App).fileIconsPage,
+	},
+	{
+		id: pageSync, title: locales.OptionsSync,
+		view: (*App).syncPage,
 	},
 }
 

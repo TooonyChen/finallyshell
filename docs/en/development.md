@@ -275,7 +275,8 @@ tools/natives/       downloads libghostty-vt for the tests before CI runs them, 
 tools/release/       release tools: the next version and its notes from CHANGELOG.md, a draft of them from the commits, the third-party licenses (notices/ has the licenses of libraries packaged as binaries)
 tools/screenshots/   regenerates the README screenshots in docs/screenshots/ from the internal/app tests
 internal/
-  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send
+  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send; sync.go is the Sync page's settings, which settings are synced, sync-state.json and the copy of hosts.json before a sync
+  cloudsync/         sync through the user's own storage: crypto.go encrypts the file (Argon2id, AES-256-GCM), merge.go merges three ways, sync.go reads, merges and writes it (retrying on a conflict); gist.go, webdav.go and s3.go are the services (s3.go signs with SigV4 by hand), remotehttp.go their shared HTTP code
   importer/          reads other clients' connections: importer.go is the list of sources (readers), the entries and problems they read, the text decoder (UTF-8, UTF-16, GB18030), finding duplicates and importing by folder; finalshell.go finds FinalShell's folder and reads the connections and folders in conn; xshell.go finds Xshell's Sessions folder and reads its .xsh files and .xts exports; securecrt.go finds SecureCRT's config folder and reads the .ini files of its Sessions folder; mobaxterm.go finds MobaXterm.ini and reads its bookmark sections, and .mxtsessions and .moba exports; sshconfig.go reads OpenSSH's ~/.ssh/config (Host blocks and patterns, Include, ProxyJump); table.go reads a server list in a CSV file, or the first sheet of an .xlsx with xlsx.go, a reader of its own (archive/zip and encoding/xml, with limits against zip bombs); testdata has made-up samples
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
   termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
@@ -327,6 +328,8 @@ internal/
     editor_proxy.go  the Proxy page of the connection editor
     editor_tunnels.go the Tunnels page of the connection editor: the table and the add/edit dialog
     proxy.go         connecting through proxies and jump hosts: dial options, the passwords to ask for before connecting, translating each hop's errors
+    sync.go          syncing: the payload of hosts and settings, reading the saved passwords on the secret queue, automatic sync from the main window's frames, applying what a sync brought (merging again what changed meanwhile)
+    options_sync.go  the Sync page of the options
     secrets.go       remembering passwords: credential store keys, the background read/write queue, "Remember password", the password prompt, passwords on permanent delete and duplicate
     closing.go       what closing the main window and quitting do: hiding to the tray, asking first
     windows.go       child windows: opening, focusing and closing by kind, redrawing every window

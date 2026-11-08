@@ -1024,5 +1024,77 @@
         "type": "String"
       }
     }
-  }
+  },
+  "optionsSync": "Sync",
+  "syncIntro": "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted on this computer with your sync password before it leaves; Finallyshell runs no server and sees nothing.",
+  "syncService": "Sync with",
+  "syncOff": "Off",
+  "syncGist": "GitHub Gist",
+  "syncWebDAV": "WebDAV",
+  "syncS3": "S3-compatible storage",
+  "syncGistToken": "Token",
+  "syncGistTokenHint": "A GitHub personal access token with the gist scope. The file goes in a secret gist of your account.",
+  "syncGistNewToken": "Create a token on GitHub",
+  "syncGistID": "Gist ID",
+  "syncGistIDPlaceholder": "Found or created automatically",
+  "syncGistIDHint": "Leave it empty: the first sync finds the gist by its file name, or creates one.",
+  "syncWebDAVURL": "Folder URL",
+  "syncUser": "User",
+  "syncWebDAVPassword": "Password",
+  "syncWebDAVPasswordHint": "Use an app password where the service has them, as Jianguoyun and Nextcloud do.",
+  "syncS3Endpoint": "Endpoint",
+  "syncS3EndpointHint": "Cloudflare R2, Backblaze B2, MinIO, AWS S3 or another S3-compatible service. For R2, set the region to auto.",
+  "syncS3Region": "Region",
+  "syncS3Bucket": "Bucket",
+  "syncS3Key": "File name",
+  "syncS3AccessKey": "Access key ID",
+  "syncS3SecretKey": "Secret access key",
+  "syncPassword": "Sync password",
+  "syncPasswordHint": "Encrypts what is synced. Use the same one on each computer. It cannot be recovered: if you forget it, replace the remote with this computer's data and a new one.",
+  "syncIncludePasswords": "Include saved passwords",
+  "syncIncludePasswordsHint": "The passwords and key passphrases kept in the system's credential store, encrypted with the rest. Private key files are not synced.",
+  "syncAutomatically": "Sync automatically",
+  "syncEveryMinutes": "{minutes, plural, one {Every # minute} other {Every # minutes}}",
+  "@syncEveryMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAutomaticallyHint": "At start, a minute after changes here, and at this interval for changes made elsewhere.",
+  "syncNow": "Sync Now",
+  "syncRunning": "Syncing…",
+  "syncIncomplete": "Fill in every field and the sync password to sync.",
+  "syncLastSynced": "Last synced {time}",
+  "@syncLastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "2026-11-08 14:02"
+      }
+    }
+  },
+  "syncCreated": "created the remote file",
+  "syncUploaded": "sent this computer's changes",
+  "syncDownloaded": "received changes",
+  "syncMerged": "merged changes from both sides",
+  "syncUpToDate": "already up to date",
+  "syncConflicts": "{count, plural, one {# item changed on both sides, this computer's kept} other {# items changed on both sides, this computer's kept}}",
+  "@syncConflicts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncReplaceRemote": "Replace the Remote with This Computer's Data…",
+  "syncReplaceRemoteConfirm": "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. What only other computers have is lost from it, and they need the new password.",
+  "syncReplaceRemoteYes": "Replace",
+  "syncErrWrongPassword": "The sync password does not match the one the remote file was encrypted with.",
+  "syncErrAuth": "The service refused the credentials. Check the token, user, password or keys.",
+  "syncErrNotEnvelope": "The remote file is not a Finallyshell sync file.",
+  "syncErrNewerFormat": "The remote file was written by a newer version of Finallyshell. Update to sync.",
+  "syncErrTimeout": "The service did not answer in time.",
+  "syncErrOther": "Could not sync: {error}"
 }
