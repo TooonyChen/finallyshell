@@ -61,9 +61,7 @@ func openImport(t *testing.T, a *App, p *fakePlatform) (manager, imp *ui.Tester)
 	a.openManager()
 	manager = p.show(t, WindowManager)
 	manager.Frame()
-	if err := manager.Click(locales.ImportFinalShell()); err != nil {
-		t.Fatalf("%v; texts %q", err, manager.Texts())
-	}
+	clickTool(t, manager, locales.ImportFinalShell())
 	if !a.windowOpen(WindowImport) || a.imp == nil {
 		t.Fatal("the import window is not open")
 	}
@@ -71,6 +69,40 @@ func openImport(t *testing.T, a *App, p *fakePlatform) (manager, imp *ui.Tester)
 	imp = p.show(t, WindowImport)
 	imp.Frame()
 	return manager, imp
+}
+
+// clickTool clicks the toolbar control labeled label, through the
+// toolbar's overflow menu ("More") when the toolbar has no room for it.
+// How much fits depends on the fonts of the machine the tests run on.
+func clickTool(t *testing.T, tt *ui.Tester, label string) {
+	t.Helper()
+	if err := tt.Click(label); err == nil {
+		return
+	}
+	if err := tt.Click("More"); err != nil {
+		t.Fatalf("no %q in the toolbar or its overflow menu: %v; texts %q", label, err, tt.Texts())
+	}
+	if err := tt.ChooseMenuItem(label); err != nil {
+		t.Fatalf("%v; menu %q", err, tt.Menu())
+	}
+}
+
+// A manager too narrow for the import tool still imports, from the
+// toolbar's overflow menu.
+func TestImportFromOverflowMenu(t *testing.T) {
+	a, p := testApp(t)
+	a.findFinalShell = func() string { return finalShellSample(t, "finalshell") }
+	a.openManager()
+	manager := p.show(t, WindowManager)
+	manager.SetSize(420, 500)
+	manager.Frame()
+	if err := manager.Click(locales.ImportFinalShell()); err == nil {
+		t.Fatal("the import tool fits a narrow manager; the test needs it in the overflow menu")
+	}
+	clickTool(t, manager, locales.ImportFinalShell())
+	if !a.windowOpen(WindowImport) || a.imp == nil {
+		t.Fatal("the import window is not open")
+	}
 }
 
 // importBox is the check box of the row of the host named name.
