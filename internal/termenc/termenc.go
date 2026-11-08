@@ -5,6 +5,7 @@
 package termenc
 
 import (
+	"bytes"
 	"io"
 	"sync"
 	"unicode/utf8"
@@ -109,12 +110,26 @@ type conn struct {
 func (c *conn) Read(p []byte) (int, error) { return c.r.Read(p) }
 
 // Write encodes p and writes it to rw. A character cut off at the end of
-// p waits for the rest, which the next Write starts with. It reports all
-// of p written once rw took the encoded bytes.
+// p waits for the rest, which the next Write starts with. Legacy mouse
+// reports go through as they are (see mouseReport). It reports all of p
+// written once rw took the encoded bytes.
 func (c *conn) Write(p []byte) (int, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	buf := append(c.tail, p...)
+	c.tail = nil
+	var out []byte
+	for {
+		i := bytes.Index(buf, mouseReport)
+		if i < 0 {
+			break
+		}
+		end := i + len(mouseReport)
+		end += reportLen(buf[end:])
+		out = append(out, c.encode(buf[:i])...)
+		out = append(out, buf[i:end]...)
+		buf = buf[end:]
+	}
 	cut := len(buf)
 	for i := len(buf) - 1; i >= 0 && i >= len(buf)-utf8.UTFMax; i-- {
 		if utf8.RuneStart(buf[i]) {
@@ -125,10 +140,37 @@ func (c *conn) Write(p []byte) (int, error) {
 		}
 	}
 	c.tail = append([]byte(nil), buf[cut:]...)
-	if _, err := c.rw.Write(c.encode(buf[:cut])); err != nil {
+	out = append(out, c.encode(buf[:cut])...)
+	if _, err := c.rw.Write(out); err != nil {
 		return 0, err
 	}
 	return len(p), nil
+}
+
+// mouseReport starts a mouse report in the legacy formats, which carry
+// the button and the position in three values after it, as raw bytes:
+// one byte each, 32 plus the value, in the X10 format (mode 1000 without
+// 1006), so a column past 94 is a byte above 0x7f; one UTF-8 character
+// each in the UTF-8 format (mode 1005). Neither is text in the server's
+// encoding, so they go through unconverted. The SGR and urxvt formats
+// are ASCII, which every supported encoding keeps.
+var mouseReport = []byte("\x1b[M")
+
+// reportLen is how many bytes at the start of s are the three values of
+// a legacy mouse report: a two-byte UTF-8 character counts as one value
+// (the UTF-8 format), any other byte as one (X10). The terminal writes a
+// report whole, so it ends with s at the latest; it is never held back
+// for the next Write, so a click is sent at once.
+func reportLen(s []byte) int {
+	n := 0
+	for v := 0; v < 3 && n < len(s); v++ {
+		if r, size := utf8.DecodeRune(s[n:]); r != utf8.RuneError && size == 2 {
+			n += 2
+		} else {
+			n++
+		}
+	}
+	return n
 }
 
 // encode is s, UTF-8, in the connection's encoding, with "?" for each

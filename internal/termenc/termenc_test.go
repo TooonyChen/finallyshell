@@ -142,3 +142,38 @@ func TestResizeKept(t *testing.T) {
 		t.Error("Resize on a connection without one")
 	}
 }
+
+// Legacy mouse reports carry raw bytes, not text: they reach the server
+// unconverted and at once, while the text around them is encoded.
+func TestMouseReportsPassThrough(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		writes []string
+		want   string
+	}{
+		// X10: a click at column 96, row 1 has the byte 0x80.
+		{"X10 past column 94", []string{"\x1b[M\x20\x80\x21"}, "\x1b[M\x20\x80\x21"},
+		// Bytes that look like the start of a UTF-8 character are not held
+		// back for the next write.
+		{"X10 ending in a lead byte", []string{"\x1b[M\x23\x21\xc3", "中"}, "\x1b[M\x23\x21\xc3\xd6\xd0"},
+		{"X10 bytes at the top", []string{"\x1b[M\x20\xff\xfe"}, "\x1b[M\x20\xff\xfe"},
+		// The UTF-8 format: column 200 is U+00E8, two bytes.
+		{"UTF-8 format", []string{"\x1b[M\x20\xc3\xa8\x21"}, "\x1b[M\x20\xc3\xa8\x21"},
+		{"text around reports", []string{"中\x1b[M\x20\x80\x21文\x1b[M\x23\x80\x21"},
+			"\xd6\xd0\x1b[M\x20\x80\x21\xce\xc4\x1b[M\x23\x80\x21"},
+		{"SGR format", []string{"\x1b[<0;96;1M\x1b[<0;96;1m"}, "\x1b[<0;96;1M\x1b[<0;96;1m"},
+		// A character cut before a report still waits for its rest.
+		{"cut character then report", []string{"\xe4\xb8", "\xad\x1b[M\x20\x80\x21"}, "\xd6\xd0\x1b[M\x20\x80\x21"},
+	} {
+		c := &fakeConn{r: bytes.NewReader(nil)}
+		w := Wrap(c, config.EncodingGBK)
+		for _, s := range tc.writes {
+			if n, err := w.Write([]byte(s)); n != len(s) || err != nil {
+				t.Fatalf("%s: write %q: %d, %v", tc.name, s, n, err)
+			}
+		}
+		if got := c.written.String(); got != tc.want {
+			t.Errorf("%s: wrote % x, want % x", tc.name, got, tc.want)
+		}
+	}
+}
