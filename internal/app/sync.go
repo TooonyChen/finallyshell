@@ -70,6 +70,23 @@ type syncState struct {
 
 	// confirmReplace asks before replacing the remote file.
 	confirmReplace bool
+	// again: something changed here during the last sync that it did
+	// not carry, as a password saved meanwhile; automatic sync syncs
+	// again at its next check.
+	again bool
+}
+
+// syncRun is what a sync started with, for syncDone.
+type syncRun struct {
+	// start is the Sync settings it started with: a result for another
+	// destination than the current one is dropped.
+	start config.SyncSettings
+	// snapshot is this device's payload, without secrets; secrets are
+	// the saved passwords it included, nil for none.
+	snapshot *cloudsync.Payload
+	secrets  map[string]string
+	// gistID is the gist the sync found or made, "" for another service.
+	gistID string
 }
 
 // syncRemote makes the remote of the settings, with the provider's
@@ -222,7 +239,7 @@ func (a *App) syncTick(c *ui.Context) {
 	}
 	interval := time.Duration(s.IntervalOrDefault()) * time.Minute
 	due := st.lastTry.IsZero() || now.Sub(st.lastTry) >= interval
-	if !due && st.err == nil && (st.synced == nil || !cloudsync.Equal(a.localPayload(), st.synced)) {
+	if !due && st.err == nil && (st.again || st.synced == nil || !cloudsync.Equal(a.localPayload(), st.synced)) {
 		due = true
 	}
 	if due {
@@ -247,14 +264,14 @@ func (a *App) startSync(force bool, now time.Time) {
 		st.state, st.stateLoaded = config.LoadSyncState(), true
 	}
 	st.running, st.err, st.lastTry = true, nil, now
-	st.confirmReplace = false
+	st.confirmReplace, st.again = false, false
 	snapshot := a.localPayload()
 	req := cloudsync.Request{
 		Remote: remote, Password: st.password, Local: snapshot, Force: force,
 		Device: deviceName(),
 	}
 	if st.state.Remote == s.Remote() {
-		req.Base = st.state.Base
+		req.Base, req.BaseSecrets = st.state.Base, st.state.Secrets
 	}
 	run := func(secrets map[string]string) {
 		if secrets != nil {
@@ -265,11 +282,11 @@ func (a *App) startSync(force bool, now time.Time) {
 			ctx, cancel := context.WithTimeout(context.Background(), syncTimeout)
 			defer cancel()
 			res, err := cloudsync.Sync(ctx, req)
-			gistID := ""
+			run := syncRun{start: s, snapshot: snapshot, secrets: secrets}
 			if g, ok := remote.(*cloudsync.Gist); ok {
-				gistID = g.ID
+				run.gistID = g.ID
 			}
-			a.post(func() { a.syncDone(res, err, snapshot, secrets, gistID) })
+			a.post(func() { a.syncDone(res, err, run) })
 		}()
 	}
 	if !s.Passwords || a.secretsUnavailable() {
@@ -305,22 +322,27 @@ func (a *App) startSync(force bool, now time.Time) {
 	a.redraw()
 }
 
-// syncDone applies what a sync brought. snapshot is the payload it
-// started with, and secrets the saved passwords it included (nil for
-// none).
-func (a *App) syncDone(res *cloudsync.Result, err error, snapshot *cloudsync.Payload, secrets map[string]string, gistID string) {
+// syncDone applies what a sync brought.
+func (a *App) syncDone(res *cloudsync.Result, err error, run syncRun) {
 	st := &a.sync
 	st.running = false
 	defer a.redraw()
+	s := &a.settings.Sync
+	if s.Remote() != run.start.Remote() {
+		// The destination changed meanwhile: what the sync brought, and
+		// its file as a base, belong to the old one.
+		st.err, st.done = nil, nil
+		return
+	}
 	if err != nil {
 		st.err = err
 		return
 	}
-	s := &a.settings.Sync
-	if s.Provider == config.SyncGist && gistID != "" && s.GistID != gistID {
-		s.GistID = gistID
+	if s.Provider == config.SyncGist && run.gistID != "" && s.GistID != run.gistID {
+		s.GistID = run.gistID
 		a.saveSettings(a.settings)
 	}
+	snapshot := run.snapshot
 	merged := res.Merged
 	if res.Changed {
 		current := a.localPayload()
@@ -334,11 +356,14 @@ func (a *App) syncDone(res *cloudsync.Result, err error, snapshot *cloudsync.Pay
 		}
 		a.applyPayload(merged)
 	}
-	if secrets != nil {
-		a.applySyncedSecrets(secrets, res.Merged.Secrets)
+	if run.secrets != nil {
+		a.applySyncedSecrets(run.secrets, res.Merged.Secrets)
 	}
 	st.err, st.done = nil, res
-	st.state = config.SyncState{Remote: s.Remote(), Base: res.Envelope, At: time.Now(), Device: res.RemoteDevice}
+	st.state = config.SyncState{
+		Remote: s.Remote(), Base: res.Envelope, At: time.Now(), Device: res.RemoteDevice,
+		Secrets: run.secrets != nil,
+	}
 	if res.Uploaded {
 		st.state.Device = deviceName()
 	}
@@ -406,26 +431,74 @@ func sameList(x, y []json.RawMessage) bool {
 }
 
 // applySyncedSecrets keeps in the credential store, and for this run,
-// the passwords the merge changed: before is what this device had.
+// the passwords the merge changed: before is what this device had as the
+// sync started. Each is changed only if the store still has what it had
+// then, in one job of the queue, so that a password saved during the
+// sync is kept, and synced next; one saved after the job comes after it
+// in the queue, and wins too.
 func (a *App) applySyncedSecrets(before, after map[string]string) {
+	type change struct {
+		key, from, to string
+		hadFrom, del  bool
+	}
+	var changes []change
 	for k, v := range after {
-		if before[k] != v {
-			a.setSecret(k, v)
-			a.rememberSynced(k, v, true)
+		if from, had := before[k]; !had || from != v {
+			changes = append(changes, change{key: k, from: from, hadFrom: had, to: v})
 		}
 	}
-	for k := range before {
+	for k, from := range before {
 		if _, ok := after[k]; !ok {
-			a.deleteSecret(k)
-			a.rememberSynced(k, "", false)
+			changes = append(changes, change{key: k, from: from, hadFrom: true, del: true})
 		}
 	}
+	if len(changes) == 0 || a.secretsUnavailable() {
+		return
+	}
+	for _, ch := range changes {
+		a.secrets.markRead(ch.key)
+	}
+	a.secrets.queue.do(func() {
+		var applied []change
+		kept, storeErr := false, error(nil)
+		for _, ch := range changes {
+			cur, ok, err := a.plat.SecretGet(ch.key)
+			if err != nil {
+				storeErr = err
+				break
+			}
+			if ok != ch.hadFrom || cur != ch.from {
+				kept = true // changed here during the sync
+				continue
+			}
+			if ch.del {
+				err = a.plat.SecretDelete(ch.key)
+			} else {
+				err = a.plat.SecretSet(ch.key, ch.to)
+			}
+			if err != nil {
+				storeErr = err
+				break
+			}
+			applied = append(applied, ch)
+		}
+		a.post(func() {
+			a.noteStore(storeErr)
+			for _, ch := range applied {
+				a.rememberSynced(ch.key, ch.from, ch.hadFrom, ch.to, !ch.del)
+			}
+			if kept || storeErr != nil {
+				a.sync.again = true
+			}
+		})
+	})
 }
 
 // rememberSynced keeps, or forgets, for this run the secret the store
 // keeps under key, as the app keeps a host's login and its proxy's
-// password in memory.
-func (a *App) rememberSynced(key, v string, keep bool) {
+// password in memory: only while what the app knows is still what the
+// store had before (from, or nothing), as one typed since is newer.
+func (a *App) rememberSynced(key, from string, hadFrom bool, v string, keep bool) {
 	rest, ok := strings.CutPrefix(key, "host/")
 	if !ok {
 		return
@@ -442,6 +515,9 @@ func (a *App) rememberSynced(key, v string, keep bool) {
 	case loginSecretKey(h) == key:
 		mem = id
 	default:
+		return
+	}
+	if cur, known := a.passwords[mem]; known && (!hadFrom || cur != from) {
 		return
 	}
 	if keep {

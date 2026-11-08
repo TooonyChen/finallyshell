@@ -1338,7 +1338,9 @@ during a sync, the sync reads it again and merges again (WebDAV and S3 send
 writing). Before a sync changes
 local connections, `hosts.json` is copied to `hosts.before-sync.json`.
 Changes made while a sync is under way are merged on top of what it
-brought, and synced next.
+brought, and synced next; a password saved meanwhile is kept, not
+replaced by the one the sync brought. When the service or its fields
+change during a sync, what it brought is dropped.
 
 "Sync Now" syncs at once. "Sync automatically" syncs at start, a minute
 after changes here (they are looked for once a minute) and every 5, 15

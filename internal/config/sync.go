@@ -168,6 +168,9 @@ type SyncState struct {
 	// read, "" when this one wrote it first.
 	At     time.Time `json:"at,omitzero"`
 	Device string    `json:"device,omitempty"`
+	// Secrets says whether this device included its saved passwords in
+	// that sync, so that Base's passwords are its own.
+	Secrets bool `json:"secrets,omitempty"`
 }
 
 func syncStatePath() string { return filepath.Join(Dir(), "sync-state.json") }

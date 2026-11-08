@@ -138,3 +138,21 @@ func TestSyncNewerSchema(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+// A device that synced without its passwords, then includes them, does
+// not take the passwords it never received for ones it deleted.
+func TestSyncBaseSecretsNotOwn(t *testing.T) {
+	r := &memRemote{}
+	withPw := &Payload{Hosts: hosts(host("a", "A")).Hosts, Secrets: map[string]string{"host/a/password": "s3cret"}}
+	syncOK(t, Request{Remote: r, Password: "pw", Local: withPw, Secrets: true})
+	without := syncOK(t, Request{Remote: r, Password: "pw", Local: &Payload{}})
+	local := without.Merged.Clone()
+	local.Secrets = nil // never applied here
+	res := syncOK(t, Request{
+		Remote: r, Password: "pw", Local: local, Secrets: true,
+		Base: without.Envelope, BaseSecrets: false,
+	})
+	if res.Merged.Secrets["host/a/password"] != "s3cret" || res.Uploaded || !res.Changed {
+		t.Fatalf("passwords lost: %+v", res)
+	}
+}

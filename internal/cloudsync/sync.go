@@ -20,6 +20,11 @@ type Request struct {
 	// Base is the envelope this device last synced, as the remote had
 	// it; nil for none. It is what the merge compares both sides with.
 	Base []byte
+	// BaseSecrets says whether this device included its secrets in the
+	// sync that made Base. When it did not, the secrets in Base were
+	// never this device's, and are not compared with: otherwise each one
+	// it lacks would count as deleted here.
+	BaseSecrets bool
 	// Force replaces the remote file with Local, without reading or
 	// merging it: for a new sync password, or to start over.
 	Force bool
@@ -94,6 +99,9 @@ func syncOnce(ctx context.Context, req Request, local *Payload, now func() time.
 	var base *Payload
 	if req.Base != nil {
 		base, _ = openPayload(req.Password, req.Base) // none if it no longer opens
+		if base != nil && !req.BaseSecrets {
+			base.Secrets = nil
+		}
 	}
 	if !req.Secrets {
 		local = local.Clone()

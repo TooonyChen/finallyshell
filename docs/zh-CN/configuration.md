@@ -165,7 +165,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 
-- `sync-state.json`：上次同步到哪里（`remote`）、什么时候（`at`）、读到的文件是哪台电脑写的（`device`），以及那次同步后的文件（`base`），仍用同步密码加密：下次同步拿它和两边比较。删掉它，下次同步会像第一次同步一样保留两边都有的内容。
+- `sync-state.json`：上次同步到哪里（`remote`）、什么时候（`at`）、读到的文件是哪台电脑写的（`device`），以及那次同步后的文件（`base`），仍用同步密码加密：下次同步拿它和两边比较；以及那次同步是否包括了本机已保存的密码（`secrets`）：没包括时，下次同步不拿基准里的密码做比较，所以后来再勾上“包括已保存的密码”会收到密码，而不是把它们删掉。删掉这个文件，下次同步会像第一次同步一样保留两边都有的内容。
 - `hosts.before-sync.json`：上次改动了 `hosts.json` 的同步之前的 `hosts.json`。
 
 服务上的文件 `finallyshell-sync.json` 是 JSON：`{"app": "finallyshell", "format": 1, "kdf": "argon2id", "salt": ..., "t": 3, "m": 65536, "p": 4, "cipher": "aes-256-gcm", "nonce": ..., "data": ...}`，二进制字段是 base64。`data` 解密后是 `{"schema": 1, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "settings": {...}, "secrets": {...}}`：folders 和 hosts 就是 `hosts.json` 里的，settings 是 `settings.json` 里同步的键，secrets 是已保存的密码，按它们在凭据存储里的键存放。

@@ -349,3 +349,82 @@ func TestSyncPage(t *testing.T) {
 	}
 	saveShot(t, tt, "options-sync-zh.png")
 }
+
+// A device that synced without passwords, then includes them, receives
+// them rather than deleting them everywhere.
+func TestSyncPasswordsTurnedOnLater(t *testing.T) {
+	r := &memRemote{}
+	one := newDevice(t, r)
+	one.a.settings.Sync.Passwords = true
+	one.addHost("h1", "web")
+	one.p.stored[hostSecretKey("h1", secretPassword)] = "s3cret"
+	one.sync(t)
+
+	two := newDevice(t, r)
+	two.sync(t)
+	two.a.settings.Sync.Passwords = true
+	two.sync(t)
+	two.p.until(t, "the store", func() bool { return two.a.secrets.queue.idle() })
+	if got := two.p.stored[hostSecretKey("h1", secretPassword)]; got != "s3cret" {
+		t.Fatalf("password %q", got)
+	}
+	one.sync(t)
+	one.p.until(t, "the store", func() bool { return one.a.secrets.queue.idle() })
+	if got := one.p.stored[hostSecretKey("h1", secretPassword)]; got != "s3cret" {
+		t.Fatalf("the first device lost its password: %q", got)
+	}
+}
+
+// What a sync brings is dropped when the destination changed meanwhile.
+func TestSyncDestinationChangedDuringSync(t *testing.T) {
+	r := &memRemote{}
+	one := newDevice(t, r)
+	one.addHost("h1", "web")
+	one.sync(t)
+	two := newDevice(t, r)
+	two.use(t)
+	two.a.startSync(false, time.Now())
+	two.a.settings.Sync.WebDAVURL = "https://elsewhere.example/dav/"
+	two.p.until(t, "the sync", func() bool { return !two.a.sync.running })
+	if len(two.a.hosts.Hosts) != 0 || two.a.sync.done != nil {
+		t.Fatalf("applied the old destination's result: %v", hostNames(two.a))
+	}
+	if st := config.LoadSyncState(); st.Base != nil {
+		t.Fatalf("saved a base: %+v", st)
+	}
+}
+
+// A password saved during a sync is kept, and synced next.
+func TestSyncPasswordSavedDuringSync(t *testing.T) {
+	r := &memRemote{}
+	key := hostSecretKey("h1", secretPassword)
+	one := newDevice(t, r)
+	one.a.settings.Sync.Passwords = true
+	one.addHost("h1", "web")
+	one.p.stored[key] = "old"
+	one.sync(t)
+	two := newDevice(t, r)
+	two.a.settings.Sync.Passwords = true
+	two.sync(t)
+	two.p.until(t, "the store", func() bool { return two.a.secrets.queue.idle() })
+
+	one.p.stored[key] = "new"
+	one.sync(t)
+	two.use(t)
+	two.a.startSync(false, time.Now())
+	two.a.setSecret(key, "mine") // after the sync read the passwords
+	two.p.until(t, "the sync", func() bool { return !two.a.sync.running && two.a.secrets.queue.idle() })
+	two.p.until(t, "the store", func() bool { two.p.drain(); return two.a.secrets.queue.idle() })
+	if got := two.p.stored[key]; got != "mine" {
+		t.Fatalf("the password saved meanwhile became %q", got)
+	}
+	if !two.a.sync.again {
+		t.Fatal("not due to sync again")
+	}
+	two.sync(t)
+	one.sync(t)
+	one.p.until(t, "the store", func() bool { return one.a.secrets.queue.idle() })
+	if got := one.p.stored[key]; got != "mine" {
+		t.Fatalf("the other device has %q", got)
+	}
+}

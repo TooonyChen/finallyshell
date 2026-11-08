@@ -211,8 +211,12 @@ Two more files belong to sync, next to `hosts.json`:
 - `sync-state.json`: where the last sync synced (`remote`), when (`at`),
   the computer that wrote the file it read (`device`), and the file as it
   was after that sync (`base`), still encrypted with the sync password: the
-  next sync compares both sides with it. Deleting it makes the next sync
-  keep what either side has, as a first sync does.
+  next sync compares both sides with it; and whether that sync included
+  this computer's saved passwords (`secrets`): when it did not, the next
+  sync does not compare passwords with the base, so turning "Include
+  saved passwords" on later receives the passwords rather than deleting
+  them. Deleting the file makes the next sync keep what either side has,
+  as a first sync does.
 - `hosts.before-sync.json`: `hosts.json` as it was before the last sync
   that changed it.
 
