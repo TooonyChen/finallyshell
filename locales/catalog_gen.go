@@ -1584,6 +1584,16 @@ func (msgs Messages) FieldBackspace() string {
 	return Catalog.Format(msgs.locale, "fieldBackspace", nil)
 }
 
+// FieldDelete says "Delete sends"
+// in the language the app shows.
+func FieldDelete() string { return In(i18n.Locale()).FieldDelete() }
+
+// FieldDelete says "Delete sends"
+// in the language of msgs.
+func (msgs Messages) FieldDelete() string {
+	return Catalog.Format(msgs.locale, "fieldDelete", nil)
+}
+
 // TerminalNextConnect says "Changes apply the next time the host connects."
 // in the language the app shows.
 func TerminalNextConnect() string { return In(i18n.Locale()).TerminalNextConnect() }
@@ -2424,24 +2434,24 @@ func (msgs Messages) ErrTunnelStopped(error string) string {
 	return Catalog.Format(msgs.locale, "errTunnelStopped", map[string]any{"error": error})
 }
 
-// BackspaceDEL says "ASCII DEL (^?)"
+// KeySeqDEL says "ASCII DEL (^?)"
 // in the language the app shows.
-func BackspaceDEL() string { return In(i18n.Locale()).BackspaceDEL() }
+func KeySeqDEL() string { return In(i18n.Locale()).KeySeqDEL() }
 
-// BackspaceDEL says "ASCII DEL (^?)"
+// KeySeqDEL says "ASCII DEL (^?)"
 // in the language of msgs.
-func (msgs Messages) BackspaceDEL() string {
-	return Catalog.Format(msgs.locale, "backspaceDEL", nil)
+func (msgs Messages) KeySeqDEL() string {
+	return Catalog.Format(msgs.locale, "keySeqDEL", nil)
 }
 
-// BackspaceCtrlH says "Control-H (^H)"
+// KeySeqCtrlH says "Control-H (^H)"
 // in the language the app shows.
-func BackspaceCtrlH() string { return In(i18n.Locale()).BackspaceCtrlH() }
+func KeySeqCtrlH() string { return In(i18n.Locale()).KeySeqCtrlH() }
 
-// BackspaceCtrlH says "Control-H (^H)"
+// KeySeqCtrlH says "Control-H (^H)"
 // in the language of msgs.
-func (msgs Messages) BackspaceCtrlH() string {
-	return Catalog.Format(msgs.locale, "backspaceCtrlH", nil)
+func (msgs Messages) KeySeqCtrlH() string {
+	return Catalog.Format(msgs.locale, "keySeqCtrlH", nil)
 }
 
 // ErrHostDeleted says "This connection was deleted"
@@ -3376,6 +3386,46 @@ func OptionWheelLinesWindows() string { return In(i18n.Locale()).OptionWheelLine
 // in the language of msgs.
 func (msgs Messages) OptionWheelLinesWindows() string {
 	return Catalog.Format(msgs.locale, "optionWheelLinesWindows", nil)
+}
+
+// KeySequences says "Key sequences"
+// in the language the app shows.
+func KeySequences() string { return In(i18n.Locale()).KeySequences() }
+
+// KeySequences says "Key sequences"
+// in the language of msgs.
+func (msgs Messages) KeySequences() string {
+	return Catalog.Format(msgs.locale, "keySequences", nil)
+}
+
+// KeySeqVT220 says "VT220 (ESC [3~)"
+// in the language the app shows.
+func KeySeqVT220() string { return In(i18n.Locale()).KeySeqVT220() }
+
+// KeySeqVT220 says "VT220 (ESC [3~)"
+// in the language of msgs.
+func (msgs Messages) KeySeqVT220() string {
+	return Catalog.Format(msgs.locale, "keySeqVT220", nil)
+}
+
+// KeySeqDefault says "Default: {value}"
+// in the language the app shows.
+func KeySeqDefault(value string) string { return In(i18n.Locale()).KeySeqDefault(value) }
+
+// KeySeqDefault says "Default: {value}"
+// in the language of msgs.
+func (msgs Messages) KeySeqDefault(value string) string {
+	return Catalog.Format(msgs.locale, "keySeqDefault", map[string]any{"value": value})
+}
+
+// KeySequencesNote says "Hosts set to \"Default\" in their connection settings use these. Changes apply the next time a session connects."
+// in the language the app shows.
+func KeySequencesNote() string { return In(i18n.Locale()).KeySequencesNote() }
+
+// KeySequencesNote says "Hosts set to \"Default\" in their connection settings use these. Changes apply the next time a session connects."
+// in the language of msgs.
+func (msgs Messages) KeySequencesNote() string {
+	return Catalog.Format(msgs.locale, "keySequencesNote", nil)
 }
 
 // ConfirmQuitTitle says "Quit Finallyshell?"

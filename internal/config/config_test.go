@@ -19,6 +19,7 @@ func TestSettings(t *testing.T) {
 		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
 		CopyOnSelect: true, RightClick: RightClickCopyOrPaste, NoLinkClick: true, WheelLines: 5, KeepManagerOpen: true,
 		DownloadDir: "/srv/incoming", AskDownloadDir: true,
+		TermBackspace: BackspaceCtrlH, TermDelete: DeleteDEL,
 	}
 	if err := SaveSettings(want); err != nil {
 		t.Fatal(err)
@@ -52,7 +53,7 @@ func TestHostHelpers(t *testing.T) {
 	if h.Target() != "root@example.com:2200" || h.Title() != "example.com" {
 		t.Errorf("target %q title %q", h.Target(), h.Title())
 	}
-	if !h.MonitorEnabled() || h.Deleted() || h.TermTypeOrDefault() != "xterm-256color" || h.Backspace != BackspaceDEL {
+	if !h.MonitorEnabled() || h.Deleted() || h.TermTypeOrDefault() != "xterm-256color" || h.Backspace != BackspaceDefault {
 		t.Errorf("a new host: monitor %v deleted %v term %q backspace %q", h.MonitorEnabled(), h.Deleted(), h.TermTypeOrDefault(), h.Backspace)
 	}
 	h.TermType = "vt100"
@@ -184,6 +185,7 @@ func fullHost() *Host {
 		DeletedAt:       time.Date(2026, 11, 8, 1, 2, 3, 0, time.UTC),
 		TermType:        "vt220",
 		Backspace:       BackspaceCtrlH,
+		Delete:          DeleteDEL,
 		Proxy:           &ProxyConfig{Kind: ProxySOCKS5, Addr: "198.51.100.7", Port: 1081, User: "proxyuser", JumpHost: "h9"},
 		Tunnels: []Tunnel{
 			{Kind: TunnelLocal, ListenPort: 8080, TargetHost: "10.0.0.5", TargetPort: 80},
@@ -226,7 +228,7 @@ func TestRoundTripEveryField(t *testing.T) {
 	data, _ := json.Marshal(got.Hosts[1])
 	var keys map[string]any
 	json.Unmarshal(data, &keys)
-	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "proxy", "tunnels", "noRememberPassword", "createdAt"} {
+	for _, k := range []string{"folder", "notes", "noMonitor", "lastConnectedAt", "deletedAt", "termType", "backspace", "delete", "proxy", "tunnels", "noRememberPassword", "createdAt"} {
 		if _, ok := keys[k]; ok {
 			t.Errorf("plain host has %q: %s", k, data)
 		}

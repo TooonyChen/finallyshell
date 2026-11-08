@@ -56,7 +56,7 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageTerminal, title: locales.OptionsTerminal,
-		view: nil,
+		view: (*App).terminalDefaultsPage,
 	},
 	{
 		id: pageMouse, parent: pageTerminal, title: locales.OptionsMouse,

@@ -181,7 +181,7 @@ func TestEditorNewFromManager(t *testing.T) {
 	}
 	h := hosts[0]
 	if h.ID == "" || h.Addr != "example.com" || h.Port != 2222 || h.User != "deploy" || h.Auth != config.AuthPassword ||
-		h.Name != "" || !h.MonitorEnabled() || h.TermType != "" || h.Backspace != config.BackspaceDEL || a.passwords[h.ID] != "pw" {
+		h.Name != "" || !h.MonitorEnabled() || h.TermType != "" || h.Backspace != config.BackspaceDefault || h.Delete != config.DeleteDefault || a.passwords[h.ID] != "pw" {
 		t.Errorf("host %+v", h)
 	}
 	if !strings.Contains(string(*saved), `"addr":"example.com"`) {
@@ -265,7 +265,7 @@ func TestEditorEditKeepsFields(t *testing.T) {
 	if err := tt.Click(locales.EditorPageTerminal()); err != nil {
 		t.Fatal(err)
 	}
-	if fieldValue(t, tt, locales.FieldTermType()) != "vt220" || !tt.HasText(locales.BackspaceCtrlH()) || !tt.HasText("UTF-8") {
+	if fieldValue(t, tt, locales.FieldTermType()) != "vt220" || !tt.HasText(locales.KeySeqCtrlH()) || !tt.HasText("UTF-8") {
 		t.Errorf("terminal page; texts %q", tt.Texts())
 	}
 
@@ -342,20 +342,26 @@ func TestEditorChangesEveryField(t *testing.T) {
 	if !a.windowOpen(WindowEditor) {
 		t.Fatal("Escape in the suggestions closed the editor")
 	}
-	if err := tt.Click(locales.BackspaceDEL()); err != nil {
-		t.Fatal(err)
+	// Both keys start at "Default", naming what the settings send.
+	for _, k := range [][2]string{
+		{locales.KeySeqDefault(locales.KeySeqDEL()), locales.KeySeqCtrlH()},
+		{locales.KeySeqDefault(locales.KeySeqVT220()), locales.KeySeqDEL()},
+	} {
+		if err := tt.Click(k[0]); err != nil {
+			t.Fatal(err)
+		}
+		if err := tt.Click(k[1]); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := tt.Click(locales.BackspaceCtrlH()); err != nil {
-		t.Fatal(err)
-	}
-	if a.editor.backspace != config.BackspaceCtrlH {
-		t.Fatalf("backspace %q", a.editor.backspace)
+	if a.editor.backspace != config.BackspaceCtrlH || a.editor.delete != config.DeleteDEL {
+		t.Fatalf("backspace %q, delete %q", a.editor.backspace, a.editor.delete)
 	}
 	if err := tt.Click(locales.Ok()); err != nil {
 		t.Fatal(err)
 	}
 	want := &config.Host{ID: "h1", Name: "db", Addr: "db.example.com", Port: 2201, User: "admin", Auth: config.AuthPassword,
-		Folder: "f1", Notes: "line 1\nline 2", NoMonitor: true, TermType: "vt100", Backspace: config.BackspaceCtrlH}
+		Folder: "f1", Notes: "line 1\nline 2", NoMonitor: true, TermType: "vt100", Backspace: config.BackspaceCtrlH, Delete: config.DeleteDEL}
 	if a.windowOpen(WindowEditor) || !reflect.DeepEqual(h, want) || a.passwords["h1"] != "s3cret" {
 		t.Errorf("host\n%+v\nwant\n%+v", h, want)
 	}
@@ -619,10 +625,11 @@ func TestEditorPages(t *testing.T) {
 				t.Errorf("title %q", got)
 			}
 			wants := map[string][]string{
-				editorSSH:      {locales.SectionGeneral(), locales.SectionAuth(), locales.SectionAdvanced(), locales.FieldNotes(), locales.MonitorChannel()},
-				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), "UTF-8", locales.BackspaceDEL()},
-				editorProxy:    {locales.FieldProxyType(), locales.ProxyNone(), locales.ProxyNoneHint()},
-				editorTunnels:  {locales.TunnelsIntro(), locales.TunnelsEmpty(), locales.TunnelAdd()},
+				editorSSH: {locales.SectionGeneral(), locales.SectionAuth(), locales.SectionAdvanced(), locales.FieldNotes(), locales.MonitorChannel()},
+				editorTerminal: {locales.FieldTermType(), locales.FieldEncoding(), locales.FieldBackspace(), locales.FieldDelete(), "UTF-8",
+					locales.KeySeqDefault(locales.KeySeqDEL()), locales.KeySeqDefault(locales.KeySeqVT220())},
+				editorProxy:   {locales.FieldProxyType(), locales.ProxyNone(), locales.ProxyNoneHint()},
+				editorTunnels: {locales.TunnelsIntro(), locales.TunnelsEmpty(), locales.TunnelAdd()},
 			}
 			labels := map[string]string{
 				editorSSH: locales.EditorPageSSH(), editorTerminal: locales.EditorPageTerminal(),
@@ -653,33 +660,59 @@ func TestEditorPages(t *testing.T) {
 	}
 }
 
-// With Backspace sending ^H, the terminal sends it, and Esc ^H with Alt;
-// other keys, and every key by default, are the terminal's.
-func TestBackspaceSendsCtrlH(t *testing.T) {
-	if backspaceKey(config.BackspaceDEL, nil) != nil {
-		t.Fatal("a key handler for the default")
+// Backspace and Delete send what the host's choices say; other keys,
+// and both keys by default, are the terminal's.
+func TestKeySequences(t *testing.T) {
+	if keySequences(config.BackspaceDEL, config.DeleteVT220, nil) != nil {
+		t.Fatal("a key handler for the defaults")
 	}
-	conn := &keyConn{done: make(chan struct{})}
-	defer close(conn.done)
-	var term *terminal.Terminal
-	term, err := terminal.New(terminal.Options{Conn: conn, OnKey: backspaceKey(config.BackspaceCtrlH, func() *terminal.Terminal { return term })})
-	if err != nil {
-		t.Skip("no terminal:", err)
-	}
-	defer term.Close()
-	tt := ui.NewTester(func(c *ui.Context) { terminal.View(c, term).Fill().AutoFocus() }, 400, 200)
-	tt.Frame()
-	for _, k := range []keyCase{
-		{"Backspace", 0, ui.KeyBackspace, "\x08"},
-		{"Alt+Backspace", ui.Alt, ui.KeyBackspace, "\x1b\x08"},
-		{"Ctrl+H", ui.Ctrl, ui.KeyH, "\x08"},
-		{"Delete", 0, ui.KeyDelete, "\x1b[3~"},
-		{"Enter", 0, ui.KeyEnter, "\r"},
+	for _, tc := range []struct {
+		name string
+		bs   config.BackspaceKey
+		del  config.DeleteKey
+		keys []keyCase
+	}{
+		{"backspace ^H", config.BackspaceCtrlH, config.DeleteVT220, []keyCase{
+			{"Backspace", 0, ui.KeyBackspace, "\x08"},
+			{"Alt+Backspace", ui.Alt, ui.KeyBackspace, "\x1b\x08"},
+			{"Ctrl+H", ui.Ctrl, ui.KeyH, "\x08"},
+			{"Delete", 0, ui.KeyDelete, "\x1b[3~"},
+			{"Enter", 0, ui.KeyEnter, "\r"},
+		}},
+		{"delete ^?", config.BackspaceDEL, config.DeleteDEL, []keyCase{
+			{"Delete", 0, ui.KeyDelete, "\x7f"},
+			{"Ctrl+Delete", ui.Ctrl, ui.KeyDelete, "\x1b[3;5~"},
+			{"Backspace", 0, ui.KeyBackspace, "\x7f"},
+		}},
+		{"delete ^H", config.BackspaceDEL, config.DeleteCtrlH, []keyCase{
+			{"Delete", 0, ui.KeyDelete, "\x08"},
+			{"Shift+Delete", ui.Shift, ui.KeyDelete, "\x1b[3;2~"},
+			{"Backspace", 0, ui.KeyBackspace, "\x7f"},
+		}},
+		{"both ^H", config.BackspaceCtrlH, config.DeleteCtrlH, []keyCase{
+			{"Backspace", 0, ui.KeyBackspace, "\x08"},
+			{"Delete", 0, ui.KeyDelete, "\x08"},
+			{"Left", 0, ui.KeyLeft, "\x1b[D"},
+		}},
 	} {
-		tt.Key(k.mods, k.key)
-		if got := conn.sent(t, term); got != k.want {
-			t.Errorf("%s sent %q, want %q", k.name, got, k.want)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			conn := &keyConn{done: make(chan struct{})}
+			defer close(conn.done)
+			var term *terminal.Terminal
+			term, err := terminal.New(terminal.Options{Conn: conn, OnKey: keySequences(tc.bs, tc.del, func() *terminal.Terminal { return term })})
+			if err != nil {
+				t.Skip("no terminal:", err)
+			}
+			defer term.Close()
+			tt := ui.NewTester(func(c *ui.Context) { terminal.View(c, term).Fill().AutoFocus() }, 400, 200)
+			tt.Frame()
+			for _, k := range tc.keys {
+				tt.Key(k.mods, k.key)
+				if got := conn.sent(t, term); got != k.want {
+					t.Errorf("%s sent %q, want %q", k.name, got, k.want)
+				}
+			}
+		})
 	}
 }
 
@@ -701,5 +734,20 @@ func TestTerminalOptionsReachServer(t *testing.T) {
 	connectFake(t, a, p, old)
 	if pty := srv.lastPTY(); pty.term != "vt220" || pty.erase != 0x08 {
 		t.Errorf("pty %+v", pty)
+	}
+
+	// With ^H in the settings, a host on "Default" takes it, and one that
+	// chose ^? keeps it.
+	a.settings.TermBackspace = config.BackspaceCtrlH
+	del := &config.Host{ID: "del", Addr: srv.host, Port: srv.port, User: "u", Auth: config.AuthPassword, NoMonitor: true,
+		Backspace: config.BackspaceDEL}
+	a.hosts.Add(del)
+	connectFake(t, a, p, plain)
+	if pty := srv.lastPTY(); pty.erase != 0x08 {
+		t.Errorf("default host with ^H in the settings: pty %+v", pty)
+	}
+	connectFake(t, a, p, del)
+	if pty := srv.lastPTY(); pty.erase != 0x7f {
+		t.Errorf("host that chose ^?: pty %+v", pty)
 	}
 }

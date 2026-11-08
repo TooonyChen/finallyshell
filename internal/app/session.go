@@ -100,6 +100,7 @@ func (a *App) connect(s *Session, secret string) {
 	}
 	h := *s.Host
 	topts := a.terminalOptions(&h) // here, on the UI thread, which owns the settings
+	bs, del := a.settings.HostBackspace(&h), a.settings.HostDelete(&h)
 	passphrase := a.storedPassphrase(s.Host)
 	fail := func(err error) {
 		a.post(func() {
@@ -123,14 +124,14 @@ func (a *App) connect(s *Session, secret string) {
 			client.Close()
 			return
 		}
-		shell, err := sshx.OpenShell(client, sshx.PTY{Term: h.TermTypeOrDefault(), Erase: eraseChar(h.Backspace)})
+		shell, err := sshx.OpenShell(client, sshx.PTY{Term: h.TermTypeOrDefault(), Erase: eraseChar(bs)})
 		if err != nil {
 			client.Close()
 			fail(&stepError{"shell", err})
 			return
 		}
 		topts.Conn = shell
-		topts.OnKey = backspaceKey(h.Backspace, func() *terminal.Terminal { return s.term })
+		topts.OnKey = keySequences(bs, del, func() *terminal.Terminal { return s.term })
 		topts.OnExit = func(int) {
 			a.post(func() {
 				if s.status == statusConnected && s.cancel != nil {
@@ -213,40 +214,6 @@ func (a *App) applyTerminalSettings() {
 			a.applyMouse(s.term)
 			a.applyAppearance(s.term, look)
 		}
-	}
-}
-
-// eraseChar is the character Backspace sends with bs.
-func eraseChar(bs config.BackspaceKey) byte {
-	if bs == config.BackspaceCtrlH {
-		return 0x08
-	}
-	return 0x7f
-}
-
-// backspaceKey is the terminal's Options.OnKey for a host whose
-// Backspace sends bs: nil for ^?, which the terminal sends itself. With
-// ^H, Backspace sends it, and Alt+Backspace Esc and ^H, as xterm does
-// with backarrowKey off. term is the terminal the key goes to: the key
-// handler asks it as it runs, on the UI thread.
-func backspaceKey(bs config.BackspaceKey, term func() *terminal.Terminal) func(ui.Modifiers, ui.Key) bool {
-	if bs != config.BackspaceCtrlH {
-		return nil
-	}
-	return func(mods ui.Modifiers, key ui.Key) bool {
-		t := term()
-		if key != ui.KeyBackspace || t == nil {
-			return false
-		}
-		switch mods {
-		case 0:
-			t.Send([]byte{0x08})
-		case ui.Alt:
-			t.Send([]byte{0x1b, 0x08})
-		default:
-			return false
-		}
-		return true
 	}
 }
 
