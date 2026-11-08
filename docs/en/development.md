@@ -1,9 +1,11 @@
 # Development
 
+English · [简体中文](../zh-CN/development.md)
+
 How to build, test and release Finallyshell, and how the code is laid
 out. The repository rules (issues first, branch names, commit messages,
-pull requests) are in [CONTRIBUTING.md](../CONTRIBUTING.md) and
-[CLAUDE.md](../CLAUDE.md).
+pull requests) are in [CONTRIBUTING.md](../../CONTRIBUTING.md) and
+[CLAUDE.md](../../CLAUDE.md).
 
 - [Running](#running)
 - [Tests](#tests)

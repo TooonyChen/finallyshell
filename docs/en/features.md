@@ -1,5 +1,7 @@
 # Features in detail
 
+English · [简体中文](../zh-CN/features.md)
+
 This page describes what Finallyshell does, screen by screen, including
 the `settings.json` keys behind each option and the limits of what is
 supported. [configuration.md](configuration.md) covers the files on disk;

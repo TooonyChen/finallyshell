@@ -35,5 +35,5 @@ terms, open an issue instead of a pull request, and describe the change.
 - `go test -race ./...`, `go vet ./...` and `go tool mygo vet` must pass.
 
 [CLAUDE.md](CLAUDE.md) has the full rules, and
-[docs/development.md](docs/development.md) how to build, run and test the
+[docs/en/development.md](docs/en/development.md) how to build, run and test the
 app.

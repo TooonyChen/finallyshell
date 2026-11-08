@@ -16,7 +16,7 @@
 <p align="center">
   <b>English</b> · <a href="README.zh-CN.md">简体中文</a>
   <br>
-  <a href="#install">Install</a> · <a href="#features">Features</a> · <a href="#keyboard-shortcuts">Shortcuts</a> · <a href="docs/features.md">Full documentation</a>
+  <a href="#install">Install</a> · <a href="#features">Features</a> · <a href="#keyboard-shortcuts">Shortcuts</a> · <a href="docs/en/features.md">Full documentation</a>
 </p>
 
 <p align="center">
@@ -127,7 +127,7 @@ Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, B
 - Only one copy runs at a time: opening it again brings the running window forward.
 - Drag the dividers between panels to resize them; the sizes are remembered.
 
-[docs/features.md](docs/features.md) describes every feature in detail, and [docs/configuration.md](docs/configuration.md) the files the app keeps.
+[docs/en/features.md](docs/en/features.md) describes every feature in detail, and [docs/en/configuration.md](docs/en/configuration.md) the files the app keeps.
 
 ## Keyboard shortcuts
 
@@ -155,7 +155,7 @@ The defaults follow FinalShell. Change them in Options › Terminal › Shortcut
 
 **macOS says the app is damaged or can't be opened.** It isn't notarized yet. Run the `xattr` command under [Install](#install).
 
-**Where are my hosts and passwords stored?** Hosts and settings are JSON files in your user config folder (`~/Library/Application Support/finallyshell` on macOS, `%AppData%\finallyshell` on Windows, `~/.config/finallyshell` on Linux). Passwords are in the system keychain under the service name `finallyshell`. See [docs/configuration.md](docs/configuration.md).
+**Where are my hosts and passwords stored?** Hosts and settings are JSON files in your user config folder (`~/Library/Application Support/finallyshell` on macOS, `%AppData%\finallyshell` on Windows, `~/.config/finallyshell` on Linux). Passwords are in the system keychain under the service name `finallyshell`. See [docs/en/configuration.md](docs/en/configuration.md).
 
 **The monitor panel stays empty.** It reads `/proc` and works only with Linux servers. Some jump hosts refuse the extra channel it opens: turn off "Enable exec channel (server monitor)" for that host.
 
@@ -173,7 +173,7 @@ git clone https://github.com/TooonyChen/finallyshell.git
 cd finallyshell && go tool mygo dev
 ```
 
-`go tool mygo dev` runs the app and restarts it when the code changes; `go tool mygo build` packages it in `build/<platform>/`. The first run downloads libghostty-vt into your user cache folder. [docs/development.md](docs/development.md) covers tests, releases and the code's layout.
+`go tool mygo dev` runs the app and restarts it when the code changes; `go tool mygo build` packages it in `build/<platform>/`. The first run downloads libghostty-vt into your user cache folder. [docs/en/development.md](docs/en/development.md) covers tests, releases and the code's layout.
 
 ## Contributing
 

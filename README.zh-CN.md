@@ -16,7 +16,7 @@
 <p align="center">
   <a href="README.md">English</a> · <b>简体中文</b>
   <br>
-  <a href="#安装">安装</a> · <a href="#功能">功能</a> · <a href="#快捷键">快捷键</a> · <a href="docs/features.md">完整文档（英文）</a>
+  <a href="#安装">安装</a> · <a href="#功能">功能</a> · <a href="#快捷键">快捷键</a> · <a href="docs/zh-CN/features.md">完整文档</a>
 </p>
 
 <p align="center">
@@ -127,7 +127,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 - 同时只运行一个：再打开一次会把已经运行的窗口提到前面。
 - 拖动面板之间的分隔条调整大小，下次启动还是这个大小。
 
-每个功能的细节见 [docs/features.md](docs/features.md)，程序保存的文件见 [docs/configuration.md](docs/configuration.md)（都是英文）。
+每个功能的细节见 [docs/zh-CN/features.md](docs/zh-CN/features.md)，程序保存的文件见 [docs/zh-CN/configuration.md](docs/zh-CN/configuration.md)。
 
 ## 快捷键
 
@@ -155,7 +155,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 
 **macOS 提示应用已损坏、无法打开。** 还没有公证，运行[安装](#安装)里的 `xattr` 命令。
 
-**主机和密码存在哪里？** 主机和设置是用户配置目录里的 JSON 文件（macOS 是 `~/Library/Application Support/finallyshell`，Windows 是 `%AppData%\finallyshell`，Linux 是 `~/.config/finallyshell`）。密码在系统钥匙串里，服务名是 `finallyshell`。详见 [docs/configuration.md](docs/configuration.md)。
+**主机和密码存在哪里？** 主机和设置是用户配置目录里的 JSON 文件（macOS 是 `~/Library/Application Support/finallyshell`，Windows 是 `%AppData%\finallyshell`，Linux 是 `~/.config/finallyshell`）。密码在系统钥匙串里，服务名是 `finallyshell`。详见 [docs/zh-CN/configuration.md](docs/zh-CN/configuration.md)。
 
 **监控面板一直是空的。** 监控读 `/proc`，只支持 Linux 服务器。有些跳板机不允许它额外开的通道，可以在这个主机的设置里关掉“启用 exec 通道（服务器监控）”。
 
@@ -173,7 +173,7 @@ git clone https://github.com/TooonyChen/finallyshell.git
 cd finallyshell && go tool mygo dev
 ```
 
-`go tool mygo dev` 运行程序，改了代码自动重启；`go tool mygo build` 打包到 `build/<平台>/`。第一次运行会把 libghostty-vt 下载到用户缓存目录。测试、发布和代码结构见 [docs/development.md](docs/development.md)。
+`go tool mygo dev` 运行程序，改了代码自动重启；`go tool mygo build` 打包到 `build/<平台>/`。第一次运行会把 libghostty-vt 下载到用户缓存目录。测试、发布和代码结构见 [docs/zh-CN/development.md](docs/zh-CN/development.md)。
 
 ## 参与贡献
 

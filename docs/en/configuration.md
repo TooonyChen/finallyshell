@@ -1,5 +1,7 @@
 # Configuration files
 
+English · [简体中文](../zh-CN/configuration.md)
+
 Finallyshell keeps its hosts and settings in plain JSON files. Passwords
 are never written to them; they go to the system's credential store. This
 page describes the files. [features.md](features.md) describes the options
