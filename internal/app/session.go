@@ -55,6 +55,7 @@ type Session struct {
 
 	start startState // the start page, while it is a new tab
 	find  findState  // the find bar over the terminal
+	bar   cmdBar     // the command bar under the terminal (commandbar.go)
 }
 
 // errConnectionLost is a session whose shell ended.

@@ -19,4 +19,7 @@ type Shortcuts struct {
 	// SwitchTab is the modifiers that go with the digits 1 to 9, which
 	// switch to the tab of their number, as "Alt+1-9".
 	SwitchTab string `json:"switchTab,omitempty"`
+	// FocusCommandBar moves the keyboard to the command bar under the
+	// terminal, and back.
+	FocusCommandBar string `json:"focusCommandBar,omitempty"`
 }

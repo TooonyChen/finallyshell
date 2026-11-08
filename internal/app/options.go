@@ -27,6 +27,7 @@ const (
 	pageColors     = "terminal/colors"
 	pageBackground = "terminal/background"
 	pageFont       = "terminal/font"
+	pageCommandBar = "terminal/commandbar"
 	pageFiles      = "files"
 	pageFileIcons  = "files/icons"
 	pageSync       = "sync"
@@ -78,6 +79,10 @@ var optionPages = []optionPage{
 	{
 		id: pageFont, parent: pageTerminal, title: locales.OptionsFont,
 		view: (*App).fontPage,
+	},
+	{
+		id: pageCommandBar, parent: pageTerminal, title: locales.OptionsCommandBar,
+		view: (*App).commandBarPage,
 	},
 	{
 		id: pageFiles, title: locales.OptionsFileManager,

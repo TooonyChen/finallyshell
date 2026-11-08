@@ -149,6 +149,25 @@ type Settings struct {
 	// Sync is the Sync page of the options: where connections and
 	// settings are synced, if anywhere (sync.go).
 	Sync SyncSettings `json:"sync,omitzero"`
+
+	// The Command bar page of the options (Terminal › Command bar), all
+	// on by default, so each is named for turning it off.
+	//
+	// NoCommandBar hides the command bar under the terminal in every
+	// session, and with it everything below: no popups, no history read
+	// or kept, no command run on the server for it.
+	NoCommandBar bool `json:"noCommandBar,omitempty"`
+	// NoCommandBarPaths turns off the path picker that Tab opens.
+	NoCommandBarPaths bool `json:"noCommandBarPaths,omitempty"`
+	// NoCommandBarHistory turns off the history picker (Up, Alt+H), and
+	// keeping the commands the bar sends.
+	NoCommandBarHistory bool `json:"noCommandBarHistory,omitempty"`
+	// NoCommandBarCommands turns off completing command names with Tab,
+	// which lists the commands on the server's PATH once a session.
+	NoCommandBarCommands bool `json:"noCommandBarCommands,omitempty"`
+	// NoServerHistory keeps the history picker from reading the server's
+	// ~/.bash_history and ~/.zsh_history.
+	NoServerHistory bool `json:"noServerHistory,omitempty"`
 }
 
 // IconThemesDir is where the VSIX files of the icon themes the user

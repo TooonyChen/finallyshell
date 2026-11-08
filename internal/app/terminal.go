@@ -27,7 +27,11 @@ func (a *App) terminalArea(c *ui.Context) {
 			a.terminalBackdrop(c, 0).Grow(1).Padding(4, 0, 0, 6).Children(func() {
 				view := terminal.View(c, s.term).Fill().AutoFocus()
 				a.findBar(c, s, view)
+				a.barFocus(s, view)
 			})
+			if a.commandBarOn() {
+				a.commandBar(c, s)
+			}
 			return
 		}
 		connecting := s.status == statusConnecting
@@ -44,6 +48,9 @@ func (a *App) terminalArea(c *ui.Context) {
 				ui.Text(c, s.statusText()).TextColor(termText).FontSize(15)
 			}
 		})
+		if a.commandBarOn() {
+			a.commandBar(c, s) // disabled, until the shell is there
+		}
 	})
 }
 

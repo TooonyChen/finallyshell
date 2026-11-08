@@ -3650,6 +3650,346 @@ func (msgs Messages) OptionWheelLinesWindows() string {
 	return Catalog.Format(msgs.locale, "optionWheelLinesWindows", nil)
 }
 
+// OptionsCommandBar says "Command bar"
+// in the language the app shows.
+func OptionsCommandBar() string { return In(i18n.Locale()).OptionsCommandBar() }
+
+// OptionsCommandBar says "Command bar"
+// in the language of msgs.
+func (msgs Messages) OptionsCommandBar() string {
+	return Catalog.Format(msgs.locale, "optionsCommandBar", nil)
+}
+
+// CmdBarLabel says "Command bar"
+// in the language the app shows.
+func CmdBarLabel() string { return In(i18n.Locale()).CmdBarLabel() }
+
+// CmdBarLabel says "Command bar"
+// in the language of msgs.
+func (msgs Messages) CmdBarLabel() string {
+	return Catalog.Format(msgs.locale, "cmdBarLabel", nil)
+}
+
+// CmdBarCommands says "Commands"
+// in the language the app shows.
+func CmdBarCommands() string { return In(i18n.Locale()).CmdBarCommands() }
+
+// CmdBarCommands says "Commands"
+// in the language of msgs.
+func (msgs Messages) CmdBarCommands() string {
+	return Catalog.Format(msgs.locale, "cmdBarCommands", nil)
+}
+
+// CmdBarHistory says "History"
+// in the language the app shows.
+func CmdBarHistory() string { return In(i18n.Locale()).CmdBarHistory() }
+
+// CmdBarHistory says "History"
+// in the language of msgs.
+func (msgs Messages) CmdBarHistory() string {
+	return Catalog.Format(msgs.locale, "cmdBarHistory", nil)
+}
+
+// CmdBarNoMatches says "No matches"
+// in the language the app shows.
+func CmdBarNoMatches() string { return In(i18n.Locale()).CmdBarNoMatches() }
+
+// CmdBarNoMatches says "No matches"
+// in the language of msgs.
+func (msgs Messages) CmdBarNoMatches() string {
+	return Catalog.Format(msgs.locale, "cmdBarNoMatches", nil)
+}
+
+// CmdBarPickHint says "Arrows choose, Enter or Tab inserts"
+// in the language the app shows.
+func CmdBarPickHint() string { return In(i18n.Locale()).CmdBarPickHint() }
+
+// CmdBarPickHint says "Arrows choose, Enter or Tab inserts"
+// in the language of msgs.
+func (msgs Messages) CmdBarPickHint() string {
+	return Catalog.Format(msgs.locale, "cmdBarPickHint", nil)
+}
+
+// CmdBarHistoryHint says "←/→ picks a word, Enter inserts"
+// in the language the app shows.
+func CmdBarHistoryHint() string { return In(i18n.Locale()).CmdBarHistoryHint() }
+
+// CmdBarHistoryHint says "←/→ picks a word, Enter inserts"
+// in the language of msgs.
+func (msgs Messages) CmdBarHistoryHint() string {
+	return Catalog.Format(msgs.locale, "cmdBarHistoryHint", nil)
+}
+
+// CmdBarClearList says "Clear list"
+// in the language the app shows.
+func CmdBarClearList() string { return In(i18n.Locale()).CmdBarClearList() }
+
+// CmdBarClearList says "Clear list"
+// in the language of msgs.
+func (msgs Messages) CmdBarClearList() string {
+	return Catalog.Format(msgs.locale, "cmdBarClearList", nil)
+}
+
+// CmdBarMore says "{count, plural, one {and # more} other {and # more}}"
+// in the language the app shows.
+func CmdBarMore(count int) string { return In(i18n.Locale()).CmdBarMore(count) }
+
+// CmdBarMore says "{count, plural, one {and # more} other {and # more}}"
+// in the language of msgs.
+func (msgs Messages) CmdBarMore(count int) string {
+	return Catalog.Format(msgs.locale, "cmdBarMore", map[string]any{"count": count})
+}
+
+// CmdBarNoSFTP says "The server's files can't be read: SFTP isn't available."
+// in the language the app shows.
+func CmdBarNoSFTP() string { return In(i18n.Locale()).CmdBarNoSFTP() }
+
+// CmdBarNoSFTP says "The server's files can't be read: SFTP isn't available."
+// in the language of msgs.
+func (msgs Messages) CmdBarNoSFTP() string {
+	return Catalog.Format(msgs.locale, "cmdBarNoSFTP", nil)
+}
+
+// CmdBarNoCommands says "Couldn't list the server's commands."
+// in the language the app shows.
+func CmdBarNoCommands() string { return In(i18n.Locale()).CmdBarNoCommands() }
+
+// CmdBarNoCommands says "Couldn't list the server's commands."
+// in the language of msgs.
+func (msgs Messages) CmdBarNoCommands() string {
+	return Catalog.Format(msgs.locale, "cmdBarNoCommands", nil)
+}
+
+// CmdBarPopups says "Popups"
+// in the language the app shows.
+func CmdBarPopups() string { return In(i18n.Locale()).CmdBarPopups() }
+
+// CmdBarPopups says "Popups"
+// in the language of msgs.
+func (msgs Messages) CmdBarPopups() string {
+	return Catalog.Format(msgs.locale, "cmdBarPopups", nil)
+}
+
+// CmdBarKeys says "Keys"
+// in the language the app shows.
+func CmdBarKeys() string { return In(i18n.Locale()).CmdBarKeys() }
+
+// CmdBarKeys says "Keys"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeys() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeys", nil)
+}
+
+// CmdBarKeyEnter says "Sends the line to the shell"
+// in the language the app shows.
+func CmdBarKeyEnter() string { return In(i18n.Locale()).CmdBarKeyEnter() }
+
+// CmdBarKeyEnter says "Sends the line to the shell"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyEnter() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyEnter", nil)
+}
+
+// CmdBarKeyTab says "Completes a path, or the command name in the first word"
+// in the language the app shows.
+func CmdBarKeyTab() string { return In(i18n.Locale()).CmdBarKeyTab() }
+
+// CmdBarKeyTab says "Completes a path, or the command name in the first word"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyTab() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyTab", nil)
+}
+
+// CmdBarKeyHistory says "Opens the history list"
+// in the language the app shows.
+func CmdBarKeyHistory() string { return In(i18n.Locale()).CmdBarKeyHistory() }
+
+// CmdBarKeyHistory says "Opens the history list"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyHistory() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyHistory", nil)
+}
+
+// CmdBarKeyFields says "In the history list: picks one word of the command"
+// in the language the app shows.
+func CmdBarKeyFields() string { return In(i18n.Locale()).CmdBarKeyFields() }
+
+// CmdBarKeyFields says "In the history list: picks one word of the command"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyFields() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyFields", nil)
+}
+
+// CmdBarKeyEsc says "Closes the list, then goes back to the terminal"
+// in the language the app shows.
+func CmdBarKeyEsc() string { return In(i18n.Locale()).CmdBarKeyEsc() }
+
+// CmdBarKeyEsc says "Closes the list, then goes back to the terminal"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyEsc() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyEsc", nil)
+}
+
+// CmdBarKeyFocus says "Moves the keyboard to the bar and back (Terminal › Shortcuts)"
+// in the language the app shows.
+func CmdBarKeyFocus() string { return In(i18n.Locale()).CmdBarKeyFocus() }
+
+// CmdBarKeyFocus says "Moves the keyboard to the bar and back (Terminal › Shortcuts)"
+// in the language of msgs.
+func (msgs Messages) CmdBarKeyFocus() string {
+	return Catalog.Format(msgs.locale, "cmdBarKeyFocus", nil)
+}
+
+// OptionShowCommandBar says "Show the command bar under the terminal"
+// in the language the app shows.
+func OptionShowCommandBar() string { return In(i18n.Locale()).OptionShowCommandBar() }
+
+// OptionShowCommandBar says "Show the command bar under the terminal"
+// in the language of msgs.
+func (msgs Messages) OptionShowCommandBar() string {
+	return Catalog.Format(msgs.locale, "optionShowCommandBar", nil)
+}
+
+// OptionShowCommandBarNote says "A line under the terminal for typing commands, as FinalShell's command input box, with completion and history."
+// in the language the app shows.
+func OptionShowCommandBarNote() string { return In(i18n.Locale()).OptionShowCommandBarNote() }
+
+// OptionShowCommandBarNote says "A line under the terminal for typing commands, as FinalShell's command input box, with completion and history."
+// in the language of msgs.
+func (msgs Messages) OptionShowCommandBarNote() string {
+	return Catalog.Format(msgs.locale, "optionShowCommandBarNote", nil)
+}
+
+// OptionCmdBarPaths says "Path picker"
+// in the language the app shows.
+func OptionCmdBarPaths() string { return In(i18n.Locale()).OptionCmdBarPaths() }
+
+// OptionCmdBarPaths says "Path picker"
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarPaths() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarPaths", nil)
+}
+
+// OptionCmdBarPathsNote says "Lists the server's folder for the path being typed, in columns."
+// in the language the app shows.
+func OptionCmdBarPathsNote() string { return In(i18n.Locale()).OptionCmdBarPathsNote() }
+
+// OptionCmdBarPathsNote says "Lists the server's folder for the path being typed, in columns."
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarPathsNote() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarPathsNote", nil)
+}
+
+// OptionCmdBarHistory says "History picker"
+// in the language the app shows.
+func OptionCmdBarHistory() string { return In(i18n.Locale()).OptionCmdBarHistory() }
+
+// OptionCmdBarHistory says "History picker"
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarHistory() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarHistory", nil)
+}
+
+// OptionCmdBarHistoryNote says "Lists the commands sent before; the bar keeps those it sends for each host."
+// in the language the app shows.
+func OptionCmdBarHistoryNote() string { return In(i18n.Locale()).OptionCmdBarHistoryNote() }
+
+// OptionCmdBarHistoryNote says "Lists the commands sent before; the bar keeps those it sends for each host."
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarHistoryNote() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarHistoryNote", nil)
+}
+
+// OptionCmdBarCommands says "Command completion"
+// in the language the app shows.
+func OptionCmdBarCommands() string { return In(i18n.Locale()).OptionCmdBarCommands() }
+
+// OptionCmdBarCommands says "Command completion"
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarCommands() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarCommands", nil)
+}
+
+// OptionCmdBarCommandsNote says "Lists the commands on the server's PATH for the first word, read once per connection."
+// in the language the app shows.
+func OptionCmdBarCommandsNote() string { return In(i18n.Locale()).OptionCmdBarCommandsNote() }
+
+// OptionCmdBarCommandsNote says "Lists the commands on the server's PATH for the first word, read once per connection."
+// in the language of msgs.
+func (msgs Messages) OptionCmdBarCommandsNote() string {
+	return Catalog.Format(msgs.locale, "optionCmdBarCommandsNote", nil)
+}
+
+// OptionServerHistory says "Read the server's shell history"
+// in the language the app shows.
+func OptionServerHistory() string { return In(i18n.Locale()).OptionServerHistory() }
+
+// OptionServerHistory says "Read the server's shell history"
+// in the language of msgs.
+func (msgs Messages) OptionServerHistory() string {
+	return Catalog.Format(msgs.locale, "optionServerHistory", nil)
+}
+
+// OptionServerHistoryNote says "Adds the commands in ~/.bash_history and ~/.zsh_history to the history picker, read over SFTP once per connection."
+// in the language the app shows.
+func OptionServerHistoryNote() string { return In(i18n.Locale()).OptionServerHistoryNote() }
+
+// OptionServerHistoryNote says "Adds the commands in ~/.bash_history and ~/.zsh_history to the history picker, read over SFTP once per connection."
+// in the language of msgs.
+func (msgs Messages) OptionServerHistoryNote() string {
+	return Catalog.Format(msgs.locale, "optionServerHistoryNote", nil)
+}
+
+// ClearAllHistory says "Clear history of all hosts…"
+// in the language the app shows.
+func ClearAllHistory() string { return In(i18n.Locale()).ClearAllHistory() }
+
+// ClearAllHistory says "Clear history of all hosts…"
+// in the language of msgs.
+func (msgs Messages) ClearAllHistory() string {
+	return Catalog.Format(msgs.locale, "clearAllHistory", nil)
+}
+
+// ClearAllHistoryNote says "The history is kept in the history folder of the settings folder, one file per host. The servers' own history files a…"
+// in the language the app shows.
+func ClearAllHistoryNote() string { return In(i18n.Locale()).ClearAllHistoryNote() }
+
+// ClearAllHistoryNote says "The history is kept in the history folder of the settings folder, one file per host. The servers' own history files a…"
+// in the language of msgs.
+func (msgs Messages) ClearAllHistoryNote() string {
+	return Catalog.Format(msgs.locale, "clearAllHistoryNote", nil)
+}
+
+// ClearAllHistoryTitle says "Clear the command history of all hosts?"
+// in the language the app shows.
+func ClearAllHistoryTitle() string { return In(i18n.Locale()).ClearAllHistoryTitle() }
+
+// ClearAllHistoryTitle says "Clear the command history of all hosts?"
+// in the language of msgs.
+func (msgs Messages) ClearAllHistoryTitle() string {
+	return Catalog.Format(msgs.locale, "clearAllHistoryTitle", nil)
+}
+
+// ClearAllHistoryDetail says "The commands kept from the command bar are deleted. This can't be undone."
+// in the language the app shows.
+func ClearAllHistoryDetail() string { return In(i18n.Locale()).ClearAllHistoryDetail() }
+
+// ClearAllHistoryDetail says "The commands kept from the command bar are deleted. This can't be undone."
+// in the language of msgs.
+func (msgs Messages) ClearAllHistoryDetail() string {
+	return Catalog.Format(msgs.locale, "clearAllHistoryDetail", nil)
+}
+
+// ClearAllHistoryYes says "Clear history"
+// in the language the app shows.
+func ClearAllHistoryYes() string { return In(i18n.Locale()).ClearAllHistoryYes() }
+
+// ClearAllHistoryYes says "Clear history"
+// in the language of msgs.
+func (msgs Messages) ClearAllHistoryYes() string {
+	return Catalog.Format(msgs.locale, "clearAllHistoryYes", nil)
+}
+
 // KeySeqVT220 says "VT220 (ESC [3~)"
 // in the language the app shows.
 func KeySeqVT220() string { return In(i18n.Locale()).KeySeqVT220() }
@@ -4390,6 +4730,16 @@ func ScSwitchTab() string { return In(i18n.Locale()).ScSwitchTab() }
 // in the language of msgs.
 func (msgs Messages) ScSwitchTab() string {
 	return Catalog.Format(msgs.locale, "scSwitchTab", nil)
+}
+
+// ScFocusCommandBar says "Focus command bar"
+// in the language the app shows.
+func ScFocusCommandBar() string { return In(i18n.Locale()).ScFocusCommandBar() }
+
+// ScFocusCommandBar says "Focus command bar"
+// in the language of msgs.
+func (msgs Messages) ScFocusCommandBar() string {
+	return Catalog.Format(msgs.locale, "scFocusCommandBar", nil)
 }
 
 // ShortcutColAction says "Action"

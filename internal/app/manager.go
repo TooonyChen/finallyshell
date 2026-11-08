@@ -878,6 +878,7 @@ func (a *App) deleteHostForever(h *config.Host) {
 	delete(a.passwords, h.ID)
 	delete(a.passwords, proxySecretKey(h.ID))
 	a.deleteHostSecrets(h.ID)
+	a.deleteHostHistory(h.ID)
 	a.saveFromManager()
 }
 

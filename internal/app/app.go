@@ -220,6 +220,9 @@ type App struct {
 	// tests replace.
 	sync      syncState
 	newRemote func(config.SyncSettings, string) (cloudsync.Remote, error)
+
+	// The command bar's history of each host (commandbar_data.go).
+	history cmdHistories
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.

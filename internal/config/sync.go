@@ -93,6 +93,7 @@ var (
 		"termBackgroundFit", "termBackgroundOpacity",
 		"keepManagerOpen",
 		"fileIconTheme", // only the themes every copy has: see portable
+		"noCommandBar", "noCommandBarPaths", "noCommandBarHistory", "noCommandBarCommands", "noServerHistory",
 	}
 	localSettings = []string{
 		"sidebarWidth", "monitorPercent", "terminalPercent", "treeWidth",

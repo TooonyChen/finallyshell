@@ -43,6 +43,7 @@ const (
 	scManager
 	scNewTab
 	scSwitchTab
+	scFocusBar
 )
 
 // shortcutAction is an action of the shortcuts page.
@@ -125,6 +126,13 @@ var shortcutActions = []shortcutAction{
 		id: scSwitchTab, title: locales.ScSwitchTab, digits: true,
 		field: func(s *config.Shortcuts) *string { return &s.SwitchTab },
 		mac:   keyCombo{ui.Super, ui.Key1}, other: keyCombo{ui.Alt, ui.Key1},
+	},
+	{
+		// L for the line; Ctrl+Shift+K is the terminal's clear screen on
+		// Windows, as in Windows Terminal, and Cmd+K on macOS.
+		id: scFocusBar, title: locales.ScFocusCommandBar,
+		field: func(s *config.Shortcuts) *string { return &s.FocusCommandBar },
+		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyL}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyL},
 	},
 }
 
@@ -415,6 +423,8 @@ func (a *App) shortcuts(c *ui.Context) {
 		a.openFind()
 	case pressed(scFullScreen):
 		a.setFullScreen(!a.fullScreen.on)
+	case a.commandBarOn() && pressed(scFocusBar):
+		a.toggleBarFocus()
 	case a.fullScreen.on && !a.terminalLive() && c.Shortcut(0, ui.KeyEscape):
 		// Esc is the shell's while it runs, as vi's; it leaves full screen
 		// where no shell takes it.
