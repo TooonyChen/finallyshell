@@ -188,7 +188,7 @@ func (a *App) startEmpty(c *ui.Context) {
 				a.startNewConnection()
 			}
 			if ui.Button(c, locales.ConnectionManager()).Clicked() {
-				a.openManager()
+				a.showManager(false)
 			}
 		})
 	})

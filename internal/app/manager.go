@@ -89,7 +89,13 @@ func (m *managerState) reveal(it managerItem) { m.pick = &it }
 
 // openManager opens the connection manager, or brings it to the front,
 // and the connection editor for a new host when there is no host to list.
-func (a *App) openManager() {
+func (a *App) openManager() { a.showManager(true) }
+
+// showManager opens the connection manager, or brings it to the front.
+// With newHost, a manager with no host to list opens the editor for a new
+// host too; without, it opens alone, as the empty start page wants it, so
+// that its Import is not behind the editor.
+func (a *App) showManager(newHost bool) {
 	m := &a.manager
 	if a.windowOpen(WindowManager) {
 		a.plat.FocusWindow(WindowManager)
@@ -107,7 +113,7 @@ func (a *App) openManager() {
 		a.searchChanged()
 	}
 	a.openWindow(managerSpec, a.managerView)
-	if len(a.hosts.Live()) == 0 {
+	if newHost && len(a.hosts.Live()) == 0 {
 		a.openEditor(nil, WindowManager)
 	}
 }
