@@ -110,6 +110,8 @@ Files and folders get icons from VS Code icon themes. Material Icon Theme and Se
 
 Pick a font, size, line height and weight, with or without ligatures, any of the hundreds of color schemes Ghostty ships, and an optional background image. Changes apply to open terminals at once. The terminal also has find (<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>), full screen, copy on select, a choice of what right-click does, and links you can open with <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+click.
 
+Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, Big5, Shift_JIS, EUC-JP, EUC-KR, ISO-8859-1 and Windows-1252, set once in Options or per host. What Backspace and Delete send can be changed the same way.
+
 <table>
   <tr>
     <td><img src="docs/screenshots/terminal-colors-en.png" alt="Color schemes with a live preview"></td>

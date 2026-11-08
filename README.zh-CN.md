@@ -110,6 +110,8 @@ macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>
 
 可以选字体、字号、行高、粗细，开关连字，从 Ghostty 自带的几百个配色里挑一个，还可以加背景图片，改了立刻应用到所有打开的终端。另外还有查找（<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>）、全屏、选中即复制、自定义右键行为，<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+单击打开链接。
 
+locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、Big5、Shift_JIS、EUC-JP、EUC-KR、ISO-8859-1 和 Windows-1252，在“选项”里统一设置，也可以按主机单独设置。退格键和删除键发送什么也一样可以改。
+
 <table>
   <tr>
     <td><img src="docs/screenshots/terminal-colors-zh-CN.png" alt="配色和实时预览"></td>

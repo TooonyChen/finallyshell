@@ -33,6 +33,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Options window](#options-window)
   - [General](#general)
   - [Transfers](#transfers)
+  - [Terminal](#terminal-defaults)
   - [Terminal › Mouse](#terminal--mouse)
   - [Terminal › Shortcuts](#terminal--shortcuts)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -237,7 +238,8 @@ off).
   own `config.json` and the connection only records the key's ID; that
   file is not read, so edit the connection and choose the key file.
 - Proxies (`proxy_id` points into FinalShell's own proxy list), port
-  forwarding, terminal encoding and backspace settings are not imported. A
+  forwarding, terminal encoding and backspace settings are not imported
+  (the format FinalShell stores those values in is not known yet). A
   connection that used a proxy says so in the Note column.
 
 FinalShell's file format has no official documentation. The import follows
@@ -269,10 +271,16 @@ Errors are shown under the field they belong to.
 
 - Terminal type: the `TERM` sent to the server, `xterm-256color` by
   default.
-- Backspace sends: `^?` (DEL, the default) or `^H`. The erase character of
-  the server's terminal is set to match.
-- Character encoding: only UTF-8 for now. libghostty-vt decodes UTF-8 only,
-  and the app does no conversion.
+- Backspace sends, Delete sends and Character encoding: the first choice
+  of each is "Default: ...", which follows the
+  [Terminal page of Options](#terminal-defaults); each can also be set for
+  this host alone. The choices are the same as on that page.
+
+In `hosts.json` these are `backspace` (`del`, `ctrl-h`), `delete`
+(`vt220`, `del`, `ctrl-h`) and `encoding` (the names are listed under
+[Terminal](#terminal-defaults)); a missing field means "Default". Hosts
+saved by older versions have no `backspace`, so they follow the global
+setting, whose default is still `^?`: their behavior does not change.
 
 ### Proxy and jump hosts
 
@@ -818,6 +826,48 @@ In `settings.json` these are `downloadDir` (missing means the system's
 Downloads folder; choosing the system's Downloads folder again is also
 stored as missing) and `askDownloadDir`. If the download folder has been
 deleted, it is created again when downloading.
+
+<a id="terminal-defaults"></a>
+
+### Terminal
+
+The Terminal page holds the global defaults for the character encoding
+and the key sequences. Hosts set to "Default" in the connection editor use
+them.
+
+- Character encoding: UTF-8 (the default), GBK, GB18030, Big5, Shift_JIS,
+  EUC-JP, EUC-KR, ISO-8859-1 or Windows-1252. It has to match the server's
+  locale: older Chinese servers use a GBK locale, and with UTF-8 their
+  Chinese text is garbled.
+  - libghostty-vt decodes UTF-8 only, so the app converts between the SSH
+    connection and the terminal (`internal/termenc`, with
+    `golang.org/x/text`). The server's output is decoded into UTF-8 before
+    it reaches the terminal, and a character split across two packets is
+    put back together; bytes that cannot be decoded show as U+FFFD.
+    Keyboard input, pastes and the terminal's replies are encoded before
+    they are sent to the server; a character the encoding lacks is sent as
+    `?` (not x/text's default 0x1A, which is Ctrl+Z in a shell). With UTF-8
+    nothing is converted.
+  - File names in the file panel and the built-in editor are still handled
+    as UTF-8, and the server monitor reads ASCII output only, so neither is
+    affected.
+  - In `settings.json` this is `termEncoding`, in `hosts.json` `encoding`,
+    with the values `utf-8`, `gbk`, `gb18030`, `big5`, `shift_jis`,
+    `euc-jp`, `euc-kr`, `iso-8859-1` and `windows-1252`. Unknown values
+    mean UTF-8.
+- Backspace sends: `^?` (ASCII DEL, the default) or `^H` (Control-H, which
+  some old systems and serial consoles need). On connecting, the erase
+  character of the server's terminal is set to match. Alt+Backspace sends
+  Esc followed by the same character. FinalShell's third choice, "VT220 -
+  Delete" (`ESC [3~`), deletes forward in a shell, so it is not offered.
+- Delete sends: `ESC [3~` (VT220, the default), `^?` or `^H`. Only Delete
+  without modifiers changes; Ctrl+Delete and the like still send the
+  plugin's `ESC [3;5~`, which programs read as Delete with modifiers.
+- Changes apply the next time a session connects, since the conversion and
+  the erase character are set when connecting. The page has "Restore
+  defaults". In `settings.json` these are `termBackspace` (`ctrl-h`;
+  missing means `^?`) and `termDelete` (`del`, `ctrl-h`; missing means
+  `ESC [3~`). Unknown values mean the default.
 
 ### Terminal › Mouse
 

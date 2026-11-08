@@ -145,9 +145,10 @@ locales/             UI strings: en.json, zh-Hans.json; catalog_gen.go is genera
 tools/release/       release tools: works out the next version, writes the release notes, collects third-party licenses (notices/ has the licenses of libraries packaged as binaries)
 tools/screenshots/   regenerates the README screenshots in docs/screenshots/ from the internal/app tests
 internal/
-  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings
+  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send
   importer/          reads other clients' connections: finalshell.go finds FinalShell's folder, reads the connections and folders in conn, finds duplicates, imports by folder; testdata has made-up samples
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
+  termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
   sshtest/           in-process SSH server for tests: password login, an empty shell, port forwarding; StartSFTP also serves SFTP (the local file system)
   monitor/           collecting and parsing server status
   remotefs/          SFTP listing, upload, download (with progress and cancel); textfile.go is the editor's reading (detecting binary files) and safe saving
@@ -177,6 +178,7 @@ internal/
     import.go        the "Import from FinalShell" window: finding or choosing the folder, preview and checkboxes, showing the result in the connection manager
     dialogs.go       password, host key and replace confirmations
     options.go       options window: the list of pages and the General page
+    keyseq.go        the Terminal page of the options (default encoding, Backspace and Delete), the choices the connection editor shares, and the key handlers that send them
     mouse.go         the Terminal › Mouse page, and how its settings become terminal options
     shortcuts.go     shortcuts: actions and their defaults per platform, keys that cannot be used, conflicts, dispatching window shortcuts, the terminal's Keybinds
     shortcutspage.go the Terminal › Shortcuts page and the key recorder

@@ -74,6 +74,20 @@ type Settings struct {
 	// other symbols.
 	OptionAsAlt bool `json:"optionAsAlt,omitempty"`
 
+	// The Terminal page of the options: the defaults of the hosts whose
+	// own setting is "Default".
+	//
+	// TermBackspace is what Backspace sends: "" for ^?, or
+	// BackspaceCtrlH. Read it with TermBackspaceKey or HostBackspace.
+	TermBackspace BackspaceKey `json:"termBackspace,omitempty"`
+	// TermDelete is what Delete sends: "" for ESC [ 3 ~, DeleteDEL or
+	// DeleteCtrlH. Read it with TermDeleteKey or HostDelete.
+	TermDelete DeleteKey `json:"termDelete,omitempty"`
+	// TermEncoding is the character encoding of the terminal: "" for
+	// UTF-8, else one of Encodings. Read it with TermEncodingName or
+	// HostEncoding.
+	TermEncoding Encoding `json:"termEncoding,omitempty"`
+
 	// The terminal's look: the Font, Color scheme and Background image
 	// pages of the options. Zero is the default of each.
 	//

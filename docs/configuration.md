@@ -113,7 +113,9 @@ Fields with empty values are not written. Missing fields mean:
 |---|---|---|
 | `noMonitor` | The server monitor is on. | `true`: no monitor, and no extra exec channel. |
 | `termType` | `xterm-256color` | The `TERM` sent to the server. |
-| `backspace` | Backspace sends `^?`. | `ctrl-h`: Backspace sends `^H`. |
+| `backspace` | The global setting (`termBackspace`). | `del`: Backspace sends `^?`; `ctrl-h`: it sends `^H`. |
+| `delete` | The global setting (`termDelete`). | `vt220`: Delete sends `ESC [3~`; `del`: `^?`; `ctrl-h`: `^H`. |
+| `encoding` | The global setting (`termEncoding`). | `utf-8`, `gbk`, `gb18030`, `big5`, `shift_jis`, `euc-jp`, `euc-kr`, `iso-8859-1` or `windows-1252`; unknown values mean UTF-8. |
 | `noRememberPassword` | Passwords are remembered. | `true`: "Remember password" was turned off. |
 
 ### Safety
@@ -146,6 +148,9 @@ default.
 | `noLinkClick` | `true` keeps Ctrl+click (Cmd+click) from opening links. | Links open. |
 | `wheelLines` | Lines per mouse wheel notch, 1 to 20 (higher reads as 20). | 3 |
 | `shortcuts` | Changed shortcuts only, such as `{"find": "Ctrl+Alt+F", "closeTab": "none"}`. | Platform defaults. |
+| `termEncoding` | The server's character encoding for hosts set to "Default": `gbk`, `gb18030`, `big5`, `shift_jis`, `euc-jp`, `euc-kr`, `iso-8859-1` or `windows-1252`. | `utf-8`, no conversion (also for unknown values). |
+| `termBackspace` | `ctrl-h`: Backspace sends `^H`, for hosts set to "Default". | `^?` |
+| `termDelete` | `del` or `ctrl-h`: what Delete sends, for hosts set to "Default". | `ESC [3~` |
 | `optionAsAlt` | `true` makes Option the Alt (Meta) key on macOS. | Off. |
 | `termFontFamily` | Terminal font, a comma-separated list. | JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace |
 | `termFontSize` | Font size, 6 to 48. | 13.5 |
@@ -163,6 +168,7 @@ default.
 
 Details of each option are in [features.md](features.md): see
 [General](features.md#general), [Transfers](features.md#transfers),
+[Terminal](features.md#terminal-defaults),
 [Terminal › Mouse](features.md#terminal--mouse),
 [Terminal › Shortcuts](features.md#terminal--shortcuts),
 [Appearance](features.md#appearance-font-color-scheme-background-image),

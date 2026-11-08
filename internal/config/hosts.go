@@ -64,8 +64,11 @@ type Host struct {
 	// TermType is the terminal type the shell is asked for, its TERM: ""
 	// for DefaultTermType. Read it with TermTypeOrDefault.
 	TermType string `json:"termType,omitempty"`
-	// Backspace is what the Backspace key sends: "" for ^? (DEL), as
-	// most terminals send, or BackspaceCtrlH.
+	// Backspace is what the Backspace key sends: "" for what the
+	// settings say (Settings.TermBackspace), else BackspaceDEL or
+	// BackspaceCtrlH. Hosts saved before the settings had it have "",
+	// and send ^? as before, the settings' default. Read it with
+	// Settings.HostBackspace.
 	Backspace BackspaceKey `json:"backspace,omitempty"`
 	// NoRememberPassword keeps the host's password, or its key's
 	// passphrase, out of the system's credential store: the app keeps it
@@ -83,6 +86,15 @@ type Host struct {
 	// ssh -L, -R and -D: each enabled one starts as a session connects.
 	Tunnels []Tunnel `json:"tunnels,omitempty"`
 
+	// Delete is what the Delete key sends: "" for what the settings say
+	// (Settings.TermDelete), else DeleteVT220, DeleteDEL or DeleteCtrlH.
+	// Read it with Settings.HostDelete.
+	Delete DeleteKey `json:"delete,omitempty"`
+	// Encoding is the character encoding of the host's terminal: "" for
+	// what the settings say (Settings.TermEncoding), else one of
+	// Encodings. Read it with Settings.HostEncoding.
+	Encoding Encoding `json:"encoding,omitempty"`
+
 	// CreatedAt is when the host was added: made in the connection
 	// editor, duplicated or imported. Zero for a host saved before this
 	// was kept.
@@ -94,17 +106,6 @@ type Host struct {
 // DefaultTermType is the terminal type of a host that names none: what
 // the terminal is, Ghostty's VT core with 256 colors and more.
 const DefaultTermType = "xterm-256color"
-
-// BackspaceKey is what the Backspace key sends to a host.
-type BackspaceKey string
-
-const (
-	// BackspaceDEL sends ^? (0x7f), as xterm, Ghostty and most others.
-	BackspaceDEL BackspaceKey = ""
-	// BackspaceCtrlH sends ^H (0x08), for servers whose erase character
-	// is ^H, as some old systems and serial consoles.
-	BackspaceCtrlH BackspaceKey = "ctrl-h"
-)
 
 // PortOr22 is the host's port, 22 when unset.
 func (h *Host) PortOr22() int {
