@@ -25,7 +25,7 @@ const WindowEditor WindowKind = "editor"
 // editing, one saved. Opened from the main window, it belongs to it and
 // does not block it: a modal window would be a sheet covering the main
 // window on macOS, and would block every window of the app on Linux (see
-// README). Opened from the connection manager, openEditor makes it modal
+// docs/development.md). Opened from the connection manager, openEditor makes it modal
 // to the manager, as FinalShell's is.
 func editorSpec(editing bool) WindowSpec {
 	title := locales.NewConnection

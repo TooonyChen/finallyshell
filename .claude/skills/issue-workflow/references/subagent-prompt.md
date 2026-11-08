@@ -14,7 +14,7 @@ resumes with its context intact.
 ## What a good prompt says
 
 1. What the project is, and where the docs of its libraries are (MyGo's
-   module directory), and "read CLAUDE.md and README.md first".
+   module directory), and "read CLAUDE.md and docs/development.md first".
 2. What's already on main that it builds on, with names: functions,
    types, files and the PRs that added them. It can't know what other
    agents merged an hour ago.
@@ -39,7 +39,7 @@ resumes with its context intact.
 - Before pushing: `gofmt -l .` empty; `go build ./...`, `go vet ./...` (also `GOOS=windows go vet .` and `GOOS=darwin go vet .`), `go tool mygo vet`, `go test -race ./...` all pass. New UI text in both locales/en.json and locales/zh-Hans.json, then `go tool mygo generate`, commit locales/catalog_gen.go. Goroutines change app state only through App.post.
 - Live tests: if a test sshd runs (e.g. 127.0.0.1:2222, user/password given here), also run `FINALLYSHELL_TEST_SSH=user:password@127.0.0.1:2222 go test -race ./...`. Don't stop or reconfigure it; other agents share it.
 - Screenshots in English and Simplified Chinese to <scratchpad>/shots/<issue>/ (don't commit); look at them with Read and fix layout; list them in the PR.
-- Update README when behavior or layout changes.
+- Update docs/features.md (and docs/configuration.md for new settings) when behavior changes; update both README.md and README.zh-CN.md when a headline feature changes, and run `go run ./tools/screenshots` when a scene they show changes.
 - Push `git push -u origin <branch>` (retry with backoff on network errors only). Open the PR with the GitHub MCP tool (ToolSearch "select:mcp__github__create_pull_request"), base main. Body per .github/pull_request_template.md: `## Summary` with "Closes #<issue>" (or "Refs #<issue>" if it doesn't resolve all of it), `## Testing` including what was not tested. Plain writing. End with the session's PR attribution footer (copy it in).
 - Don't merge, comment on issues, or push other branches. I review and squash-merge; I may message you for fixes or rebases (then fix, rerun everything, push with --force-with-lease).
 

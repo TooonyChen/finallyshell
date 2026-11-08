@@ -1,0 +1,972 @@
+# Features in detail
+
+This page describes what Finallyshell does, screen by screen, including
+the `settings.json` keys behind each option and the limits of what is
+supported. [configuration.md](configuration.md) covers the files on disk;
+[development.md](development.md) covers building and the code.
+
+- [Window layout](#window-layout)
+- [Sessions and tabs](#sessions-and-tabs)
+- [New tab and quick connect](#new-tab-and-quick-connect)
+- [Connection manager](#connection-manager)
+- [Import from FinalShell](#import-from-finalshell)
+- [Connection editor](#connection-editor)
+  - [SSH connection](#ssh-connection)
+  - [Terminal](#terminal-page)
+  - [Proxy and jump hosts](#proxy-and-jump-hosts)
+  - [Tunnels](#tunnels-page)
+  - [Keys and other behavior](#keys-and-other-behavior)
+- [Server monitor and system info](#server-monitor-and-system-info)
+- [Terminal](#terminal)
+  - [Find](#find)
+  - [Full screen](#full-screen)
+  - [Appearance: font, color scheme, background image](#appearance-font-color-scheme-background-image)
+- [File panel](#file-panel)
+  - [File icon themes](#file-icon-themes)
+  - [Symbolic links](#symbolic-links)
+  - [Upload and download](#upload-and-download)
+  - [Transfers tab](#transfers-tab)
+  - [Downloads popover](#downloads-popover)
+  - [Progress on the app icon](#progress-on-the-app-icon)
+- [Remote file editor](#remote-file-editor)
+- [Tunnels tab](#tunnels-tab)
+- [Options window](#options-window)
+  - [General](#general)
+  - [Transfers](#transfers)
+  - [Terminal › Mouse](#terminal--mouse)
+  - [Terminal › Shortcuts](#terminal--shortcuts)
+- [Keyboard shortcuts](#keyboard-shortcuts)
+- [Layout and split dividers](#layout-and-split-dividers)
+- [Language](#language)
+
+## Window layout
+
+The main window follows FinalShell's layout, except that the session tabs
+are vertical:
+
+- Top left: the server monitor of the current session.
+- Bottom left: the vertical session list.
+- Top right: the terminal.
+- Bottom right: the Files, Transfers and Tunnels tabs.
+
+## Sessions and tabs
+
+The bottom left of the window is a vertical list of sessions, titled
+"Sessions (N)". Each has a status dot: green for connected, yellow for
+connecting, red for failed. The list scrolls, and sessions can be
+reordered by dragging. The context menu of a session has Reconnect,
+Duplicate session, Disconnect and Close.
+
+The "+" button opens a new tab (see below). New tabs can be selected,
+dragged and closed like sessions, but the count in the title does not
+include them. When every tab is closed, the right side still shows quick
+connect, and connecting there opens a new tab.
+
+When a connection succeeds, its time is recorded for the "Recent" list of
+quick connect. When a host's `noMonitor` is `true`, the server status is
+not polled, so no extra exec channel is opened (some jump hosts do not
+allow one).
+
+On the first connection to a host, a dialog shows the host key
+fingerprint. Once trusted, it is written to `finallyshell/known_hosts` in
+the config directory. A connection whose host key has changed is refused.
+
+## New tab and quick connect
+
+One new tab is opened at startup. Its "Quick connect" list shows every
+host that is not deleted (name, host, user):
+
+- First the hosts connected recently (at most 30), the last one connected
+  at the top.
+- Then the other hosts, the last one added at the top. The time a host was
+  added (`createdAt`) is recorded when it is created, duplicated or
+  imported from FinalShell. Older hosts without that time come last, in
+  their saved order.
+
+When both parts are present they are headed "Recent" and "Other
+connections". A host that was just added therefore appears here right
+away, without having to be connected once first.
+
+- Clicking a host or pressing Enter connects in this tab, and the same row
+  turns into the session.
+- The search box filters as you type, matching name, address, user and
+  notes. Results keep the same order as without a search. The up and down
+  arrow keys move the selection and skip the "Recent" and "Other
+  connections" rows.
+- "Clear" clears the list of recent connections. It does not delete
+  hosts: they are all still listed under "Other connections".
+- The "Connection manager" button opens the connection manager. While a
+  new tab is selected, connecting from the connection manager also
+  connects in that tab.
+- When there are no hosts at all, a "New connection" button is shown.
+
+## Connection manager
+
+The connection manager opens with Cmd+O on macOS and Ctrl+Shift+O on
+other systems (the key can be changed on the Shortcuts page). It is a
+separate window titled "Connections". As in FinalShell, it is a tree of
+folders and connections, with the columns Name, Host, Port, User and
+Notes (only the first line of the notes is shown). Clicking a column
+header sorts by it, and dragging the edge of a header resizes the column.
+
+The host list is stored in `<user config dir>/finallyshell/hosts.json`.
+Passwords are never written to it; they are kept in the system's
+credential store (see
+[Where passwords are stored](configuration.md#where-passwords-are-stored)).
+
+Toolbar:
+
+- New connection.
+- New folder: created in the selected folder, or, when a connection is
+  selected, in the folder that connection is in.
+- Collapse all, Expand all.
+- Import: import from FinalShell (see below).
+- Show deleted.
+- A folder filter: "All", or only one folder.
+- A search box.
+
+Below the tree is "Close window after connecting", checked by default. It
+is stored as `keepManagerOpen` in `settings.json`; without that key the
+window closes.
+
+Search filters as you type, matching name, address, user and notes. Every
+word must match, ignoring case. Folders that contain results are expanded
+and the first result is selected, so Enter connects to it. Clearing the
+search restores the folders that were expanded before.
+
+Double-clicking a connection, or pressing Enter, opens a session in the
+main window (in the selected tab if the main window has a new tab
+selected), brings the main window to the front, and closes the connection
+manager if "Close window after connecting" is checked.
+
+The context menu of a connection has:
+
+- Connect.
+- Edit.
+- Duplicate: the copy is named "<name> (copy)". Proxy or jump host
+  settings, tunnels, and the remembered password and proxy password are
+  copied too; the entries in the credential store are copied to the new
+  connection as well.
+- Rename (F2).
+- Move to folder.
+- Copy host: copies the host address.
+- Delete (the Delete key).
+
+The context menu of a folder has New connection, New subfolder, Rename,
+Move to folder and Delete. Deleting a folder asks first. Its connections
+and subfolders move to its parent folder (or to the top level for a
+top-level folder), and the question says where they go.
+
+Dragging a connection or folder onto a folder row moves it into that
+folder. Dropping it on a connection row moves it into the folder of that
+connection, and dropping it on empty space moves it to the top level. A
+folder cannot be dragged into itself or into one of its own subfolders.
+
+Deleting a connection only moves it to the deleted items (`deletedAt`).
+With "Show deleted" checked, deleted connections are shown in grey in
+their original folders, and their context menu has Restore and Delete
+permanently (which asks first). Every permanent delete goes through
+`deleteHostForever`, which also clears the password and proxy password
+remembered for the host, both in memory and in the credential store.
+
+Deleting (or permanently deleting) a connection that other connections use
+as their jump host asks first, and the question lists the connections that
+will no longer be able to connect. The jump host drop-down only lists
+connections that are not deleted.
+
+A connection editor opened from the connection manager is a modal window
+of the connection manager (see
+[Child windows](development.md#child-windows)). After it saves, the
+connection manager shows and selects the connection right away.
+
+## Import from FinalShell
+
+Import, in the connection manager's toolbar, opens a modal window of the
+connection manager. It looks for FinalShell's data folder (the one with a
+`conn` folder in it), trying in order:
+
+- Windows: `%LOCALAPPDATA%\finalshell`, `%APPDATA%\finalshell`,
+  `%ProgramFiles%\FinalShell`, `%ProgramFiles(x86)%\FinalShell`,
+  `C:\finalshell`. If FinalShell is installed somewhere else and keeps its
+  data in its install folder, choose the folder yourself.
+- macOS: `~/Library/FinalShell`, `~/Library/Application Support/finalshell`.
+- Linux: `~/.finalshell`, `~/.local/share/finalshell`.
+
+If none is found, a folder chooser opens (showing hidden folders). You can
+choose the data folder, its `conn` folder, or a folder exported from
+FinalShell. "Choose folder…" at the top of the window picks another folder
+at any time. The files are read in a goroutine and shown through
+`App.post` when done.
+
+The window lists every SSH connection (Name, Host, User, Folder, Note),
+each with a checkbox. All are checked by default. "Select all" and "Select
+none" change them all, and Enter, double-click or Space toggles the
+selected row.
+
+- A connection with the same host address (ignoring case), port and user
+  as an existing host is shown in grey as "Already present as ...". It
+  cannot be checked and is not imported. Of two identical connections in
+  FinalShell, only the first is imported.
+- Files that cannot be read (not JSON, too large, a read error, no host
+  address) count as failed. RDP, VNC and other non-SSH connections, and
+  connections deleted in FinalShell, count as skipped. Both are listed
+  below the table.
+
+"Import N" puts the connections into folders that follow FinalShell's
+folder structure. Folders are matched by name level by level from the top:
+an existing one is reused, a missing one is created, and only folders that
+receive imported connections are created. The window then closes, the
+connection manager expands those folders and selects the first imported
+connection, and the bottom of the connection manager shows how many were
+imported, skipped and failed.
+
+Fields that are imported: name, host, port, user, notes (`description`),
+folder, authentication method, and whether the exec channel is enabled (a
+connection with it turned off is imported with the server monitor turned
+off).
+
+- The time added (`createdAt`) is the time of the import, not FinalShell's
+  `create_time`, so imported connections come first under "Other
+  connections" in quick connect.
+- Passwords are not imported. FinalShell stores them encrypted in its
+  files; Finallyshell does not decrypt them and does not read that field.
+  Each password is asked for at the first connection (remembered by
+  default, in the system keychain).
+- A connection that uses a private key is imported with "Private key"
+  authentication but no key file. FinalShell stores private keys in its
+  own `config.json` and the connection only records the key's ID; that
+  file is not read, so edit the connection and choose the key file.
+- Proxies (`proxy_id` points into FinalShell's own proxy list), port
+  forwarding, terminal encoding and backspace settings are not imported. A
+  connection that used a proxy says so in the Note column.
+
+FinalShell's file format has no official documentation. The import follows
+the FinalShell import code of other open source clients (Hatoba,
+LiteShell, MeatShell, OpenFinalShell), summarized in the comments of
+`internal/importer/finalshell.go`. Parsing is lenient: unknown fields are
+ignored, missing ones get defaults (port 22, password authentication), and
+a port written as a string is accepted.
+
+## Connection editor
+
+New connection and Edit connection open a separate window, with its pages
+on the left and OK and Cancel at the bottom.
+
+### SSH connection
+
+- Name, Host, Port, Notes (several lines).
+- Method (Password or Private key), User, then either Password, or the
+  Private key file ("Browse…" chooses it) and its Passphrase.
+- "Remember password" ("Remember passphrase" for a private key), on by
+  default.
+- "Enable exec channel (server monitor)".
+
+Errors are shown under the field they belong to.
+
+<a id="terminal-page"></a>
+
+### Terminal
+
+- Terminal type: the `TERM` sent to the server, `xterm-256color` by
+  default.
+- Backspace sends: `^?` (DEL, the default) or `^H`. The erase character of
+  the server's terminal is set to match.
+- Character encoding: only UTF-8 for now. libghostty-vt decodes UTF-8 only,
+  and the app does no conversion.
+
+### Proxy and jump hosts
+
+Type is one of None (connect directly), SOCKS5, HTTP or Jump host.
+
+- SOCKS5 and HTTP (`CONNECT`) take the proxy's host and port (1080 and 8080
+  by default), and a user and password when the proxy needs
+  authentication (HTTP uses Basic authentication). With SOCKS5 the proxy
+  resolves the host name, so the host can be a name only the proxy's side
+  knows.
+- Jump host picks another saved connection (not the connection itself).
+  It works like `ssh -J`: log in to the jump host first, then have its SSH
+  server forward the connection to this host (the jump host must allow TCP
+  forwarding). A jump host can have its own proxy or jump host, and the
+  hops are connected one after another. If they loop back, both the editor
+  and connecting report "The jump hosts form a loop: a → b → a".
+- Every hop is treated as if it were connected directly: its host key is
+  confirmed on the first connection, and it uses its own login method and
+  password. When connecting, passwords that are not known yet are asked
+  for one at a time, in order: the host's own, then its proxy's, then each
+  jump host's. The prompt is titled "Jump host password" or "Proxy
+  password" and says which host it is for and which connection needs it.
+  After a host is changed to use a jump host, reconnecting asks for the new
+  jump host's password first.
+- Proxy passwords are kept in the system's credential store like host
+  passwords (following "Remember password" on the SSH connection page), not
+  in `hosts.json`.
+- Errors name the hop that failed: "Proxy 1.2.3.4:1080: Connection
+  refused: no proxy on that port", "Jump host web-1: Authentication
+  failed: ...", "Jump host web-1: Cannot connect to 10.0.0.5:22: ...".
+- Closing or disconnecting a session also closes its connections to the
+  jump hosts.
+
+<a id="tunnels-page"></a>
+
+### Tunnels
+
+SSH port forwarding. A table lists Type, Listen on, Forward to and
+Enabled, with Add…, Edit… and Remove below it (double-clicking a row also
+edits it). Adding and editing use the same dialog.
+
+- Local (`-L`): listens on this computer, and forwards each connection
+  through the server to the target (the target address is resolved on the
+  server's side).
+- Remote (`-R`): listens on the server, and sends each connection back to
+  this computer, which connects to the target.
+- Dynamic (`-D`): a SOCKS5 proxy on this computer; the server connects to
+  the addresses that clients ask for. Only CONNECT is supported, without
+  authentication. Addresses can be IPv4, IPv6 or domain names (resolved
+  by the server). The SOCKS5 server is a small piece of code of its own
+  (`sshx/forward.go`), as none of the existing dependencies had one.
+
+By default a tunnel listens on `127.0.0.1` only (for a remote tunnel, the
+server's `127.0.0.1`), so only the same machine can connect. Checking "Let
+other computers connect" allows another listen address (`0.0.0.0` by
+default) and shows a warning: anyone can use the tunnel without logging
+in. A remote tunnel also needs the server's `GatewayPorts` to allow it.
+
+The listen address of a remote tunnel must be an IP address (IPv4 or IPv6)
+or `localhost` (meaning `127.0.0.1`). The SSH library would resolve a host
+name on this computer rather than on the server, so host names are not
+accepted. If `hosts.json` was edited by hand to contain one, that tunnel
+reports an error explaining why when it starts, and the table shows a
+warning icon on it.
+
+Ports must be from 1 to 65535, and the target host is required. When
+another tunnel on the same machine already listens on the same port, the
+dialog says "Another tunnel already listens on this port". A tunnel with
+"Start with the session" turned off does not start automatically, but can
+be started by hand on the Tunnels tab.
+
+### Keys and other behavior
+
+- Enter is OK (except in Notes, where it starts a new line), and Esc is
+  Cancel.
+- Only one editor is open at a time. Clicking New connection or Edit while
+  one is open brings the open one to the front, without losing what is
+  unsaved in it.
+- Changes to the host of a session that is already open take effect at the
+  next connection.
+- If the host is deleted in the connection manager while it is being
+  edited, OK only says "This connection was deleted" and does not save it
+  back.
+
+## Server monitor and system info
+
+The top left shows the current session's server: IP, uptime, load, CPU,
+memory and swap, the processes using the most memory, network speed and
+latency graphs, and disks. It reads `/proc` over SSH every 2 seconds, so
+only Linux servers are supported. When not connected it shows an empty
+placeholder like FinalShell's ("-", 0%).
+
+The "System info" button below the IP opens a popover with the host name,
+OS (`/etc/os-release`), kernel, architecture, CPU model and cores, memory,
+uptime, IP addresses and disks. "Copy" copies them as plain text. They are
+read once each time the popover opens, over an exec channel, by a POSIX sh
+script that also runs on BusyBox. When tools such as `lscpu`, `nproc` or
+`ip` are missing, it skips them or uses something else.
+
+## Terminal
+
+The top right is the terminal. When a session disconnects, the last screen
+stays, and a "Reconnect" bar appears at the top.
+
+### Find
+
+Ctrl+Shift+F (Cmd+F on macOS) opens a find bar at the top right of the
+terminal (MyGo's `ui.FindBar`).
+
+- As you type, the plugin's `Search` searches the screen and scrollback,
+  highlights every match, and shows which match is current out of how
+  many.
+- Enter goes to the next match (upwards, to earlier output), Shift+Enter
+  to the previous one. F3 and Shift+F3 (Cmd+G and Shift+Cmd+G on macOS)
+  work too.
+- Esc or "Done" closes the bar, ends the search and returns the keyboard to
+  the terminal.
+- Pressing the shortcut again selects all the text in the find box.
+- Each session has its own find bar.
+- Matching ignores the case of ASCII letters (that is how the plugin
+  works).
+
+### Full screen
+
+Ctrl+Shift+Enter (Cmd+Enter on macOS) hides the left side bar and the file
+panel below, leaving only the terminal, and puts the window into the
+system's full screen. Pressing it again leaves full screen.
+
+- Esc leaves full screen only when there is no shell to receive it (a new
+  tab, a disconnected session). In a connected terminal, Esc goes to the
+  shell as usual (vi needs it).
+- If the window was already in the system's full screen, it stays there
+  when the app leaves its full screen.
+- Leaving the system's full screen by the system's means (the green button
+  on macOS) also leaves the app's full screen.
+
+### Appearance: font, color scheme, background image
+
+The Options pages Terminal › Font, Terminal › Color scheme and Terminal ›
+Background image set how terminals look. A change applies at once to
+every open terminal (`SetFont`, `SetTheme`), and new terminals use it too.
+A change made while a session is connecting is applied once it connects.
+Each page has "Restore defaults" at the bottom and a preview at the top: a
+sample prompt, a colored `ls` and code with ligatures, drawn with UI
+widgets in the same font, colors and background.
+
+Font:
+
+- Font family: as you type, the monospaced fonts installed on the system
+  are suggested (from `ui.FontFamilies`). It can be a comma-separated list,
+  of which the first installed font is used. Empty means the default:
+  JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono,
+  monospace.
+- Size: 6 to 48, 13.5 by default.
+- Line height: 0.8 to 2 times the font's own line height, 1 by default.
+- Weight: Light 300, Regular 400, Medium 500, Semibold 600, Bold 700. The
+  plugin always draws bold 300 heavier than this, and at least 700; there
+  is no separate weight for bold.
+- Ligatures: on by default. Turning them off sets `-calt` and `-liga`.
+
+Changing the font ends a Ctrl+= zoom in the terminal; changing only the
+color scheme does not.
+
+Color scheme:
+
+- The several hundred themes that Ghostty ships
+  (`terminal.GhosttyThemes()`), including the user's own in Ghostty's
+  themes folder.
+- The search box filters by name. Each row shows the background color and
+  a few colors as a sample, and the 16 ANSI colors are shown under the
+  preview.
+- The default is Tomorrow Night. If the theme file goes missing, the
+  default is used.
+- The UI is always light, and the plugin's `DarkTheme` is only used in dark
+  windows, so there is a single choice, set as both `Theme` and
+  `DarkTheme`.
+
+Background image:
+
+- "Choose…" opens the system's open dialog for a PNG, JPEG, GIF, WebP or
+  BMP image (a file of at most 64 MB and at most 100 million pixels). The
+  image is decoded first to make sure it can be shown, then copied into
+  the config directory (`finallyshell/background-<time>.<extension>`), so
+  moving or deleting the original does not matter. Choosing another image,
+  or "Remove", deletes the old copy.
+- Fit: Cover (cropped), Contain or Tile. Opacity: 5% to 100%, 30% by
+  default.
+- A file that is not an image, or cannot be read, only shows an error. It
+  is not copied and does not replace the current image.
+- If the copy goes missing (or the name in `settings.json` is not one of
+  the app's copies), the page shows "The background image is missing:
+  choose it again, or remove it." You can choose an image again or remove
+  it.
+- Reading and decoding the image never happen on the UI thread. Nothing is
+  read at startup. The first time the image is needed, a goroutine reads
+  it and shows it through `App.post`; until then the terminal shows only
+  the color scheme's background color. If the image is changed or removed
+  while it is being read, the old result is dropped.
+- An image larger than 3840 pixels on its long side is scaled down before
+  it is kept in memory (the copy on disk is still the original file).
+  JPEG images are rotated according to their EXIF orientation.
+
+How it is drawn: every terminal is created with `Transparent: true`, and
+the app draws the background under it. First the color scheme's
+background color, then the image, then a layer of the background color at
+(1 − opacity), so text always sits on the color scheme's background.
+Background colors set by programs (OSC 11, cell backgrounds) are drawn as
+usual.
+
+In `settings.json` these are `termFontFamily`, `termFontSize`,
+`termLineHeight`, `termFontWeight`, `termNoLigatures`, `termTheme`,
+`termBackground` (the file name of the copy), `termBackgroundFit`
+(`contain` or `tile`; missing means cover) and `termBackgroundOpacity`
+(percent). A missing key means the default.
+
+## File panel
+
+The "Files" tab at the bottom right browses the server over SFTP: a folder
+tree on the left, a file table on the right (with multiple selection), and
+a path bar where a path can be typed directly.
+
+### File icon themes
+
+The file panel shows icons by file name: `docker-compose.yml` gets the
+Docker icon, `main.go` the Go icon, `src/` the src folder icon, and an
+expanded folder switches to its open icon. The icons come from VS Code's
+file icon theme format, so any VS Code icon theme works. The theme is
+chosen on the Options page File manager › File icon theme, which has a
+preview at the top, and takes effect at once.
+
+- Built in: Material Icon Theme (the default), Seti (the one VS Code ships
+  with), and Minimal (one icon for files and one for folders, as the app
+  used to look).
+- "Install from VSIX…" takes a `.vsix` file (a VS Code extension package,
+  for example one downloaded from [Open VSX](https://open-vsx.org)). After
+  checking that it contains an icon theme that can be read, it copies the
+  file as is to `icon-themes/<publisher>.<name>.vsix` in the config
+  directory. A newer version of the same extension replaces the older one.
+  The installed theme is selected automatically. The limit is 50 MB. The
+  remove button in the list deletes the copy.
+- Icon themes already installed in VS Code, VS Code Insiders, VSCodium,
+  Cursor and Windsurf are listed automatically (`~/.vscode/extensions` and
+  so on; on Windows, under `%USERPROFILE%`). They are read in place, not
+  copied. Uninstalled ones (`.obsolete`) are skipped, and only the newest
+  version of an extension is listed. "Refresh" looks again.
+- If the selected theme later disappears or cannot be read, the panel
+  shows Material Icon Theme and the options page says why.
+
+Only the theme's JSON and the SVG, PNG and font files it refers to are
+read; no code from the extension runs. Paths that point outside the
+extension are ignored. Themes that use a font for their icons (Seti uses
+WOFF, file-icons uses WOFF2) are converted to TrueType before they are
+registered with the UI. Icons are matched with VS Code's rules: file name
+first, then extension (the longest first, so `a.test.ts` looks for
+`test.ts` first), then language (the file name to language table comes
+from the language extensions that VS Code ships), and finally the default
+file icon. The UI is light, so the theme's `light` section is used.
+
+In `settings.json` this is `fileIconTheme`: missing means Material,
+`minimal` is Minimal, `bundled:seti` is Seti, and anything else is
+`<publisher>.<name>/<theme ID>`.
+
+Both built-in themes are MIT licensed; their licenses are inside their
+VSIX files (`internal/fileicons/bundled/`). To update them and the language
+table, change the versions in `internal/fileicons/internal/gen` and run
+`go generate ./internal/fileicons` (this needs git and network access).
+
+### Symbolic links
+
+In the file table, the icon of each symbolic link has a small arrow in its
+bottom left corner, and the name is followed, in light text, by where it
+points (`bin → usr/bin`). As with `ls -l`, this is the link's text as
+written, relative or absolute, not resolved.
+
+- A link to a folder is shown as a folder, sorted with the folders, and
+  double-clicking it opens it.
+- A link to a file has the type "Link", the size of the file it points to,
+  and the link's own permissions.
+- A link whose target does not exist (or that loops) is a broken link: its
+  name is red, its type is "Broken link", it has no size, and
+  double-clicking does not open it. A link whose target cannot be examined
+  for lack of permission is not considered broken.
+- When listing a folder, up to 16 links are resolved at the same time
+  (each needs two round trips, `readlink` and `stat`), so folders with many
+  links (such as `/usr/lib64`) do not wait for them one by one.
+- The folder tree on the left shows no arrows.
+
+### Upload and download
+
+Upload: drag files or folders from Explorer or Finder onto the file table
+(they go to the current folder) or onto a folder in the folder tree. The
+toolbar's upload button and the context menu can also choose files or a
+folder.
+
+Download: select files or folders and click the download button. They are
+saved in the download folder, which is the system's Downloads folder
+(`~/Downloads`) by default and can be changed on the Transfers page of the
+options. "Download to…" in the context menu chooses a location instead.
+With "Ask where to save each download" checked on the Transfers page, the
+download button always asks for the location first with the system's
+folder chooser.
+
+### Transfers tab
+
+The "Transfers" tab at the bottom right shows progress, speed, time left
+and a cancel button. At most 3 transfers run at the same time; the rest
+wait in a queue.
+
+- When the destination already has an item with the same name, the app
+  asks whether to replace it.
+- A failed or canceled transfer can be retried ("Retry"). It is queued
+  again on the same session with its current connection; a session that is
+  closed or not connected cannot retry.
+- A finished download can be opened ("Open", with the system's default
+  app; if no app can open it, it is shown in its folder) or shown in its
+  folder ("Show in folder").
+
+### Downloads popover
+
+The "Downloads" button at the far right of the file panel's toolbar works
+like FinalShell's. While transfers are running, the button shows their
+count. It opens a popover:
+
+- The first row is the download folder (with the middle left out when it is
+  too long), "Change…", and "Show in Finder" ("Show in Explorer" on
+  Windows, "Show in folder" on Linux; the folder is created first if it
+  does not exist).
+- Below are the recent transfers, uploads and downloads, newest at the top,
+  each row the same as on the Transfers tab.
+- At the bottom is "Clear finished".
+
+The popover and the Transfers tab show the same queue: the Transfers tab in
+the order transfers started, the popover the other way round.
+
+### Progress on the app icon
+
+While transfers are running:
+
+- On macOS, the Dock icon shows their count and the overall progress.
+- On Windows, the taskbar button shows the overall progress (MyGo has no
+  icon badge on Windows).
+- Linux docks that support the Unity launcher API show both.
+
+The overall progress counts the bytes of the transfers that are running
+and have a known size. Everything is cleared when all transfers end.
+Progress is updated at most 4 times a second, and the count is updated as
+soon as it changes.
+
+## Remote file editor
+
+As in FinalShell, double-clicking a file in the file table (or selecting
+it and pressing Enter), or choosing "Edit" in the context menu, opens it
+in the editor window. Double-clicking a folder still opens the folder.
+
+The editor is MyGo's code editor (`ui/editor`): syntax highlighting for
+more than 30 languages, find and replace, go to line, undo, multiple
+cursors and folding. The language is chosen by file name; a script without
+an extension is recognized by its `#!` line. Languages it does not have,
+such as nginx or systemd files, are shown as plain text, and `.conf` is
+treated as TOML by MyGo.
+
+### Window
+
+There is one editor window (a child window of the main window, 1000×700,
+resizable), with a tab for each file. Each tab remembers the session it
+came from. The window title is `host:path` of the selected tab, and a tab
+with unsaved changes shows a dot. Opening a file that is already open
+switches to its tab.
+
+The toolbar has Save, Undo, Redo, Find, Replace, Go to line, Soft wrap and
+Reload from the server. The status bar at the bottom shows "Saved" or the
+error from saving, the language, line and column, the encoding and the
+line endings (click the encoding or line endings to change them).
+
+### Keys
+
+- Ctrl+S (Cmd+S on macOS) saves.
+- Ctrl+W (Cmd+W on macOS, or the key "Close tab" was changed to) closes the
+  tab. Closing the last tab closes the window.
+- Ctrl+Tab and Ctrl+Shift+Tab switch tabs.
+- Esc only goes to the editor (it closes the find bar, the go to line bar
+  and completion, and returns multiple cursors to one). Unlike other child
+  windows, Esc never closes the editor window: Esc is pressed often while
+  editing, and one stray press should not close the window. Close the
+  window with its close button, or by closing the last tab.
+- The editor's own keys (Ctrl+F find, Ctrl+H replace, Ctrl+G go to line,
+  Ctrl+D select next, and so on; Zed's keys on macOS) are described in
+  MyGo's documentation.
+- The main window's shortcuts do not work in the editor window.
+
+### Reading
+
+The file is read entirely into memory over SFTP in a goroutine (no
+temporary file), with progress shown for large files, and shown through
+`App.post` when done.
+
+- A file over 10 MB asks first ("Open Anyway").
+- A file with a NUL byte in its first 8000 bytes is treated as binary and is
+  not opened. "Open with the Default App" downloads it to the app's cache
+  folder (`<cache dir>/finallyshell/opened/<time>/`; folders older than a
+  day are deleted the next time one is opened) and opens it with the
+  system's default app. Changes to that copy are not sent back to the
+  server.
+
+### Saving
+
+The editor first writes a hidden temporary file in the same folder
+(`.<file name>.finallyshell-<random>.tmp`), gives it the original file's
+owner (when the owner differs) and permissions (including setuid and
+similar bits), then replaces the original with `posix-rename@openssh.com`.
+If the server does not have that extension (or it fails), the original is
+deleted first and the temporary file renamed (renaming in SFTP version 3
+cannot overwrite an existing file, so for a short moment the file does not
+exist). This way programs that read the file only ever see the old or the
+new version, and the original is safe if the connection drops midway.
+
+Replacing creates a new file, which loses the original's extended
+attributes, ACLs, SELinux label and hard links, and only root can give a
+file to another user. So in these cases the editor writes in place instead
+(truncate, then write):
+
+- the file is a symbolic link (the target is written, and the link stays a
+  link);
+- the folder is not writable;
+- the owner or permissions cannot be set;
+- the rename is refused (for example in a sticky folder such as `/tmp`).
+
+Writing in place keeps everything about the file but is not atomic: if it
+fails halfway, the file is left truncated (the text is still in the editor,
+so it can be saved again).
+
+If creating the temporary file fails for another reason (for example a full
+disk), the editor reports the error and leaves the original alone. If the
+file has disappeared by the time it is saved, it is created again.
+
+### Conflicts
+
+The editor records the file's modification time and size on the server
+when it is opened (or last saved), and checks them again before saving. If
+they changed (or the file was deleted), it asks whether to "Overwrite" or
+"Reload". Reloading counts as an edit, so Undo brings your text back.
+
+### Line endings and encoding
+
+- The file's line endings are kept (CRLF or LF; a file with both is saved
+  with whichever it has more of).
+- UTF-8 is the default, and a leading BOM is kept.
+- For a file that is not valid UTF-8, a notice at the top says it may be in
+  GB18030 (or GBK) and offers "Reopen as GB18030". Saving it unchanged
+  writes back the bytes that are not UTF-8 as they were.
+- The status bar can switch to GBK or GB18030 (`golang.org/x/text`). Before
+  any change, the original bytes are decoded again with the new encoding;
+  after a change, only the encoding used for saving changes. A character
+  that GBK does not have (an emoji, for example) makes saving fail with the
+  line it is on.
+
+### Unsaved changes
+
+- Closing a tab, or closing the window with its close button, asks "Don't
+  Save / Cancel / Save" first. For the window it is "Save All": the tabs
+  that are saved close, and the window closes once all of them are saved.
+- When quitting the app, the confirmation also says how many files have
+  unsaved changes. This question is asked whether or not "Confirm before
+  closing the window" is on.
+- When the main window is hidden to the tray, an editor window with
+  unsaved changes is not closed.
+
+### Disconnected sessions
+
+When the session disconnects, the text in the editor is kept, a notice says
+there is no connection, and Save is disabled. After the session reconnects,
+saving uses its new SFTP connection. If the session's tab was closed, the
+file is saved through another connected session to the same host.
+
+Not supported: saving with sudo. A file without write permission fails to
+save with "permission denied".
+
+## Tunnels tab
+
+The "Tunnels" tab at the bottom right lists the tunnels of the current
+session. Each shows:
+
+- its status: Starting…, Listening, Stopped, or the reason it failed, such
+  as "Port 127.0.0.1:8080 is already in use" or "The server did not listen
+  on …: the port is in use there, or forwarding is not allowed";
+- the number of open connections and of connections in all;
+- bytes sent and received;
+- why the last connection that could not reach the target failed.
+
+Each row has Start or Stop. The number on the tab is the number of tunnels
+listening.
+
+- When a session connects, its enabled tunnels start. A tunnel that fails
+  (for example because its port is in use) only affects itself; the
+  session connects as usual.
+- Disconnecting, losing the connection or closing the session stops all of
+  them and frees their ports. Reconnecting starts them again with the
+  host's current settings.
+- When the host is reached through a proxy or jump host, tunnels use the
+  connection to the host itself.
+- "Edit tunnels…" opens the Tunnels page of the connection editor.
+
+## Options window
+
+The gear button next to the "Sessions" title at the bottom left opens the
+Options window. As in FinalShell, it has a tree of pages on the left and
+the page on the right. Every option is saved to `settings.json` as soon as
+it changes, and takes effect at once, except for the two Mouse options
+noted below.
+
+The terminal appearance pages are described under
+[Appearance](#appearance-font-color-scheme-background-image), and the
+file icon theme page under [File icon themes](#file-icon-themes).
+
+### General
+
+- Language: System language, English or 简体中文.
+- Select new tabs automatically (on by default): switch to a new
+  connection once it opens. When off, new sessions open in the background
+  and the current session stays selected; if no session is selected, the
+  new one is still selected.
+- Minimize to tray when closed (off by default): the main window's close
+  button hides the window to a tray icon (the menu bar on macOS). The
+  icon's menu has "Show Finallyshell" and "Quit". On Windows, left-clicking
+  the icon also shows the window; on macOS, so does clicking the Dock icon.
+  When the system has no tray (Linux without
+  `libayatana-appindicator3`), the option behaves as if it were off.
+- Confirm before closing the window (on by default): while a session is
+  connected or connecting, closing the main window or quitting (the tray
+  menu, Cmd+Q on macOS) asks once first, with the system's message box.
+  With the tray option also on, the close button hides the window without
+  asking, and only "Quit" asks.
+
+See [Closing and quitting](development.md#closing-and-quitting) for the
+full behavior.
+
+### Transfers
+
+- Download folder, with "Change…" and "Use default".
+- "Ask where to save each download" (off by default).
+
+In `settings.json` these are `downloadDir` (missing means the system's
+Downloads folder; choosing the system's Downloads folder again is also
+stored as missing) and `askDownloadDir`. If the download folder has been
+deleted, it is created again when downloading.
+
+### Terminal › Mouse
+
+All of these use features of the terminal plugin itself.
+
+- Copy on select (off by default): text selected with the mouse (and with
+  Select All) is copied to the clipboard.
+- Right click: Show the context menu (the default), Paste, Copy the
+  selection, Copy if text is selected, else paste, or Do nothing. When a
+  program on the server takes over the mouse (vim with `mouse=a`, for
+  example), the right click goes to the program, and this setting applies
+  only with Shift held.
+- Ctrl+click opens links (Cmd+click on macOS, on by default): web addresses
+  and OSC 8 hyperlinks shown in the terminal open in the system's browser.
+  When off, clicking a link does nothing. The plugin has no switch to turn
+  off link detection, so links (and file paths) are still underlined while
+  Ctrl is held; they just do not open.
+- Lines per mouse wheel notch (1 to 20, 3 by default): affects the mouse
+  wheel only, not trackpads. On Windows, 3 means the "lines to scroll at a
+  time" from the system's mouse settings, and other values scale from it.
+
+Copy on select and the scroll lines take effect at once in open terminals
+(the plugin has `SetCopyOnSelect` and `SetScrollMultiplier`). The plugin
+reads the right click and link options only when a terminal is created and
+has no setter for them, so open sessions pick them up after they
+reconnect. Recreating a terminal in use would lose its screen and
+scrollback, so the app does not do that.
+
+In `settings.json` these are `copyOnSelect`, `rightClick` (`paste`,
+`copy`, `copy-or-paste` or `ignore`; a missing or unknown value means the
+context menu), `noLinkClick` and `wheelLines` (missing means 3, more than 20
+means 20).
+
+There is no middle-click paste. The plugin passes the middle button only
+to programs that take over the mouse, does not handle it itself, and does
+not expose whether a program has taken over the mouse; if the app handled
+the middle button on its own, such a program would receive both the
+middle click and the pasted text. The plugin also has no Linux PRIMARY
+selection. Supporting it would need the plugin to add a middle-click
+option like `RightClick`.
+
+### Terminal › Shortcuts
+
+A table lists each action with its current key and its default key (see
+[Keyboard shortcuts](#keyboard-shortcuts)). Select a row and click
+"Change…", press the new key combination in the dialog, and click OK to
+save it. "Use default" fills in the default key, "Reset" restores the
+selected row, and "Reset all" restores every row.
+
+Keys the shell needs cannot be used, and the dialog says why in red:
+
+- keys without modifiers (or with only Shift);
+- letters, digits, punctuation, Space, the arrow keys and similar keys with
+  only Ctrl (Ctrl+C, Ctrl+R, Ctrl+W, Ctrl+←, ...);
+- the same keys with only Alt (Alt+B and Alt+F are Meta in the shell and
+  move by words);
+- on macOS, the same keys with only Option (they type characters);
+- on Windows, Ctrl+Alt with a letter (that is AltGr, which many keyboard
+  layouts use to type characters);
+- keys the system uses (Cmd+Q, Cmd+H, Cmd+M, Cmd+Tab, Cmd+Space and others
+  on macOS; Alt+Tab and Alt+F4 on Windows and Linux; Win key combinations
+  on Windows).
+
+Exceptions: "Switch to tab 1–9" may use Alt with the digits (readline's
+numeric arguments are rarely used, and GNOME Terminal does the same), and
+"Terminal: reconnect" may use any key (it only acts while the session is
+disconnected and there is no shell).
+
+A key that another action already uses is shown with a warning in yellow;
+after OK, that other action has no key (shown as "None"). A key the
+terminal itself uses (Ctrl+Shift+A select all, Ctrl+= zoom, Shift+PageUp
+scrolling, Ctrl+Insert and Shift+Insert copy and paste) also shows a
+warning, and after OK the key belongs to the shortcut.
+
+Window shortcuts take effect at once. The terminal's copy and paste keys
+are the terminal plugin's `Keybinds`, which the plugin reads only when a
+terminal is created, so a change applies to sessions connected (or
+reconnected) afterwards.
+
+On macOS this page also has "Use Option as Alt (Meta)" (off by default,
+the plugin's `OptionAsAlt`). When on, Option+B sends Esc b instead of
+typing ∫. It also applies to sessions connected afterwards.
+
+In `settings.json`, only changed keys are stored:
+`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`. The key names
+are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
+`nextTab`, `closeTab`, `connectionManager`, `newTab` and `switchTab` (whose
+value looks like `"Alt+1-9"`). `Super` is Cmd on macOS, and `none` means no
+key. A key that is missing or cannot be read has its default. Option as Alt
+is `optionAsAlt`.
+
+## Keyboard shortcuts
+
+Defaults, the same as FinalShell's. All of them can be changed on the
+Terminal › Shortcuts page.
+
+| Action | macOS | Windows / Linux |
+|---|---|---|
+| Terminal: copy | Cmd+C | Ctrl+Shift+C |
+| Terminal: paste | Cmd+V | Ctrl+Shift+V |
+| Terminal: find | Cmd+F | Ctrl+Shift+F |
+| Terminal: full screen | Cmd+Enter | Ctrl+Shift+Enter |
+| Terminal: reconnect (while the session is disconnected and the terminal area has focus) | Enter | Enter |
+| Previous tab | Cmd+[ | Ctrl+Shift+Tab |
+| Next tab | Cmd+] | Ctrl+Tab |
+| Close tab | Cmd+W | Ctrl+Shift+W |
+| Connection manager | Cmd+O | Ctrl+Shift+O |
+| New tab | Cmd+T | Ctrl+Shift+T |
+| Switch to tab 1–9 | Cmd+1…9 | Alt+1…9 |
+
+Notes:
+
+- Ctrl+Shift+T used to open the connection manager. It now opens a new
+  tab, as in other terminal apps; the new tab has the recent connections
+  and a "Connection manager" button. The connection manager moved to
+  Ctrl+Shift+O.
+- On macOS, Close tab is Cmd+W, not FinalShell's Cmd+Q (which quits). So
+  that Cmd+W reaches the window, the macOS menu bar drops MyGo's default
+  File menu (its Close Window item holds Cmd+W). In the main window, Cmd+W
+  closes the tab. In child windows (Options, the connection editor), Cmd+W
+  closes the child window, as in other Mac apps (if "Close tab" was changed
+  to another key, that key also closes child windows), and Esc closes them
+  too. On Windows and Linux, child windows close with Esc and the system's
+  close button. The file editor is the exception: Cmd+W (Ctrl+W) closes a
+  tab, and Esc does not close the window (see
+  [Remote file editor](#remote-file-editor)).
+- On macOS, switching tabs uses only Cmd with a digit: Option with a digit
+  types a character (¡, ™, £, ...).
+- On Windows, the terminal plugin by default also binds Ctrl+C (copy when
+  there is a selection) and Ctrl+V (paste when the clipboard has
+  something). Finallyshell removes those, leaving them to the shell as on
+  Linux (interrupt, and insert the next key literally). Copy and paste with
+  Ctrl+Shift+C and Ctrl+Shift+V, or Ctrl+Insert and Shift+Insert.
+- Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
+  shell and are not used as shortcuts on Windows and Linux. In MyGo's
+  legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an
+  upstream issue (#21), and the app does not work around it.
+
+## Layout and split dividers
+
+The dividers between the areas of the window can be dragged to resize them
+(or moved with the arrow keys once they have focus), and double-clicking a
+divider restores the default size. Every area has a minimum size, so it
+cannot be dragged out of sight. The sizes are saved in
+`finallyshell/settings.json` and restored at the next start.
+
+## Language
+
+The UI is in English and Simplified Chinese. By default it follows the
+system language. Change it on the General page of the Options window
+(the gear button next to the "Sessions" title at the bottom left); the
+choice is saved.

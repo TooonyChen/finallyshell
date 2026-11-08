@@ -34,5 +34,6 @@ terms, open an issue instead of a pull request, and describe the change.
   `chore/...`), commits and pull request titles use Conventional Commits.
 - `go test -race ./...`, `go vet ./...` and `go tool mygo vet` must pass.
 
-[CLAUDE.md](CLAUDE.md) has the full rules, and [README.md](README.md)
-how to build and run the app.
+[CLAUDE.md](CLAUDE.md) has the full rules, and
+[docs/development.md](docs/development.md) how to build, run and test the
+app.

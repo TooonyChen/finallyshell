@@ -2,7 +2,7 @@
 
 An SSH client in Go laid out like FinalShell, with vertical session tabs.
 UI: MyGo native UI (`github.com/egoist/mygo/ui`); terminal: MyGo's terminal
-plugin (libghostty-vt). See README.md for the package layout.
+plugin (libghostty-vt). See docs/development.md for the package layout.
 
 ## Repository rules
 
@@ -66,3 +66,7 @@ Work is issue-driven; the `issue-workflow` skill
   `go tool mygo generate`; commit the regenerated `locales/catalog_gen.go`.
 - Run `go vet ./...` and `go tool mygo vet` before committing.
 - Goroutines change app state only through `App.post`.
+- Docs: behavior goes in `docs/features.md`, files and settings keys in
+  `docs/configuration.md`. `README.md` and `README.zh-CN.md` show the
+  headline features and must say the same thing; when a scene they show
+  changes, run `go run ./tools/screenshots` and commit `docs/screenshots/`.
