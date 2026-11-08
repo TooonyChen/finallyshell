@@ -734,3 +734,52 @@ func TestExtractLinksNotAllowed(t *testing.T) {
 		t.Errorf("other error: %v", err)
 	}
 }
+
+// A gzip trailer that does not match fails the transfer, once all is
+// unpacked: the files may be wrong.
+func TestExtractDamagedTrailer(t *testing.T) {
+	for _, at := range []int{8, 1} { // the CRC, the size
+		ar := makeArchive(t, entry{name: "proj/", typ: tar.TypeDir}, entry{name: "proj/a.txt", typ: tar.TypeReg, body: "alpha"})
+		b := ar.Bytes()
+		b[len(b)-at] ^= 0xff
+		_, err := ExtractArchive(context.Background(), bytes.NewReader(b), t.TempDir(), []string{"proj"}, nil)
+		var damaged *DamagedArchiveError
+		if !errors.As(err, &damaged) || !errors.Is(err, gzip.ErrChecksum) {
+			t.Errorf("trailer byte -%d: %v", at, err)
+		}
+	}
+	// The whole stream read: a good one passes.
+	ar := makeArchive(t, entry{name: "proj/a.txt", typ: tar.TypeReg, body: "alpha"})
+	if err := extractAll(t, context.Background(), ar, t.TempDir(), []string{"proj"}, nil); err != nil {
+		t.Error(err)
+	}
+}
+
+// A hard link may point only to a file this download wrote, not to one
+// that was in the folder before.
+func TestExtractHardLinkToOldFile(t *testing.T) {
+	dst := t.TempDir()
+	writeFile(t, filepath.Join(dst, "proj", "old"), []byte("the user's own"))
+	ar := makeArchive(t, entry{name: "proj/", typ: tar.TypeDir}, entry{name: "proj/new", typ: tar.TypeLink, link: "proj/old"})
+	err := extractAll(t, context.Background(), ar, dst, []string{"proj"}, nil)
+	var unsafe *UnsafeEntryError
+	if !errors.As(err, &unsafe) {
+		t.Errorf("err %v", err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(dst, "proj", "old")); string(data) != "the user's own" {
+		t.Errorf("old: %q", data)
+	}
+	if _, err := os.Lstat(filepath.Join(dst, "proj", "new")); err == nil {
+		t.Error("new was made")
+	}
+	// Nor to a file of this download that a link took the place of since.
+	ar = makeArchive(t,
+		entry{name: "proj/", typ: tar.TypeDir},
+		entry{name: "proj/f", typ: tar.TypeReg, body: "sent"},
+		entry{name: "proj/f", typ: tar.TypeSymlink, link: "old"},
+		entry{name: "proj/h", typ: tar.TypeLink, link: "proj/f"},
+	)
+	if err := extractAll(t, context.Background(), ar, dst, []string{"proj"}, nil); !errors.As(err, &unsafe) {
+		t.Errorf("replaced: %v", err)
+	}
+}

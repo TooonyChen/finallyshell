@@ -1,6 +1,7 @@
 package app
 
 import (
+	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
@@ -326,6 +327,7 @@ func TestArchiveTransfersTab(t *testing.T) {
 func TestTransferErrorText(t *testing.T) {
 	cases := map[error]string{
 		fmt.Errorf("x: %w", &remotefs.WindowsNameError{Name: "a:b"}): locales.ArchiveWindowsName("a:b"),
+		&remotefs.DamagedArchiveError{Err: gzip.ErrChecksum}:         locales.ArchiveDamaged(gzip.ErrChecksum.Error()),
 		remotefs.ErrNoShell: locales.ArchiveNoShell(),
 		&remotefs.TarError{Status: 2, Stderr: "tar: x: Cannot stat"}: "tar: x: Cannot stat",
 		context.Canceled: context.Canceled.Error(),

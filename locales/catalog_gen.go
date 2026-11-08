@@ -1296,6 +1296,16 @@ func (msgs Messages) ArchiveNoShell() string {
 	return Catalog.Format(msgs.locale, "archiveNoShell", nil)
 }
 
+// ArchiveDamaged says "The archive arrived damaged ({error}): the files unpacked from it may be wrong. Download it again."
+// in the language the app shows.
+func ArchiveDamaged(error string) string { return In(i18n.Locale()).ArchiveDamaged(error) }
+
+// ArchiveDamaged says "The archive arrived damaged ({error}): the files unpacked from it may be wrong. Download it again."
+// in the language of msgs.
+func (msgs Messages) ArchiveDamaged(error string) string {
+	return Catalog.Format(msgs.locale, "archiveDamaged", map[string]any{"error": error})
+}
+
 // ManagerTitle says "Connections"
 // in the language the app shows.
 func ManagerTitle() string { return In(i18n.Locale()).ManagerTitle() }

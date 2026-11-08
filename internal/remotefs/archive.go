@@ -79,6 +79,17 @@ func (e *WindowsNameError) Error() string {
 	return fmt.Sprintf("%q is not a valid name on Windows", e.Name)
 }
 
+// DamagedArchiveError is an archive whose gzip stream does not check out
+// at its end: its checksum or size does not match what was unpacked, so
+// the files unpacked from it may be wrong.
+type DamagedArchiveError struct{ Err error }
+
+func (e *DamagedArchiveError) Error() string {
+	return fmt.Sprintf("the archive arrived damaged (%v); the files unpacked from it may be wrong", e.Err)
+}
+
+func (e *DamagedArchiveError) Unwrap() error { return e.Err }
+
 // SkippedLinks are the symbolic links of an unpacked archive that were
 // not made, by their names in the archive. The rest was unpacked.
 type SkippedLinks struct {
@@ -276,10 +287,11 @@ func ExtractArchive(ctx context.Context, r io.Reader, dir string, roots []string
 		return SkippedLinks{}, err
 	}
 	x := &extractor{
-		dir:   dir,
-		roots: map[string]bool{},
-		safe:  map[string]bool{dir: true},
-		c:     &archiveCounter{ctx: ctx, progress: progress},
+		dir:     dir,
+		roots:   map[string]bool{},
+		safe:    map[string]bool{dir: true},
+		written: map[string]bool{},
+		c:       &archiveCounter{ctx: ctx, progress: progress},
 	}
 	for _, n := range roots {
 		x.roots[n] = true
@@ -302,6 +314,11 @@ func (x *extractor) unpack(r io.Reader) error {
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
+			// The rest of the gzip stream, to its trailer: only reading it
+			// checks the CRC and the size of all that was unpacked.
+			if _, err := io.Copy(io.Discard, zr); err != nil {
+				return &DamagedArchiveError{err}
+			}
 			return nil
 		}
 		if err != nil {
@@ -407,7 +424,11 @@ type extractor struct {
 	roots map[string]bool
 	// safe are the folders known to be real folders, not links: dir, and
 	// those made or checked since.
-	safe    map[string]bool
+	safe map[string]bool
+	// written are the regular files this extraction wrote, the only ones
+	// a hard link may point to: a file that was there before has contents
+	// the server never sent.
+	written map[string]bool
 	links   []madeLink
 	skipped SkippedLinks
 	c       *archiveCounter
@@ -493,6 +514,7 @@ func (x *extractor) ensureDir(d string) error {
 			if err := os.Remove(d); err != nil {
 				return err
 			}
+			delete(x.written, d)
 		}
 		if err := os.Mkdir(d, 0o755); err != nil {
 			return err
@@ -511,6 +533,7 @@ func (x *extractor) clear(p string) error {
 		return err
 	}
 	delete(x.safe, p)
+	delete(x.written, p)
 	if err := os.Remove(p); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
@@ -544,6 +567,7 @@ func (x *extractor) file(p string, mode fs.FileMode, mtime time.Time, r io.Reade
 	if !mtime.IsZero() {
 		os.Chtimes(p, mtime, mtime)
 	}
+	x.written[p] = true
 	return nil
 }
 
@@ -576,13 +600,14 @@ func (x *extractor) hardLink(p, name string) error {
 		return err
 	}
 	fi, err := os.Lstat(src)
-	if err != nil || !fi.Mode().IsRegular() || !x.safe[filepath.Dir(src)] {
+	if err != nil || !fi.Mode().IsRegular() || !x.written[src] || !x.safe[filepath.Dir(src)] {
 		return &UnsafeEntryError{name}
 	}
 	if err := x.clear(p); err != nil {
 		return err
 	}
 	if os.Link(src, p) == nil {
+		x.written[p] = true
 		return x.c.add(0)
 	}
 	in, err := os.Open(src)

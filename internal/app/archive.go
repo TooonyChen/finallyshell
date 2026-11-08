@@ -105,7 +105,10 @@ func (t *transferJob) currentLine(c *ui.Context) {
 // it has them.
 func transferErrorText(err error) string {
 	var bad *remotefs.WindowsNameError
+	var damaged *remotefs.DamagedArchiveError
 	switch {
+	case errors.As(err, &damaged):
+		return locales.ArchiveDamaged(damaged.Err.Error())
 	case errors.As(err, &bad):
 		return locales.ArchiveWindowsName(bad.Name)
 	case errors.Is(err, remotefs.ErrNoShell):

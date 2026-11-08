@@ -212,6 +212,7 @@
   },
   "archiveWindowsName": "{name} is not a valid file name on Windows",
   "archiveNoShell": "No SSH connection to run tar over",
+  "archiveDamaged": "The archive arrived damaged ({error}): the files unpacked from it may be wrong. Download it again.",
   "managerTitle": "Connections",
   "newHost": "New",
   "edit": "Edit",

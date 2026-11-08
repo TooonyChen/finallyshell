@@ -959,8 +959,11 @@ way, one transfer each.
 Downloads are unpacked safely: names that are absolute, have `..` or are
 outside the items asked for stop the transfer; nothing is written
 through a symbolic link (a link where a folder goes is replaced by the
-folder, as tar does); setuid, setgid and sticky bits are dropped. On
-Windows, names that Windows does not allow (such as `a:b` or `CON`) fail
+folder, as tar does); a hard link may only point to a file the same
+download wrote; setuid, setgid and sticky bits are dropped. The gzip
+stream is read to its end, and when its checksum or size does not match,
+the transfer fails and says that the files unpacked from it may be
+wrong. On Windows, names that Windows does not allow (such as `a:b` or `CON`) fail
 the transfer with the name; they are not renamed.
 
 Some symbolic links are not created, and the rest of the download is:
