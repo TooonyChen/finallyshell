@@ -1,6 +1,9 @@
 package app
 
 import (
+	"context"
+	"errors"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"slices"
@@ -143,32 +146,43 @@ func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
 }
 
 // TestSSHProcesses lists the real server's processes in the Processes
-// tab, opens the details of a sleep the shell started, and kills it.
+// tab, opens the details of a sleep the shell started, and kills it; a
+// signal to a sleep killed outside the app is not sent. The sleeps have
+// seconds of their own, as other tests, and other people, use the server
+// too.
 func TestSSHProcesses(t *testing.T) {
 	killWait = 300 * time.Millisecond
 	defer func() { killWait = 3 * time.Second }()
 	a, p, s := connectTestServer(t)
 	defer a.CloseAll()
-	s.term.Send([]byte("FS_PROCS_TEST=from-finallyshell sleep 397 &\r"))
+	args := "sleep " + strconv.Itoa(100000+rand.IntN(800000))
+	other := "sleep " + strconv.Itoa(900000+rand.IntN(90000))
+	s.term.Send([]byte("FS_PROCS_TEST=from-finallyshell " + args + " &\r" + other + " &\r"))
 	a.bottomTab = tabProcesses
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
-	var sleep monitor.Process
-	p.until(t, "the sleep listed", func() bool {
-		i := slices.IndexFunc(s.procs.list, func(pr monitor.Process) bool { return pr.Args == "sleep 397" })
-		if i >= 0 {
-			sleep = s.procs.list[i]
+	find := func(args string) (monitor.Process, bool) {
+		i := slices.IndexFunc(s.procs.list, func(pr monitor.Process) bool { return pr.Args == args })
+		if i < 0 {
+			return monitor.Process{}, false
 		}
-		return i >= 0
+		return s.procs.list[i], true
+	}
+	var sleep, sleep2 monitor.Process
+	p.until(t, "the sleeps listed", func() bool {
+		var ok, ok2 bool
+		sleep, ok = find(args)
+		sleep2, ok2 = find(other)
+		return ok && ok2
 	})
 	if s.procs.err != nil || len(s.procs.list) < 3 || sleep.Name != "sleep" || sleep.User == "" || sleep.Path == "" {
 		t.Fatalf("list of %d, err %v, sleep %+v", len(s.procs.list), s.procs.err, sleep)
 	}
-	s.procs.filter = "sleep 397"
-	tt.Frame()
-	if !tt.HasText("sleep 397") || !tt.HasText("1 process") {
-		t.Errorf("the sleep is not shown; texts %q", tt.Texts())
-	}
+	s.procs.filter = args
+	p.until(t, "the sleep alone in the table", func() bool {
+		shown := s.procs.shown()
+		return len(shown) == 1 && shown[0].PID == sleep.PID && tt.HasText(args)
+	})
 
 	a.openProcTab(s, sleep)
 	tab := s.procs.tabs[0]
@@ -184,6 +198,25 @@ func TestSSHProcesses(t *testing.T) {
 		t.Fatalf("kill: err %v, still running %v", d.err, d.still)
 	}
 	p.until(t, "the sleep gone", func() bool {
-		return !slices.ContainsFunc(s.procs.list, func(pr monitor.Process) bool { return pr.PID == sleep.PID })
+		_, ok := find(args)
+		return !ok
 	})
+
+	// The other sleep ends outside the app while the dialog is open: the
+	// signal is not sent, and the dialog says the process ended.
+	a.askSignal(s, sleep2, "HUP", false)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if _, _, err := monitor.RunScript(ctx, s.client, "kill -KILL "+strconv.Itoa(sleep2.PID)+"\n"); err != nil {
+		t.Fatal(err)
+	}
+	p.until(t, "the other sleep ended", func() bool {
+		running, err := monitor.ProcessRunning(ctx, s.client, sleep2.PID, sleep2.Start)
+		return err == nil && !running
+	})
+	a.sendSignal(a.processes.dlg)
+	p.until(t, "the answer", func() bool { return a.processes.dlg != nil && !a.processes.dlg.busy })
+	if d := a.processes.dlg; !d.gone || !errors.Is(d.err, monitor.ErrNoProcess) {
+		t.Errorf("signal to an ended process: gone %v, err %v", d.gone, d.err)
+	}
 }
