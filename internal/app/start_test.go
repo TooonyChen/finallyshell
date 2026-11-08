@@ -73,10 +73,10 @@ func TestQuickHosts(t *testing.T) {
 		// and those added at a time unknown in the order they are kept.
 		{"", all, 3},
 		{"  ", all, 3},
-		{"web", []string{"web-1"}, 1},             // the deleted host left out
-		{"10.0.0", []string{"db-1", "backup"}, 2}, // by address
-		{"DEPLOY", []string{"staging"}, 0},        // by user, never connected
-		{"database", []string{"db-1"}, 1},         // by notes
+		{"web", []string{"web-1"}, 1}, // the deleted host left out
+		{"10.0.0", []string{"db-1", "backup"}, 2},                                       // by address
+		{"DEPLOY", []string{"staging"}, 0},                                              // by user, never connected
+		{"database", []string{"db-1"}, 1},                                               // by notes
 		{"i", []string{"db-1", "web-1", "backup", "ci-runner", "staging", "legacy"}, 3}, // in the same order
 		{"example", []string{"new-app", "ci-runner", "staging", "legacy"}, 0},
 		{"root shop", []string{"web-1"}, 1}, // every word
