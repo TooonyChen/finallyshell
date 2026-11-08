@@ -181,7 +181,11 @@ cd finallyshell && go tool mygo dev
 
 ## 致谢
 
-感谢 [LINUX DO](https://linux.do/) 社区的支持。
+感谢：
+
+- [FinalShell](https://www.hostbuf.com/)，从刚上大学到毕业工作，一路都是它陪着我过来的，这个项目也是受它启发做的。
+- [V2EX](https://www.v2ex.com/) 社区。
+- [LINUX DO](https://linux.do/) 社区。
 
 ## 许可证
 

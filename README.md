@@ -181,7 +181,11 @@ Issues and pull requests are welcome. Every change starts as an issue that says 
 
 ## Acknowledgements
 
-Thanks to the [LINUX DO](https://linux.do/) community for its support.
+Thanks to:
+
+- [FinalShell](https://www.hostbuf.com/), which kept me company from my first year of university to my first job, and which inspired this project.
+- The [V2EX](https://www.v2ex.com/) community.
+- The [LINUX DO](https://linux.do/) community.
 
 ## License
 
