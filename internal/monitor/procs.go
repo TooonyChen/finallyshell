@@ -537,16 +537,59 @@ type SignalError struct {
 
 func (e *SignalError) Error() string { return e.Msg }
 
-// SendSignal sends sig, one of Signals, to pid with kill on the server.
-// A kill that fails is a *SignalError with the server's message.
-func SendSignal(ctx context.Context, client *ssh.Client, pid int, sig string) error {
+// signalGone is what signalScript prints, with the exit status
+// signalGoneStatus, when the process is not the one meant: it ended, and
+// its PID may be another process's now.
+const (
+	signalGone       = procMark + "gone---"
+	signalGoneStatus = 3
+)
+
+// signalScript sends sig to pid, only when pid is still the process that
+// started at start (clock ticks after boot, field 22 of its stat; 0
+// sends without that check). The check and the kill are in one script,
+// so a PID that another process took while the user was choosing is not
+// signalled; what remains is the moment between the two commands, which
+// a shell cannot close.
+func signalScript(pid int, start uint64, sig string) string {
+	p := strconv.Itoa(pid)
+	check := ""
+	if start != 0 {
+		// The fields after the name, which ends at the last ") ": the
+		// first is the state, Z for a zombie, which has ended, and the
+		// 20th the start time.
+		check = `s=$(cat /proc/` + p + `/stat 2>/dev/null) || gone
+s=${s##*") "}
+set -- $s
+[ "$1" != Z ] && [ "${20}" = ` + strconv.FormatUint(start, 10) + ` ] || gone
+`
+	}
+	return `export LC_ALL=C
+gone() { echo "` + signalGone + `"; exit ` + strconv.Itoa(signalGoneStatus) + `; }
+` + check + `kill -` + sig + ` ` + p + ` 2>&1
+`
+}
+
+// SendSignal sends sig, one of Signals, to pid with kill on the server,
+// when pid is still the process that started at start (0 for any). A
+// process that ended, or whose PID another process has now, is
+// ErrNoProcess, and no signal is sent. A kill that fails is a
+// *SignalError with the server's message.
+func SendSignal(ctx context.Context, client *ssh.Client, pid int, start uint64, sig string) error {
 	if !slices.Contains(Signals, sig) || pid <= 0 {
 		return fmt.Errorf("bad signal %q to %d", sig, pid)
 	}
-	script := "export LC_ALL=C\nkill -" + sig + " " + strconv.Itoa(pid) + " 2>&1\n"
-	out, stderr, err := RunScript(ctx, client, script)
+	out, stderr, err := RunScript(ctx, client, signalScript(pid, start, sig))
 	if ctx.Err() != nil {
 		return ctx.Err()
+	}
+	return signalResult(out, stderr, err)
+}
+
+// signalResult is what signalScript's output and exit tell.
+func signalResult(out, stderr string, err error) error {
+	if strings.Contains(out, signalGone) {
+		return ErrNoProcess
 	}
 	var exit *ssh.ExitError
 	if errors.As(err, &exit) {

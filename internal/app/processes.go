@@ -52,7 +52,7 @@ type processAPI interface {
 	// list reads the processes; l keeps the CPU times between reads.
 	list(ctx context.Context, client *ssh.Client, l *monitor.ProcessLister) ([]monitor.Process, error)
 	details(ctx context.Context, client *ssh.Client, pid int) (monitor.ProcessDetails, error)
-	signal(ctx context.Context, client *ssh.Client, pid int, sig string) error
+	signal(ctx context.Context, client *ssh.Client, pid int, start uint64, sig string) error
 	// running tells whether pid, started at start, is still there.
 	running(ctx context.Context, client *ssh.Client, pid int, start uint64) (bool, error)
 }
@@ -68,8 +68,8 @@ func (serverProcesses) details(ctx context.Context, client *ssh.Client, pid int)
 	return monitor.ReadProcessDetails(ctx, client, pid)
 }
 
-func (serverProcesses) signal(ctx context.Context, client *ssh.Client, pid int, sig string) error {
-	return monitor.SendSignal(ctx, client, pid, sig)
+func (serverProcesses) signal(ctx context.Context, client *ssh.Client, pid int, start uint64, sig string) error {
+	return monitor.SendSignal(ctx, client, pid, start, sig)
 }
 
 func (serverProcesses) running(ctx context.Context, client *ssh.Client, pid int, start uint64) (bool, error) {
@@ -713,6 +713,7 @@ type signalDialog struct {
 	busy    bool
 	waiting bool // after Kill's TERM, for the process to go
 	still   bool // still running after Kill's TERM: offering KILL
+	gone    bool // ended before a signal was sent: nothing left to do
 	err     error
 	cancel  context.CancelFunc
 }
@@ -734,7 +735,7 @@ func (a *App) closeSignalDialog() {
 // sendSignal sends d's signal on a goroutine.
 func (a *App) sendSignal(d *signalDialog) {
 	s := d.s
-	if d.busy || s.status != statusConnected {
+	if d.busy || d.gone || s.status != statusConnected {
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -746,7 +747,7 @@ func (a *App) sendSignal(d *signalDialog) {
 	go func() {
 		defer cancel()
 		sctx, scancel := context.WithTimeout(ctx, procTimeout)
-		err := api.signal(sctx, client, d.pid, sig)
+		err := api.signal(sctx, client, d.pid, d.start, sig)
 		scancel()
 		if err != nil || !kill {
 			a.post(func() { a.signalSent(d, err, false) })
@@ -776,6 +777,13 @@ func (a *App) signalSent(d *signalDialog, err error, running bool) {
 		return
 	}
 	d.busy, d.waiting, d.cancel = false, false, nil
+	if errors.Is(err, monitor.ErrNoProcess) {
+		// Ended, maybe with its PID another process's now: nothing was
+		// sent, and there is nothing left to send to.
+		d.err, d.gone = err, true
+		d.s.procs.poll.pollNow()
+		return
+	}
 	if err != nil && !errors.Is(err, context.Canceled) {
 		d.err = err
 		return
@@ -792,6 +800,9 @@ func signalErrorText(err error) string {
 	var se *monitor.SignalError
 	if errors.As(err, &se) {
 		return locales.SignalRefused(se.Msg)
+	}
+	if errors.Is(err, monitor.ErrNoProcess) {
+		return locales.ProcAlreadyEnded()
 	}
 	return locales.SignalFailed(describeProcError(err))
 }
@@ -817,6 +828,8 @@ func (a *App) signalDialogView(c *ui.Context, d *signalDialog) {
 	ui.Column(c).Width(420).Gap(12).Children(func() {
 		var title, body, ok string
 		switch {
+		case d.gone:
+			title, body = d.name+" ("+strconv.Itoa(d.pid)+")", locales.ProcAlreadyEnded()
 		case d.still:
 			title, body, ok = locales.KillStillTitle(d.name, strconv.Itoa(d.pid)), locales.KillStillBody(), locales.ForceKill()
 		case d.kill:
@@ -826,7 +839,7 @@ func (a *App) signalDialogView(c *ui.Context, d *signalDialog) {
 		}
 		ui.Text(c, title).FontSize(16).Bold()
 		ui.Text(c, body)
-		if d.err != nil {
+		if d.err != nil && !d.gone {
 			ui.Text(c, signalErrorText(d.err)).TextColor(theme.Danger).MaxLines(3)
 		}
 		ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
@@ -837,6 +850,12 @@ func (a *App) signalDialogView(c *ui.Context, d *signalDialog) {
 				}
 			}
 			ui.Spacer(c)
+			if d.gone {
+				if ui.PrimaryButton(c, locales.Close()).Clicked() {
+					a.closeSignalDialog()
+				}
+				return
+			}
 			if ui.Button(c, locales.Cancel()).Clicked() {
 				a.closeSignalDialog()
 			}

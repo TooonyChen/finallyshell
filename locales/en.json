@@ -411,6 +411,7 @@
   "forceKill": "Force Kill",
   "signalRefused": "The server refused: {error}",
   "signalFailed": "Could not send the signal: {error}",
+  "procAlreadyEnded": "The process has already ended. No signal was sent.",
   "procGone": "Process {pid} is no longer running.",
   "procDetailsFailed": "Could not read the details: {error}",
   "procCwd": "Working directory",

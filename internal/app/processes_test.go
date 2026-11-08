@@ -23,7 +23,8 @@ type fakeProcesses struct {
 	listErr error
 	lists   int // reads of the list
 	info    map[int]monitor.ProcessDetails
-	signals []string // "TERM 7267", as sent
+	signals []string     // "TERM 7267@3000": the signal, the PID and the start time, as sent
+	ended   map[int]bool // processes that ended: signals to them are not sent
 	sigErr  error
 	// alive is the processes still running after a signal.
 	alive map[int]bool
@@ -49,10 +50,13 @@ func (f *fakeProcesses) details(ctx context.Context, client *ssh.Client, pid int
 	return d, nil
 }
 
-func (f *fakeProcesses) signal(ctx context.Context, client *ssh.Client, pid int, sig string) error {
+func (f *fakeProcesses) signal(ctx context.Context, client *ssh.Client, pid int, start uint64, sig string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	f.signals = append(f.signals, sig+" "+strconv.Itoa(pid))
+	if f.ended[pid] {
+		return monitor.ErrNoProcess
+	}
+	f.signals = append(f.signals, sig+" "+strconv.Itoa(pid)+"@"+strconv.FormatUint(start, 10))
 	return f.sigErr
 }
 
@@ -109,6 +113,7 @@ func demoProcesses() *fakeProcesses {
 			1: {PID: 1, Name: "systemd", User: "root", Start: 2, Args: []string{"/sbin/init", "splash"}, PathDenied: true, CwdDenied: true, EnvDenied: true},
 		},
 		alive: map[int]bool{},
+		ended: map[int]bool{},
 	}
 }
 
@@ -323,7 +328,7 @@ func TestProcessesSignals(t *testing.T) {
 	f.set(func() { f.sigErr = nil })
 	tt.Click("Send")
 	p.until(t, "the dialog closed", func() bool { return a.processes.dlg == nil })
-	if got := f.sent(); !slices.Equal(got, []string{"HUP 7267", "HUP 7267"}) {
+	if got := f.sent(); !slices.Equal(got, []string{"HUP 7267@3000", "HUP 7267@3000"}) {
 		t.Errorf("sent %q", got)
 	}
 
@@ -343,7 +348,7 @@ func TestProcessesSignals(t *testing.T) {
 	saveShot(t, tt, "kill-still-running-en.png")
 	tt.Click("Force Kill")
 	p.until(t, "the dialog closed", func() bool { return a.processes.dlg == nil })
-	if got := f.sent(); !slices.Equal(got[2:], []string{"TERM 7267", "KILL 7267"}) {
+	if got := f.sent(); !slices.Equal(got[2:], []string{"TERM 7267@3000", "KILL 7267@3000"}) {
 		t.Errorf("sent %q", got)
 	}
 
@@ -353,7 +358,7 @@ func TestProcessesSignals(t *testing.T) {
 	tt.Frame()
 	tt.Click("Kill")
 	p.until(t, "the dialog closed", func() bool { return a.processes.dlg == nil })
-	if got := f.sent(); len(got) != 5 || got[4] != "TERM 7267" {
+	if got := f.sent(); len(got) != 5 || got[4] != "TERM 7267@3000" {
 		t.Errorf("sent %q", got)
 	}
 
@@ -364,6 +369,35 @@ func TestProcessesSignals(t *testing.T) {
 	tt.Frame()
 	if a.processes.dlg != nil || len(f.sent()) != 5 {
 		t.Errorf("cancel: dialog %v, sent %q", a.processes.dlg != nil, f.sent())
+	}
+
+	// A process that ended while the dialog was open, its PID maybe
+	// another's now, gets no signal: from the menu's signals, Kill, and
+	// Force Kill alike.
+	f.set(func() { f.ended[7267] = true })
+	for _, step := range []struct {
+		sig        string
+		kill, more bool
+	}{{"HUP", false, false}, {"TERM", true, false}, {"TERM", true, true}} {
+		a.askSignal(s, java, step.sig, step.kill)
+		if step.more { // the offer of Force Kill, open when it ended
+			a.processes.dlg.still = true
+		}
+		a.sendSignal(a.processes.dlg)
+		p.until(t, "the answer", func() bool { return a.processes.dlg != nil && !a.processes.dlg.busy })
+		tt.Frame()
+		if d := a.processes.dlg; !d.gone || !tt.HasText("The process has already ended. No signal was sent.") {
+			t.Errorf("%+v: gone %v; texts %q", step, d.gone, tt.Texts())
+		}
+		saveShot(t, tt, "signal-gone-en.png")
+		tt.Click("Close")
+		tt.Frame()
+		if a.processes.dlg != nil {
+			t.Errorf("%+v: Close left the dialog open", step)
+		}
+	}
+	if got := f.sent(); len(got) != 5 {
+		t.Errorf("signals sent to an ended process: %q", got[5:])
 	}
 }
 

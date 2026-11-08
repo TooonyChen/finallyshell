@@ -2848,6 +2848,16 @@ func (msgs Messages) SignalFailed(error string) string {
 	return Catalog.Format(msgs.locale, "signalFailed", map[string]any{"error": error})
 }
 
+// ProcAlreadyEnded says "The process has already ended. No signal was sent."
+// in the language the app shows.
+func ProcAlreadyEnded() string { return In(i18n.Locale()).ProcAlreadyEnded() }
+
+// ProcAlreadyEnded says "The process has already ended. No signal was sent."
+// in the language of msgs.
+func (msgs Messages) ProcAlreadyEnded() string {
+	return Catalog.Format(msgs.locale, "procAlreadyEnded", nil)
+}
+
 // ProcGone says "Process {pid} is no longer running."
 // in the language the app shows.
 func ProcGone(pid string) string { return In(i18n.Locale()).ProcGone(pid) }

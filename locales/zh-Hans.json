@@ -278,6 +278,7 @@
   "forceKill": "强制结束",
   "signalRefused": "服务器拒绝：{error}",
   "signalFailed": "无法发送信号：{error}",
+  "procAlreadyEnded": "进程已经结束，没有发送信号。",
   "procGone": "进程 {pid} 已不在运行。",
   "procDetailsFailed": "无法读取详情：{error}",
   "procCwd": "工作目录",

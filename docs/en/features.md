@@ -1283,7 +1283,10 @@ on the side panel's process list opens it too.
   Every signal asks first. Kill sends SIGTERM; when the process is still
   running 3 seconds later, the dialog offers "Force Kill" with SIGKILL.
   When the server refuses, the dialog shows its words, such as "The
-  server refused: Operation not permitted".
+  server refused: Operation not permitted". A process that ended while
+  the dialog was open gets no signal, even when another process has its
+  PID by then: the dialog says "The process has already ended. No signal
+  was sent."
 - When the session disconnects, the last list stays, greyed, under the
   same reconnect bar as the terminal's. Servers that are not Linux show
   "Only Linux servers are supported", and hosts whose server monitor is
@@ -1295,7 +1298,8 @@ monitor's: `ps` for the users, memory and command lines, `cat` of every
 `/proc/<pid>/exe` links for the paths. It runs with BusyBox's `ps` and
 `ls`, and leaves out its own processes. Details read
 `/proc/<pid>/cmdline`, `exe`, `cwd` and `environ` once when the tab
-opens; signals are sent with `kill`.
+opens. Signals are sent with `kill`, by a script that first checks the
+PID's start time in `/proc/<pid>/stat` against the one the list read.
 
 ## Options window
 
