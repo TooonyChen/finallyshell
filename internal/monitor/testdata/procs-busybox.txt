@@ -1,0 +1,23 @@
+---FINALLYSHELL:self---
+2210
+---FINALLYSHELL:uname---
+Linux
+---FINALLYSHELL:cpu---
+cpu  4000 0 1000 50000 100 0 10 0 0 0
+cpu0 4000 0 1000 50000 100 0 10 0 0 0
+---FINALLYSHELL:ps---
+PID   PPID  USER     RSS  COMMAND
+    1     0 root      880 /sbin/init
+    2     0 root        0 [kthreadd]
+ 1501     1 root     310m /usr/bin/dockerd --host=unix:///var/run/docker.sock
+ 1777     1 nobody   1.2g node /srv/app/server.js
+ 2001     1 root     2304 /usr/sbin/sshd -D
+ 2210  2205 root     1200 sh -s
+ 2211  2210 root     1000 ps -o pid=,ppid=,user=,rss=,args=
+---FINALLYSHELL:stat---
+1 (init) S 0 1 1 0 -1 4194560 52 1 0 0 30 20 0 0 20 0 1 0 5 172 3010 18446744073709551615 1 1 0 0 0 0 0 4096 1088 0 0 0 17 0 0 0 0 0 0
+1501 (dockerd) S 1 1501 1501 0 -1 4194560 52 1 0 0 600 200 0 0 20 0 12 0 400 172 3010 18446744073709551615 1 1 0 0 0 0 0 4096 1088 0 0 0 17 0 0 0 0 0 0
+---FINALLYSHELL:exe---
+lrwxrwxrwx    1 root     root             0 Nov  8 22:54 /proc/1/exe -> /bin/busybox
+lrwxrwxrwx    1 root     root             0 Nov  8 22:54 /proc/1501/exe -> /usr/bin/dockerd
+---FINALLYSHELL:end---
