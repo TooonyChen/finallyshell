@@ -23,7 +23,9 @@ jobs:
         run: |
           unformatted=$(gofmt -l .)
           if [ -n "$unformatted" ]; then
-            echo "::error::Not gofmt-ed:"
+            # go fmt uses the gofmt of go.mod's toolchain; a gofmt on PATH
+            # from another Go version can align comments differently.
+            echo "::error::Not formatted, run go fmt ./...:"
             echo "$unformatted"
             exit 1
           fi
