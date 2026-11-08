@@ -113,6 +113,8 @@ macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>
 
 可以选字体、字号、行高、粗细，开关连字，从 Ghostty 自带的几百个配色里挑一个，还可以加背景图片，改了立刻应用到所有打开的终端。另外还有查找（<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>）、全屏、选中即复制、自定义右键行为，<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+单击打开链接。
 
+终端下面是 FinalShell 的命令输入框：输入命令，回车发给 shell。<kbd>Tab</kbd> 分多列列出正在输入的路径所在的服务器文件夹，在第一个词上则列出服务器 PATH 里的命令；<kbd>↑</kbd>、<kbd>Alt</kbd>+<kbd>H</kbd> 或“历史”按钮列出以前发给这台主机的命令，以及它的 shell 历史里的命令，<kbd>←</kbd> <kbd>→</kbd> 可以从一条命令里只取一个词。用不上的话，在“选项 › 终端 › 命令输入框”里关掉它，或者只关掉其中一部分。
+
 locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、Big5、Shift_JIS、EUC-JP、EUC-KR、ISO-8859-1 和 Windows-1252，在“选项”里统一设置，也可以按主机单独设置。退格键和删除键发送什么也一样可以改。
 
 <table>
@@ -152,6 +154,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 | 连接管理器 | <kbd>Cmd</kbd>+<kbd>O</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> |
 | 新标签页 | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | 切换到第 1 到 9 个标签 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
+| 命令输入框，再按回到终端 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-zh-CN.png" width="720" alt="选项里的快捷键页">

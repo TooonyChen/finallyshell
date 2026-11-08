@@ -25,6 +25,7 @@
 - [终端](#terminal-section)
   - [查找](#查找)
   - [全屏](#全屏)
+  - [命令输入框](#命令输入框)
   - [外观：字体、配色、背景图片](#外观字体配色背景图片)
 - [文件面板](#文件面板)
   - [文件图标主题](#文件图标主题)
@@ -43,6 +44,7 @@
   - [终端](#terminal-defaults)
   - [终端 › 鼠标](#终端--鼠标)
   - [终端 › 快捷键](#终端--快捷键)
+  - [终端 › 命令输入框](#终端--命令输入框)
   - [同步](#同步)
 - [快捷键](#快捷键)
 - [布局和分隔条](#布局和分隔条)
@@ -344,6 +346,23 @@ Ctrl+Shift+Enter（macOS 是 Cmd+Enter）隐藏左边栏和下面的文件面板
 - 窗口本来就是系统全屏的，退出程序的全屏时保持系统全屏。
 - 用系统的办法（macOS 的绿色按钮）退出系统全屏，也一起退出程序的全屏。
 
+### 命令输入框
+
+终端下面是一行命令输入框，和 FinalShell 的命令输入框一样：一个终端图标、没有占位文字的输入框，以及最右边的“历史”按钮。默认打开；“选项 › 终端 › 命令输入框”可以关掉它，或者关掉其中某个弹出列表，那里也列出了它的按键（见[终端 › 命令输入框](#终端--命令输入框)）。
+
+- 回车把输入框里的内容加一个回车发给 shell，和在终端里输入一样（经过会话的编码转换），然后清空输入框。终端的按键不受影响：只有在输入框里打字时，键盘才在输入框。
+- Tab 补全光标处的词：
+  - 像路径的词（含 `/`，或以 `~`、`.` 开头）打开路径选择，分多列列出服务器上的文件夹：先文件夹（以 `/` 结尾），再文件，图标和文件面板的图标主题一样，隐藏文件排在最后。输入可以筛选（不区分大小写），筛选为空时按退格键回到上一级，方向键移动，回车或 Tab 插入。插入文件夹后接着列出它里面的内容；插入文件后加一个空格。名字里的空格等会被 shell 另作解释的字符用 `\` 转义。最多列出 2000 项，后面显示“还有 N 项”。
+  - 否则，第一个词打开命令补全：服务器 PATH 里以它开头的命令。每次连接用一个 exec 通道读取一次：有 bash 时用 `compgen -c`（包括内置命令），没有 bash 时列出 `$PATH` 里的每个文件夹。关闭了“启用 exec 通道”的主机改为通过 SFTP 列出 `/usr/local/sbin`、`/usr/local/bin`、`/usr/sbin`、`/usr/bin`、`/sbin` 和 `/bin`。
+  - 其他词打开当前文件夹的路径选择。
+- 相对路径从 shell 报告的工作目录（OSC 7）算起；shell 不报告时从文件面板的文件夹算起。`~` 是主目录。文件夹通过会话的 SFTP 读取，所以没有 SFTP 的服务器会在弹出列表里显示错误，发送和历史照常可用。
+- ↑、Alt+H 或“历史”按钮打开历史列表（按钮让键盘留在输入框，列表打开时再点就关闭；关掉历史列表后按钮隐藏）：以前发送过的、以已输入内容开头的命令，最新的在最下面，紧挨输入框。↑ ↓ 移动；← → 高亮选中命令里的一个字段（词），这样可以从 `yum -y install epel-release` 里单独取出 `epel-release`。回车把这个字段插入到光标处的词的位置；没有高亮字段时，把整条命令放进输入框。“清空列表”删除这台主机的历史。
+- 历史由程序按主机保存：从输入框发送的每条命令，每条只留一次，最新的在最后，条数不限（文件超过 10 MB 时从最旧的删起，见 [configuration.md](configuration.md#命令历史)）。后面接着服务器上 `~/.bash_history` 和 `~/.zsh_history` 里的命令，每次连接通过 SFTP 读取一次，所以在终端里输入的命令也会出现（bash 在 shell 退出时才写历史文件）。
+- Esc 关闭弹出列表，再按一次 Esc 键盘回到终端。“聚焦命令输入框”（Ctrl+Shift+L，macOS 上是 Cmd+Shift+L）在输入框和终端之间切换键盘。
+- 新标签页没有输入框。正在连接或已断开的会话里，输入框显示为禁用。
+
+暂不支持：一次发给多个会话，以及快捷命令按钮。
+
 ### 外观：字体、配色、背景图片
 
 选项的“终端 › 字体”“终端 › 配色”“终端 › 背景图片”三页管终端的外观。改了立刻应用到所有打开的终端（`SetFont`、`SetTheme`），新开的终端也用新设置；连接过程中改了，连上后也会补上。每页下面有“恢复默认”，上面有预览：示例提示符、彩色 `ls`、带连字的代码，用界面控件画，用的是同样的字体、配色和背景。
@@ -630,7 +649,23 @@ shell 需要的键不让用，框里用红字说明原因：
 
 macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，插件的 `OptionAsAlt`）：开了之后 Option+B 发送 Esc b，而不是输入 ∫。同样对之后连接的会话生效。
 
-在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab` 和 `switchTab`（值像 `"Alt+1-9"`）。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）和 `focusCommandBar`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+
+### 终端 › 命令输入框
+
+“在终端下方显示命令输入框”下面的“按键”一节列出输入框的按键：回车、Tab、↑ 或 Alt+H、历史列表里的 ← →、Esc，以及“终端 › 快捷键”里当前绑定的“聚焦命令输入框”快捷键。输入框本身不显示按键说明。
+
+[命令输入框](#命令输入框)的开关，默认都打开，改了立刻对所有会话生效：
+
+| 选项 | 键 | |
+|---|---|---|
+| 在终端下方显示命令输入框 | `noCommandBar` | 关掉后所有会话都不显示输入框：没有弹出列表，不保存也不读取历史，也不为它打开 exec 通道。关着的时候其他开关不能改。 |
+| 路径选择 | `noCommandBarPaths` | 在路径上，或在第一个词之后的词上按 Tab。 |
+| 历史命令 | `noCommandBarHistory` | ↑、Alt+H 和“历史”按钮，关掉时按钮隐藏。关掉后也不再保存发送的命令。 |
+| 命令补全 | `noCommandBarCommands` | 在第一个词上按 Tab；关掉后在那里按 Tab 打开路径选择。 |
+| 读取服务器的 shell 历史 | `noServerHistory` | 在历史列表里加上 `~/.bash_history` 和 `~/.zsh_history`。 |
+
+这些键都以“关掉”命名，所以 `true` 表示关。“清空所有主机的历史…”先询问，再删除程序保存的所有主机的历史（`history` 文件夹）；服务器自己的历史文件不会改动。
 
 ### 同步
 
@@ -677,6 +712,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 | 连接管理器 | Cmd+O | Ctrl+Shift+O |
 | 新标签页 | Cmd+T | Ctrl+Shift+T |
 | 切换到第 1–9 个标签 | Cmd+1…9 | Alt+1…9 |
+| 聚焦命令输入框（再按回到终端） | Cmd+Shift+L | Ctrl+Shift+L |
 
 说明：
 
@@ -684,6 +720,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 - 关闭标签在 macOS 上是 Cmd+W，不是 FinalShell 的 Cmd+Q（那是退出）。为了让 Cmd+W 到达窗口，macOS 上的菜单栏去掉了 MyGo 默认的“文件”菜单（里面的“关闭窗口”占着 Cmd+W）。主窗口里 Cmd+W 关闭标签。子窗口（选项、连接编辑器）里 Cmd+W 关闭这个子窗口，和别的 Mac 程序一样（“关闭标签”改成别的键后，那个键也关闭子窗口），Esc 也照样关闭。Windows 和 Linux 上子窗口用 Esc 和系统的关闭按钮。文件编辑器例外：Cmd+W（Ctrl+W）关闭标签，Esc 不关闭窗口（见[编辑远程文件](#编辑远程文件)）。
 - macOS 上切换标签只用 Cmd+数字：Option+数字会输入字符（¡、™、£……）。
 - Windows 上 terminal 插件默认还把 Ctrl+C（有选中时复制）和 Ctrl+V（剪贴板有内容时粘贴）绑成复制粘贴。Finallyshell 去掉了这两个，和 Linux 一样留给 shell（中断、原样输入下一个键）。复制粘贴用 Ctrl+Shift+C / Ctrl+Shift+V，或 Ctrl+Insert / Shift+Insert。
+- 聚焦命令输入框不用 Ctrl+Shift+K：Windows 上那是终端的清屏（和 Windows Terminal 一样）。FinalShell 单按 Ctrl 切换，会和 shell 用的每个 Ctrl 键冲突，所以没有照搬。关掉命令输入框后，这个键交给终端。
 - 只带 Ctrl 的字母键（Ctrl+A……Ctrl+Z 等）都是 shell 的，在 Windows 和 Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
 
 ## 布局和分隔条

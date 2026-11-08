@@ -28,6 +28,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Terminal](#terminal-section)
   - [Find](#find)
   - [Full screen](#full-screen)
+  - [Command bar](#command-bar)
   - [Appearance: font, color scheme, background image](#appearance-font-color-scheme-background-image)
 - [File panel](#file-panel)
   - [File icon themes](#file-icon-themes)
@@ -46,6 +47,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Terminal](#terminal-defaults)
   - [Terminal › Mouse](#terminal--mouse)
   - [Terminal › Shortcuts](#terminal--shortcuts)
+  - [Terminal › Command bar](#terminal--command-bar)
   - [Sync](#sync)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Layout and split dividers](#layout-and-split-dividers)
@@ -722,6 +724,67 @@ system's full screen. Pressing it again leaves full screen.
 - Leaving the system's full screen by the system's means (the green button
   on macOS) also leaves the app's full screen.
 
+### Command bar
+
+Under the terminal is a one-line command bar, as FinalShell's command
+input box: a terminal icon, the input, without placeholder text, and a
+"History" button at its end. It is on by default; Options › Terminal ›
+Command bar turns it off, or any of its popups, and lists its keys (see
+[Terminal › Command bar](#terminal--command-bar)).
+
+- Enter sends what the bar holds to the shell, followed by a carriage
+  return, as if it had been typed in the terminal (through the session's
+  encoding), and clears the bar. The terminal keeps all its keys: the bar
+  only has the keyboard while you are typing in it.
+- Tab completes the word at the caret:
+  - a word that looks like a path (it has a `/`, or starts with `~` or
+    `.`) opens the path picker, the server's folder in columns: folders
+    first, ending in `/`, then files, with the icons of the file panel's
+    icon theme, hidden ones last. Typing filters it (ignoring case),
+    Backspace in an empty filter goes up a folder, the arrow keys move,
+    and Enter or Tab inserts the entry. A folder inserted lists its own
+    entries; a file ends the word with a space. Names with blanks or
+    other characters the shell would read are escaped with `\`. At most
+    2000 entries are listed, with "and N more" after them.
+  - the first word otherwise opens command completion: the commands on
+    the server's PATH that start with it. They are read once per
+    connection, over one exec channel, with bash's `compgen -c` (which
+    includes builtins), or a listing of each `$PATH` folder on servers
+    without bash. A host whose "Enable exec channel" is off lists
+    `/usr/local/sbin`, `/usr/local/bin`, `/usr/sbin`, `/usr/bin`, `/sbin`
+    and `/bin` over SFTP instead.
+  - any other word opens the path picker for the current folder.
+- Relative paths are read from the shell's working directory when the
+  shell reports it (OSC 7), else from the file panel's folder; `~` is the
+  home folder. Folders are listed over the session's SFTP, so a server
+  without SFTP shows the error in the popup, while sending and the history
+  still work.
+- Up, Alt+H or the "History" button opens the history picker (the
+  button keeps the keyboard in the bar, and closes the picker when it is
+  open; it is hidden while the history picker is off): the commands sent
+  before that
+  start with what is typed, the newest at the bottom, next to the bar.
+  Up and Down move; Left and Right highlight one field (word) of the
+  highlighted command, so `epel-release` can be taken out of
+  `yum -y install epel-release` alone. Enter inserts the field in place of
+  the word at the caret, or, with no field highlighted, puts the whole
+  command in the bar. "Clear list" deletes the host's history.
+- The history is the app's own, per host: every command sent from the
+  bar, each once, newest last, with no limit on how many (the file is cut
+  from the oldest past 10 MB; see
+  [configuration.md](configuration.md#command-history)). Below it come
+  the commands of the server's `~/.bash_history` and `~/.zsh_history`,
+  read over SFTP once per connection, so commands typed in the terminal
+  show up too (bash writes its history file when the shell exits).
+- Esc closes the popup; Esc again gives the keyboard back to the
+  terminal. "Focus command bar" (Ctrl+Shift+L, Cmd+Shift+L on macOS)
+  moves the keyboard to the bar and back.
+- New tabs show no bar. In a session that is connecting or disconnected,
+  the bar is shown disabled.
+
+Not supported: sending a line to several sessions at once, and quick
+command buttons.
+
 ### Appearance: font, color scheme, background image
 
 The Options pages Terminal › Font, Terminal › Color scheme and Terminal ›
@@ -1357,10 +1420,33 @@ typing ∫. It also applies to sessions connected afterwards.
 In `settings.json`, only changed keys are stored:
 `"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`. The key names
 are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
-`nextTab`, `closeTab`, `connectionManager`, `newTab` and `switchTab` (whose
-value looks like `"Alt+1-9"`). `Super` is Cmd on macOS, and `none` means no
+`nextTab`, `closeTab`, `connectionManager`, `newTab`, `switchTab` (whose
+value looks like `"Alt+1-9"`) and `focusCommandBar`. `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
+
+### Terminal › Command bar
+
+Under "Show the command bar under the terminal", a "Keys" section lists
+the bar's keys: Enter, Tab, Up or Alt+H, Left and Right in the history
+picker, Esc, and the Focus command bar shortcut as it is bound on
+Terminal › Shortcuts. The bar itself shows no key help.
+
+The switches of the [command bar](#command-bar), each on by default and
+applied at once, to every session:
+
+| Option | Key | |
+|---|---|---|
+| Show the command bar under the terminal | `noCommandBar` | Off hides the bar in every session: no popups, no history kept or read, no exec channel opened for it. The other switches can't change while it is off. |
+| Path picker | `noCommandBarPaths` | Tab on a path, or on a word that isn't the first. |
+| History picker | `noCommandBarHistory` | Up, Alt+H and the History button, which is hidden while it is off. Off also stops keeping the commands sent. |
+| Command completion | `noCommandBarCommands` | Tab on the first word; off, Tab there opens the path picker. |
+| Read the server's shell history | `noServerHistory` | `~/.bash_history` and `~/.zsh_history` in the history picker. |
+
+The keys are named for turning each part off, so `true` means off.
+"Clear history of all hosts…" asks first, then deletes the history the
+app keeps of every host (the `history` folder); the servers' own history
+files are not changed.
 
 ### Sync
 
@@ -1456,6 +1542,7 @@ Terminal › Shortcuts page.
 | Connection manager | Cmd+O | Ctrl+Shift+O |
 | New tab | Cmd+T | Ctrl+Shift+T |
 | Switch to tab 1–9 | Cmd+1…9 | Alt+1…9 |
+| Focus command bar (and back to the terminal) | Cmd+Shift+L | Ctrl+Shift+L |
 
 Notes:
 
@@ -1480,6 +1567,11 @@ Notes:
   something). Finallyshell removes those, leaving them to the shell as on
   Linux (interrupt, and insert the next key literally). Copy and paste with
   Ctrl+Shift+C and Ctrl+Shift+V, or Ctrl+Insert and Shift+Insert.
+- Focus command bar is not Ctrl+Shift+K: on Windows that is the
+  terminal's clear screen (as in Windows Terminal). FinalShell switches
+  with a lone Ctrl press, which would clash with every Ctrl key the shell
+  uses, so it isn't copied. With the command bar off, the key goes to the
+  terminal.
 - Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
   shell and are not used as shortcuts on Windows and Linux. In MyGo's
   legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an

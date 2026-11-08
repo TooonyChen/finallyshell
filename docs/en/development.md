@@ -275,7 +275,7 @@ tools/natives/       downloads libghostty-vt for the tests before CI runs them, 
 tools/release/       release tools: the next version and its notes from CHANGELOG.md, a draft of them from the commits, the third-party licenses (notices/ has the licenses of libraries packaged as binaries)
 tools/screenshots/   regenerates the README screenshots in docs/screenshots/ from the internal/app tests
 internal/
-  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send; sync.go is the Sync page's settings, which settings are synced, sync-state.json and the copy of hosts.json before a sync
+  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send; sync.go is the Sync page's settings, which settings are synced, sync-state.json and the copy of hosts.json before a sync; history.go is the command bar's history files and reading bash's and zsh's history files
   cloudsync/         sync through the user's own storage: crypto.go encrypts the file (Argon2id, AES-256-GCM), merge.go merges three ways, sync.go reads, merges and writes it (retrying on a conflict); gist.go, webdav.go and s3.go are the services (s3.go signs with SigV4 by hand), remotehttp.go their shared HTTP code
   importer/          reads other clients' connections: importer.go is the list of sources (readers), the entries and problems they read, the text decoder (UTF-8, UTF-16, GB18030), finding duplicates and importing by folder; finalshell.go finds FinalShell's folder and reads the connections and folders in conn; xshell.go finds Xshell's Sessions folder and reads its .xsh files and .xts exports; securecrt.go finds SecureCRT's config folder and reads the .ini files of its Sessions folder; mobaxterm.go finds MobaXterm.ini and reads its bookmark sections, and .mxtsessions and .moba exports; sshconfig.go reads OpenSSH's ~/.ssh/config (Host blocks and patterns, Include, ProxyJump); table.go reads a server list in a CSV file, or the first sheet of an .xlsx with xlsx.go, a reader of its own (archive/zip and encoding/xml, with limits against zip bombs); testdata has made-up samples
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
@@ -294,6 +294,9 @@ internal/
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
     terminal.go      terminal area
     findbar.go       the find bar on the terminal, driving the plugin's Search
+    commandbar.go    the command bar under the terminal: its keys, the path, command and history popups, words and fields
+    commandbar_data.go what the popups read: folders over SFTP, command names over an exec channel (or SFTP), the hosts' history, the server's shell history
+    options_commandbar.go the Terminal › Command bar page
     fullscreen.go    full screen: only the terminal area, window in the system's full screen
     start.go         new tab: quick connect, search, clearing recent connections
     splits.go        split dividers: minimum sizes of the areas, saving and restoring sizes

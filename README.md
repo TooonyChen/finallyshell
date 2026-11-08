@@ -113,6 +113,8 @@ Files and folders get icons from VS Code icon themes. Material Icon Theme and Se
 
 Pick a font, size, line height and weight, with or without ligatures, any of the hundreds of color schemes Ghostty ships, and an optional background image. Changes apply to open terminals at once. The terminal also has find (<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>), full screen, copy on select, a choice of what right-click does, and links you can open with <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+click.
 
+Under the terminal is FinalShell's command bar: type a command and Enter sends it to the shell. <kbd>Tab</kbd> lists the server's folder for the path you are typing, in columns, or the commands on its PATH for the first word; <kbd>↑</kbd>, <kbd>Alt</kbd>+<kbd>H</kbd> or its History button lists the commands you sent to that host before, and those in its shell history, and <kbd>←</kbd> <kbd>→</kbd> pick one word out of a command. Don't need it? Turn it, or any part of it, off in Options › Terminal › Command bar.
+
 Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, Big5, Shift_JIS, EUC-JP, EUC-KR, ISO-8859-1 and Windows-1252, set once in Options or per host. What Backspace and Delete send can be changed the same way.
 
 <table>
@@ -152,6 +154,7 @@ The defaults follow FinalShell. Change them in Options › Terminal › Shortcut
 | Connection manager | <kbd>Cmd</kbd>+<kbd>O</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> |
 | New tab | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | Go to tab 1 to 9 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
+| Command bar, and back to the terminal | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-en.png" width="720" alt="The shortcuts page in Options">

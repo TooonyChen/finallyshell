@@ -12,6 +12,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
   - [安全](#安全)
 - [settings.json](#settingsjson)
 - [同步](#同步)
+- [命令历史](#命令历史)
 - [updater.json](#updaterjson)
 - [mygo.json 里的 updates](#mygojson-里的-updates)
 - [密码存在哪里](#密码存在哪里)
@@ -31,6 +32,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `icon-themes/` | 从 VSIX 文件安装的文件图标主题，存成 `<发布者>.<名称>.vsix`。 |
 | `sync-state.json` | 上次同步的状态（见[同步](#同步)）。 |
 | `hosts.before-sync.json` | 上次改动了它的同步之前的 `hosts.json`。 |
+| `history/<主机 ID>.txt` | 命令输入框按主机保存的历史（见[命令历史](#命令历史)）。 |
 
 `mygo dev`、`go run` 和安装版用的是同一个目录，所以共用主机和设置。
 
@@ -143,11 +145,16 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `termBackgroundOpacity` | 图片的不透明度（百分比），5 到 100。 | 30 |
 | `keepManagerOpen` | `true` 时连接后不关闭连接管理器。 | 关闭。 |
 | `fileIconTheme` | `minimal`、`bundled:seti` 或 `<发布者>.<名称>/<主题 ID>`。 | Material Icon Theme |
+| `noCommandBar` | `true` 时不显示终端下方的命令输入框，它的功能也都不用。 | 显示。 |
+| `noCommandBarPaths` | `true` 时关掉命令输入框的路径选择。 | 开。 |
+| `noCommandBarHistory` | `true` 时关掉历史列表，也不再保存发送的命令。 | 开。 |
+| `noCommandBarCommands` | `true` 时关掉命令补全。 | 开。 |
+| `noServerHistory` | `true` 时历史列表里不加服务器的 `~/.bash_history` 和 `~/.zsh_history`。 | 读取。 |
 | `sidebarWidth`、`treeWidth` | 左边栏和文件面板目录树的宽度，最后一次拖动的结果。 | 程序的默认值。 |
 | `monitorPercent`、`terminalPercent` | 服务器监控占左边栏的比例、终端占主区域的比例，单位是百分比。 | 程序的默认值。 |
 | `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
 
-每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)和[布局和分隔条](features.md#布局和分隔条)。
+每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)和[布局和分隔条](features.md#布局和分隔条)。
 
 ## 同步
 
@@ -171,6 +178,12 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 - `hosts.before-sync.json`：上次改动了 `hosts.json` 的同步之前的 `hosts.json`。
 
 服务上的文件 `finallyshell-sync.json` 是 JSON：`{"app": "finallyshell", "format": 1, "kdf": "argon2id", "salt": ..., "t": 3, "m": 65536, "p": 4, "cipher": "aes-256-gcm", "nonce": ..., "data": ...}`，二进制字段是 base64。`data` 解密后是 `{"schema": 1, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "settings": {...}, "secrets": {...}}`：folders 和 hosts 就是 `hosts.json` 里的，settings 是 `settings.json` 里同步的键，secrets 是已保存的密码，按它们在凭据存储里的键存放。
+
+## 命令历史
+
+[命令输入框](features.md#命令输入框)把从它发送的命令存在 `history/<主机 ID>.txt`，每台主机一个文件，文件名是主机在 `hosts.json` 里的 `id`：UTF-8 纯文本，一行一条命令，最旧的在前，每条只留一次（再次发送的移到最后）。条数不限；文件超过 10 MB 时删掉最旧的。多行的命令和空命令不保存。彻底删除主机时一起删除它的文件（删到“显示已删除”时不删），“选项 › 终端 › 命令输入框 › 清空所有主机的历史…”删除整个文件夹。程序关闭时可以编辑或删除这些文件；每次运行中，历史列表第一次用到时才读取。
+
+同步暂时不包括历史；文件格式保持简单，以便以后同步。
 
 ## updater.json
 

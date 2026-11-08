@@ -15,6 +15,7 @@ behind each setting.
   - [Safety](#safety)
 - [settings.json](#settingsjson)
 - [Sync](#sync)
+- [Command history](#command-history)
 - [updater.json](#updaterjson)
 - [Updates in mygo.json](#updates-in-mygojson)
 - [Where passwords are stored](#where-passwords-are-stored)
@@ -38,6 +39,7 @@ instead.
 | `icon-themes/` | File icon themes installed from VSIX files, as `<publisher>.<name>.vsix`. |
 | `sync-state.json` | What the last sync synced (see [Sync](#sync)). |
 | `hosts.before-sync.json` | `hosts.json` as it was before the last sync that changed it. |
+| `history/<host ID>.txt` | The command bar's history of each host (see [Command history](#command-history)). |
 
 `mygo dev`, `go run` and the installed app all use the same directory, so
 they share hosts and settings.
@@ -173,6 +175,11 @@ default.
 | `termBackgroundOpacity` | Image opacity in percent, 5 to 100. | 30 |
 | `keepManagerOpen` | `true` keeps the connection manager open after connecting. | It closes. |
 | `fileIconTheme` | `minimal`, `bundled:seti`, or `<publisher>.<name>/<theme ID>`. | Material Icon Theme |
+| `noCommandBar` | `true` hides the command bar under the terminal, and all it does. | Shown. |
+| `noCommandBarPaths` | `true` turns the command bar's path picker off. | On. |
+| `noCommandBarHistory` | `true` turns the history picker off, and keeping the commands sent. | On. |
+| `noCommandBarCommands` | `true` turns command completion off. | On. |
+| `noServerHistory` | `true` keeps the server's `~/.bash_history` and `~/.zsh_history` out of the history picker. | Read. |
 | `sidebarWidth`, `treeWidth` | Widths of the sidebar and the file panel's folder tree, as last dragged. | The app's defaults. |
 | `monitorPercent`, `terminalPercent` | The server monitor's share of the sidebar and the terminal's share of the main area, in percent. | The app's defaults. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
@@ -182,6 +189,7 @@ Details of each option are in [features.md](features.md): see
 [Terminal](features.md#terminal-defaults),
 [Terminal › Mouse](features.md#terminal--mouse),
 [Terminal › Shortcuts](features.md#terminal--shortcuts),
+[Terminal › Command bar](features.md#terminal--command-bar),
 [Appearance](features.md#appearance-font-color-scheme-background-image),
 [File icon themes](features.md#file-icon-themes),
 [Connection manager](features.md#connection-manager) and
@@ -229,6 +237,23 @@ the binary fields in base64. Decrypted, `data` is
 where folders and hosts are those of `hosts.json`, settings the synced
 keys of `settings.json`, and secrets the saved passwords by their key in
 the credential store.
+
+## Command history
+
+The [command bar](features.md#command-bar) keeps the commands sent from
+it in `history/<host ID>.txt`, a file per host named by the host's `id`
+in `hosts.json`: plain UTF-8 text, one command per line, the oldest first,
+each command once (one sent again moves to the end). There is no limit on
+the number of commands; once a file passes 10 MB, the oldest are dropped.
+Commands of several lines and blank ones are not kept. A host's file is
+deleted with the host (when it is deleted for good, not when it goes to
+"Show deleted"), and Options › Terminal › Command bar › "Clear history of
+all hosts…" deletes the folder. You can edit or delete the files while
+the app is closed; one is read the first time the history picker needs
+it in a run.
+
+Sync does not carry the history yet; the format is kept this simple so
+that it could.
 
 ## updater.json
 
