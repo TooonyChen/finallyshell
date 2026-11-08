@@ -173,10 +173,13 @@ func TestImportTableFiles(t *testing.T) {
 	if !tt.HasText("東京") || !tt.HasText("生产 / 网站") || !tt.HasText("192.0.2.60:2222") || !tt.HasText(locales.ImportColPassword()) {
 		t.Errorf("texts %q", tt.Texts())
 	}
-	for path, want := range map[string]string{
-		tableSample(t, "libreoffice.xlsx"): "calc-1",
-		tableSample(t, "no-host.csv"):      locales.TableNoHostColumn("“Name”, “Port”, “User”"),
+	// In this order: the check after the loop is of the list read last,
+	// which has no passwords.
+	for _, c := range []struct{ path, want string }{
+		{tableSample(t, "libreoffice.xlsx"), "calc-1"},
+		{tableSample(t, "no-host.csv"), locales.TableNoHostColumn("“Name”, “Port”, “User”")},
 	} {
+		path, want := c.path, c.want
 		p.pickTyped(path)
 		if err := tt.Click(locales.ChooseFile()); err != nil {
 			t.Fatalf("%v; texts %q", err, tt.Texts())
