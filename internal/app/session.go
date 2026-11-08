@@ -49,6 +49,7 @@ type Session struct {
 	files  fileState
 
 	tunnels tunnelState // see tunnels.go
+	procs   procState   // the Processes tab, see processes.go
 
 	hostKeyQ *sshx.HostKeyQuestion
 	cancel   context.CancelFunc

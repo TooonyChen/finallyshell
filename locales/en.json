@@ -350,6 +350,77 @@
       }
     }
   },
+  "tabProcesses": "Processes",
+  "openProcesses": "Open the process manager",
+  "colPID": "PID",
+  "colProcUser": "User",
+  "colProcMemory": "Memory",
+  "colProcCPU": "CPU %",
+  "colProcName": "Name",
+  "colProcCommand": "Command line",
+  "colProcPath": "Path",
+  "procFilter": "Filter by name, command line or user",
+  "procCount": "{count, plural, one {# process} other {# processes}}",
+  "@procCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "procCountFiltered": "{shown} of {count, plural, one {# process} other {# processes}}",
+  "@procCountFiltered": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "procReading": "Reading processes…",
+  "procOnlyLinux": "Only Linux servers are supported",
+  "procListFailed": "Could not list the processes: {error}",
+  "procCopyPID": "Copy PID",
+  "procCopyCommand": "Copy Command Line",
+  "procOpenDetails": "Open Details",
+  "procSendSignal": "Send Signal",
+  "procKill": "Kill…",
+  "sigTERM": "Asks the process to quit.",
+  "sigKILL": "Ends the process at once; it cannot clean up.",
+  "sigHUP": "Hangs up; many daemons reload their configuration.",
+  "sigINT": "Interrupts the process, as Ctrl+C does.",
+  "sigSTOP": "Pauses the process until it gets SIGCONT.",
+  "sigCONT": "Resumes a paused process.",
+  "signalTitle": "Send {signal} to {name} ({pid})?",
+  "signalSend": "Send",
+  "killTitle": "Kill {name} ({pid})?",
+  "killBody": "This sends SIGTERM, which asks the process to quit. If it is still running after {seconds} seconds, you can force it with SIGKILL.",
+  "@killBody": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "procKillButton": "Kill",
+  "killWaiting": "Waiting for the process to quit…",
+  "killStillTitle": "{name} ({pid}) is still running",
+  "killStillBody": "It did not quit after SIGTERM. Force it to quit with SIGKILL? It cannot clean up.",
+  "forceKill": "Force Kill",
+  "signalRefused": "The server refused: {error}",
+  "signalFailed": "Could not send the signal: {error}",
+  "procGone": "Process {pid} is no longer running.",
+  "procDetailsFailed": "Could not read the details: {error}",
+  "procCwd": "Working directory",
+  "procNeedsRoot": "Needs root",
+  "procEnvironment": "Environment",
+  "envName": "Name",
+  "envValue": "Value",
+  "envCopyValue": "Copy Value",
+  "envCopyPair": "Copy NAME=value",
+  "envCopyAll": "Copy All",
   "tunnelStarting": "Starting…",
   "tunnelListening": "Listening",
   "tunnelStopped": "Stopped",

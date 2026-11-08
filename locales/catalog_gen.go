@@ -2472,6 +2472,482 @@ func (msgs Messages) TabTunnelsActive(count int) string {
 	return Catalog.Format(msgs.locale, "tabTunnelsActive", map[string]any{"count": count})
 }
 
+// TabProcesses says "Processes"
+// in the language the app shows.
+func TabProcesses() string { return In(i18n.Locale()).TabProcesses() }
+
+// TabProcesses says "Processes"
+// in the language of msgs.
+func (msgs Messages) TabProcesses() string {
+	return Catalog.Format(msgs.locale, "tabProcesses", nil)
+}
+
+// OpenProcesses says "Open the process manager"
+// in the language the app shows.
+func OpenProcesses() string { return In(i18n.Locale()).OpenProcesses() }
+
+// OpenProcesses says "Open the process manager"
+// in the language of msgs.
+func (msgs Messages) OpenProcesses() string {
+	return Catalog.Format(msgs.locale, "openProcesses", nil)
+}
+
+// ColPID says "PID"
+// in the language the app shows.
+func ColPID() string { return In(i18n.Locale()).ColPID() }
+
+// ColPID says "PID"
+// in the language of msgs.
+func (msgs Messages) ColPID() string {
+	return Catalog.Format(msgs.locale, "colPID", nil)
+}
+
+// ColProcUser says "User"
+// in the language the app shows.
+func ColProcUser() string { return In(i18n.Locale()).ColProcUser() }
+
+// ColProcUser says "User"
+// in the language of msgs.
+func (msgs Messages) ColProcUser() string {
+	return Catalog.Format(msgs.locale, "colProcUser", nil)
+}
+
+// ColProcMemory says "Memory"
+// in the language the app shows.
+func ColProcMemory() string { return In(i18n.Locale()).ColProcMemory() }
+
+// ColProcMemory says "Memory"
+// in the language of msgs.
+func (msgs Messages) ColProcMemory() string {
+	return Catalog.Format(msgs.locale, "colProcMemory", nil)
+}
+
+// ColProcCPU says "CPU %"
+// in the language the app shows.
+func ColProcCPU() string { return In(i18n.Locale()).ColProcCPU() }
+
+// ColProcCPU says "CPU %"
+// in the language of msgs.
+func (msgs Messages) ColProcCPU() string {
+	return Catalog.Format(msgs.locale, "colProcCPU", nil)
+}
+
+// ColProcName says "Name"
+// in the language the app shows.
+func ColProcName() string { return In(i18n.Locale()).ColProcName() }
+
+// ColProcName says "Name"
+// in the language of msgs.
+func (msgs Messages) ColProcName() string {
+	return Catalog.Format(msgs.locale, "colProcName", nil)
+}
+
+// ColProcCommand says "Command line"
+// in the language the app shows.
+func ColProcCommand() string { return In(i18n.Locale()).ColProcCommand() }
+
+// ColProcCommand says "Command line"
+// in the language of msgs.
+func (msgs Messages) ColProcCommand() string {
+	return Catalog.Format(msgs.locale, "colProcCommand", nil)
+}
+
+// ColProcPath says "Path"
+// in the language the app shows.
+func ColProcPath() string { return In(i18n.Locale()).ColProcPath() }
+
+// ColProcPath says "Path"
+// in the language of msgs.
+func (msgs Messages) ColProcPath() string {
+	return Catalog.Format(msgs.locale, "colProcPath", nil)
+}
+
+// ProcFilter says "Filter by name, command line or user"
+// in the language the app shows.
+func ProcFilter() string { return In(i18n.Locale()).ProcFilter() }
+
+// ProcFilter says "Filter by name, command line or user"
+// in the language of msgs.
+func (msgs Messages) ProcFilter() string {
+	return Catalog.Format(msgs.locale, "procFilter", nil)
+}
+
+// ProcCount says "{count, plural, one {# process} other {# processes}}"
+// in the language the app shows.
+func ProcCount(count int) string { return In(i18n.Locale()).ProcCount(count) }
+
+// ProcCount says "{count, plural, one {# process} other {# processes}}"
+// in the language of msgs.
+func (msgs Messages) ProcCount(count int) string {
+	return Catalog.Format(msgs.locale, "procCount", map[string]any{"count": count})
+}
+
+// ProcCountFiltered says "{shown} of {count, plural, one {# process} other {# processes}}"
+// in the language the app shows.
+func ProcCountFiltered(shown int, count int) string {
+	return In(i18n.Locale()).ProcCountFiltered(shown, count)
+}
+
+// ProcCountFiltered says "{shown} of {count, plural, one {# process} other {# processes}}"
+// in the language of msgs.
+func (msgs Messages) ProcCountFiltered(shown int, count int) string {
+	return Catalog.Format(msgs.locale, "procCountFiltered", map[string]any{"shown": shown, "count": count})
+}
+
+// ProcReading says "Reading processes…"
+// in the language the app shows.
+func ProcReading() string { return In(i18n.Locale()).ProcReading() }
+
+// ProcReading says "Reading processes…"
+// in the language of msgs.
+func (msgs Messages) ProcReading() string {
+	return Catalog.Format(msgs.locale, "procReading", nil)
+}
+
+// ProcOnlyLinux says "Only Linux servers are supported"
+// in the language the app shows.
+func ProcOnlyLinux() string { return In(i18n.Locale()).ProcOnlyLinux() }
+
+// ProcOnlyLinux says "Only Linux servers are supported"
+// in the language of msgs.
+func (msgs Messages) ProcOnlyLinux() string {
+	return Catalog.Format(msgs.locale, "procOnlyLinux", nil)
+}
+
+// ProcListFailed says "Could not list the processes: {error}"
+// in the language the app shows.
+func ProcListFailed(error string) string { return In(i18n.Locale()).ProcListFailed(error) }
+
+// ProcListFailed says "Could not list the processes: {error}"
+// in the language of msgs.
+func (msgs Messages) ProcListFailed(error string) string {
+	return Catalog.Format(msgs.locale, "procListFailed", map[string]any{"error": error})
+}
+
+// ProcCopyPID says "Copy PID"
+// in the language the app shows.
+func ProcCopyPID() string { return In(i18n.Locale()).ProcCopyPID() }
+
+// ProcCopyPID says "Copy PID"
+// in the language of msgs.
+func (msgs Messages) ProcCopyPID() string {
+	return Catalog.Format(msgs.locale, "procCopyPID", nil)
+}
+
+// ProcCopyCommand says "Copy Command Line"
+// in the language the app shows.
+func ProcCopyCommand() string { return In(i18n.Locale()).ProcCopyCommand() }
+
+// ProcCopyCommand says "Copy Command Line"
+// in the language of msgs.
+func (msgs Messages) ProcCopyCommand() string {
+	return Catalog.Format(msgs.locale, "procCopyCommand", nil)
+}
+
+// ProcOpenDetails says "Open Details"
+// in the language the app shows.
+func ProcOpenDetails() string { return In(i18n.Locale()).ProcOpenDetails() }
+
+// ProcOpenDetails says "Open Details"
+// in the language of msgs.
+func (msgs Messages) ProcOpenDetails() string {
+	return Catalog.Format(msgs.locale, "procOpenDetails", nil)
+}
+
+// ProcSendSignal says "Send Signal"
+// in the language the app shows.
+func ProcSendSignal() string { return In(i18n.Locale()).ProcSendSignal() }
+
+// ProcSendSignal says "Send Signal"
+// in the language of msgs.
+func (msgs Messages) ProcSendSignal() string {
+	return Catalog.Format(msgs.locale, "procSendSignal", nil)
+}
+
+// ProcKill says "Kill…"
+// in the language the app shows.
+func ProcKill() string { return In(i18n.Locale()).ProcKill() }
+
+// ProcKill says "Kill…"
+// in the language of msgs.
+func (msgs Messages) ProcKill() string {
+	return Catalog.Format(msgs.locale, "procKill", nil)
+}
+
+// SigTERM says "Asks the process to quit."
+// in the language the app shows.
+func SigTERM() string { return In(i18n.Locale()).SigTERM() }
+
+// SigTERM says "Asks the process to quit."
+// in the language of msgs.
+func (msgs Messages) SigTERM() string {
+	return Catalog.Format(msgs.locale, "sigTERM", nil)
+}
+
+// SigKILL says "Ends the process at once; it cannot clean up."
+// in the language the app shows.
+func SigKILL() string { return In(i18n.Locale()).SigKILL() }
+
+// SigKILL says "Ends the process at once; it cannot clean up."
+// in the language of msgs.
+func (msgs Messages) SigKILL() string {
+	return Catalog.Format(msgs.locale, "sigKILL", nil)
+}
+
+// SigHUP says "Hangs up; many daemons reload their configuration."
+// in the language the app shows.
+func SigHUP() string { return In(i18n.Locale()).SigHUP() }
+
+// SigHUP says "Hangs up; many daemons reload their configuration."
+// in the language of msgs.
+func (msgs Messages) SigHUP() string {
+	return Catalog.Format(msgs.locale, "sigHUP", nil)
+}
+
+// SigINT says "Interrupts the process, as Ctrl+C does."
+// in the language the app shows.
+func SigINT() string { return In(i18n.Locale()).SigINT() }
+
+// SigINT says "Interrupts the process, as Ctrl+C does."
+// in the language of msgs.
+func (msgs Messages) SigINT() string {
+	return Catalog.Format(msgs.locale, "sigINT", nil)
+}
+
+// SigSTOP says "Pauses the process until it gets SIGCONT."
+// in the language the app shows.
+func SigSTOP() string { return In(i18n.Locale()).SigSTOP() }
+
+// SigSTOP says "Pauses the process until it gets SIGCONT."
+// in the language of msgs.
+func (msgs Messages) SigSTOP() string {
+	return Catalog.Format(msgs.locale, "sigSTOP", nil)
+}
+
+// SigCONT says "Resumes a paused process."
+// in the language the app shows.
+func SigCONT() string { return In(i18n.Locale()).SigCONT() }
+
+// SigCONT says "Resumes a paused process."
+// in the language of msgs.
+func (msgs Messages) SigCONT() string {
+	return Catalog.Format(msgs.locale, "sigCONT", nil)
+}
+
+// SignalTitle says "Send {signal} to {name} ({pid})?"
+// in the language the app shows.
+func SignalTitle(signal string, name string, pid string) string {
+	return In(i18n.Locale()).SignalTitle(signal, name, pid)
+}
+
+// SignalTitle says "Send {signal} to {name} ({pid})?"
+// in the language of msgs.
+func (msgs Messages) SignalTitle(signal string, name string, pid string) string {
+	return Catalog.Format(msgs.locale, "signalTitle", map[string]any{"signal": signal, "name": name, "pid": pid})
+}
+
+// SignalSend says "Send"
+// in the language the app shows.
+func SignalSend() string { return In(i18n.Locale()).SignalSend() }
+
+// SignalSend says "Send"
+// in the language of msgs.
+func (msgs Messages) SignalSend() string {
+	return Catalog.Format(msgs.locale, "signalSend", nil)
+}
+
+// KillTitle says "Kill {name} ({pid})?"
+// in the language the app shows.
+func KillTitle(name string, pid string) string { return In(i18n.Locale()).KillTitle(name, pid) }
+
+// KillTitle says "Kill {name} ({pid})?"
+// in the language of msgs.
+func (msgs Messages) KillTitle(name string, pid string) string {
+	return Catalog.Format(msgs.locale, "killTitle", map[string]any{"name": name, "pid": pid})
+}
+
+// KillBody says "This sends SIGTERM, which asks the process to quit. If it is still running after {seconds} seconds, you can force it …"
+// in the language the app shows.
+func KillBody(seconds int) string { return In(i18n.Locale()).KillBody(seconds) }
+
+// KillBody says "This sends SIGTERM, which asks the process to quit. If it is still running after {seconds} seconds, you can force it …"
+// in the language of msgs.
+func (msgs Messages) KillBody(seconds int) string {
+	return Catalog.Format(msgs.locale, "killBody", map[string]any{"seconds": seconds})
+}
+
+// ProcKillButton says "Kill"
+// in the language the app shows.
+func ProcKillButton() string { return In(i18n.Locale()).ProcKillButton() }
+
+// ProcKillButton says "Kill"
+// in the language of msgs.
+func (msgs Messages) ProcKillButton() string {
+	return Catalog.Format(msgs.locale, "procKillButton", nil)
+}
+
+// KillWaiting says "Waiting for the process to quit…"
+// in the language the app shows.
+func KillWaiting() string { return In(i18n.Locale()).KillWaiting() }
+
+// KillWaiting says "Waiting for the process to quit…"
+// in the language of msgs.
+func (msgs Messages) KillWaiting() string {
+	return Catalog.Format(msgs.locale, "killWaiting", nil)
+}
+
+// KillStillTitle says "{name} ({pid}) is still running"
+// in the language the app shows.
+func KillStillTitle(name string, pid string) string {
+	return In(i18n.Locale()).KillStillTitle(name, pid)
+}
+
+// KillStillTitle says "{name} ({pid}) is still running"
+// in the language of msgs.
+func (msgs Messages) KillStillTitle(name string, pid string) string {
+	return Catalog.Format(msgs.locale, "killStillTitle", map[string]any{"name": name, "pid": pid})
+}
+
+// KillStillBody says "It did not quit after SIGTERM. Force it to quit with SIGKILL? It cannot clean up."
+// in the language the app shows.
+func KillStillBody() string { return In(i18n.Locale()).KillStillBody() }
+
+// KillStillBody says "It did not quit after SIGTERM. Force it to quit with SIGKILL? It cannot clean up."
+// in the language of msgs.
+func (msgs Messages) KillStillBody() string {
+	return Catalog.Format(msgs.locale, "killStillBody", nil)
+}
+
+// ForceKill says "Force Kill"
+// in the language the app shows.
+func ForceKill() string { return In(i18n.Locale()).ForceKill() }
+
+// ForceKill says "Force Kill"
+// in the language of msgs.
+func (msgs Messages) ForceKill() string {
+	return Catalog.Format(msgs.locale, "forceKill", nil)
+}
+
+// SignalRefused says "The server refused: {error}"
+// in the language the app shows.
+func SignalRefused(error string) string { return In(i18n.Locale()).SignalRefused(error) }
+
+// SignalRefused says "The server refused: {error}"
+// in the language of msgs.
+func (msgs Messages) SignalRefused(error string) string {
+	return Catalog.Format(msgs.locale, "signalRefused", map[string]any{"error": error})
+}
+
+// SignalFailed says "Could not send the signal: {error}"
+// in the language the app shows.
+func SignalFailed(error string) string { return In(i18n.Locale()).SignalFailed(error) }
+
+// SignalFailed says "Could not send the signal: {error}"
+// in the language of msgs.
+func (msgs Messages) SignalFailed(error string) string {
+	return Catalog.Format(msgs.locale, "signalFailed", map[string]any{"error": error})
+}
+
+// ProcGone says "Process {pid} is no longer running."
+// in the language the app shows.
+func ProcGone(pid string) string { return In(i18n.Locale()).ProcGone(pid) }
+
+// ProcGone says "Process {pid} is no longer running."
+// in the language of msgs.
+func (msgs Messages) ProcGone(pid string) string {
+	return Catalog.Format(msgs.locale, "procGone", map[string]any{"pid": pid})
+}
+
+// ProcDetailsFailed says "Could not read the details: {error}"
+// in the language the app shows.
+func ProcDetailsFailed(error string) string { return In(i18n.Locale()).ProcDetailsFailed(error) }
+
+// ProcDetailsFailed says "Could not read the details: {error}"
+// in the language of msgs.
+func (msgs Messages) ProcDetailsFailed(error string) string {
+	return Catalog.Format(msgs.locale, "procDetailsFailed", map[string]any{"error": error})
+}
+
+// ProcCwd says "Working directory"
+// in the language the app shows.
+func ProcCwd() string { return In(i18n.Locale()).ProcCwd() }
+
+// ProcCwd says "Working directory"
+// in the language of msgs.
+func (msgs Messages) ProcCwd() string {
+	return Catalog.Format(msgs.locale, "procCwd", nil)
+}
+
+// ProcNeedsRoot says "Needs root"
+// in the language the app shows.
+func ProcNeedsRoot() string { return In(i18n.Locale()).ProcNeedsRoot() }
+
+// ProcNeedsRoot says "Needs root"
+// in the language of msgs.
+func (msgs Messages) ProcNeedsRoot() string {
+	return Catalog.Format(msgs.locale, "procNeedsRoot", nil)
+}
+
+// ProcEnvironment says "Environment"
+// in the language the app shows.
+func ProcEnvironment() string { return In(i18n.Locale()).ProcEnvironment() }
+
+// ProcEnvironment says "Environment"
+// in the language of msgs.
+func (msgs Messages) ProcEnvironment() string {
+	return Catalog.Format(msgs.locale, "procEnvironment", nil)
+}
+
+// EnvName says "Name"
+// in the language the app shows.
+func EnvName() string { return In(i18n.Locale()).EnvName() }
+
+// EnvName says "Name"
+// in the language of msgs.
+func (msgs Messages) EnvName() string {
+	return Catalog.Format(msgs.locale, "envName", nil)
+}
+
+// EnvValue says "Value"
+// in the language the app shows.
+func EnvValue() string { return In(i18n.Locale()).EnvValue() }
+
+// EnvValue says "Value"
+// in the language of msgs.
+func (msgs Messages) EnvValue() string {
+	return Catalog.Format(msgs.locale, "envValue", nil)
+}
+
+// EnvCopyValue says "Copy Value"
+// in the language the app shows.
+func EnvCopyValue() string { return In(i18n.Locale()).EnvCopyValue() }
+
+// EnvCopyValue says "Copy Value"
+// in the language of msgs.
+func (msgs Messages) EnvCopyValue() string {
+	return Catalog.Format(msgs.locale, "envCopyValue", nil)
+}
+
+// EnvCopyPair says "Copy NAME=value"
+// in the language the app shows.
+func EnvCopyPair() string { return In(i18n.Locale()).EnvCopyPair() }
+
+// EnvCopyPair says "Copy NAME=value"
+// in the language of msgs.
+func (msgs Messages) EnvCopyPair() string {
+	return Catalog.Format(msgs.locale, "envCopyPair", nil)
+}
+
+// EnvCopyAll says "Copy All"
+// in the language the app shows.
+func EnvCopyAll() string { return In(i18n.Locale()).EnvCopyAll() }
+
+// EnvCopyAll says "Copy All"
+// in the language of msgs.
+func (msgs Messages) EnvCopyAll() string {
+	return Catalog.Format(msgs.locale, "envCopyAll", nil)
+}
+
 // TunnelStarting says "Starting…"
 // in the language the app shows.
 func TunnelStarting() string { return In(i18n.Locale()).TunnelStarting() }

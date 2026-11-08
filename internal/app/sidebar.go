@@ -57,20 +57,20 @@ func (a *App) serverView(c *ui.Context, s *Session) {
 		default:
 			st = &s.stats
 		}
-		serverStats(c, st, a.netPicker(s))
+		serverStats(c, st, a.netPicker(s), a.openProcesses)
 	})
 }
 
 // serverStats shows st, or the skeleton for nil; net is the choice of
-// network interfaces.
-func serverStats(c *ui.Context, st *monitor.Stats, net netPicker) {
+// network interfaces, and a click on the process list calls openProcs.
+func serverStats(c *ui.Context, st *monitor.Stats, net netPicker, openProcs func()) {
 	if st == nil {
 		ui.Text(c, locales.UptimeUnknown())
 		ui.Text(c, locales.LoadAverage("-"))
 		widgets.UsageBar(c, locales.Cpu(), 0, "0%", colors.cpu)
 		widgets.UsageBar(c, locales.Memory(), 0, "0%", colors.mem)
 		widgets.UsageBar(c, locales.Swap(), 0, "0%", colors.swap)
-		procTable(c, nil)
+		procTable(c, nil, nil)
 		netRow(c, 0, 0, "", "", nil)
 		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatBytes)
 		latencyRow(c, "-")
@@ -84,7 +84,7 @@ func serverStats(c *ui.Context, st *monitor.Stats, net netPicker) {
 	widgets.UsageBar(c, locales.Memory(), ratio(st.MemUsed, st.MemTotal), usage(st.MemUsed, st.MemTotal), colors.mem)
 	widgets.UsageBar(c, locales.Swap(), ratio(st.SwapUsed, st.SwapTotal), usage(st.SwapUsed, st.SwapTotal), colors.swap)
 
-	procTable(c, st.Procs)
+	procTable(c, st.Procs, openProcs)
 
 	netGraph(c, st, net)
 
@@ -130,9 +130,18 @@ func usage(used, total uint64) string {
 	return fmt.Sprintf("%.0f%%  %s/%s", 100*ratio(used, total), formatBytes(float64(used)), formatBytes(float64(total)))
 }
 
-func procTable(c *ui.Context, procs []monitor.Proc) {
+// procTable is the processes using the most memory; a click opens the
+// process manager with open, when it is not nil.
+func procTable(c *ui.Context, procs []monitor.Proc, open func()) {
 	headText := colors.procHeadText
-	ui.Column(c).Border(1, colors.frame).Background(colors.procTable).Children(func() {
+	table := ui.Column(c).Border(1, colors.frame).Background(colors.procTable)
+	if open != nil {
+		table.Cursor(ui.CursorPointer).Tooltip(locales.OpenProcesses()).Role(ui.RoleButton).Label(locales.OpenProcesses())
+		if table.Clicked() {
+			open()
+		}
+	}
+	table.Children(func() {
 		ui.Row(c).Background(colors.procHead).PaddingX(6).Height(20).Children(func() {
 			ui.Text(c, locales.Memory()).Width(54).TextColor(headText).FontSize(12)
 			ui.Text(c, locales.Cpu()).Width(40).TextColor(headText).FontSize(12)

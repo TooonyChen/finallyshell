@@ -148,7 +148,7 @@ type App struct {
 	monitorPct  float32
 	terminalPct float32
 	treeWidth   float32
-	bottomTab   int // 0 files, 1 transfers, 2 tunnels
+	bottomTab   int // tabFiles, tabTransfers, …
 	termFont    terminal.Font
 	termTheme   *terminal.Theme
 	look        appearance // the rest of the terminal's look
@@ -223,6 +223,11 @@ type App struct {
 
 	// The command bar's history of each host (commandbar_data.go).
 	history cmdHistories
+
+	// The polls of the bottom panel's tabs (polling.go), and the
+	// Processes tab's shared state (processes.go).
+	polls     pollSet
+	processes processesUI
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -264,6 +269,7 @@ func (a *App) current() *Session {
 
 // View builds the window.
 func (a *App) View(c *ui.Context) {
+	defer a.stopUnseenPolls()
 	useTheme(c)
 	a.shortcuts(c)
 	a.saveLayoutAtRest(c)
@@ -296,27 +302,53 @@ func (a *App) mainArea(c *ui.Context) {
 	a.splitMoved(c, split, &a.terminalPct, terminalLimits)
 }
 
-// bottomPanel is the files of the active session, and the transfers.
+// The bottom panel's tabs, in order: their index in a.bottomTab and in
+// bottomTabs.
+const (
+	tabFiles = iota
+	tabTransfers
+	tabTunnels
+	tabProcesses
+)
+
+// bottomTab is a tab of the bottom panel: its label, and its page.
+type bottomTab struct {
+	label string
+	page  func(c *ui.Context)
+}
+
+// bottomTabs are the bottom panel's tabs, by their constants.
+func (a *App) bottomTabs() []bottomTab {
+	transfersLabel := locales.TabTransfers()
+	if n := a.transfers.active(); n > 0 {
+		transfersLabel = locales.TabTransfersActive(n)
+	}
+	tunnelsLabel := locales.TabTunnels()
+	if s := a.current(); s != nil && s.listening() > 0 {
+		tunnelsLabel = locales.TabTunnelsActive(s.listening())
+	}
+	return []bottomTab{
+		tabFiles:     {locales.TabFiles(), a.filePanel},
+		tabTransfers: {transfersLabel, a.transferPanel},
+		tabTunnels:   {tunnelsLabel, a.tunnelPanel},
+		tabProcesses: {locales.TabProcesses(), a.processPanel},
+	}
+}
+
+// bottomPanel is the files of the active session, the transfers, and
+// the session's other tabs.
 func (a *App) bottomPanel(c *ui.Context) {
+	tabs := a.bottomTabs()
 	ui.Column(c).Fill().Background(theme.Background).Children(func() {
 		ui.Row(c).PaddingX(6).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
-			transfersLabel := locales.TabTransfers()
-			if n := a.transfers.active(); n > 0 {
-				transfersLabel = locales.TabTransfersActive(n)
+			labels := make([]string, len(tabs))
+			for i, t := range tabs {
+				labels[i] = t.label
 			}
-			tunnelsLabel := locales.TabTunnels()
-			if s := a.current(); s != nil && s.listening() > 0 {
-				tunnelsLabel = locales.TabTunnelsActive(s.listening())
-			}
-			ui.Tabs(c, &a.bottomTab, locales.TabFiles(), transfersLabel, tunnelsLabel)
+			ui.Tabs(c, &a.bottomTab, labels...)
 		})
-		switch a.bottomTab {
-		case 0:
-			a.filePanel(c)
-		case 1:
-			a.transferPanel(c)
-		case 2:
-			a.tunnelPanel(c)
+		if a.bottomTab >= 0 && a.bottomTab < len(tabs) {
+			tabs[a.bottomTab].page(c)
 		}
 	})
 }

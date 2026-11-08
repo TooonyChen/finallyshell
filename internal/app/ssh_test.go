@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"finallyshell/internal/config"
 	"finallyshell/internal/monitor"
@@ -139,4 +140,50 @@ func connectTestServer(t *testing.T) (*App, *fakePlatform, *Session) {
 		t.Fatal(describeError(s.err))
 	}
 	return a, p, s
+}
+
+// TestSSHProcesses lists the real server's processes in the Processes
+// tab, opens the details of a sleep the shell started, and kills it.
+func TestSSHProcesses(t *testing.T) {
+	killWait = 300 * time.Millisecond
+	defer func() { killWait = 3 * time.Second }()
+	a, p, s := connectTestServer(t)
+	defer a.CloseAll()
+	s.term.Send([]byte("FS_PROCS_TEST=from-finallyshell sleep 397 &\r"))
+	a.bottomTab = tabProcesses
+	tt := ui.NewTester(a.View, 1280, 820)
+	p.tt = tt
+	var sleep monitor.Process
+	p.until(t, "the sleep listed", func() bool {
+		i := slices.IndexFunc(s.procs.list, func(pr monitor.Process) bool { return pr.Args == "sleep 397" })
+		if i >= 0 {
+			sleep = s.procs.list[i]
+		}
+		return i >= 0
+	})
+	if s.procs.err != nil || len(s.procs.list) < 3 || sleep.Name != "sleep" || sleep.User == "" || sleep.Path == "" {
+		t.Fatalf("list of %d, err %v, sleep %+v", len(s.procs.list), s.procs.err, sleep)
+	}
+	s.procs.filter = "sleep 397"
+	tt.Frame()
+	if !tt.HasText("sleep 397") || !tt.HasText("1 process") {
+		t.Errorf("the sleep is not shown; texts %q", tt.Texts())
+	}
+
+	a.openProcTab(s, sleep)
+	tab := s.procs.tabs[0]
+	p.until(t, "the details", func() bool { return !tab.loading })
+	if tab.err != nil || tab.d.Cwd == "" || tab.d.EnvDenied || !slices.Contains(tab.d.Env, monitor.EnvVar{Name: "FS_PROCS_TEST", Value: "from-finallyshell"}) {
+		t.Errorf("details %+v, err %v", tab.d, tab.err)
+	}
+
+	a.askSignal(s, sleep, "TERM", true)
+	a.sendSignal(a.processes.dlg)
+	p.until(t, "the kill", func() bool { return a.processes.dlg == nil || a.processes.dlg.err != nil || a.processes.dlg.still })
+	if d := a.processes.dlg; d != nil {
+		t.Fatalf("kill: err %v, still running %v", d.err, d.still)
+	}
+	p.until(t, "the sleep gone", func() bool {
+		return !slices.ContainsFunc(s.procs.list, func(pr monitor.Process) bool { return pr.PID == sleep.PID })
+	})
 }

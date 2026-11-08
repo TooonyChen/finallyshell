@@ -32,6 +32,7 @@ func (a *App) dialogs(c *ui.Context) {
 			a.replace = nil
 		}
 	}
+	a.signalDialogs(c)
 }
 
 func (a *App) passwordView(c *ui.Context) {
