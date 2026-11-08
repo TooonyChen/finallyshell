@@ -281,7 +281,7 @@ internal/
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
   termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
   sshtest/           in-process SSH server for tests: password login, an empty shell, port forwarding; StartSFTP also serves SFTP (the local file system)
-  monitor/           collecting and parsing server status
+  monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen
   remotefs/          SFTP listing, upload, download (with progress and cancel), rename, mkdir, create and delete (ops.go); textfile.go is the editor's reading (detecting binary files) and safe saving
   icons/             embedded SVG icons (Lucide, ISC license)
   fileicons/         VS Code file icon themes: reading VSIX files and extension folders, finding icons by name, font conversion, installing and finding installed themes; bundled/ has the built-in Material and Seti, languages_gen.go is VS Code's language table, internal/gen generates them
@@ -290,6 +290,7 @@ internal/
     app.go           App state, overall layout, opening and closing sessions
     session.go       one session: connection, terminal, monitor, SFTP; translating error messages
     sidebar.go       left side: monitor panel, vertical session list
+    netifaces.go     the network graph's interface menu: its label, choosing interfaces and keeping the choice per host
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
     terminal.go      terminal area
     findbar.go       the find bar on the terminal, driving the plugin's Search

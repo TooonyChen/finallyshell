@@ -151,7 +151,7 @@ internal/
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
   termenc/           终端的连接在服务器的编码（GBK、Big5……）和终端读的 UTF-8 之间转换
   sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发，StartSFTP 还提供 SFTP（本机文件系统）
-  monitor/           服务器状态采集和解析
+  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计
   remotefs/          SFTP 列目录、上传、下载（带进度和取消），重命名、新建、删除（ops.go）；textfile.go 是编辑器的读取（认出二进制文件）和安全保存
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
   fileicons/         VS Code 文件图标主题：读 VSIX 和扩展目录、按名字找图标、字体转换、安装和查找已装的主题；bundled/ 是内置的 Material 和 Seti，languages_gen.go 是 VS Code 的语言表，internal/gen 生成它们
@@ -160,6 +160,7 @@ internal/
     app.go           App 状态、整体布局、打开/关闭会话
     session.go       一个会话：连接、终端、监控、SFTP；错误信息的翻译
     sidebar.go       左侧：监控面板、竖向会话列表
+    netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
     terminal.go      终端区域
     findbar.go       终端上的查找栏，驱动插件的 Search

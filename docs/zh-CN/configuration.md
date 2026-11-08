@@ -49,6 +49,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
     "auth": "key", "keyPath": "~/.ssh/id_ed25519",
     "folder": "f2", "notes": "备注", "noMonitor": true,
     "termType": "vt220", "backspace": "ctrl-h", "noRememberPassword": true,
+    "monitorIfaces": ["eth0", "wg0"],
     "proxy": {"kind": "jump", "jumpHost": "h2"},
     "tunnels": [
       {"kind": "local", "listenPort": 15432, "targetHost": "db.internal", "targetPort": 5432},
@@ -96,6 +97,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | 字段 | 没有时 | 有时 |
 |---|---|---|
 | `noMonitor` | 开启服务器监控。 | `true`：不监控，也不开额外的 exec 通道。 |
+| `monitorIfaces` | 网速曲线显示流量最大的网卡。 | 网卡名列表，比如 `["eth0", "wg0"]`：曲线显示它们的合计。服务器上没有的名字跳过，一个都不剩时显示流量最大的网卡。 |
 | `termType` | `xterm-256color` | 发给服务器的 `TERM`。 |
 | `backspace` | 跟随全局设置（`termBackspace`）。 | `del`：退格键发送 `^?`；`ctrl-h`：发送 `^H`。 |
 | `delete` | 跟随全局设置（`termDelete`）。 | `vt220`：删除键发送 `ESC [3~`；`del`：`^?`；`ctrl-h`：`^H`。 |

@@ -62,6 +62,7 @@ version 2.
     "auth": "key", "keyPath": "~/.ssh/id_ed25519",
     "folder": "f2", "notes": "notes", "noMonitor": true,
     "termType": "vt220", "backspace": "ctrl-h", "noRememberPassword": true,
+    "monitorIfaces": ["eth0", "wg0"],
     "proxy": {"kind": "jump", "jumpHost": "h2"},
     "tunnels": [
       {"kind": "local", "listenPort": 15432, "targetHost": "db.internal", "targetPort": 5432},
@@ -119,6 +120,7 @@ Fields with empty values are not written. Missing fields mean:
 | Field | Missing means | Set means |
 |---|---|---|
 | `noMonitor` | The server monitor is on. | `true`: no monitor, and no extra exec channel. |
+| `monitorIfaces` | The network graph shows the busiest interface. | A list of interface names, such as `["eth0", "wg0"]`: the graph shows their sum. Names the server does not have are skipped, and with none left the graph shows the busiest. |
 | `termType` | `xterm-256color` | The `TERM` sent to the server. |
 | `backspace` | The global setting (`termBackspace`). | `del`: Backspace sends `^?`; `ctrl-h`: it sends `^H`. |
 | `delete` | The global setting (`termDelete`). | `vt220`: Delete sends `ESC [3~`; `del`: `^?`; `ctrl-h`: `^H`. |

@@ -660,6 +660,21 @@ latency graphs, and disks. It reads `/proc` over SSH every 2 seconds, so
 only Linux servers are supported. When not connected it shows an empty
 placeholder like FinalShell's ("-", 0%).
 
+The network graph shows the busiest interface by default: the one with
+the most bytes since the server started, never `lo`. The interface name
+at the graph's top right opens a menu of "Automatic (busiest)" and every
+interface of `/proc/net/dev` with its current speeds: the others first,
+then Docker's `veth*`, then `lo`. Choosing an interface checks or
+unchecks it, and with several checked the graph shows their sum and the
+label says "eth0 + wg0". Each interface keeps its own history, so a
+choice shows the last two minutes at once, and an interface that comes
+up later (a VPN) is in the menu from the next reading. The choice is kept
+per host (`monitorIfaces` in `hosts.json`, synced with the host). A
+chosen interface the server no longer has is left out; when none of the
+chosen is left, the graph shows the busiest again and its label says
+"eth0 (auto)", with the missing names in its tooltip. Those stay checked
+in the menu, marked "not found", until unchecked.
+
 The "System info" button below the IP opens a popover with the host name,
 OS (`/etc/os-release`), kernel, architecture, CPU model and cores, memory,
 uptime, IP addresses and disks. "Copy" copies them as plain text. They are
