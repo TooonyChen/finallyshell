@@ -26,6 +26,35 @@ FINALLYSHELL_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH
 
 隧道的测试（`internal/sshx` 的 `TestTunnels`、`internal/app` 的 `TestSSHTunnels`）也用这个变量，服务器要在本机（远程隧道的端口从本机去连）并允许 TCP 转发（`AllowTcpForwarding yes`）。不设变量时它们用进程内的测试服务器（`internal/sshtest`）。
 
+## 安装
+
+在 [Releases](https://github.com/TooonyChen/finallyshell/releases) 下载：macOS（Apple 芯片）是 `.dmg`，Windows 是安装程序 `finallyshell-setup-<版本>-amd64.exe` 或免安装的 `.zip`，Debian / Ubuntu 是 `.deb`，其他 Linux 是 `.tar.gz` 加 `install.sh`（`sh install.sh` 装到 `~/.local`）。
+
+macOS 版还没有经过 Apple 公证，第一次打开会被拦下。拖进“应用程序”后运行：
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Finallyshell.app
+```
+
+或者在“系统设置 › 隐私与安全性”里点“仍要打开”。
+
+## 发布
+
+把 main 推到 `production` 分支就是发布：
+
+```sh
+git push origin origin/main:production
+```
+
+`.github/workflows/release.yml` 接着做这些事：
+
+1. 算版本号（`go run ./tools/release version`）：看上一个 `v*` tag 之后的提交类型（Conventional Commits）。有破坏性改动（`feat!:`、`BREAKING CHANGE:`）升主版本，1.0 之前升次版本；有 `feat` 升次版本；只有 `fix`、`perf` 升修订号；只有 `docs`、`chore`、`test`、`ci`、`build`、`style`、`refactor` 不发布，workflow 到这里结束。还没有 tag 时用 `mygo.json` 里的版本（第一次发布是 0.2.0）。已经打过 tag 的提交不会再发布，所以重新运行是安全的。
+2. 跑和 PR 一样的检查（`.github/workflows/ci.yml`：gofmt、`go vet`、`go tool mygo vet`、`go test -race`）。
+3. 编译三个平台：macOS arm64 在 macOS runner 上（ad hoc 签名、dmg），Linux x86_64 和 Windows x86_64 在 Linux runner 上交叉编译（Windows 安装程序用 apt 装的 NSIS）。版本号只在 runner 里写进 `mygo.json`，main 上的不改；`LICENSE` 和第三方许可证（`go run ./tools/release licenses`）放进 `resources/`，随应用一起打包。
+4. 打 tag `v<版本>`，发布 GitHub Release，附上安装包、`SHA256SUMS`、`LICENSE.txt`、`THIRD_PARTY_LICENSES.txt`，说明按提交类型分组（`go run ./tools/release notes`）。
+
+`production` 只应该从 main 快进，在仓库设置里给它加分支保护（禁止强推）。
+
 ## 功能
 
 - 中文和英文界面。默认跟随系统语言，点左下角“会话”标题旁的齿轮按钮打开“选项”窗口，在“常规”页切换，选择会保存。
@@ -209,6 +238,7 @@ main.go              启动 MyGo、开主窗口，把系统功能（子窗口、
 tray.go              托盘图标、确认用的消息框、退出
 keychain.go          系统凭据存储（mygo.Secrets）：Platform 的 SecretGet/Set/Delete
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
+tools/release/        发布用的工具：算下一个版本号、生成 release 说明、收集第三方许可证（notices/ 是以二进制打包的库的许可证）
 internal/
   config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置
   importer/          读其他客户端的连接：finalshell.go 找 FinalShell 的目录、读 conn 里的连接和文件夹、判重、按文件夹导入；testdata 是编造的样例

@@ -1,0 +1,145 @@
+name: release
+
+# Pushing main to the production branch releases it:
+#
+#   git push origin origin/main:production
+#
+# The commits since the last v* tag decide the version (tools/release);
+# with no feat, fix, perf or breaking change there is nothing to release
+# and the run stops after the version job.
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One release at a time, never cancelled, so two pushes can't race for a tag.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  version:
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - id: next
+        run: |
+          version=$(go run ./tools/release version)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ -z "$version" ]; then
+            echo "::notice::Nothing to release"
+          fi
+
+  gate:
+    needs: version
+    if: needs.version.outputs.version != ''
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: [version, gate]
+    strategy:
+      matrix:
+        include:
+          - platform: darwin/arm64
+            # Signing (ad hoc) and the disk image need macOS.
+            os: macos-latest
+          - platform: linux/amd64
+            os: ubuntu-latest
+          - platform: windows/amd64
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Install NSIS
+        if: matrix.platform == 'windows/amd64'
+        run: sudo apt-get update && sudo apt-get install -y nsis
+      - name: Set the version and add the licenses
+        # Only in this runner: main keeps its mygo.json, the tag is the
+        # version. MyGo ships the resources directory inside each app.
+        run: |
+          jq --arg v "$VERSION" '.version = $v' mygo.json > mygo.json.tmp
+          mv mygo.json.tmp mygo.json
+          mkdir -p resources
+          cp LICENSE resources/LICENSE.txt
+          go run ./tools/release licenses > resources/THIRD_PARTY_LICENSES.txt
+      - run: go tool mygo build -platform "$PLATFORM" -o dist
+      - name: Collect the files to publish
+        run: |
+          dir="dist/${PLATFORM/\//-}"
+          mkdir upload
+          case "$PLATFORM" in
+          darwin/*)
+            cp "$dir"/*.dmg upload/
+            ;;
+          linux/*)
+            cp "$dir"/*.deb "$dir"/*.tar.gz "$dir"/install.sh upload/
+            ;;
+          windows/*)
+            cp "$dir"/*-setup-*.exe upload/
+            # A portable copy: the executable needs the DLL beside it.
+            (cd "$dir" && zip -9 "$OLDPWD/upload/finallyshell-$VERSION-windows-amd64.zip" \
+              Finallyshell.exe ghostty-vt.dll LICENSE.txt THIRD_PARTY_LICENSES.txt)
+            ;;
+          esac
+          ls -l upload
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ format('build-{0}', strategy.job-index) }}
+          path: upload/
+          if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: actions/download-artifact@v8
+        with:
+          path: upload
+          merge-multiple: true
+      - name: Licenses and checksums
+        run: |
+          cp LICENSE upload/LICENSE.txt
+          go run ./tools/release licenses > upload/THIRD_PARTY_LICENSES.txt
+          (cd upload && sha256sum * > SHA256SUMS)
+          cat upload/SHA256SUMS
+      - name: Release notes
+        run: |
+          {
+            go run ./tools/release notes
+            echo
+            cat .github/release-install.md
+          } > notes.md
+      - name: Publish
+        run: |
+          gh release create "v$VERSION" upload/* \
+            --target "$GITHUB_SHA" \
+            --title "v$VERSION" \
+            --notes-file notes.md
