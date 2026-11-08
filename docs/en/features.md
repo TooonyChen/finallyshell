@@ -932,11 +932,12 @@ transfer does:
 
 - "Download as archive" is in the file table's context menu (for a folder
   or several items, not for a single file), in the folder tree's context
-  menu (for any folder but `/`) and in the download button's context
-  menu. The server runs `tar -czf -` in the items' folder; the app reads
+  menu (for any folder but `/`) and in the context menu of the toolbar's
+  download button (right-click it; a click still downloads). The server runs `tar -czf -` in the items' folder; the app reads
   the stream and unpacks it into the download folder file by file.
 - "Upload as archive…" is in the file table's and the folder tree's
-  context menus and in the upload buttons' context menus. It chooses
+  context menus and in the context menus of the toolbar's two upload
+  buttons (right-click them; a click still chooses files or a folder). It chooses
   folders; the app packs them into a stream that the server unpacks with
   `tar -xzf -` in the folder, which it makes first if needed. The files
   belong to the user who logs in, whatever the owners on this computer.
@@ -956,13 +957,23 @@ what it printed, and "Retry over SFTP" sends the same items the usual
 way, one transfer each.
 
 Downloads are unpacked safely: names that are absolute, have `..` or are
-outside the items asked for stop the transfer; symbolic links that point
-outside the download folder are not made, and the transfer lists them
-once the rest is unpacked; nothing is written through a symbolic link (a
-link where a folder goes is replaced by the folder, as tar does); setuid,
-setgid and sticky bits are dropped. On Windows, names that Windows does
-not allow (such as `a:b` or `CON`) fail the transfer with the name; they
-are not renamed.
+outside the items asked for stop the transfer; nothing is written
+through a symbolic link (a link where a folder goes is replaced by the
+folder, as tar does); setuid, setgid and sticky bits are dropped. On
+Windows, names that Windows does not allow (such as `a:b` or `CON`) fail
+the transfer with the name; they are not renamed.
+
+Some symbolic links are not created, and the rest of the download is:
+
+- Links that point outside the download folder: by their target, or
+  through other links once everything is unpacked (`a -> b/../..` where
+  `b -> ..`), on the disk as it is.
+- On Windows, all links when Windows does not allow the user to create
+  them (it does in Developer Mode or for administrators).
+
+The transfer then ends as done, with a warning line such as "2 links were
+not created: they point outside the folder"; its tooltip lists the links.
+"Retry over SFTP" is not offered for it.
 
 ### Transfers tab
 

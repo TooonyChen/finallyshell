@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -78,16 +79,39 @@ func (e *WindowsNameError) Error() string {
 	return fmt.Sprintf("%q is not a valid name on Windows", e.Name)
 }
 
-// SkippedLinksError is an archive unpacked whole except for symbolic
-// links that point outside the folder, which were not made.
-type SkippedLinksError struct{ Names []string }
-
-func (e *SkippedLinksError) Error() string {
-	return fmt.Sprintf("%d links point outside the folder and were not made: %s", len(e.Names), strings.Join(e.Names, ", "))
+// SkippedLinks are the symbolic links of an unpacked archive that were
+// not made, by their names in the archive. The rest was unpacked.
+type SkippedLinks struct {
+	// Outside point outside the folder, or lead out of it through other
+	// links.
+	Outside []string
+	// NotAllowed the system did not let the user make: Windows without
+	// Developer Mode or an administrator.
+	NotAllowed []string
 }
 
-// windowsNames checks names as Windows needs them, on Windows.
-var windowsNames = runtime.GOOS == "windows"
+// Len is the number of links skipped.
+func (s SkippedLinks) Len() int { return len(s.Outside) + len(s.NotAllowed) }
+
+var (
+	// goos is the system the files are written on.
+	goos = runtime.GOOS
+	// windowsNames checks names as Windows needs them, on Windows.
+	windowsNames = goos == "windows"
+	// symlink makes links; tests put another in its place.
+	symlink = os.Symlink
+)
+
+// errPrivilegeNotHeld is ERROR_PRIVILEGE_NOT_HELD, what Windows says to
+// a user who may not make symbolic links.
+const errPrivilegeNotHeld = syscall.Errno(1314)
+
+// linkNotAllowed tells whether err is the system refusing the user to
+// make a symbolic link at all, so that the link is skipped, not the
+// transfer failed.
+func linkNotAllowed(goos string, err error) bool {
+	return goos == "windows" && errors.Is(err, errPrivilegeNotHeld)
+}
 
 // archiveCounter counts the bytes of file contents, and stops when the
 // context ends.
@@ -243,21 +267,13 @@ func (e *streamError) Unwrap() error { return e.err }
 // It never writes through a symbolic link: one where a folder goes is
 // replaced by the folder, as tar does. Modes are kept without setuid,
 // setgid and sticky bits, and the owner can always read and write.
-// Absolute names and names with ".." stop it; links that point outside
-// dir are not made, and are listed in a *SkippedLinksError once the rest
-// is unpacked.
-func ExtractArchive(ctx context.Context, r io.Reader, dir string, roots []string, progress ArchiveProgress) error {
-	skipped, err := extract(ctx, r, dir, roots, progress)
-	if err == nil && len(skipped) > 0 {
-		err = &SkippedLinksError{skipped}
-	}
-	return err
-}
-
-func extract(ctx context.Context, r io.Reader, dir string, roots []string, progress ArchiveProgress) ([]string, error) {
+// Absolute names and names with ".." stop it. Links that point outside
+// dir, on their own or through other links, are not made, nor those the
+// system does not allow; it returns them.
+func ExtractArchive(ctx context.Context, r io.Reader, dir string, roots []string, progress ArchiveProgress) (SkippedLinks, error) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
-		return nil, err
+		return SkippedLinks{}, err
 	}
 	x := &extractor{
 		dir:   dir,
@@ -268,26 +284,122 @@ func extract(ctx context.Context, r io.Reader, dir string, roots []string, progr
 	for _, n := range roots {
 		x.roots[n] = true
 	}
+	err = x.unpack(r)
+	// Links made so far, also when it stopped half way: those that lead
+	// out through others only show now.
+	if lerr := x.checkLinks(); err == nil {
+		err = lerr
+	}
+	return x.skipped, err
+}
+
+func (x *extractor) unpack(r io.Reader) error {
 	zr, err := gzip.NewReader(bufio.NewReaderSize(r, 64<<10))
 	if err != nil {
-		return nil, &streamError{err}
+		return &streamError{err}
 	}
 	tr := tar.NewReader(zr)
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
-			return x.skipped, nil
+			return nil
 		}
 		if err != nil {
-			return x.skipped, &streamError{err}
+			return &streamError{err}
 		}
-		if err := ctx.Err(); err != nil {
-			return x.skipped, err
+		if err := x.c.ctx.Err(); err != nil {
+			return err
 		}
 		if err := x.entry(hdr, tr); err != nil {
-			return x.skipped, err
+			return err
 		}
 	}
+}
+
+// checkLinks removes the links made that lead outside x.dir on the disk
+// as it is now: following the links of their targets, and, for a part
+// that is not there, by its name. All are judged before any is removed,
+// so that a link to a link that leads out goes too; removing them can
+// change where others lead, so it goes round until none is removed.
+func (x *extractor) checkLinks() error {
+	dir, err := physical(x.dir)
+	if err != nil {
+		return err
+	}
+	for {
+		var kept, out []madeLink
+		for _, l := range x.links {
+			fi, err := os.Lstat(l.path)
+			if err != nil || fi.Mode()&fs.ModeSymlink == 0 {
+				continue // replaced since by a folder or a file
+			}
+			if to, err := physical(l.path); err == nil && isInside(dir, to) {
+				kept = append(kept, l)
+			} else {
+				out = append(out, l)
+			}
+		}
+		x.links = kept
+		if len(out) == 0 {
+			return nil
+		}
+		for _, l := range out {
+			if err := os.Remove(l.path); err != nil {
+				return err
+			}
+			x.skipped.Outside = append(x.skipped.Outside, l.name)
+		}
+	}
+}
+
+// maxLinks is how many links physical follows before it gives up, as
+// the system does for a loop.
+const maxLinks = 255
+
+// physical is where the absolute path p leads on the disk: through every
+// link of the part that is there, and by the names of the part that is
+// not.
+func physical(p string) (string, error) {
+	sep := string(filepath.Separator)
+	vol := filepath.VolumeName(p)
+	done, rest := vol+sep, p[len(vol):]
+	links := 0
+	for rest != "" {
+		rest = strings.TrimLeft(rest, `/`+sep)
+		name := rest
+		if i := strings.IndexAny(rest, `/`+sep); i >= 0 {
+			name, rest = rest[:i], rest[i:]
+		} else {
+			rest = ""
+		}
+		switch name {
+		case "", ".":
+			continue
+		case "..":
+			done = filepath.Dir(done)
+			continue
+		}
+		next := filepath.Join(done, name)
+		fi, err := os.Lstat(next)
+		if err != nil || fi.Mode()&fs.ModeSymlink == 0 {
+			done = next
+			continue
+		}
+		if links++; links > maxLinks {
+			return "", fmt.Errorf("%s: too many links", p)
+		}
+		target, err := os.Readlink(next)
+		if err != nil {
+			return "", err
+		}
+		if filepath.IsAbs(target) || filepath.VolumeName(target) != "" {
+			v := filepath.VolumeName(target)
+			done, rest = v+sep, target[len(v):]+sep+rest
+		} else {
+			rest = target + sep + rest
+		}
+	}
+	return done, nil
 }
 
 type extractor struct {
@@ -296,9 +408,13 @@ type extractor struct {
 	// safe are the folders known to be real folders, not links: dir, and
 	// those made or checked since.
 	safe    map[string]bool
-	skipped []string
+	links   []madeLink
+	skipped SkippedLinks
 	c       *archiveCounter
 }
+
+// madeLink is a symbolic link the extractor made.
+type madeLink struct{ name, path string }
 
 // target checks the archive name of an entry, and returns it cleaned and
 // where it goes.
@@ -435,15 +551,20 @@ func (x *extractor) symlink(clean, p, target string) error {
 	local := filepath.FromSlash(target)
 	if target == "" || path.IsAbs(target) || filepath.IsAbs(local) || filepath.VolumeName(local) != "" ||
 		!isInside(x.dir, filepath.Join(filepath.Dir(p), local)) {
-		x.skipped = append(x.skipped, clean)
+		x.skipped.Outside = append(x.skipped.Outside, clean)
 		return nil
 	}
 	if err := x.clear(p); err != nil {
 		return err
 	}
-	if err := os.Symlink(local, p); err != nil {
+	if err := symlink(local, p); err != nil {
+		if linkNotAllowed(goos, err) {
+			x.skipped.NotAllowed = append(x.skipped.NotAllowed, clean)
+			return nil
+		}
 		return err
 	}
+	x.links = append(x.links, madeLink{clean, p})
 	return x.c.add(0)
 }
 
@@ -625,23 +746,21 @@ func uploadScript(dir string) string {
 
 // DownloadArchive fetches the remote files and folders paths, all in one
 // folder, into the local folder dstDir, packed by tar on the server, and
-// returns the local path of the first.
-func DownloadArchive(ctx context.Context, client *ssh.Client, paths []string, dstDir string, progress ArchiveProgress) (string, error) {
+// returns the local path of the first, and the links it did not make
+// (see ExtractArchive).
+func DownloadArchive(ctx context.Context, client *ssh.Client, paths []string, dstDir string, progress ArchiveProgress) (string, SkippedLinks, error) {
 	dir, names, err := splitRemote(paths)
 	if err != nil {
-		return "", err
+		return "", SkippedLinks{}, err
 	}
 	local := filepath.Join(dstDir, names[0])
-	var skipped []string
+	var skipped SkippedLinks
 	err = runTar(ctx, client, downloadScript(dir, names), func(_ io.Writer, stdout io.Reader) error {
 		var err error
-		skipped, err = extract(ctx, stdout, dstDir, names, progress)
+		skipped, err = ExtractArchive(ctx, stdout, dstDir, names, progress)
 		return err
 	})
-	if err == nil && len(skipped) > 0 {
-		err = &SkippedLinksError{skipped}
-	}
-	return local, err
+	return local, skipped, err
 }
 
 // UploadArchive sends the local files and folders paths into the remote

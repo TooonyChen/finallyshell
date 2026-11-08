@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"finallyshell/internal/icons"
 	"finallyshell/internal/remotefs"
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
@@ -103,17 +104,38 @@ func (t *transferJob) currentLine(c *ui.Context) {
 // transferErrorText is why a transfer failed, in the app's words where
 // it has them.
 func transferErrorText(err error) string {
-	var skipped *remotefs.SkippedLinksError
 	var bad *remotefs.WindowsNameError
 	switch {
-	case errors.As(err, &skipped):
-		return locales.ArchiveSkippedLinks(len(skipped.Names), strings.Join(skipped.Names, ", "))
 	case errors.As(err, &bad):
 		return locales.ArchiveWindowsName(bad.Name)
 	case errors.Is(err, remotefs.ErrNoShell):
 		return locales.ArchiveNoShell()
 	}
 	return err.Error()
+}
+
+// maxTooltipNames is how many names the tooltip of skipped links lists.
+const maxTooltipNames = 20
+
+// skippedLinesOf warns, in a finished archive download's row, of the
+// links it did not make, with their names in the tooltip. The rest of
+// the download is there, so it is done, not failed.
+func skippedLinesOf(c *ui.Context, s remotefs.SkippedLinks) {
+	line := func(text string, names []string) {
+		if len(names) == 0 {
+			return
+		}
+		tip := names
+		if len(tip) > maxTooltipNames {
+			tip = append(slices.Clip(tip[:maxTooltipNames]), "…")
+		}
+		ui.Row(c).Gap(5).AlignItems(ui.Center).Tooltip(strings.Join(tip, "\n")).Children(func() {
+			ui.Icon(c, icons.Get("triangle-alert")).FontSize(12).TextColor(theme.Warning).Shrink(0)
+			ui.Text(c, text).FontSize(11.5).TextColor(theme.Warning).SingleLine().Shrink(1).MinWidth(0)
+		})
+	}
+	line(locales.ArchiveLinksOutside(len(s.Outside)), s.Outside)
+	line(locales.ArchiveLinksNotAllowed(len(s.NotAllowed)), s.NotAllowed)
 }
 
 // canRetryOverSFTP tells whether t is a failed archive transfer whose

@@ -1256,16 +1256,24 @@ func (msgs Messages) RetryOverSftp() string {
 	return Catalog.Format(msgs.locale, "retryOverSftp", nil)
 }
 
-// ArchiveSkippedLinks says "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the fol…"
+// ArchiveLinksOutside says "{count, plural, one {# link was not created: it points outside the folder} other {# links were not created: they poin…"
 // in the language the app shows.
-func ArchiveSkippedLinks(count int, names string) string {
-	return In(i18n.Locale()).ArchiveSkippedLinks(count, names)
+func ArchiveLinksOutside(count int) string { return In(i18n.Locale()).ArchiveLinksOutside(count) }
+
+// ArchiveLinksOutside says "{count, plural, one {# link was not created: it points outside the folder} other {# links were not created: they poin…"
+// in the language of msgs.
+func (msgs Messages) ArchiveLinksOutside(count int) string {
+	return Catalog.Format(msgs.locale, "archiveLinksOutside", map[string]any{"count": count})
 }
 
-// ArchiveSkippedLinks says "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the fol…"
+// ArchiveLinksNotAllowed says "{count, plural, one {# link was not created: Windows allows links only in Developer Mode or for administrators} other…"
+// in the language the app shows.
+func ArchiveLinksNotAllowed(count int) string { return In(i18n.Locale()).ArchiveLinksNotAllowed(count) }
+
+// ArchiveLinksNotAllowed says "{count, plural, one {# link was not created: Windows allows links only in Developer Mode or for administrators} other…"
 // in the language of msgs.
-func (msgs Messages) ArchiveSkippedLinks(count int, names string) string {
-	return Catalog.Format(msgs.locale, "archiveSkippedLinks", map[string]any{"count": count, "names": names})
+func (msgs Messages) ArchiveLinksNotAllowed(count int) string {
+	return Catalog.Format(msgs.locale, "archiveLinksNotAllowed", map[string]any{"count": count})
 }
 
 // ArchiveWindowsName says "{name} is not a valid file name on Windows"

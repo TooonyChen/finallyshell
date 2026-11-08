@@ -54,7 +54,8 @@ type transferJob struct {
 	archive bool
 	srcs    []string
 	ssh     *ssh.Client
-	current string // the file an archive transfer is at
+	current string                // the file an archive transfer is at
+	skipped remotefs.SkippedLinks // the links an archive download did not make
 
 	state      transferState
 	err        error
@@ -282,7 +283,7 @@ func (a *App) run(t *transferJob) {
 		}
 	}
 	go func() {
-		local, err := a.transfer(ctx, t, report)
+		local, skipped, err := a.transfer(ctx, t, report)
 		a.post(func() {
 			cancel()
 			q.running--
@@ -292,7 +293,7 @@ func (a *App) run(t *transferJob) {
 			}
 			switch {
 			case err == nil:
-				t.state, t.done, t.local = transferDone, t.total, local
+				t.state, t.done, t.local, t.skipped = transferDone, t.total, local, skipped
 			case remotefs.IsCanceled(err):
 				t.state = transferCanceled
 			default:
@@ -308,8 +309,19 @@ func (a *App) run(t *transferJob) {
 }
 
 // transfer measures t and copies it, on its goroutine, telling report
-// how far it is, and returns the local copy of a download.
-func (a *App) transfer(ctx context.Context, t *transferJob, report remotefs.ArchiveProgress) (string, error) {
+// how far it is, and returns the local copy of a download, and the links
+// an archive download did not make.
+func (a *App) transfer(ctx context.Context, t *transferJob, report remotefs.ArchiveProgress) (string, remotefs.SkippedLinks, error) {
+	local, err := a.copyFiles(ctx, t, report)
+	if err != nil || !t.archive || t.dir != download {
+		return local, remotefs.SkippedLinks{}, err
+	}
+	return remotefs.DownloadArchive(ctx, t.ssh, t.srcs, t.dstDir, report)
+}
+
+// copyFiles is transfer, but for archive downloads, which it only
+// prepares.
+func (a *App) copyFiles(ctx context.Context, t *transferJob, report remotefs.ArchiveProgress) (string, error) {
 	if t.archive {
 		if t.dir == download {
 			// The download folder of the settings may be gone.
@@ -332,7 +344,7 @@ func (a *App) transfer(ctx context.Context, t *transferJob, report remotefs.Arch
 		if t.dir == upload {
 			return "", remotefs.UploadArchive(ctx, t.ssh, t.srcs, t.dstDir, report)
 		}
-		return remotefs.DownloadArchive(ctx, t.ssh, t.srcs, t.dstDir, report)
+		return "", nil
 	}
 	total, err := t.measure(ctx)
 	if err == nil && t.dir == download {
@@ -437,6 +449,7 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 				}
 			case transferDone:
 				ui.Text(c, locales.TransferDone()).FontSize(11.5).TextColor(theme.Success)
+				skippedLinesOf(c, t.skipped)
 			case transferCanceled:
 				widgets.Muted(c, locales.TransferCanceled()).FontSize(11.5)
 			case transferFailed:

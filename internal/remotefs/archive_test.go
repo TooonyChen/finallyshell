@@ -150,7 +150,7 @@ func TestArchiveRoundTrip(t *testing.T) {
 		t.Errorf("progress named %d files", len(files))
 	}
 	var unpacked int64
-	if err := ExtractArchive(context.Background(), &buf, dst, []string{"proj", "single.txt"}, func(done int64, _ string) { unpacked = done }); err != nil {
+	if err := extractAll(t, context.Background(), &buf, dst, []string{"proj", "single.txt"}, func(done int64, _ string) { unpacked = done }); err != nil {
 		t.Fatal(err)
 	}
 	if unpacked != size {
@@ -179,7 +179,7 @@ func TestArchiveRoundTrip(t *testing.T) {
 	if err := WriteArchive(context.Background(), &buf, paths[:1], nil); err != nil {
 		t.Fatal(err)
 	}
-	if err := ExtractArchive(context.Background(), &buf, dst, []string{"proj"}, nil); err != nil {
+	if err := extractAll(t, context.Background(), &buf, dst, []string{"proj"}, nil); err != nil {
 		t.Fatal(err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(dst, "proj", "a.txt")); string(data) != "changed" {
@@ -225,7 +225,7 @@ func TestExtractRejectsUnsafeNames(t *testing.T) {
 		dst := filepath.Join(parent, "dst")
 		os.Mkdir(dst, 0o755)
 		ar := makeArchive(t, entry{name: "proj/", typ: tar.TypeDir, mode: 0o755}, entry{name: name, typ: tar.TypeReg, body: "pwned"})
-		err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil)
+		err := extractAll(t, context.Background(), ar, dst, []string{"proj"}, nil)
 		var unsafe *UnsafeEntryError
 		if !errors.As(err, &unsafe) {
 			t.Errorf("%s: %v", name, err)
@@ -240,7 +240,7 @@ func TestExtractRejectsUnsafeNames(t *testing.T) {
 	dst := t.TempDir()
 	ar := makeArchive(t, entry{name: "proj/", typ: tar.TypeDir}, entry{name: "proj/h", typ: tar.TypeLink, link: "../../etc/passwd"})
 	var unsafe *UnsafeEntryError
-	if err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil); !errors.As(err, &unsafe) {
+	if err := extractAll(t, context.Background(), ar, dst, []string{"proj"}, nil); !errors.As(err, &unsafe) {
 		t.Errorf("hard link outside: %v", err)
 	}
 }
@@ -268,10 +268,9 @@ func TestExtractNeverFollowsLinks(t *testing.T) {
 		entry{name: "proj/up/evil", typ: tar.TypeReg, body: "pwned"},
 		entry{name: "proj/ok", typ: tar.TypeSymlink, link: "abs/target.txt"},
 	)
-	err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil)
-	var skipped *SkippedLinksError
-	if !errors.As(err, &skipped) || !slices.Equal(skipped.Names, []string{"proj/abs", "proj/climb"}) {
-		t.Fatalf("err %v", err)
+	skipped, err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil)
+	if err != nil || !slices.Equal(skipped.Outside, []string{"proj/abs", "proj/climb"}) || len(skipped.NotAllowed) != 0 {
+		t.Fatalf("skipped %+v, err %v", skipped, err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(outside, "target.txt")); string(data) != "keep" {
 		t.Errorf("wrote through a link: %q", data)
@@ -300,7 +299,7 @@ func TestExtractNeverFollowsLinks(t *testing.T) {
 	os.Mkdir(filepath.Join(dst2, "proj"), 0o755)
 	os.Symlink(filepath.Join(outside, "target.txt"), filepath.Join(dst2, "proj", "t"))
 	ar = makeArchive(t, entry{name: "proj/t", typ: tar.TypeReg, body: "new"})
-	if err := ExtractArchive(context.Background(), ar, dst2, []string{"proj"}, nil); err != nil {
+	if err := extractAll(t, context.Background(), ar, dst2, []string{"proj"}, nil); err != nil {
 		t.Fatal(err)
 	}
 	if data, _ := os.ReadFile(filepath.Join(outside, "target.txt")); string(data) != "keep" {
@@ -319,7 +318,7 @@ func TestExtractModesAndHardLinks(t *testing.T) {
 		entry{name: "proj/ro", typ: tar.TypeReg, mode: 0o444, body: "read only"},
 		entry{name: "proj/hard", typ: tar.TypeLink, link: "proj/ro"},
 	)
-	if err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil); err != nil {
+	if err := extractAll(t, context.Background(), ar, dst, []string{"proj"}, nil); err != nil {
 		t.Fatal(err)
 	}
 	fi, _ := os.Stat(filepath.Join(dst, "proj", "suid"))
@@ -352,7 +351,7 @@ func TestExtractWindowsNames(t *testing.T) {
 	defer func(old bool) { windowsNames = old }(windowsNames)
 	windowsNames = true
 	ar := makeArchive(t, entry{name: "proj/", typ: tar.TypeDir}, entry{name: "proj/a:b.txt", typ: tar.TypeReg, body: "x"})
-	err := ExtractArchive(context.Background(), ar, t.TempDir(), []string{"proj"}, nil)
+	err := extractAll(t, context.Background(), ar, t.TempDir(), []string{"proj"}, nil)
 	var bad *WindowsNameError
 	if !errors.As(err, &bad) || bad.Name != "proj/a:b.txt" {
 		t.Errorf("err %v", err)
@@ -381,7 +380,7 @@ func TestArchiveCancel(t *testing.T) {
 	}
 	dst := t.TempDir()
 	ctx, cancel = context.WithCancel(context.Background())
-	err = ExtractArchive(ctx, &buf, dst, []string{"proj"}, func(done int64, _ string) {
+	err = extractAll(t, ctx, &buf, dst, []string{"proj"}, func(done int64, _ string) {
 		if done > 1<<20 {
 			cancel()
 		}
@@ -401,10 +400,10 @@ func TestExtractBrokenStream(t *testing.T) {
 	ar := makeArchive(t, entry{name: "proj/a", typ: tar.TypeReg, body: strings.Repeat("a", 10_000)})
 	cut := bytes.NewReader(ar.Bytes()[:ar.Len()/2])
 	var se *streamError
-	if err := ExtractArchive(context.Background(), cut, t.TempDir(), []string{"proj"}, nil); !errors.As(err, &se) {
+	if err := extractAll(t, context.Background(), cut, t.TempDir(), []string{"proj"}, nil); !errors.As(err, &se) {
 		t.Errorf("cut stream: %v", err)
 	}
-	if err := ExtractArchive(context.Background(), strings.NewReader(""), t.TempDir(), []string{"proj"}, nil); !errors.As(err, &se) {
+	if err := extractAll(t, context.Background(), strings.NewReader(""), t.TempDir(), []string{"proj"}, nil); !errors.As(err, &se) {
 		t.Errorf("empty stream: %v", err)
 	}
 }
@@ -460,7 +459,7 @@ func TestScriptsWithLocalTar(t *testing.T) {
 	if err := down.Start(); err != nil {
 		t.Fatal(err)
 	}
-	if err := ExtractArchive(context.Background(), stdout, back, []string{"proj", "single.txt"}, nil); err != nil {
+	if err := extractAll(t, context.Background(), stdout, back, []string{"proj", "single.txt"}, nil); err != nil {
 		t.Fatal(err)
 	}
 	io.Copy(io.Discard, stdout)
@@ -478,7 +477,7 @@ func TestScriptsWithLocalTar(t *testing.T) {
 // Without exec on the server, or without a connection, an archive
 // transfer fails at once.
 func TestArchiveWithoutExec(t *testing.T) {
-	if _, err := DownloadArchive(context.Background(), nil, []string{"/a/b"}, t.TempDir(), nil); !errors.Is(err, ErrNoShell) {
+	if _, _, err := DownloadArchive(context.Background(), nil, []string{"/a/b"}, t.TempDir(), nil); !errors.Is(err, ErrNoShell) {
 		t.Errorf("no client: %v", err)
 	}
 	client := sshtest.Start(t).Dial(t)
@@ -550,11 +549,11 @@ func TestArchiveLive(t *testing.T) {
 		t.Errorf("remote size %d, local %d (%v)", got, want, err)
 	}
 	var done int64
-	local, err := DownloadArchive(context.Background(), client, remotePaths, back, func(n int64, _ string) { done = n })
+	local, skipped, err := DownloadArchive(context.Background(), client, remotePaths, back, func(n int64, _ string) { done = n })
 	if err != nil {
 		t.Fatal(err)
 	}
-	if local != filepath.Join(back, "proj") || done != want {
+	if local != filepath.Join(back, "proj") || done != want || skipped.Len() != 0 {
 		t.Errorf("local %s, %d bytes of %d", local, done, want)
 	}
 	wantTree, gotTree := treeOf(t, src), treeOf(t, back)
@@ -565,7 +564,7 @@ func TestArchiveLive(t *testing.T) {
 	}
 
 	// tar fails on a missing name, and says so.
-	_, err = DownloadArchive(context.Background(), client, []string{path.Join(remote, "missing")}, t.TempDir(), nil)
+	_, _, err = DownloadArchive(context.Background(), client, []string{path.Join(remote, "missing")}, t.TempDir(), nil)
 	var te *TarError
 	if !errors.As(err, &te) || te.Status == 0 || !strings.Contains(te.Stderr, "missing") {
 		t.Errorf("missing: %v", err)
@@ -594,7 +593,7 @@ func TestArchiveLive(t *testing.T) {
 	}
 	dst := t.TempDir()
 	ctx, cancel = context.WithCancel(context.Background())
-	_, err = DownloadArchive(ctx, client, []string{path.Join(remote, "huge")}, dst, func(n int64, _ string) {
+	_, _, err = DownloadArchive(ctx, client, []string{path.Join(remote, "huge")}, dst, func(n int64, _ string) {
 		if n > 2<<20 {
 			cancel()
 		}
@@ -606,7 +605,132 @@ func TestArchiveLive(t *testing.T) {
 		t.Error("the part of big.bin is left")
 	}
 	// The connection is still good for the next one.
-	if _, err := DownloadArchive(context.Background(), client, []string{path.Join(remote, "single.txt")}, t.TempDir(), nil); err != nil {
+	if _, _, err := DownloadArchive(context.Background(), client, []string{path.Join(remote, "single.txt")}, t.TempDir(), nil); err != nil {
 		t.Errorf("after cancel: %v", err)
+	}
+}
+
+// extractAll unpacks as ExtractArchive does, and fails the test when it
+// skips links.
+func extractAll(t *testing.T, ctx context.Context, r io.Reader, dir string, roots []string, progress ArchiveProgress) error {
+	t.Helper()
+	skipped, err := ExtractArchive(ctx, r, dir, roots, progress)
+	if skipped.Len() != 0 {
+		t.Errorf("skipped %+v", skipped)
+	}
+	return err
+}
+
+// Links that each point inside, but lead outside through each other, are
+// removed once the archive is unpacked.
+func TestExtractChainedLinks(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symbolic links need privileges on Windows")
+	}
+	parent := t.TempDir()
+	dst := filepath.Join(parent, "dst")
+	os.Mkdir(dst, 0o755)
+	writeFile(t, filepath.Join(parent, "secret.txt"), []byte("outside"))
+	ar := makeArchive(t,
+		entry{name: "x/", typ: tar.TypeDir},
+		// dst/x/b is dst: inside.
+		entry{name: "x/b", typ: tar.TypeSymlink, link: ".."},
+		// dst/x/b/../.. is dst by its names, but dst/.. on the disk.
+		entry{name: "x/a", typ: tar.TypeSymlink, link: "b/../.."},
+		// A link to a link that points out, and others down that chain,
+		// one to a file that is not there.
+		entry{name: "x/up", typ: tar.TypeSymlink, link: "a"},
+		entry{name: "x/via", typ: tar.TypeSymlink, link: "up/secret.txt"},
+		entry{name: "x/gone", typ: tar.TypeSymlink, link: "up/missing/../../.."},
+		// Links that stay inside are kept, dangling or not.
+		entry{name: "x/self", typ: tar.TypeSymlink, link: "b/x"},
+		entry{name: "x/later", typ: tar.TypeSymlink, link: "not-yet/file"},
+		// A loop leads nowhere: removed.
+		entry{name: "x/loop1", typ: tar.TypeSymlink, link: "loop2"},
+		entry{name: "x/loop2", typ: tar.TypeSymlink, link: "loop1"},
+	)
+	skipped, err := ExtractArchive(context.Background(), ar, dst, []string{"x"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	slices.Sort(skipped.Outside)
+	if want := []string{"x/a", "x/gone", "x/loop1", "x/loop2", "x/up", "x/via"}; !slices.Equal(skipped.Outside, want) {
+		t.Errorf("skipped %q, want %q", skipped.Outside, want)
+	}
+	for _, n := range skipped.Outside {
+		if _, err := os.Lstat(filepath.Join(dst, n)); err == nil {
+			t.Errorf("%s is still there", n)
+		}
+	}
+	for _, n := range []string{"x/b", "x/self", "x/later"} {
+		if fi, err := os.Lstat(filepath.Join(dst, n)); err != nil || fi.Mode()&fs.ModeSymlink == 0 {
+			t.Errorf("%s was removed: %v", n, err)
+		}
+	}
+	// The user's own link in the folder that leads out counts too.
+	dst2 := t.TempDir()
+	os.Symlink(parent, filepath.Join(dst2, "mine"))
+	ar = makeArchive(t, entry{name: "x/", typ: tar.TypeDir}, entry{name: "x/l", typ: tar.TypeSymlink, link: "../mine/secret.txt"})
+	if skipped, err := ExtractArchive(context.Background(), ar, dst2, []string{"x"}, nil); err != nil || !slices.Equal(skipped.Outside, []string{"x/l"}) {
+		t.Errorf("through the user's link: %+v %v", skipped, err)
+	}
+}
+
+func TestPhysical(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symbolic links need privileges on Windows")
+	}
+	dir, _ := filepath.EvalSymlinks(t.TempDir())
+	os.MkdirAll(filepath.Join(dir, "real", "sub"), 0o755)
+	os.Symlink("real/sub", filepath.Join(dir, "l"))
+	os.Symlink(filepath.Join(dir, "real"), filepath.Join(dir, "abs"))
+	for in, want := range map[string]string{
+		"l":               filepath.Join(dir, "real", "sub"),
+		"l/..":            filepath.Join(dir, "real"),
+		"l/../../x":       filepath.Join(dir, "x"),
+		"abs/sub/missing": filepath.Join(dir, "real", "sub", "missing"),
+		"missing/../l/..": filepath.Join(dir, "real"),
+		"real/./sub//":    filepath.Join(dir, "real", "sub"),
+	} {
+		if got, err := physical(dir + string(filepath.Separator) + in); err != nil || got != want {
+			t.Errorf("physical(%s) = %s %v, want %s", in, got, err, want)
+		}
+	}
+}
+
+// Where the system does not let the user make links, as Windows without
+// Developer Mode, links are skipped and the rest unpacked.
+func TestExtractLinksNotAllowed(t *testing.T) {
+	if !linkNotAllowed("windows", &os.LinkError{Op: "symlink", Err: errPrivilegeNotHeld}) ||
+		linkNotAllowed("linux", &os.LinkError{Op: "symlink", Err: errPrivilegeNotHeld}) ||
+		linkNotAllowed("windows", &os.LinkError{Op: "symlink", Err: fs.ErrPermission}) {
+		t.Error("linkNotAllowed")
+	}
+	defer func(g string, f func(string, string) error) { goos, symlink = g, f }(goos, symlink)
+	goos = "windows"
+	symlink = func(old, new string) error {
+		return &os.LinkError{Op: "symlink", Old: old, New: new, Err: errPrivilegeNotHeld}
+	}
+	dst := t.TempDir()
+	ar := makeArchive(t,
+		entry{name: "proj/", typ: tar.TypeDir},
+		entry{name: "proj/link", typ: tar.TypeSymlink, link: "a.txt"},
+		entry{name: "proj/a.txt", typ: tar.TypeReg, body: "alpha"},
+		entry{name: "proj/out", typ: tar.TypeSymlink, link: "/etc"},
+	)
+	skipped, err := ExtractArchive(context.Background(), ar, dst, []string{"proj"}, nil)
+	if err != nil || !slices.Equal(skipped.NotAllowed, []string{"proj/link"}) || !slices.Equal(skipped.Outside, []string{"proj/out"}) || skipped.Len() != 2 {
+		t.Errorf("skipped %+v, err %v", skipped, err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(dst, "proj", "a.txt")); string(data) != "alpha" {
+		t.Errorf("a.txt %q", data)
+	}
+	// Any other error still fails it.
+	symlink = func(old, new string) error {
+		return &os.LinkError{Op: "symlink", Old: old, New: new, Err: fs.ErrPermission}
+	}
+	ar = makeArchive(t, entry{name: "proj/", typ: tar.TypeDir}, entry{name: "proj/link", typ: tar.TypeSymlink, link: "a.txt"})
+	if _, err := ExtractArchive(context.Background(), ar, t.TempDir(), []string{"proj"}, nil); !errors.Is(err, fs.ErrPermission) {
+		t.Errorf("other error: %v", err)
 	}
 }

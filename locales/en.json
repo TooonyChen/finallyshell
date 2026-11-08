@@ -194,14 +194,19 @@
   "archivePacking": "Packing {file}",
   "archiveUnpacking": "Unpacking {file}",
   "retryOverSftp": "Retry over SFTP",
-  "archiveSkippedLinks": "{count, plural, one {# link points outside the folder and was not made: {names}} other {# links point outside the folder and were not made: {names}}}",
-  "@archiveSkippedLinks": {
+  "archiveLinksOutside": "{count, plural, one {# link was not created: it points outside the folder} other {# links were not created: they point outside the folder}}",
+  "@archiveLinksOutside": {
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "names": {
-        "type": "String"
+      }
+    }
+  },
+  "archiveLinksNotAllowed": "{count, plural, one {# link was not created: Windows allows links only in Developer Mode or for administrators} other {# links were not created: Windows allows links only in Developer Mode or for administrators}}",
+  "@archiveLinksNotAllowed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   },

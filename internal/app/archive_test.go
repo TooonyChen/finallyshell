@@ -277,7 +277,8 @@ func demoArchiveTransfers(a *App, s *Session) {
 	add(&transferJob{dir: download, srcs: []string{"/opt/tools"}, dstDir: "/home/me/Downloads",
 		state: transferFailed, total: -1, err: &remotefs.TarError{Status: 127, Stderr: "sh: 1: exec: tar: not found"}})
 	add(&transferJob{dir: download, srcs: []string{"/etc/nginx"}, dstDir: "/home/me/Downloads",
-		state: transferDone, done: 61_000, total: 61_000, local: "/home/me/Downloads/nginx"})
+		state: transferDone, done: 61_000, total: 61_000, local: "/home/me/Downloads/nginx",
+		skipped: remotefs.SkippedLinks{Outside: []string{"nginx/sites-enabled/default", "nginx/modules-enabled/50-mod-stream.conf"}}})
 	a.transfers.running = 2
 }
 
@@ -290,6 +291,7 @@ func TestArchiveTransfersTab(t *testing.T) {
 	s.sftp = localSFTP(t)
 	a.active = 0
 	a.bottomTab = 1
+	a.terminalPct = 45 // room for all the rows
 	demoArchiveTransfers(a, s)
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
@@ -298,7 +300,7 @@ func TestArchiveTransfersTab(t *testing.T) {
 	for _, want := range []string{
 		"node_modules", locales.ArchiveItems("public", 2), locales.DownloadArchiveDirection() + " → /home/me/Downloads",
 		locales.UploadArchiveDirection() + " → web-1:/var/www", locales.RetryOverSftp(),
-		locales.TransferFailed("sh: 1: exec: tar: not found"),
+		locales.TransferFailed("sh: 1: exec: tar: not found"), locales.ArchiveLinksOutside(2), locales.OpenFile(),
 	} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q; texts %q", want, tt.Texts())
@@ -313,7 +315,7 @@ func TestArchiveTransfersTab(t *testing.T) {
 	tt.Frame()
 	tt.Frame()
 	texts = strings.Join(tt.Texts(), "\n")
-	for _, want := range []string{"打包下载 → ", "打包上传 → ", "public 及另外 2 项", "改用 SFTP 重试", "正在解包 ", "正在打包 "} {
+	for _, want := range []string{"打包下载 → ", "打包上传 → ", "public 及另外 2 项", "改用 SFTP 重试", "正在解包 ", "正在打包 ", "2 个链接没有创建"} {
 		if !strings.Contains(texts, want) {
 			t.Errorf("no %q in Chinese; texts %q", want, tt.Texts())
 		}
@@ -323,7 +325,6 @@ func TestArchiveTransfersTab(t *testing.T) {
 
 func TestTransferErrorText(t *testing.T) {
 	cases := map[error]string{
-		&remotefs.SkippedLinksError{Names: []string{"a/l", "b"}}:     locales.ArchiveSkippedLinks(2, "a/l, b"),
 		fmt.Errorf("x: %w", &remotefs.WindowsNameError{Name: "a:b"}): locales.ArchiveWindowsName("a:b"),
 		remotefs.ErrNoShell: locales.ArchiveNoShell(),
 		&remotefs.TarError{Status: 2, Stderr: "tar: x: Cannot stat"}: "tar: x: Cannot stat",
@@ -334,7 +335,7 @@ func TestTransferErrorText(t *testing.T) {
 			t.Errorf("%v: %q, want %q", err, got, want)
 		}
 	}
-	if got := locales.ArchiveSkippedLinks(1, "x"); !strings.HasPrefix(got, "1 link points") {
+	if got := locales.ArchiveLinksOutside(1); !strings.HasPrefix(got, "1 link was not created") {
 		t.Errorf("one link: %q", got)
 	}
 }
@@ -373,6 +374,32 @@ func testArchiveTransfers(t *testing.T, a *App, p *fakePlatform, s *Session, hom
 		t.Fatalf("archive download: %v, local %s", j.err, j.local)
 	}
 	sameTree(t, filepath.Join(local, "site"), filepath.Join(p.downloads, "site"))
+
+	// Links that lead outside, on their own or through another, are not
+	// made when they come back; the download is done all the same.
+	if runtime.GOOS != "windows" {
+		links := filepath.Join(local, "links")
+		os.MkdirAll(links, 0o755)
+		os.WriteFile(filepath.Join(links, "file.txt"), []byte("kept"), 0o644)
+		os.Symlink("/etc", filepath.Join(links, "abs"))
+		os.Symlink("..", filepath.Join(links, "b"))
+		os.Symlink("b/../..", filepath.Join(links, "a"))
+		os.Symlink("file.txt", filepath.Join(links, "ok"))
+		n = len(a.transfers.jobs)
+		a.uploadAs(s, []string{links}, remote, true)
+		p.until(t, "the links' upload", func() bool { return len(a.transfers.jobs) == n+1 && a.transfers.active() == 0 })
+		a.downloadFrom(s, remote, []string{"links"}, "", true)
+		p.until(t, "the links' download", func() bool { return len(a.transfers.jobs) == n+2 && a.transfers.active() == 0 })
+		j := a.transfers.jobs[n+1]
+		slices.Sort(j.skipped.Outside)
+		if j.state != transferDone || !slices.Equal(j.skipped.Outside, []string{"links/a", "links/abs"}) {
+			t.Errorf("links: state %d, %v, skipped %+v", j.state, j.err, j.skipped)
+		}
+		if target, _ := os.Readlink(filepath.Join(p.downloads, "links", "ok")); target != "file.txt" {
+			t.Errorf("the link inside: %q", target)
+		}
+		n = len(a.transfers.jobs) - 2
+	}
 
 	a.downloadFrom(s, remote, []string{"missing"}, "", true)
 	p.until(t, "the failing download", func() bool { return len(a.transfers.jobs) == n+3 && a.transfers.active() == 0 })

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"finallyshell/internal/icons"
+	"finallyshell/internal/remotefs"
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
 
@@ -163,6 +164,7 @@ func (a *App) retry(t *transferJob) {
 	q.jobs = slices.Delete(q.jobs, i, i+1)
 	t.sftp, t.ssh = t.sess.sftp, t.sess.client
 	t.state, t.err, t.local, t.cancel, t.current = transferWaiting, nil, "", nil, ""
+	t.skipped = remotefs.SkippedLinks{}
 	t.done, t.total, t.speed, t.sampleDone = 0, -1, 0, 0
 	q.jobs = append(q.jobs, t)
 	a.pump()
