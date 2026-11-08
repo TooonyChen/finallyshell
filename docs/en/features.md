@@ -41,6 +41,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Progress on the app icon](#progress-on-the-app-icon)
 - [Remote file editor](#remote-file-editor)
 - [Tunnels tab](#tunnels-tab)
+- [Processes tab](#processes-tab)
 - [Options window](#options-window)
   - [General](#general)
   - [Transfers](#transfers)
@@ -62,7 +63,7 @@ are vertical:
 - Top left: the server monitor of the current session.
 - Bottom left: the vertical session list.
 - Top right: the terminal.
-- Bottom right: the Files, Transfers and Tunnels tabs.
+- Bottom right: the Files, Transfers, Tunnels and Processes tabs.
 
 ## Sessions and tabs
 
@@ -661,7 +662,8 @@ The top left shows the current session's server: IP, uptime, load, CPU,
 memory and swap, the processes using the most memory, network speed and
 latency graphs, and disks. It reads `/proc` over SSH every 2 seconds, so
 only Linux servers are supported. When not connected it shows an empty
-placeholder like FinalShell's ("-", 0%).
+placeholder like FinalShell's ("-", 0%). A click on the process list opens
+the [Processes tab](#processes-tab).
 
 The network graph shows the busiest interface by default: the one with
 the most bytes since the server started, never `lo`. The interface name
@@ -1244,6 +1246,56 @@ listening.
 - When the host is reached through a proxy or jump host, tunnels use the
   connection to the host itself.
 - "Edit tunnels…" opens the Tunnels page of the connection editor.
+
+## Processes tab
+
+The "Processes" tab at the bottom right is the process manager of the
+current session, as FinalShell's "advanced process management". A click
+on the side panel's process list opens it too.
+
+- The table lists every process with its PID, user, memory (RSS), CPU %,
+  name, command line and executable path. A click on a header sorts by
+  that column, a second click reverses it; CPU, highest first, is the
+  default. The filter above it matches the name, the command line and
+  the user, ignoring case, and the count beside it says how many are
+  shown.
+- The list is read again every 2 seconds while the tab is shown, and not
+  at all while another tab or session is shown. The chosen row stays on
+  its process as the rows move. Refresh reads it at once.
+- CPU % is the share of one CPU the process used since the last reading,
+  from the CPU times in `/proc/<pid>/stat`, as `top` shows it: a busy
+  process with several threads can pass 100%. The first reading shows
+  `ps`'s average over the process's life (0 on BusyBox, whose `ps` has
+  none).
+- The path of another user's process needs root to read and shows "-".
+- A double click, Enter or "Open Details" in the context menu opens the
+  process in a tab below the list, named like `7267-java`, with its PID,
+  name, user, full command line, executable path and working directory
+  on the left and its environment variables on the right. The tab's
+  buttons copy all of it as text and read it again; the environment's
+  context menu copies a value, a `NAME=value` line, or all of them.
+  Fields that need root show "-" with "Needs root". A process gone since
+  says so. Tabs close with their ×; the divider between the list and the
+  tabs, and the one between the fields and the environment, can be
+  dragged.
+- The context menu of a row also has Copy PID, Copy Command Line, Send
+  Signal (SIGTERM, SIGKILL, SIGHUP, SIGINT, SIGSTOP, SIGCONT) and Kill….
+  Every signal asks first. Kill sends SIGTERM; when the process is still
+  running 3 seconds later, the dialog offers "Force Kill" with SIGKILL.
+  When the server refuses, the dialog shows its words, such as "The
+  server refused: Operation not permitted".
+- When the session disconnects, the last list stays, greyed, under the
+  same reconnect bar as the terminal's. Servers that are not Linux show
+  "Only Linux servers are supported", and hosts whose server monitor is
+  off show that it is off: the tab uses the same exec channels.
+
+Each reading is one POSIX sh script over an exec channel, as the server
+monitor's: `ps` for the users, memory and command lines, `cat` of every
+`/proc/<pid>/stat` for the names and CPU times, and one `ls -l` of the
+`/proc/<pid>/exe` links for the paths. It runs with BusyBox's `ps` and
+`ls`, and leaves out its own processes. Details read
+`/proc/<pid>/cmdline`, `exe`, `cwd` and `environ` once when the tab
+opens; signals are sent with `kill`.
 
 ## Options window
 

@@ -83,7 +83,7 @@ Passwords and key passphrases are kept in macOS Keychain, Windows Credential Man
 
 ### Server monitor
 
-While a session is connected, the panel at the top left shows the server's uptime, load, CPU, memory and swap, the processes using the most memory, network speed, latency and disk space, refreshed every two seconds. "System info" shows the OS, kernel, CPU model, memory, IP addresses and disks, and copies them as text. The monitor reads `/proc`, so it needs a Linux server.
+While a session is connected, the panel at the top left shows the server's uptime, load, CPU, memory and swap, the processes using the most memory, network speed, latency and disk space, refreshed every two seconds. "System info" shows the OS, kernel, CPU model, memory, IP addresses and disks, and copies them as text. The Processes tab lists every process, sortable and filterable, opens one to show its command line, working directory and environment, and sends signals or kills it after asking. The monitor reads `/proc`, so it needs a Linux server.
 
 <p align="center">
   <img src="docs/screenshots/system-info-en.png" width="560" alt="The system info popover">
