@@ -200,6 +200,17 @@ FINALLYSHELL_TEST_SSH=user:password@127.0.0.1:22 go test ./internal/app -run SSH
 - 系统没有凭据存储时（Linux 上没有 libsecret、没有会话 D-Bus，或者 D-Bus 上没有 Secret Service，服务器和精简桌面上常见），密码只存在内存里：编辑器和密码框里的“记住密码”变灰，下面写明原因。
 - 读写凭据存储时系统可能会询问用户：解锁钥匙串或密钥环；macOS 上重新编译过的程序第一次读以前存的条目时，会问是否允许。这些调用可能要等很久，所以程序从不在 UI 线程上调用它们（见 `internal/app/secrets.go` 开头的说明），而是放在一个后台 goroutine 里按顺序执行，结果通过 `App.post` 交回 UI 线程。
 
+## 许可证
+
+Finallyshell 公开源码，但不是 OSI 定义的开源软件。你可以在下面两个许可证里任选一个（全文见 [LICENSE](LICENSE)）：
+
+- [PolyForm Noncommercial 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Noncommercial-1.0.0.md)：任何非商业用途，包括 fork、修改和分享。
+- [PolyForm Internal Use 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Internal-Use-1.0.0.md)：你和你的公司内部使用，可以修改，但不能对外分发。在公司上班时用它连服务器属于这一种。
+
+出售本软件、把它放进收费产品、以商业目的分发修改版等，需要另外取得商业授权，请开一个 issue 联系。
+
+贡献代码前请看 [CONTRIBUTING.md](CONTRIBUTING.md)：提交的贡献授权作者以任何许可证（包括商业许可证）再授权。
+
 ## 代码结构
 
 Go 里一个文件夹就是一个包（package），包之间不能循环引用，所以按职责拆分。`internal/` 下的包只能被本项目使用。
