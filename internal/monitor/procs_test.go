@@ -241,7 +241,11 @@ func TestSignalScript(t *testing.T) {
 	if err := os.Symlink(sleepPath, odd); err != nil {
 		t.Fatal(err)
 	}
+	// The kernel names the process after the file run, the link; argv[0]
+	// stays "sleep", for a multi-call binary (BusyBox, uutils) that picks
+	// its tool by it.
 	cmd := exec.Command(odd, "60")
+	cmd.Args[0] = "sleep"
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -251,16 +255,21 @@ func TestSignalScript(t *testing.T) {
 	pid := cmd.Process.Pid
 	var st procStat
 	for deadline := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		select {
+		case err := <-exited:
+			t.Fatalf("the sleep run as %q ended by itself before the test: %v", odd, err)
+		default:
+		}
 		data, err := os.ReadFile("/proc/" + strconv.Itoa(pid) + "/stat")
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("the sleep's stat: %v", err)
 		}
 		var ok bool
-		if _, st, ok = parseProcStat(strings.TrimSpace(string(data))); ok && st.name == "a) (b" {
+		if _, st, ok = parseProcStat(strings.TrimSpace(string(data))); ok && st.name == "a) (b" && st.state != 'Z' {
 			break
 		}
 		if time.Now().After(deadline) {
-			t.Fatalf("stat %q", data)
+			t.Fatalf("the sleep did not start as %q: stat %q", odd, data)
 		}
 	}
 
