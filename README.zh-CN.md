@@ -179,6 +179,10 @@ cd finallyshell && go tool mygo dev
 
 欢迎提 issue 和 pull request。每个改动先开一个 issue，写清楚打算怎么做；细节和贡献条款见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
+## 致谢
+
+感谢 [LINUX DO](https://linux.do/) 社区的支持。
+
 ## 许可证
 
 Finallyshell 公开源码，但不是 OSI 定义的开源软件。你可以在下面两个许可证里任选一个（全文见 [LICENSE](LICENSE)）：

@@ -179,6 +179,10 @@ cd finallyshell && go tool mygo dev
 
 Issues and pull requests are welcome. Every change starts as an issue that says how it will be solved; [CONTRIBUTING.md](CONTRIBUTING.md) has the details and the terms for contributions.
 
+## Acknowledgements
+
+Thanks to the [LINUX DO](https://linux.do/) community for its support.
+
 ## License
 
 Finallyshell is source-available, not open source as the OSI defines it. You may use it under either of these licenses ([LICENSE](LICENSE) has the full text):
