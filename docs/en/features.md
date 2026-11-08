@@ -745,7 +745,11 @@ Command bar turns it off, or any of its popups, and lists its keys (see
     and Enter or Tab inserts the entry. A folder inserted lists its own
     entries; a file ends the word with a space. Names with blanks or
     other characters the shell would read are escaped with `\`. At most
-    2000 entries are listed, with "and N more" after them.
+    2000 entries are listed, with "and N more" after them. A name with a
+    control character (a newline, an escape sequence) is shown dimmed,
+    with the character escaped, and cannot be inserted: sent, a newline
+    would run what follows it as a command of its own. Command names and
+    lines of the server's history with one are left out.
   - the first word otherwise opens command completion: the commands on
     the server's PATH that start with it. They are read once per
     connection, over one exec channel, with bash's `compgen -c` (which

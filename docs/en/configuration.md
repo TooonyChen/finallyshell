@@ -245,8 +245,9 @@ it in `history/<host ID>.txt`, a file per host named by the host's `id`
 in `hosts.json`: plain UTF-8 text, one command per line, the oldest first,
 each command once (one sent again moves to the end). There is no limit on
 the number of commands; once a file passes 10 MB, the oldest are dropped.
-Commands of several lines and blank ones are not kept. A host's file is
-deleted with the host (when it is deleted for good, not when it goes to
+Blank commands, and those with a control character other than tab (a
+second line, an escape sequence), are not kept, nor read from a file.
+A host's file is deleted with the host (when it is deleted for good, not when it goes to
 "Show deleted"), and Options › Terminal › Command bar › "Clear history of
 all hosts…" deletes the folder. You can edit or delete the files while
 the app is closed; one is read the first time the history picker needs

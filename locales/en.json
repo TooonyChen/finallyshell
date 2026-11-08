@@ -489,6 +489,7 @@
   "cmdBarCommands": "Commands",
   "cmdBarHistory": "History",
   "cmdBarNoMatches": "No matches",
+  "cmdBarControlName": "This name has control characters and can't be inserted",
   "cmdBarPickHint": "Arrows choose, Enter or Tab inserts",
   "cmdBarHistoryHint": "←/→ picks a word, Enter inserts",
   "cmdBarClearList": "Clear list",

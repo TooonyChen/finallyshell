@@ -16,7 +16,7 @@ func TestHistoryFile(t *testing.T) {
 	if list, err := LoadHistory("h1"); err != nil || list != nil {
 		t.Fatalf("no file: %q, %v", list, err)
 	}
-	for _, c := range []string{"ls -l", "cd /etc", "  ", "two\nlines", "ls -l", "df -h"} {
+	for _, c := range []string{"ls -l", "cd /etc", "  ", "two\nlines", "echo \x1b[31m", "ls -l", "df -h"} {
 		if err := AddHistory("h1", c); err != nil {
 			t.Fatal(err)
 		}
@@ -136,6 +136,14 @@ func TestParseShellHistory(t *testing.T) {
 	want := []string{"ls -la", "echo ă 中", "git status", "plain line"}
 	if got := ParseShellHistory([]byte(zsh), true); !slices.Equal(got, want) {
 		t.Errorf("zsh %q, want %q", got, want)
+	}
+	// Lines with control characters, as a file crafted to put escape
+	// sequences into the terminal, are dropped; a tab stays.
+	crafted := "ls\n" + "echo \x1b[2Jcleared\n" + ": 1700000000:0;rm \x07x\n" + "a\x7fb\n" + "c\u0085d\n" + "printf 'a\tb'\n"
+	for _, zsh := range []bool{false, true} {
+		if got := ParseShellHistory([]byte(crafted), zsh); !slices.Equal(got, []string{"ls", "printf 'a\tb'"}) {
+			t.Errorf("crafted (zsh %v): %q", zsh, got)
+		}
 	}
 	// A line that only looks like zsh's stays as it is.
 	if got := ParseShellHistory([]byte(": not:zsh;x\n"), true); !slices.Equal(got, []string{": not:zsh;x"}) {

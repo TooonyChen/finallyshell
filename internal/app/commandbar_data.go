@@ -65,9 +65,46 @@ type serverHistory struct {
 // (config/history.go), read from its file the first time it is needed.
 type cmdHistories struct {
 	hosts map[string]*hostHistory
-	// pending counts the reads and writes of the files under way, which
-	// tests wait for.
+
+	// The reads and writes of the files, done in the order asked by one
+	// goroutine at a time, so that a command sent before a Clear does not
+	// come back after it, nor two commands swap.
+	mu      sync.Mutex
+	jobs    []func()
+	running bool // a goroutine works through jobs
+	// pending counts the jobs not done yet, which tests wait for.
 	pending sync.WaitGroup
+}
+
+// do queues job, after those queued before it, off the UI thread.
+func (q *cmdHistories) do(job func()) {
+	q.pending.Add(1)
+	q.mu.Lock()
+	q.jobs = append(q.jobs, job)
+	start := !q.running
+	q.running = true
+	q.mu.Unlock()
+	if start {
+		go q.work()
+	}
+}
+
+// work runs the jobs queued, in order, until there are none.
+func (q *cmdHistories) work() {
+	for {
+		q.mu.Lock()
+		if len(q.jobs) == 0 {
+			q.running = false
+			q.mu.Unlock()
+			return
+		}
+		job := q.jobs[0]
+		q.jobs[0] = nil
+		q.jobs = q.jobs[1:]
+		q.mu.Unlock()
+		job()
+		q.pending.Done()
+	}
 }
 
 // hostHistory is a host's history: the commands sent from the bar, the
@@ -88,9 +125,7 @@ func (a *App) hostHistory(id string) *hostHistory {
 	}
 	h := &hostHistory{loading: true}
 	a.history.hosts[id] = h
-	a.history.pending.Add(1)
-	go func() {
-		defer a.history.pending.Done()
+	a.history.do(func() {
 		list, _ := config.LoadHistory(id)
 		a.post(func() {
 			// What was sent while it read is newer than what it read.
@@ -99,7 +134,7 @@ func (a *App) hostHistory(id string) *hostHistory {
 			}
 			h.loading, h.cmds = false, list
 		})
-	}()
+	})
 	return h
 }
 
@@ -108,7 +143,7 @@ func (a *App) hostHistory(id string) *hostHistory {
 func (a *App) addHistory(id, cmd string) {
 	h := a.hostHistory(id)
 	h.cmds = config.AddCommand(h.cmds, cmd)
-	a.history.pending.Go(func() { config.AddHistory(id, cmd) })
+	a.history.do(func() { config.AddHistory(id, cmd) })
 }
 
 // clearHostHistory is the history picker's Clear list: the host's
@@ -120,7 +155,7 @@ func (a *App) clearHostHistory(s *Session) {
 		a.history.hosts = map[string]*hostHistory{}
 	}
 	a.history.hosts[id] = &hostHistory{}
-	a.history.pending.Go(func() { config.DeleteHistory(id) })
+	a.history.do(func() { config.DeleteHistory(id) })
 	hideServerHistory(s)
 	s.bar.sel, s.bar.field = 0, -1
 }
@@ -139,7 +174,7 @@ func hideServerHistory(s *Session) {
 // page's button does once the user confirms.
 func (a *App) clearAllHistory() {
 	a.history.hosts = nil
-	a.history.pending.Go(func() { config.ClearAllHistory() })
+	a.history.do(func() { config.ClearAllHistory() })
 	for _, s := range a.sessions {
 		if !s.isNewTab() {
 			hideServerHistory(s)
@@ -151,7 +186,7 @@ func (a *App) clearAllHistory() {
 // deleted for good.
 func (a *App) deleteHostHistory(id string) {
 	delete(a.history.hosts, id)
-	a.history.pending.Go(func() { config.DeleteHistory(id) })
+	a.history.do(func() { config.DeleteHistory(id) })
 }
 
 // historyFor is what s's history picker lists, the newest first: the
@@ -346,7 +381,8 @@ func readPickerDir(sc *sftp.Client, key string) (string, []barItem, error) {
 	}
 	items := make([]barItem, 0, len(entries))
 	for _, e := range entries {
-		items = append(items, barItem{name: e.Name, dir: e.IsDir(), hidden: strings.HasPrefix(e.Name, ".")})
+		items = append(items, barItem{name: e.Name, dir: e.IsDir(), hidden: strings.HasPrefix(e.Name, "."),
+			bad: config.HasControl(e.Name, false)})
 	}
 	slices.SortStableFunc(items, func(x, y barItem) int {
 		switch {
@@ -487,12 +523,13 @@ func runCommandsScript(ctx context.Context, client *ssh.Client) (string, error) 
 }
 
 // commandNameList is the names of lines, sorted, each once, without
-// those that cannot be a command's.
+// those that cannot be a command's, or be inserted in the bar: a name
+// with a control character is dropped (config.HasControl).
 func commandNameList(lines []string) []string {
 	var names []string
 	for _, l := range lines {
 		l = strings.TrimSpace(l)
-		if l != "" && !strings.ContainsAny(l, "/ \t") {
+		if l != "" && !strings.ContainsAny(l, "/ ") && !config.HasControl(l, false) {
 			names = append(names, l)
 		}
 	}

@@ -3700,6 +3700,16 @@ func (msgs Messages) CmdBarNoMatches() string {
 	return Catalog.Format(msgs.locale, "cmdBarNoMatches", nil)
 }
 
+// CmdBarControlName says "This name has control characters and can't be inserted"
+// in the language the app shows.
+func CmdBarControlName() string { return In(i18n.Locale()).CmdBarControlName() }
+
+// CmdBarControlName says "This name has control characters and can't be inserted"
+// in the language of msgs.
+func (msgs Messages) CmdBarControlName() string {
+	return Catalog.Format(msgs.locale, "cmdBarControlName", nil)
+}
+
 // CmdBarPickHint says "Arrows choose, Enter or Tab inserts"
 // in the language the app shows.
 func CmdBarPickHint() string { return In(i18n.Locale()).CmdBarPickHint() }

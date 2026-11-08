@@ -1,6 +1,7 @@
 package app
 
 import (
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -372,6 +373,9 @@ func (a *App) choose(s *Session, e barEdit, caret int, view popupContent, i int)
 	b := &s.bar
 	r := []rune(e.text)
 	it := view.items[i]
+	if it.bad {
+		return // shown, never inserted
+	}
 	switch b.popup {
 	case popupPaths:
 		p := view.path
@@ -419,6 +423,20 @@ type barItem struct {
 	name   string
 	dir    bool
 	hidden bool
+	// bad is a name with a control character (config.HasControl): shown,
+	// but never inserted, as a newline in it would run what follows as a
+	// command of its own.
+	bad bool
+}
+
+// shownName is how the popup writes an item's name: a bad one with its
+// control characters escaped, as \n.
+func (it barItem) shownName() string {
+	if !it.bad {
+		return it.name
+	}
+	q := strconv.Quote(it.name)
+	return q[1 : len(q)-1]
 }
 
 // popupContent is what the open popup shows, made from the bar's text
@@ -623,10 +641,15 @@ func (a *App) gridCell(c *ui.Context, s *Session, view popupContent, i int) {
 	b := &s.bar
 	it := view.items[i]
 	on := i == b.sel
-	cell := ui.Row(c).Width(popupCellWidth).Gap(6).AlignItems(ui.Center).Padding(3, 6).Radius(4).Cursor(ui.CursorPointer)
+	cell := ui.Row(c).Width(popupCellWidth).Gap(6).AlignItems(ui.Center).Padding(3, 6).Radius(4)
 	text := theme.Text
 	if it.hidden {
 		text = theme.TextMuted
+	}
+	if it.bad {
+		cell.Opacity(0.5).Tooltip(locales.CmdBarControlName())
+	} else {
+		cell.Cursor(ui.CursorPointer)
 	}
 	if on {
 		cell.Background(theme.Accent)
@@ -636,13 +659,13 @@ func (a *App) gridCell(c *ui.Context, s *Session, view popupContent, i int) {
 		if b.popup == popupPaths {
 			a.fileIcon(c, it.name, it.dir, false, false)
 		}
-		name := it.name
+		name := it.shownName()
 		if it.dir {
 			name += "/"
 		}
 		ui.Text(c, name).TextColor(text).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 	})
-	if cell.Clicked() {
+	if cell.Clicked() && !it.bad {
 		b.sel = i
 		a.chooseInView(s, view, i)
 	}

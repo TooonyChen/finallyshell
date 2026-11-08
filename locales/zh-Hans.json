@@ -363,6 +363,7 @@
   "cmdBarCommands": "命令",
   "cmdBarHistory": "历史",
   "cmdBarNoMatches": "没有匹配项",
+  "cmdBarControlName": "这个名字含有控制字符，不能插入",
   "cmdBarPickHint": "方向键选择，回车或 Tab 插入",
   "cmdBarHistoryHint": "←/→ 选一个词，回车插入",
   "cmdBarClearList": "清空列表",

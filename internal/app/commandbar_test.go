@@ -501,7 +501,8 @@ func TestCommandBarSwitches(t *testing.T) {
 	}
 
 	// The bar off: gone, its shortcut the terminal's, nothing read.
-	a.history = cmdHistories{}
+	a.history.pending.Wait()
+	a.history.hosts = nil
 	s.bar = cmdBar{}
 	a.changeSettings(func() { a.settings.NoCommandBar = true })
 	tt.Frame()
@@ -633,6 +634,93 @@ func TestCommandBarPage(t *testing.T) {
 }
 
 // A host deleted for good takes its history with it.
+// The history files are written in the order asked: a command sent
+// before a Clear or a host's deletion does not come back after it.
+func TestCommandBarHistoryOrder(t *testing.T) {
+	a, _ := testApp(t)
+	t.Cleanup(a.history.pending.Wait)
+	for range 20 {
+		a.addHistory("h1", "first")
+		a.addHistory("h1", "second")
+		a.clearAllHistory()
+		a.addHistory("h1", "last")
+		a.history.pending.Wait()
+		if list, _ := config.LoadHistory("h1"); !slices.Equal(list, []string{"last"}) {
+			t.Fatalf("add, clear, add: %q", list)
+		}
+		a.addHistory("h2", "ls")
+		a.deleteHostHistory("h2")
+		a.history.pending.Wait()
+		if _, err := os.Stat(filepath.Join(config.HistoryDir(), "h2.txt")); !os.IsNotExist(err) {
+			t.Fatalf("add, delete the host: %v", err)
+		}
+		for _, c := range []string{"a", "b", "c", "a"} {
+			a.addHistory("h3", c)
+		}
+		a.history.pending.Wait()
+		if list, _ := config.LoadHistory("h3"); !slices.Equal(list, []string{"b", "c", "a"}) {
+			t.Fatalf("in order: %q", list)
+		}
+		config.ClearAllHistory()
+		a.history.hosts = nil
+	}
+}
+
+// A remote name with a control character, as a newline that would run
+// what follows it as a command, shows in the picker but can't be
+// inserted; history lines with one are dropped.
+func TestCommandBarControlNames(t *testing.T) {
+	a, p, s, tt, home := barServer(t)
+	for _, name := range []string{"innocent\nid", "a\x1b[2Jb"} {
+		if err := os.WriteFile(filepath.Join(home, name), nil, 0o644); err != nil {
+			t.Skip("the file system takes no such name:", err)
+		}
+	}
+	os.WriteFile(filepath.Join(home, ".bash_history"), []byte("ls\necho \x1b[2Jgone\nprintf '\\x1b'\n"), 0o644)
+	tt.Type("cat ")
+	tt.Key(0, ui.KeyTab)
+	v := popupDone(t, p, a, s)
+	bad := map[string]bool{}
+	for _, it := range v.items {
+		if it.bad {
+			bad[it.name] = true
+		}
+	}
+	if !bad["innocent\nid"] || !bad["a\x1b[2Jb"] || len(bad) != 2 {
+		t.Fatalf("bad names %v in %q", bad, itemNames(v))
+	}
+	if !tt.HasText(`innocent\nid`) {
+		t.Errorf("the name is not shown escaped; texts %q", tt.Texts())
+	}
+	saveShot(t, tt, "commandbar-control-en.png")
+	tt.Type("inn")
+	tt.Frame()
+	for _, k := range []ui.Key{ui.KeyEnter, ui.KeyTab} {
+		tt.Key(0, k)
+		tt.Frame()
+		if s.bar.text != "cat inn" || s.bar.popup != popupPaths {
+			t.Errorf("%v on a bad name: %q, popup %d", k, s.bar.text, s.bar.popup)
+		}
+	}
+	if err := tt.Click(`innocent\nid`); err == nil {
+		tt.Frame()
+	}
+	if s.bar.text != "cat inn" {
+		t.Errorf("a click on a bad name: %q", s.bar.text)
+	}
+	tt.Key(0, ui.KeyEscape)
+	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(0, ui.KeyBackspace)
+	tt.Key(0, ui.KeyUp)
+	v = popupDone(t, p, a, s)
+	if got := itemNames(v); !slices.Equal(got, []string{"git status", `printf '\x1b'`, "ls"}) {
+		t.Errorf("history with an escape sequence: %q", got)
+	}
+	if got := commandNameList([]string{"ls", "evil\x1b[2J", "x\u0085y"}); !slices.Equal(got, []string{"ls"}) {
+		t.Errorf("command names %q", got)
+	}
+}
+
 func TestCommandBarHistoryDeletedWithHost(t *testing.T) {
 	a, _ := testApp(t)
 	h := &config.Host{ID: config.NewHostID(), Name: "web-1", Addr: "10.0.0.1", User: "root"}

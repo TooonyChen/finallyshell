@@ -66,7 +66,7 @@ func loadHistory(hostID string) ([]string, error) {
 	}
 	var list []string
 	for line := range strings.Lines(string(data)) {
-		if line = strings.TrimRight(line, "\r\n"); strings.TrimSpace(line) != "" {
+		if line = strings.TrimRight(line, "\r\n"); Keepable(line) {
 			list = append(list, line)
 		}
 	}
@@ -74,8 +74,8 @@ func loadHistory(hostID string) ([]string, error) {
 }
 
 // AddHistory adds cmd to a host's history, as the newest command; one
-// already there moves to the end. A command of blanks, or of more than
-// one line, is not kept.
+// already there moves to the end. A command of blanks, or with a control
+// character (a second line, an escape sequence), is not kept.
 func AddHistory(hostID, cmd string) error {
 	if !Keepable(cmd) {
 		return nil
@@ -134,7 +134,21 @@ func ClearAllHistory() error {
 // Keepable tells whether cmd can go in a history file: one line that is
 // not only blanks.
 func Keepable(cmd string) bool {
-	return strings.TrimSpace(cmd) != "" && !strings.ContainsAny(cmd, "\r\n")
+	return strings.TrimSpace(cmd) != "" && !HasControl(cmd, true)
+}
+
+// HasControl tells whether s has a control character: C0 (U+0000 to
+// U+001F), DEL or C1 (U+0080 to U+009F), tabs aside with tab set. A
+// command with one, inserted in the command bar and sent, would run more
+// than it shows (a newline) or drive the terminal (an escape sequence),
+// so the history keeps none and the bar inserts none.
+func HasControl(s string, tab bool) bool {
+	for _, r := range s {
+		if (r < 0x20 && !(tab && r == '\t')) || (r >= 0x7f && r <= 0x9f) {
+			return true
+		}
+	}
+	return false
 }
 
 // AddCommand returns list, the oldest first, with cmd as its newest
@@ -180,7 +194,9 @@ func TrimHistory(list []string, limit int) []string {
 // before each command, and which writes the bytes 0x83 to 0x9d, and NUL,
 // "metafied": 0x83, then the byte xor 0x20. A command of several lines,
 // written with a backslash ending each but the last, is left out, as are
-// blank lines: the command bar holds one line. The result is the oldest
+// blank lines, the command bar holding one line, and lines with a control
+// character other than tab (HasControl), so that a file written to put
+// escape sequences into the terminal puts nothing there. The result is the oldest
 // first, each command once.
 func ParseShellHistory(data []byte, zsh bool) []string {
 	if zsh {
@@ -198,7 +214,7 @@ func ParseShellHistory(data []byte, zsh bool) []string {
 		if cmd, ok := zshCommand(line); ok {
 			line = cmd
 		}
-		if strings.TrimSpace(line) != "" {
+		if Keepable(line) {
 			list = append(list, line)
 		}
 	}
