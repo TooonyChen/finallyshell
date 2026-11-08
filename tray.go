@@ -2,16 +2,17 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"image/color"
 	"image/png"
 	"log"
 	"runtime"
 
 	"finallyshell/internal/app"
-	"finallyshell/internal/icons"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/ui"
 )
 
 // HideToTray hides the main window behind a tray icon, which is there
@@ -97,15 +98,21 @@ func (p *platform) Confirm(q app.Confirmation) bool {
 // (OnBeforeQuit in main), then every window closes.
 func (p *platform) Quit() { mygo.App.Quit() }
 
-// trayIcon is the terminal icon as a 32x32 PNG: black, for the system to
-// tint, on macOS and Windows; blue on Linux, whose panels show it as it
-// is, light or dark.
+// traySVG is the app icon (docs/icon.svg) in one color, drawn in
+// currentColor.
+//
+//go:embed tray.svg
+var traySVG []byte
+
+// trayIcon is tray.svg as a 32x32 PNG: black, for the system to tint, on
+// macOS and Windows; blue on Linux, whose panels show it as it is, light
+// or dark.
 func trayIcon() []byte {
 	var ink color.Color = color.Black
 	if runtime.GOOS == "linux" {
 		ink = color.RGBA{0x25, 0x63, 0xeb, 0xff}
 	}
 	var buf bytes.Buffer
-	png.Encode(&buf, icons.Get("terminal").Image(32, 32, ink))
+	png.Encode(&buf, ui.MustParseSVG(traySVG).Image(32, 32, ink))
 	return buf.Bytes()
 }
