@@ -265,7 +265,8 @@ func (a *App) procToolbar(c *ui.Context, s *Session) {
 			ui.Text(c, msg).TextColor(theme.Danger).SingleLine().Shrink(1).MinWidth(0).Tooltip(msg)
 		case s.status == statusConnected && !ps.loaded:
 			ui.Spinner(c).Label(locales.ProcReading())
-			widgets.Muted(c, locales.ProcReading())
+			// One line, cut short in a narrow column.
+			widgets.Muted(c, locales.ProcReading()).SingleLine().Shrink(1).MinWidth(0)
 		case ps.loaded:
 			n, shown := len(ps.list), len(ps.shown())
 			text := locales.ProcCount(n)

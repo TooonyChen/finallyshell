@@ -9,13 +9,20 @@ import (
 
 // The right column is a column on the terminal's right, full height,
 // that holds the bottom panel when it is moved there (bottomPanelSide
-// "right"), and is meant to hold the server monitor too (#152): the
-// monitor on top, the panel below. Its width, rightPanelWidth, is kept
-// from the window's right edge: a wider window gives the room to the
-// terminal.
+// "right"), the server monitor when it is (monitorSide "right"), or
+// both: the monitor on top, the panel below, divided at
+// rightMonitorPercent. Its width, rightPanelWidth, is kept from the
+// window's right edge: a wider window gives the room to the terminal.
 //
-// Hidden on the right (panelhide.go), the column goes away and a thin
-// strip at the terminal's right edge keeps the button that shows it.
+// Hidden on the right (panelhide.go), the panel goes away. Alone in the
+// column, it takes the column with it, and a thin strip at the
+// terminal's right edge keeps the button that shows it; under the
+// monitor, it collapses to its row of tabs at the column's bottom, as
+// under the terminal, and the monitor takes the height.
+//
+// With the monitor on the right, the session panel fills the left
+// column. A panel row's panel has the monitor beside it, still
+// following the current session; full screen shows neither.
 
 // defaultRightWidth is the right column's width, in DIPs, when none is
 // saved, and where a double click on its divider puts it back.
@@ -113,6 +120,48 @@ func (a *App) hiddenRightMainArea(c *ui.Context) {
 		ui.Column(c).Grow(1).MinWidth(0).FillHeight().Children(func() { a.terminalArea(c) })
 		a.hiddenPanelStrip(c)
 	})
+}
+
+// monitorOnRight reports whether the server monitor is in the right
+// column.
+func (a *App) monitorOnRight() bool { return a.monitorSide == config.PanelRight }
+
+// setMonitorOnRight moves the server monitor to the right column, or
+// back over the session list, and saves the choice.
+func (a *App) setMonitorOnRight(right bool) {
+	side := ""
+	if right {
+		side = config.PanelRight
+	}
+	if a.monitorSide == side {
+		return
+	}
+	a.monitorSide = side
+	a.saveLayout()
+}
+
+// rightMonitor is the monitor in the right column, on the left column's
+// color, as it is there.
+func (a *App) rightMonitor(c *ui.Context) {
+	ui.Column(c).Fill().Background(colors.sidebar).Children(func() { a.monitorPanel(c) })
+}
+
+// monitorOverTabs is the right column with the monitor and the hidden
+// panel: the monitor over the panel's row of tabs.
+func (a *App) monitorOverTabs(c *ui.Context) {
+	ui.Column(c).Fill().Children(func() {
+		ui.Column(c).Grow(1).MinHeight(0).FillWidth().Children(func() { a.rightMonitor(c) })
+		a.panelTabRow(c, a.bottomTabs(), &a.bottomTab, true)
+	})
+}
+
+// moveMonitorLabel is the monitor's context menu's item that moves it to
+// the other side.
+func (a *App) moveMonitorLabel() string {
+	if a.monitorOnRight() {
+		return locales.MoveMonitorLeft()
+	}
+	return locales.MoveMonitorRight()
 }
 
 // movePanelLabel is the context menu's item that moves the panel to the

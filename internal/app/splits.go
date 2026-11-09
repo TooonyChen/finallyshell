@@ -16,7 +16,7 @@ const (
 	defaultTerminalPct = 64
 	defaultTreeWidth   = 200 // DIPs
 	// The monitor's share of the right column above the bottom panel,
-	// when both are there (#152).
+	// when both are there.
 	defaultRightMonitorPct = 45
 )
 
@@ -73,6 +73,12 @@ func (a *App) restoreLayout() {
 	}
 	if s.RightPanelWidth >= rightLimits.first && s.RightPanelWidth <= maxSavedWidth {
 		a.rightWidth = s.RightPanelWidth
+	}
+	if s.MonitorSide == config.PanelRight {
+		a.monitorSide = config.PanelRight
+	}
+	if s.RightMonitorPercent > 0 && s.RightMonitorPercent < 100 {
+		a.rightMonitorPct = s.RightMonitorPercent
 	}
 	// The Processes and Network tabs' sizes, which the sessions share.
 	if s.ProcListPercent > 0 && s.ProcListPercent < 100 {
@@ -140,6 +146,8 @@ func (a *App) saveLayout() {
 	a.settings.BottomPanelHidden = a.bottomHidden
 	a.settings.BottomPanelSide = a.bottomSide
 	a.settings.RightPanelWidth = a.rightWidth
+	a.settings.MonitorSide = a.monitorSide
+	a.settings.RightMonitorPercent = a.rightMonitorPct
 	a.settings.TreeWidth = a.treeWidth
 	a.settings.ProcListPercent = a.processes.listPct
 	a.settings.ProcFieldsPercent = a.processes.fieldsPct

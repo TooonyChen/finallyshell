@@ -16,7 +16,8 @@ import (
 //
 // On the right of the terminal (rightcolumn.go), hiding the panel takes
 // its column away, and a strip at the terminal's right edge keeps the
-// button that shows it.
+// button that shows it; under the monitor there, it collapses to its row
+// of tabs at the column's bottom.
 //
 // The state is the settings' BottomPanelHidden, saved with the pane
 // sizes. A panel row (paneltab.go) is the panel itself and ignores it, as
@@ -121,11 +122,11 @@ func (a *App) collapsedTabs(c *ui.Context, labels []string, tab *int) {
 }
 
 // bottomPanelButton is the button that collapses the bottom panel, a
-// chevron down, or opens it, a chevron up; on the right, the chevrons
-// point right and left.
+// chevron down, or opens it, a chevron up; alone on the right, where it
+// hides beside the terminal, the chevrons point right and left.
 func (a *App) bottomPanelButton(c *ui.Context) {
 	hide, show := "chevron-down", "chevron-up"
-	if a.panelOnRight() {
+	if a.panelOnRight() && !a.monitorOnRight() {
 		hide, show = "chevron-right", "chevron-left"
 	}
 	icon, label := hide, locales.HidePanel()

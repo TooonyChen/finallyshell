@@ -54,10 +54,13 @@ func (h hiddenParts) none() bool {
 // monitorHidden is the parts the user hid.
 func (a *App) monitorHidden() hiddenParts { return hiddenParts{a.settings.MonitorHidden} }
 
-// monitorMenu is the monitor panel's context menu: a check box per
-// part. Items about the panel itself, such as which side it is on, go
-// here above the parts, then m.Separator().
+// monitorMenu is the monitor panel's context menu: the side it is on,
+// then a check box per part.
 func (a *App) monitorMenu(m *ui.Menu) {
+	if m.Item(a.moveMonitorLabel()).Chosen() {
+		a.setMonitorOnRight(!a.monitorOnRight())
+	}
+	m.Separator()
 	a.monitorPartItems(m)
 }
 

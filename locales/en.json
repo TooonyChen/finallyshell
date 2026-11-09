@@ -1409,6 +1409,8 @@
   "showPanel": "Show panel",
   "movePanelRight": "Move panel to right side",
   "movePanelBottom": "Move panel to bottom",
+  "moveMonitorRight": "Move to right side",
+  "moveMonitorLeft": "Move to left side",
   "scToggleBottomPanel": "Show or hide the bottom panel",
   "panelTabLabel": "{session} | {tab}",
   "tabCommands": "Commands",

@@ -167,6 +167,9 @@ type App struct {
 	bottomSide      string
 	rightWidth      float32
 	rightMonitorPct float32
+	// monitorSide is where the server monitor is: "" over the session
+	// list, config.PanelRight on top of the right column.
+	monitorSide string
 
 	// The pane sizes changed since they were saved, last at layoutAt.
 	layoutDirty bool
@@ -331,8 +334,15 @@ func (a *App) cycle(d int) {
 	}
 }
 
+// sidebar is the monitor over the session panel, or the session panel
+// alone while the monitor is on the right (rightcolumn.go), monitorPct
+// kept for when it comes back.
 func (a *App) sidebar(c *ui.Context) {
 	ui.Column(c).Fill().Background(colors.sidebar).Children(func() {
+		if a.monitorOnRight() {
+			a.sessionPanel(c)
+			return
+		}
 		split := ui.SplitVerticalPercent(c, &a.monitorPct, func() { a.monitorPanel(c) }, func() { a.sessionPanel(c) }).SplitReset(defaultMonitorPct).Fill()
 		a.splitMoved(c, split, &a.monitorPct, monitorLimits)
 	})
@@ -341,20 +351,36 @@ func (a *App) sidebar(c *ui.Context) {
 // mainArea is the terminal over the bottom panel, or over its tabs alone
 // while it is collapsed (panelhide.go); the terminal beside the panel in
 // the right column, or beside the strip that shows it while it is hidden
-// (rightcolumn.go); or a panel row's panel (paneltab.go).
+// (rightcolumn.go); or a panel row's panel (paneltab.go). With the
+// monitor on the right, the right column holds it too, on top, over the
+// panel when that is there.
 func (a *App) mainArea(c *ui.Context) {
+	var monitor func()
+	if a.monitorOnRight() {
+		monitor = func() { a.rightMonitor(c) }
+	}
+	terminal := func() { a.terminalArea(c) }
 	if s := a.current(); s.isPanelTab() {
-		a.panelArea(c, s)
+		a.withRightColumn(c, func() { a.panelArea(c, s) }, monitor, nil)
 		return
 	}
 	if a.panelOnRight() {
-		if a.bottomHidden {
+		switch {
+		case !a.bottomHidden:
+			a.withRightColumn(c, terminal, monitor, func() { a.bottomPanel(c, &a.bottomTab) })
+		case monitor != nil:
+			a.withRightColumn(c, terminal, func() { a.monitorOverTabs(c) }, nil)
+		default:
 			a.hiddenRightMainArea(c)
-			return
 		}
-		a.withRightColumn(c, func() { a.terminalArea(c) }, nil, func() { a.bottomPanel(c, &a.bottomTab) })
 		return
 	}
+	a.withRightColumn(c, func() { a.terminalOverPanel(c) }, monitor, nil)
+}
+
+// terminalOverPanel is the terminal over the bottom panel, or over its
+// tabs alone while it is collapsed.
+func (a *App) terminalOverPanel(c *ui.Context) {
 	if a.bottomHidden {
 		a.collapsedMainArea(c)
 		return

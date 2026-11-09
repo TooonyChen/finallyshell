@@ -52,13 +52,14 @@ func monitorPartsApp(t *testing.T, lang string) (*App, *ui.Tester, *Session) {
 	return a, tt, s
 }
 
-// openMonitorMenu right-clicks the monitor panel, on its IP line.
+// openMonitorMenu right-clicks the monitor panel, on its IP line: the
+// item that moves it to the right, then the parts.
 func openMonitorMenu(t *testing.T, tt *ui.Tester, ip string) {
 	t.Helper()
 	if err := tt.RightClick("IP " + ip); err != nil {
 		t.Fatal(err)
 	}
-	var want []string
+	want := []string{locales.MoveMonitorRight(), "-"}
 	for _, p := range monitorParts {
 		want = append(want, p.label())
 	}

@@ -197,6 +197,8 @@ default.
 | `bottomPanelHidden` | `true` collapses the bottom panel under the terminal to its row of tabs, or, on the right, hides its column. | Open. |
 | `bottomPanelSide` | `right` puts the bottom panel in a column on the terminal's right. | `""`, under the terminal. |
 | `rightPanelWidth` | Width of the column on the terminal's right, in DIPs, as last dragged. | The app's default (460). |
+| `monitorSide` | `right` puts the server monitor at the top of the column on the terminal's right; the session list then fills the left column. | `""`, at the top left. |
+| `rightMonitorPercent` | The server monitor's share of the right column's height, above the bottom panel, when both are there, in percent. | The app's default (45). |
 | `leftPanelPage` | `connections` shows the Connections page in the bottom-left panel. | The session tabs. |
 | `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
@@ -234,7 +236,8 @@ Each settings key is either synced or kept on each computer; the lists are
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `procListPercent`, `procFieldsPercent`, `netListPercent`,
 `monitorHidden`, `bottomPanelHidden`, `bottomPanelSide`, `rightPanelWidth`,
-`termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
+`monitorSide`, `rightMonitorPercent`, `termBackground`, `downloadDir`,
+`askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are
 where this computer's window was left, as the pane sizes are), and a

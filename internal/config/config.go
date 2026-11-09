@@ -62,6 +62,14 @@ type Settings struct {
 	// RightPanelWidth is the width of the column on the terminal's right,
 	// in DIPs, as last dragged. Zero is the app's default.
 	RightPanelWidth float32 `json:"rightPanelWidth,omitempty"`
+	// MonitorSide is where the server monitor is: "" at the top left,
+	// over the session list, PanelRight in the column on the terminal's
+	// right.
+	MonitorSide string `json:"monitorSide,omitempty"`
+	// RightMonitorPercent is the monitor's share of the right column's
+	// height above the bottom panel, when both are there. Zero is the
+	// app's default.
+	RightMonitorPercent float32 `json:"rightMonitorPercent,omitempty"`
 
 	// The General page of the options. Each is named so that false, as a
 	// file without it reads, is the default.
@@ -232,8 +240,9 @@ type Settings struct {
 // connections.
 const LeftPanelConnections = "connections"
 
-// PanelRight is Settings.BottomPanelSide with the panel in the column on
-// the terminal's right.
+// PanelRight is Settings.BottomPanelSide with the panel, and
+// Settings.MonitorSide with the monitor, in the column on the terminal's
+// right.
 const PanelRight = "right"
 
 // The values of GeoLocations and GeoLocationsV6.

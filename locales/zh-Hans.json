@@ -849,6 +849,8 @@
   "showPanel": "显示面板",
   "movePanelRight": "将面板移到右侧",
   "movePanelBottom": "将面板移到底部",
+  "moveMonitorRight": "移到右侧",
+  "moveMonitorLeft": "移到左侧",
   "scToggleBottomPanel": "显示或隐藏底部面板",
   "panelTabLabel": "{session} | {tab}",
   "tabCommands": "命令",

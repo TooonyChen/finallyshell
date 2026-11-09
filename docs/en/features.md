@@ -106,6 +106,20 @@ panel's tabs show it again, as at the bottom. The side is kept in
 `settings.json`. A panel opened in a tab of its own ignores it, and full
 screen is unchanged.
 
+The server monitor can go on the right too: "Move to right side" at the
+top of its context menu puts it in the same column, and "Move to left
+side" puts it back. The session list then fills the left column, and the
+monitor's old height there comes back with it. With the bottom panel
+under the terminal, the monitor has the column alone, full height, next
+to the terminal and the panel. With the panel on the right as well, the
+monitor is on top and the panel below, with a divider between them.
+Hiding the panel there collapses it to its row of tabs at the column's
+bottom, with the "Show panel" button (chevron up) at its end, and the
+monitor takes the height; a click on a tab opens the panel on it. The
+monitor follows the current session wherever it is, and a panel opened
+in a tab of its own has it beside it. The side is kept in
+`settings.json`; full screen shows the terminal alone.
+
 ## Sessions and tabs
 
 The bottom left of the window is a vertical list of sessions, on the
@@ -885,15 +899,17 @@ be started by hand on the Tunnels tab.
 
 ## Server monitor and system info
 
-The top left shows the current session's server: IP, uptime, load, CPU,
+The top left, or the top of the column on the terminal's right (see
+[Window layout](#window-layout)), shows the current session's server: IP, uptime, load, CPU,
 memory and swap, the processes using the most memory, network speed and
 latency graphs, and disks. It reads `/proc` over SSH every 2 seconds, so
 only Linux servers are supported. When not connected it shows an empty
 placeholder like FinalShell's ("-", 0%). A click on the process list opens
 the [Processes tab](#processes-tab).
 
-Right-click anywhere on the monitor to choose which parts show: a check
-box each for "Uptime and load", "CPU, memory, swap", "Processes",
+Right-click anywhere on the monitor to move it to the other side ("Move
+to right side" or "Move to left side") or to choose which parts show: a
+check box each for "Uptime and load", "CPU, memory, swap", "Processes",
 "Network", "Latency" and "Disks". The IP line and the System info button
 always show. The choice is the same for every host, and the placeholder
 hides the same parts. When every part is hidden, the panel shows the IP
@@ -2164,6 +2180,12 @@ up to what leaves the terminal 320 DIPs; a double click puts it back at
 460. The width is saved with the other sizes, and the terminal's
 divider under it keeps its position for when the panel goes back to the
 bottom.
+
+With the monitor on the right as well as the bottom panel, the divider
+between them sets the monitor's share of the column's height, 45% by
+default, leaving the monitor its IP line and the panel its tabs and a row
+of its table; a double click puts it back at 45%. It is saved with the
+other sizes. The column's width is the same whichever of them is in it.
 
 ## Language
 
