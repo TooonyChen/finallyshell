@@ -255,6 +255,38 @@ func TestSSHFollowShell(t *testing.T) {
 	p.until(t, "the panel in /var", func() bool { return s.files.cwd == "/var" && !s.files.loading })
 }
 
+// A program named claude in the shell's foreground shows Claude Code's
+// logo on the tab, read from the server's /proc; Ctrl+C ends it, and the
+// logo goes. The fake claude is a shell script that waits, in a folder of
+// the test's own under the user's home.
+func TestSSHAgentIcon(t *testing.T) {
+	poll := agentPoll
+	agentPoll = time.Second
+	defer func() { agentPoll = poll }()
+	a, p, s := connectTestServer(t)
+	defer a.CloseAll()
+	dir := ".finallyshell-agent-test-" + strconv.Itoa(rand.IntN(1_000_000))
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if _, stderr, err := monitor.RunScript(ctx, s.client, "mkdir -p ~/"+dir+" && printf '#!/bin/sh\\nwhile :; do sleep 1; done\\n' >~/"+dir+"/claude && chmod +x ~/"+dir+"/claude\n"); err != nil {
+		t.Fatal(err, stderr)
+	}
+	defer monitor.RunScript(context.Background(), s.client, "rm -rf ~/"+dir+"\n")
+	p.until(t, "the shell's folder as it starts", func() bool { return s.shell.dir != "" })
+	if a.shownAgent(s) != nil {
+		t.Fatalf("an agent at the prompt: %v", a.shownAgent(s))
+	}
+	s.term.Send([]byte("~/" + dir + "/claude --resume\r"))
+	s.shellKey(0, ui.KeyEnter) // as Enter does
+	p.until(t, "Claude Code", func() bool { return a.shownAgent(s) != nil })
+	if ag := a.shownAgent(s); ag.Name != "Claude Code" {
+		t.Fatalf("agent %s", ag.Name)
+	}
+	s.term.Send([]byte{3})
+	s.shellKey(ui.Ctrl, ui.KeyC) // as Ctrl+C does
+	p.until(t, "no agent", func() bool { return a.shownAgent(s) == nil })
+}
+
 // The Network tab on a real server: a listener the test starts, found by
 // its port, with its connection; and a trace route, which says what the
 // server lacks.

@@ -3,12 +3,14 @@ package app
 import (
 	"context"
 	"os"
+	"path"
 	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 
 	"finallyshell/internal/config"
+	"finallyshell/internal/monitor"
 	"finallyshell/internal/sshtest"
 	"finallyshell/locales"
 
@@ -148,11 +150,19 @@ func TestFilesFollowShell(t *testing.T) {
 }
 
 // fakeShellDir stands in for the server's answer of the shell's
-// directory, counting the reads.
+// directory and foreground program, counting the reads.
 type fakeShellDir struct {
 	mu    sync.Mutex
 	dir   string
+	fg    []string // the foreground program's arguments
 	reads int
+}
+
+// run has the shell run args in its foreground: none for its prompt.
+func (fd *fakeShellDir) run(args ...string) {
+	fd.mu.Lock()
+	defer fd.mu.Unlock()
+	fd.fg = args
 }
 
 func (fd *fakeShellDir) set(dir string) {
@@ -167,11 +177,22 @@ func (fd *fakeShellDir) count() int {
 	return fd.reads
 }
 
-func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (string, error) {
+func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (monitor.Shell, error) {
 	fd.mu.Lock()
 	defer fd.mu.Unlock()
 	fd.reads++
-	return fd.dir, nil
+	sh := monitor.Shell{Dir: fd.dir, Comm: "bash", Args: []string{"-bash"}}
+	if len(fd.fg) > 0 {
+		sh.Comm, sh.Args = path.Base(fd.fg[0]), fd.fg
+	}
+	return sh, nil
+}
+
+// standInShell has the followers read fd in place of the server.
+func standInShell(t *testing.T, fd *fakeShellDir) {
+	read := readShellState
+	readShellState = fd.read
+	t.Cleanup(func() { readShellState = read })
 }
 
 // A shell that reports nothing is read from the server as the session
@@ -182,9 +203,7 @@ func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (string, e
 func TestFilesFollowShellRead(t *testing.T) {
 	home := followHome(t)
 	fd := &fakeShellDir{dir: home}
-	read := readShellDir
-	readShellDir = fd.read
-	t.Cleanup(func() { readShellDir = read })
+	standInShell(t, fd)
 	a, p, s, tt := followServer(t, home, true)
 	f := &s.files
 

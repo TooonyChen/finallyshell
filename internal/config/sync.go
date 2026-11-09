@@ -93,7 +93,7 @@ var (
 		"termBackgroundFit", "termBackgroundOpacity",
 		"keepManagerOpen",
 		"fileIconTheme", // only the themes every copy has: see portable
-		"noFollowTerminalDir",
+		"noFollowTerminalDir", "noAgentIcons",
 		"noCommandBar", "noCommandBarPaths", "noCommandBarHistory", "noCommandBarCommands", "noServerHistory",
 	}
 	localSettings = []string{

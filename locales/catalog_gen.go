@@ -4596,6 +4596,36 @@ func (msgs Messages) KeySequencesNote() string {
 	return Catalog.Format(msgs.locale, "keySequencesNote", nil)
 }
 
+// TerminalSessionTabs says "Session tabs"
+// in the language the app shows.
+func TerminalSessionTabs() string { return In(i18n.Locale()).TerminalSessionTabs() }
+
+// TerminalSessionTabs says "Session tabs"
+// in the language of msgs.
+func (msgs Messages) TerminalSessionTabs() string {
+	return Catalog.Format(msgs.locale, "terminalSessionTabs", nil)
+}
+
+// OptionAgentIcons says "Show the coding agent running in each tab"
+// in the language the app shows.
+func OptionAgentIcons() string { return In(i18n.Locale()).OptionAgentIcons() }
+
+// OptionAgentIcons says "Show the coding agent running in each tab"
+// in the language of msgs.
+func (msgs Messages) OptionAgentIcons() string {
+	return Catalog.Format(msgs.locale, "optionAgentIcons", nil)
+}
+
+// OptionAgentIconsNote says "While Claude Code, Codex, Gemini CLI or another coding agent runs in a session's shell, its logo shows next to the ta…"
+// in the language the app shows.
+func OptionAgentIconsNote() string { return In(i18n.Locale()).OptionAgentIconsNote() }
+
+// OptionAgentIconsNote says "While Claude Code, Codex, Gemini CLI or another coding agent runs in a session's shell, its logo shows next to the ta…"
+// in the language of msgs.
+func (msgs Messages) OptionAgentIconsNote() string {
+	return Catalog.Format(msgs.locale, "optionAgentIconsNote", nil)
+}
+
 // ConfirmQuitTitle says "Quit Finallyshell?"
 // in the language the app shows.
 func ConfirmQuitTitle() string { return In(i18n.Locale()).ConfirmQuitTitle() }

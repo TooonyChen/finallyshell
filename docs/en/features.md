@@ -10,6 +10,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Window layout](#window-layout)
 - [Sessions and tabs](#sessions-and-tabs)
   - [Bottom panel in a tab of its own](#bottom-panel-in-a-tab-of-its-own)
+  - [Coding agents in tabs](#coding-agents-in-tabs)
 - [Connections page](#connections-page)
 - [New tab and quick connect](#new-tab-and-quick-connect)
 - [Connection manager](#connection-manager)
@@ -148,6 +149,71 @@ keeps its terminal and its bottom panel as before.
   the command bar.
 - A new tab has no button. A session that failed or was disconnected
   still opens its panel row, whose pages show the session's state.
+
+### Coding agents in tabs
+
+While a coding agent runs in a session's shell, the session's row shows
+the agent's logo after its name, on the name's line, so that several tabs
+to the same server, each running an agent, can be told apart. The logo's
+tooltip is the agent's name ("Claude Code"). It is drawn in one color,
+the row's text color, as the other icons are. A long name is cut before
+the logo. The name itself doesn't change: a renamed tab shows its own
+name with the logo, and the transfers, finding a row by typing and the
+file editor's tabs read the name alone. A panel row shows no logo; its
+session's row does.
+
+| Agent | Its program |
+|---|---|
+| Claude Code | `claude`, `@anthropic-ai/claude-code` |
+| Codex | `codex`, `@openai/codex` |
+| Gemini CLI | `gemini`, `@google/gemini-cli` |
+| pi | `pi`, `@mariozechner/pi-coding-agent` |
+| opencode | `opencode`, `opencode-ai` |
+| Amp | `amp`, `@sourcegraph/amp` |
+| Cursor CLI | `cursor-agent` |
+| GitHub Copilot CLI | `copilot`, `@github/copilot` |
+| Qwen Code | `qwen`, `@qwen-code/qwen-code` |
+| Goose | `goose` |
+| Kimi CLI | `kimi` |
+| Kiro CLI | `kiro-cli` |
+| Aider | `aider`, `aider-chat` |
+| Crush | `crush` |
+| Droid (Factory) | `droid` |
+| Auggie | `auggie`, `@augmentcode/auggie` |
+
+Aider, Crush, Droid and Auggie show a generic robot, having no logo in
+the set the app uses.
+
+How it is told:
+
+- The program is the one in the foreground of the shell's terminal, read
+  from the server's `/proc` over an exec channel of the session's own
+  connection, with the shell's folder (see [Following the terminal's
+  folder](#following-the-terminals-folder)), so two tabs to the same
+  server are told apart. It is an agent when its name, or its first
+  argument's, is one of those above, whole: `pip` is not `pi`, and
+  `claude-monitor` is not `claude`. When the program is a runtime or a
+  launcher (`node`, `bun`, `deno`, `python`, `npx`, `bunx`, `pnpm`,
+  `uvx` and the like, and `sudo`), the script or package it runs counts,
+  so `node /usr/lib/node_modules/@anthropic-ai/claude-code/cli.js` and
+  `npx @openai/codex` are agents.
+- It is read after Enter in the terminal and after the command bar sends
+  a command, about 250 ms and 1.5 s later, and after Ctrl+C, Ctrl+D and
+  Ctrl+Z, which end or stop an agent without an Enter. While a tab shows
+  an agent, it is also read every 10 seconds, so that the logo goes when
+  the agent ends by itself. Nothing is read otherwise, and a tab never
+  has more than one read in flight.
+- Not seen: an agent inside `tmux` or `screen`, or in an `ssh` to another
+  host; servers without `/proc` (macOS, BSD); hosts whose exec channel is
+  off (`noMonitor`). An agent run with `sudo` is seen, unless `/proc` is
+  mounted with `hidepid`.
+- Options › Terminal › "Show the coding agent running in each tab", on by
+  default, turns it off: no logo, and no reads for it (the reads for the
+  file panel still happen while it follows the terminal).
+
+The logos are from [LobeHub Icons](https://github.com/lobehub/lobe-icons)
+(MIT license, credited in the third-party licenses). They are their
+owners' trademarks, shown only to name the program that is running.
 
 ## Connections page
 

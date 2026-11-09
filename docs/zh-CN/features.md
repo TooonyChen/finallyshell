@@ -7,6 +7,7 @@
 - [窗口布局](#窗口布局)
 - [会话和标签](#会话和标签)
   - [底部面板单独成标签](#底部面板单独成标签)
+  - [标签上的编程智能体](#标签上的编程智能体)
 - [“连接”页](#连接页)
 - [新标签页和快速连接](#新标签页和快速连接)
 - [连接管理器](#连接管理器)
@@ -93,6 +94,40 @@
 - 面板行不是会话：“会话 (N)”的数目和退出时的询问都不算它。
 - 终端的操作在面板行里不起作用：全屏、查找、命令输入框。
 - 新标签页没有这个按钮。连接失败或已断开的会话也能打开面板行，各页显示会话的状态。
+
+### 标签上的编程智能体
+
+会话的 shell 里运行编程智能体时，会话那一行在名称后面、同一行上显示智能体的图标，连到同一台服务器、各自运行智能体的几个标签就分得清了。图标的提示文字是智能体的名称（“Claude Code”）。图标是单色的，用这一行文字的颜色，和其他图标一样。名称太长时先截断名称，图标留着。名称本身不变：重命名过的标签显示自己的名称和图标，传输、在列表里打字查找、编辑器的标签都只用名称。面板行不显示图标，它的会话那一行显示。
+
+| 智能体 | 它的程序 |
+|---|---|
+| Claude Code | `claude`、`@anthropic-ai/claude-code` |
+| Codex | `codex`、`@openai/codex` |
+| Gemini CLI | `gemini`、`@google/gemini-cli` |
+| pi | `pi`、`@mariozechner/pi-coding-agent` |
+| opencode | `opencode`、`opencode-ai` |
+| Amp | `amp`、`@sourcegraph/amp` |
+| Cursor CLI | `cursor-agent` |
+| GitHub Copilot CLI | `copilot`、`@github/copilot` |
+| Qwen Code | `qwen`、`@qwen-code/qwen-code` |
+| Goose | `goose` |
+| Kimi CLI | `kimi` |
+| Kiro CLI | `kiro-cli` |
+| Aider | `aider`、`aider-chat` |
+| Crush | `crush` |
+| Droid (Factory) | `droid` |
+| Auggie | `auggie`、`@augmentcode/auggie` |
+
+Aider、Crush、Droid 和 Auggie 在应用用的图标集里没有图标，显示一个通用的机器人。
+
+怎么判断：
+
+- 看的是 shell 所在终端的前台程序，和 shell 的目录一起（见[跟随终端目录](#跟随终端目录)），通过会话自己连接的 exec 通道读服务器的 `/proc`，所以连到同一台服务器的两个标签分得开。它的名称，或者它第一个参数的名称，整个等于上表中的一个，就是那个智能体：`pip` 不是 `pi`，`claude-monitor` 也不是 `claude`。程序是运行时或启动器（`node`、`bun`、`deno`、`python`、`npx`、`bunx`、`pnpm`、`uvx` 等，以及 `sudo`）时，看它运行的脚本或包，所以 `node /usr/lib/node_modules/@anthropic-ai/claude-code/cli.js` 和 `npx @openai/codex` 都算。
+- 在终端里按回车、命令输入框发送命令后读，大约 250 毫秒和 1.5 秒后各一次；按 Ctrl+C、Ctrl+D、Ctrl+Z 后也读，这几个键不用回车就能结束或暂停智能体。标签显示着智能体时，还每 10 秒读一次，智能体自己退出时图标就会消失。其他时候不读，一个标签同时最多只有一次读取。
+- 看不到：`tmux` 或 `screen` 里的智能体，`ssh` 到另一台主机后运行的智能体；没有 `/proc` 的服务器（macOS、BSD）；关了 exec 通道的主机（`noMonitor`）。用 `sudo` 运行的智能体看得到，除非 `/proc` 挂载时用了 `hidepid`。
+- 选项 › 终端 ›“在标签上显示其中运行的编程智能体”默认打开，关掉后不显示图标，也不为此读取（文件面板跟随终端时，它的读取照旧）。
+
+图标来自 [LobeHub Icons](https://github.com/lobehub/lobe-icons)（MIT 许可证，列在第三方许可证里）。这些图标是其所有者的商标，只用来指明正在运行的程序。
 
 ## “连接”页
 

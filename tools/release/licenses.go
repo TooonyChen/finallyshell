@@ -37,6 +37,10 @@ var licenseChoices = map[string]struct{ note, file string }{
 // repository and embedded in the app.
 var repoNotices = []struct{ title, path string }{
 	{"Lucide icons (https://lucide.dev)", "internal/icons/svg/LICENSE"},
+	// The coding agents' logos a session tab shows (internal/icons/agents),
+	// from @lobehub/icons-static-svg 1.102.0. The logos are their owners'
+	// trademarks, shown only to name the program that is running.
+	{"LobeHub Icons (https://github.com/lobehub/lobe-icons)", "internal/icons/agents/LICENSE"},
 }
 
 // Module is a Go module the app links.

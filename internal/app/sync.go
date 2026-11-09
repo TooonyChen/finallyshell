@@ -422,6 +422,7 @@ func (a *App) applyPayload(p *cloudsync.Payload) {
 			a.plat.SetAppearance(a.settings.Appearance.Normal())
 		}
 		a.applyTerminalSettings()
+		a.applyAgentIcons()
 	}
 }
 

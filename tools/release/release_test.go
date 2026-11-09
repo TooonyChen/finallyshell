@@ -374,6 +374,8 @@ func TestThirdPartyLicenses(t *testing.T) {
 		"under the FreeType License",
 		"The FreeType Project LICENSE",
 		"Lucide icons",
+		"LobeHub Icons",
+		"Copyright (c) 2023 LobeHub",
 		"VS Code icon theme material-icon-theme",
 		"VS Code icon theme seti",
 	} {

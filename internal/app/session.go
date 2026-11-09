@@ -151,9 +151,7 @@ func (a *App) connect(s *Session, secret string) {
 		topts.Conn = termenc.Wrap(shell, enc)
 		keys := keySequences(bs, del, func() *terminal.Terminal { return s.term })
 		topts.OnKey = func(mods ui.Modifiers, key ui.Key) bool {
-			if key == ui.KeyEnter {
-				s.shellCommandSent() // for the file panel to follow a cd
-			}
+			s.shellKey(mods, key) // for the file panel to follow a cd, and the tab its agent
 			return keys != nil && keys(mods, key)
 		}
 		topts.OnExit = func(int) {

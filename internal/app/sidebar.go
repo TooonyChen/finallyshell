@@ -278,7 +278,7 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		if s.status != statusConnected {
 			sub = s.statusText()
 		}
-		name := func() { rowName(c, s.label(), active) }
+		name := func() { a.sessionName(c, s, active) }
 		if renaming {
 			name = func() { a.renameField(c, active) }
 		}
@@ -309,11 +309,12 @@ func rowLines(c *ui.Context, name func(), sub string, active, hovered bool) bool
 }
 
 // rowName is the name line of a session row.
-func rowName(c *ui.Context, name string, active bool) {
+func rowName(c *ui.Context, name string, active bool) ui.Element {
 	t := ui.Text(c, name).SingleLine()
 	if active {
 		t.Bold()
 	}
+	return t
 }
 
 func rowSubColor(active bool) ui.Color {

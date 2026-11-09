@@ -138,6 +138,7 @@ Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, B
 
 ### And also
 
+- Running Claude Code, Codex, Gemini CLI or another coding agent? Its logo shows on the session tab while it runs, so tabs to the same server are easy to tell apart.
 - English and Simplified Chinese, following the system language or chosen in Options.
 - Light and dark appearance, following the system or chosen in Options.
 - Every shortcut can be changed. Keys the shell needs, such as <kbd>Ctrl</kbd>+<kbd>C</kbd> or <kbd>Ctrl</kbd>+<kbd>R</kbd>, are refused with an explanation.

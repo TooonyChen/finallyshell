@@ -281,10 +281,10 @@ internal/
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
   termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
   sshtest/           in-process SSH server for tests: password login, an empty shell, port forwarding; StartSFTP also serves SFTP (the local file system)
-  monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen; netstat.go is the Network tab's sockets (ss, or /proc/net and /proc/<pid>/fd), their rates and rows; trace.go is trace route over an exec channel (NextTrace's RAW output, traceroute, tracepath)
+  monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen; netstat.go is the Network tab's sockets (ss, or /proc/net and /proc/<pid>/fd), their rates and rows; trace.go is trace route over an exec channel (NextTrace's RAW output, traceroute, tracepath); shelldir.go reads the shell of a connection from /proc: its folder and the program in its foreground; agents.go tells the coding agent a program is
   geo/               where IP addresses are: ip2region's data through its Go binding (xdb.go), downloading it from GitHub or jsDelivr against its checksum (download.go), the online lookups on ip-api.com and ip.sb (online.go) and their cache (cache.go); geotest/ makes small .xdb files for tests
   remotefs/          SFTP listing, upload, download (with progress and cancel), rename, mkdir, create and delete (ops.go); textfile.go is the editor's reading (detecting binary files) and safe saving; archive.go is archive transfers: packing and safely unpacking tar.gz streams, and running tar over an exec channel
-  icons/             embedded SVG icons (Lucide, ISC license)
+  icons/             embedded SVG icons (Lucide, ISC license); agents/ has the coding agents' logos (LobeHub Icons, MIT license)
   fileicons/         VS Code file icon themes: reading VSIX files and extension folders, finding icons by name, font conversion, installing and finding installed themes; bundled/ has the built-in Material and Seti, languages_gen.go is VS Code's language table, internal/gen generates them
   widgets/           small reusable widgets: icon buttons, usage bars, line charts, form rows, side navigation with pages (nav.go)
   app/               UI and state
@@ -293,6 +293,7 @@ internal/
     sidebar.go       left side: monitor panel, vertical session list
     conntree.go      the left panel's Connections page: the switch between its pages, the connection manager's tree in one column, the folders kept open
     paneltab.go      panel rows: a session's bottom panel in a row of the list of its own, sharing the session's connection (connSession)
+    agenticon.go     the logo of the coding agent running in a session's shell, on its row: the reads the shell's follower (shelldir.go) does for it, the Session tabs option
     netifaces.go     the network graph's interface menu: its label, choosing interfaces and keeping the choice per host
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
     terminal.go      terminal area

@@ -110,6 +110,7 @@ func (a *App) terminalDefaultsPage(c *ui.Context) {
 	a.lookFooter(c, locales.KeySequencesNote(), func() {
 		a.settings.TermEncoding, a.settings.TermBackspace, a.settings.TermDelete = "", "", ""
 	}, defaults)
+	a.agentIconsOption(c)
 }
 
 // eraseChar is the character Backspace sends with bs, which the server's

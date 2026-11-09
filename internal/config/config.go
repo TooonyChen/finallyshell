@@ -169,6 +169,10 @@ type Settings struct {
 	// when the shell's working directory changes; by default the panel
 	// goes to it (the toggle in the panel's toolbar).
 	NoFollowTerminalDir bool `json:"noFollowTerminalDir,omitempty"`
+	// NoAgentIcons hides the logo of the coding agent running in a
+	// session's shell, which its tab shows by default, and leaves out the
+	// reads of the server that tell it (Options › Terminal).
+	NoAgentIcons bool `json:"noAgentIcons,omitempty"`
 
 	// Sync is the Sync page of the options: where connections and
 	// settings are synced, if anywhere (sync.go).

@@ -151,10 +151,10 @@ internal/
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
   termenc/           终端的连接在服务器的编码（GBK、Big5……）和终端读的 UTF-8 之间转换
   sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发，StartSFTP 还提供 SFTP（本机文件系统）
-  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计；netstat.go 是网络页的 socket（ss，或 /proc/net 和 /proc/<pid>/fd）、速度和行；trace.go 是通过 exec 通道的路由追踪（NextTrace 的 RAW 输出、traceroute、tracepath）
+  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计；netstat.go 是网络页的 socket（ss，或 /proc/net 和 /proc/<pid>/fd）、速度和行；trace.go 是通过 exec 通道的路由追踪（NextTrace 的 RAW 输出、traceroute、tracepath）；shelldir.go 从 /proc 读连接上的 shell：它的目录和前台程序；agents.go 判断程序是哪个编程智能体
   geo/               IP 归属地：通过官方 Go 绑定读取 ip2region 数据（xdb.go），从 GitHub 或 jsDelivr 按校验和下载数据（download.go），ip-api.com 和 ip.sb 的在线查询（online.go）及其缓存（cache.go）；geotest/ 为测试生成小的 .xdb 文件
   remotefs/          SFTP 列目录、上传、下载（带进度和取消），重命名、新建、删除（ops.go）；textfile.go 是编辑器的读取（认出二进制文件）和安全保存；archive.go 是打包传输：打包和安全解包 tar.gz 数据流，在 exec 通道上运行 tar
-  icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
+  icons/             内嵌的 SVG 图标（Lucide，ISC 协议）；agents/ 是编程智能体的图标（LobeHub Icons，MIT 协议）
   fileicons/         VS Code 文件图标主题：读 VSIX 和扩展目录、按名字找图标、字体转换、安装和查找已装的主题；bundled/ 是内置的 Material 和 Seti，languages_gen.go 是 VS Code 的语言表，internal/gen 生成它们
   widgets/           可复用的小控件：图标按钮、用量条、折线图、表单行、左侧导航加页面（nav.go）
   app/               界面和状态
@@ -163,6 +163,7 @@ internal/
     sidebar.go       左侧：监控面板、竖向会话列表
     conntree.go      左侧面板的“连接”页：两页之间的切换、连接管理器的树（只有一列）、记住展开的文件夹
     paneltab.go      面板行：会话的底部面板单独成列表里的一行，共用会话的连接（connSession）
+    agenticon.go     会话行上显示 shell 里运行的编程智能体的图标：shell 跟随（shelldir.go）为它做的读取，“会话标签”选项
     netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
     terminal.go      终端区域
