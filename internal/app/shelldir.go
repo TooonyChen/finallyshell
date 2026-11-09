@@ -64,9 +64,15 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 	w.on.Store(!a.settings.NoAgentIcons)
 	s.shell = shellDirState{wake: wake, agents: w}
 	delays, readServer, poll := shellDirReads, readShellState, agentPoll // as tests set them now
+	// sent is the agent the follower last sent the UI thread, which the
+	// tab shows once it has taken it, and sentTurn the setting's turn
+	// then (agentWatch.turns): only the goroutine uses them.
+	var sent *monitor.Agent
+	sentTurn := w.turns.Load()
 	// read reads the directory, when dir, and the foreground program,
 	// when the tabs show agents, and reports whether that is one.
 	read := func(dir, baseline bool) (agent bool) {
+		turn := w.turns.Load() // before on: a turn read is never newer
 		agents := probe && w.on.Load()
 		d := ""
 		if dir {
@@ -87,9 +93,14 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 			ag = sh.Agent()
 		}
 		newDir := dir && d != ""
-		newAgent := agents && ag != w.shown.Load() // only a change redraws
+		// Only a change redraws: one from what was sent, though the UI
+		// thread may not have taken it yet, or since the setting changed.
+		newAgent := agents && (ag != sent || turn != sentTurn)
 		if ctx.Err() != nil || !newDir && !newAgent {
 			return ag != nil
+		}
+		if newAgent {
+			sent, sentTurn = ag, turn
 		}
 		a.post(func() {
 			if ctx.Err() != nil || s.shell.wake != wake {

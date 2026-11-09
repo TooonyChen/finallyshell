@@ -28,9 +28,11 @@ type agentWatch struct {
 	// on is whether the tabs show agents (the setting): the follower
 	// reads the program only then.
 	on atomic.Bool
-	// shown is the agent the tab shows, for the follower to send only
-	// what changed.
-	shown atomic.Pointer[monitor.Agent]
+	// turns counts the changes of on. The follower sends a read only
+	// when it differs from the last it sent, which the UI thread may not
+	// have taken yet; after a change of the setting, which clears what
+	// the tab shows, it sends the next read whatever it is.
+	turns atomic.Int64
 	// wake asks the follower to read the program, as after Ctrl+C.
 	wake chan struct{}
 }
@@ -64,9 +66,6 @@ func (a *App) shellAgentRead(s *Session, ag *monitor.Agent) {
 		ag = nil // turned off since the read
 	}
 	s.shell.agent = ag
-	if w := s.shell.agents; w != nil {
-		w.shown.Store(ag)
-	}
 }
 
 // shownAgent is the agent s's tab shows: nil while it shows none.
@@ -87,10 +86,10 @@ func (a *App) applyAgentIcons() {
 		if w == nil || w.on.Load() == on {
 			continue
 		}
+		w.turns.Add(1) // before on, which the follower reads after it
 		w.on.Store(on)
 		if !on {
 			s.shell.agent = nil
-			w.shown.Store(nil)
 		}
 		w.poke()
 	}

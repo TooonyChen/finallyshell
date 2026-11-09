@@ -104,6 +104,34 @@ func TestAgentIcon(t *testing.T) {
 	}
 }
 
+// A read that the UI thread has not taken yet doesn't hide the next one:
+// an agent read, then gone at the next read before the tab showed it,
+// leaves no logo once the UI thread takes both.
+func TestAgentIconPendingRead(t *testing.T) {
+	_, p, s, tt, fd := agentServer(t)
+	n := fd.count()
+	fd.run("claude")
+	tt.Key(0, ui.KeyEnter) // reads 10 ms and 40 ms later; nothing posted runs meanwhile
+	waitReads := func(n int) {
+		t.Helper()
+		deadline := time.Now().Add(20 * time.Second)
+		for fd.count() < n {
+			if time.Now().After(deadline) {
+				t.Fatalf("%d reads, want %d", fd.count(), n)
+			}
+			time.Sleep(time.Millisecond)
+		}
+	}
+	waitReads(n + 1) // read 1: claude
+	fd.run()
+	waitReads(n + 2) // read 2: none
+	time.Sleep(20 * time.Millisecond)
+	settle(p, 200*time.Millisecond) // the UI thread takes both
+	if got := agentShown(tt, s); got != "" {
+		t.Errorf("the tab shows %q after the agent ended", got)
+	}
+}
+
 // Turned off in Options › Terminal, no tab shows an agent and none is
 // read: Ctrl+C reads nothing, nor does Enter in a shell that reports its
 // folder, and a tab showing one stops reading. Turned on, the tab reads
