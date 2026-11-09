@@ -2,6 +2,8 @@ package app
 
 import (
 	"runtime"
+	"slices"
+	"strings"
 	"time"
 
 	"finallyshell/internal/config"
@@ -20,9 +22,9 @@ import (
 // (rightcolumn.go). Whether it shows and its sizes are kept with the pane
 // sizes (splits.go), this device's own.
 //
-// Send, or Cmd+Enter (Ctrl+Enter elsewhere) in the text, sends the text
-// selected, or all of it with none, as a quick command of those lines
-// is sent (sendQuick): line by line through sendLine, to the window's
+// Send, or Cmd+Enter (Ctrl+Enter elsewhere) in the text, sends the lines
+// selected, whole, or all of it with none, as a quick command of those
+// lines is sent (sendQuick): line by line through sendLine, to the window's
 // send target (sendtarget.go), with the toolbar's and the bar's question
 // before the first send to a new target. Its Options are a quick
 // command's Enter, here for every send, and emptying the editor of what
@@ -309,35 +311,80 @@ func cmdSelected(st *editor.State) bool {
 	return false
 }
 
-// cmdSendText is what Send sends, and what Save as command saves: the
-// text selected, the selections joined by newlines, or all of it.
-func cmdSendText(st *editor.State) string {
-	if cmdSelected(st) {
-		return st.SelectedText()
+// cmdLines are lines first to last of the editor's text, from 0.
+type cmdLines struct{ first, last int }
+
+// cmdSelectedLines are the lines the selections touch, whole, so that a
+// sloppy drag sends no half a command: in order, the runs of selections
+// on the same or next lines joined. A selection that ends at the start
+// of a line, as a drag to the start of the next line does, leaves that
+// line out. nil without a selection.
+func cmdSelectedLines(snap editor.Snapshot, sels []editor.Selection) []cmdLines {
+	sels = slices.DeleteFunc(slices.Clone(sels), editor.Selection.Empty)
+	slices.SortFunc(sels, func(x, y editor.Selection) int { return x.Start() - y.Start() })
+	var runs []cmdLines
+	for _, sel := range sels {
+		first, last := snap.LineOf(sel.Start()), snap.LineOf(sel.End())
+		if last > first && snap.LineStart(last) == sel.End() {
+			last--
+		}
+		if n := len(runs); n > 0 && first <= runs[n-1].last+1 {
+			runs[n-1].last = max(runs[n-1].last, last)
+			continue
+		}
+		runs = append(runs, cmdLines{first, last})
 	}
-	return st.Buffer.String()
+	return runs
 }
 
-// sendCmdEditor sends the text, as a quick command of its lines: to s,
-// or to each session of the send target. With Clear after sending, what
-// was sent goes from the editor once sent, unless it was edited since.
+// cmdSendText is what Send sends, and what Save as command saves, of
+// snap: the lines selected, whole (cmdSelectedLines), the runs joined by
+// newlines, or all of it.
+func cmdSendText(snap editor.Snapshot, runs []cmdLines) string {
+	if len(runs) == 0 {
+		return snap.String()
+	}
+	parts := make([]string, len(runs))
+	for i, r := range runs {
+		parts[i] = snap.Slice(snap.LineStart(r.first), snap.LineEnd(r.last))
+	}
+	return strings.Join(parts, "\n")
+}
+
+// cmdClearLines are the edits that take the lines of runs out of snap,
+// each with its newline: the one after it, or before it for the last
+// line.
+func cmdClearLines(snap editor.Snapshot, runs []cmdLines) []editor.Edit {
+	edits := make([]editor.Edit, len(runs))
+	for i, r := range runs {
+		start, end := snap.LineStart(r.first), snap.LineEnd(r.last)
+		if r.last+1 < snap.LineCount() {
+			end = snap.LineStart(r.last + 1)
+		} else if r.first > 0 {
+			start = snap.LineEnd(r.first - 1)
+		}
+		edits[i] = editor.Edit{Start: start, End: end}
+	}
+	return edits
+}
+
+// sendCmdEditor sends the text, or the lines selected, as a quick
+// command of its lines: to s, or to each session of the send target.
+// With Clear after sending, the lines sent go from the editor once sent,
+// unless it was edited since; Cmd+Z brings them back.
 // The text keeps the keyboard, for the next lines; with Enter off, the
 // terminal of s's row takes it, to press Enter there.
 func (a *App) sendCmdEditor(c *ui.Context, s *Session) {
 	st := a.quickUI.box.code
-	lines := config.QuickCommandLines(cmdSendText(st))
+	buf := st.Buffer
+	snap := buf.Snapshot()
+	runs := cmdSelectedLines(snap, st.Selections())
+	lines := config.QuickCommandLines(cmdSendText(snap, runs))
 	if len(lines) == 0 {
 		return
 	}
 	enter := !a.settings.CommandEditorNoEnter
-	var sent []editor.Edit
-	for _, sel := range st.Selections() {
-		if !sel.Empty() {
-			sent = append(sent, editor.Edit{Start: sel.Start(), End: sel.End()})
-		}
-	}
-	buf := st.Buffer
-	version := buf.Version()
+	version := snap.Version()
 	send := func(t *Session) {
 		for i, line := range lines {
 			a.sendLine(t, line, enter || i < len(lines)-1)
@@ -345,10 +392,10 @@ func (a *App) sendCmdEditor(c *ui.Context, s *Session) {
 	}
 	a.sendToTargets(s, send, func() {
 		if a.settings.CommandEditorClear && buf.Version() == version {
-			if len(sent) == 0 {
+			if len(runs) == 0 {
 				buf.Set("")
 			} else {
-				buf.Edit(sent...)
+				buf.Edit(cmdClearLines(snap, runs)...)
 			}
 		}
 		if enter {
@@ -369,13 +416,15 @@ func (a *App) cmdKeysToTerminal() {
 }
 
 // cmdSaveAsCommand opens the quick command editor on a new command of
-// the text selected, or all of it, its Enter the editor's.
+// the lines selected, whole, or all of the text, its Enter the editor's.
 func (a *App) cmdSaveAsCommand() {
 	if a.windowOpen(WindowQuickCommand) {
 		a.plat.FocusWindow(WindowQuickCommand) // the one open, as New command
 		return
 	}
-	text := cmdSendText(a.quickUI.box.code)
+	st := a.quickUI.box.code
+	snap := st.Buffer.Snapshot()
+	text := cmdSendText(snap, cmdSelectedLines(snap, st.Selections()))
 	a.newQuickCommand()
 	if ed := a.quickUI.ed; ed != nil {
 		ed.text, ed.enter = text, !a.settings.CommandEditorNoEnter

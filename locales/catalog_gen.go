@@ -8774,6 +8774,16 @@ func (msgs Messages) QuickSearch() string {
 	return Catalog.Format(msgs.locale, "quickSearch", nil)
 }
 
+// QuickSearchShort says "Search"
+// in the language the app shows.
+func QuickSearchShort() string { return In(i18n.Locale()).QuickSearchShort() }
+
+// QuickSearchShort says "Search"
+// in the language of msgs.
+func (msgs Messages) QuickSearchShort() string {
+	return Catalog.Format(msgs.locale, "quickSearchShort", nil)
+}
+
 // QuickLines says "{count, plural, one {# line} other {# lines}}"
 // in the language the app shows.
 func QuickLines(count int) string { return In(i18n.Locale()).QuickLines(count) }

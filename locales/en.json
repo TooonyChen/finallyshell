@@ -1425,6 +1425,7 @@
   "quickNewGroup": "New group",
   "quickGroupName": "Group name",
   "quickSearch": "Search commands",
+  "quickSearchShort": "Search",
   "quickLines": "{count, plural, one {# line} other {# lines}}",
   "@quickLines": {
     "placeholders": {

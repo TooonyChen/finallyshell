@@ -312,6 +312,142 @@ func TestCmdEditorOptions(t *testing.T) {
 	}
 }
 
+// selectText selects bytes from to to of the editor's text.
+func selectText(a *App, tt *ui.Tester, from, to int) {
+	a.quickUI.box.code.Select(from, to)
+	tt.Frame()
+}
+
+// A selection sends, saves and clears the lines it touches, whole: one
+// that ends at the start of a line leaves that line out.
+func TestCmdEditorWholeLines(t *testing.T) {
+	a, _, s, conn, tt := barTerm(t)
+	showCmdEditor(t, a, tt)
+	const text = "cd /srv/app\ngit pull\ndocker compose ps"
+	setCmdText(a, tt, text)
+
+	// From "/srv" to "git p": both lines, whole.
+	selectText(a, tt, strings.Index(text, "/srv"), strings.Index(text, "ull"))
+	clickSend(t, tt, locales.CmdEditorSendSelection())
+	if got := conn.sent(t, s.term); got != "cd /srv/app\rgit pull\r" {
+		t.Errorf("a partial selection sent %q", got)
+	}
+	// Dragged backwards, within a line.
+	selectText(a, tt, strings.Index(text, "ps"), strings.Index(text, "compose"))
+	clickSend(t, tt, locales.CmdEditorSendSelection())
+	if got := conn.sent(t, s.term); got != "docker compose ps\r" {
+		t.Errorf("a selection in a line sent %q", got)
+	}
+	// From the start of line 2 to the start of line 3: line 2 alone.
+	selectText(a, tt, strings.Index(text, "git"), strings.Index(text, "docker"))
+	clickSend(t, tt, locales.CmdEditorSendSelection())
+	if got := conn.sent(t, s.term); got != "git pull\r" {
+		t.Errorf("a selection ending at a line's start sent %q", got)
+	}
+	// Clear after sending takes the whole lines out, and Cmd+Z puts them
+	// back.
+	a.settings.CommandEditorClear = true
+	selectText(a, tt, strings.Index(text, "pull"), strings.Index(text, "compose"))
+	clickSend(t, tt, locales.CmdEditorSendSelection())
+	if got := conn.sent(t, s.term); got != "git pull\rdocker compose ps\r" {
+		t.Errorf("sent %q", got)
+	}
+	if got := cmdText(a); got != "cd /srv/app" {
+		t.Errorf("Clear after sending left %q", got)
+	}
+	tt.Key(ui.Cmd, ui.KeyZ)
+	if got := cmdText(a); got != text {
+		t.Errorf("undo gave %q", got)
+	}
+
+	// Save as command takes the same lines.
+	selectText(a, tt, strings.Index(text, "pull"), strings.Index(text, "docker")+3)
+	tt.Click(locales.CmdEditorSaveAs())
+	if ed := a.quickUI.ed; ed == nil || ed.text != "git pull\ndocker compose ps" {
+		t.Errorf("Save as command holds %+v", ed)
+	}
+}
+
+// cmdSelectedLines and cmdClearLines: the lines each selection touches,
+// joined where they meet, and the edits that take them out.
+func TestCmdSelectedLines(t *testing.T) {
+	const text = "aa\nbb\ncc\ndd\n" // five lines, the last empty
+	sel := func(a, h int) editor.Selection { return editor.Selection{Anchor: a, Head: h} }
+	for _, tc := range []struct {
+		name  string
+		sels  []editor.Selection
+		send  string
+		clear string
+	}{
+		{"none", []editor.Selection{sel(4, 4)}, text, ""},
+		{"in a line", []editor.Selection{sel(4, 5)}, "bb", "aa\ncc\ndd\n"},
+		{"across lines", []editor.Selection{sel(1, 7)}, "aa\nbb\ncc", "dd\n"},
+		{"ends at a line start", []editor.Selection{sel(3, 9)}, "bb\ncc", "aa\ndd\n"},
+		{"backwards to a line start", []editor.Selection{sel(9, 3)}, "bb\ncc", "aa\ndd\n"},
+		{"just a newline", []editor.Selection{sel(2, 3)}, "aa", "bb\ncc\ndd\n"},
+		{"the whole text", []editor.Selection{sel(0, len(text))}, "aa\nbb\ncc\ndd", ""},
+		{"the last line", []editor.Selection{sel(10, 11)}, "dd", "aa\nbb\ncc\n"},
+		{"two on a line", []editor.Selection{sel(3, 4), sel(4, 5)}, "bb", "aa\ncc\ndd\n"},
+		{"next lines joined", []editor.Selection{sel(6, 7), sel(3, 4)}, "bb\ncc", "aa\ndd\n"},
+		{"apart", []editor.Selection{sel(0, 1), sel(9, 10)}, "aa\ndd", "bb\ncc\n"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			buf := editor.NewBuffer(text)
+			snap := buf.Snapshot()
+			runs := cmdSelectedLines(snap, tc.sels)
+			if got := cmdSendText(snap, runs); got != tc.send {
+				t.Errorf("sends %q, want %q", got, tc.send)
+			}
+			if len(runs) == 0 {
+				return
+			}
+			buf.Edit(cmdClearLines(snap, runs)...)
+			if got := buf.String(); got != tc.clear {
+				t.Errorf("clear leaves %q, want %q", got, tc.clear)
+			}
+		})
+	}
+}
+
+// Beside the editor the search has the short placeholder, which fits
+// it, in both languages; without the editor, the long one.
+func TestCmdEditorSearchPlaceholder(t *testing.T) {
+	for _, lang := range []string{"en", "zh-Hans"} {
+		t.Run(lang, func(t *testing.T) {
+			a, p, _, _, tt := barTerm(t)
+			p.SetLocale(lang)
+			tt.SetLocale(lang)
+			demoQuick(a, lang != "en")
+			a.bottomTab = tabCommands
+			tt.Frame()
+			search := func() ui.AccessInfo {
+				t.Helper()
+				f, ok := tt.AccessByRole(ui.RoleTextField, locales.QuickSearch())
+				if !ok {
+					t.Fatalf("no search; texts %q", tt.Texts())
+				}
+				return f
+			}
+			if f := search(); f.Placeholder != locales.QuickSearch() {
+				t.Errorf("placeholder %q without the editor", f.Placeholder)
+			}
+			showCmdEditor(t, a, tt)
+			f := search()
+			if f.Placeholder != locales.QuickSearchShort() {
+				t.Errorf("placeholder %q beside the editor", f.Placeholder)
+			}
+			// Its text in the field's room, at the default sizes.
+			var w float32
+			ui.NewTester(func(c *ui.Context) {
+				w, _ = c.MeasureText(0, ui.Span{Text: f.Placeholder})
+			}, 100, 100).Frame()
+			if w == 0 || w > f.Bounds.W {
+				t.Errorf("placeholder %q is %v wide, the field %v", f.Placeholder, w, f.Bounds.W)
+			}
+		})
+	}
+}
+
 // With All sessions as the target, chosen with the editor's Send to,
 // Send asks first, then sends each line to each connected session once,
 // the panel row not doubling its session; the toolbar's Send to gives
@@ -573,6 +709,11 @@ func TestCmdEditorShots(t *testing.T) {
 			selectLines(a, tt, 2, 3)
 			short := strings.TrimSuffix(lang, "-Hans")
 			saveShot(t, tt, "cmdeditor-selection-"+short+".png")
+			// Part of lines 3 and 4, which sends them whole.
+			text := cmdDemo[lang]
+			selectText(a, tt, strings.Index(text, "up -d"), strings.Index(text, "compose ps")+3)
+			saveShot(t, tt, "cmdeditor-partial-"+short+".png")
+			selectLines(a, tt, 2, 3)
 
 			openCmdOptions(t, tt)
 			tt.Frame()

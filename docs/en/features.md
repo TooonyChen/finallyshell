@@ -1821,6 +1821,8 @@ lines in and send them, without saving them as a quick command first.
   whole width, the divider setting the buttons' share of the height (40%
   by default). Whether it shows and both sizes are saved with the other
   pane sizes (see [Layout and split dividers](#layout-and-split-dividers)).
+  While it shows, the toolbar's search box says just "Search", which fits
+  the room left to it.
 - At the top: "Command editor", "Save as command" and "Clear", which
   empties it (Cmd+Z, Ctrl+Z elsewhere, brings the text back). The text has
   line numbers and a monospaced font, and no highlighting: what is typed
@@ -1828,11 +1830,14 @@ lines in and send them, without saving them as a quick command first.
   keyboard back to the terminal, as in the command bar.
 - At the bottom: "Options", "Send to" and "Send".
   - "Send", or Cmd+Enter (Ctrl+Enter on Linux and Windows) in the text,
-    sends the text selected, or all of it with none selected; the
-    button says "Send selection" while there is a selection. The text is
-    sent as a quick command of those lines is: line by line, each
-    through the command bar's path (the session's encoding, the folder
-    follower, the host's history), each followed by a carriage return.
+    sends the lines the selection touches, each whole, or all of the
+    text with none selected, so that a sloppy drag sends no half a
+    command. A selection that ends at the start of a line, as a drag to
+    the start of the next line does, leaves that line out. The button
+    says "Send selection" while there is a selection. The lines are sent
+    as a quick command of them is: line by line, each through the
+    command bar's path (the session's encoding, the folder follower, the
+    host's history), each followed by a carriage return.
     Lines are sent as they are, control characters included, as a quick
     command's are. Empty lines at the end are left out.
   - "Send to" is the same target as the toolbar's and the command bar's
@@ -1841,15 +1846,15 @@ lines in and send them, without saving them as a quick command first.
   - "Options" has "Press Enter after each line" (on by default; off, the
     last line waits at the prompt, and the terminal takes the keyboard
     for you to press Enter there) and "Clear after sending" (off by
-    default), which takes what was sent out of the editor: the selection,
-    or all of it. Otherwise the text stays, and keeps the keyboard. Both
-    are saved in `settings.json` (`commandEditorNoEnter`,
-    `commandEditorClear`).
+    default), which takes what was sent out of the editor: the lines
+    selected, whole, or all of it. Otherwise the text stays, and keeps
+    the keyboard. Both are saved in `settings.json`
+    (`commandEditorNoEnter`, `commandEditorClear`).
   - "Send" is disabled, and Cmd+Enter sends nothing, while the editor is
     empty or no session of the target is connected, as the buttons are.
 - "Save as command" opens the quick command editor on a new command of
-  the text selected, or all of it, with the editor's "Press Enter after
-  each line".
+  the lines selected, whole as Send takes them, or all of the text, with
+  the editor's "Press Enter after each line".
 - The text is the same in every session and in a panel row's Commands
   tab, and is kept across restarts: it is saved in `commandeditor.txt` in
   the settings folder (see

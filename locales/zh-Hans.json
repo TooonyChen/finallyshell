@@ -865,6 +865,7 @@
   "quickNewGroup": "新建分组",
   "quickGroupName": "分组名称",
   "quickSearch": "搜索命令",
+  "quickSearchShort": "搜索",
   "quickLines": "{count, plural, other {# 行}}",
   "quickSend": "发送",
   "quickPutInBar": "放进命令输入框",

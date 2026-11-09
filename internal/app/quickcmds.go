@@ -394,10 +394,15 @@ func (a *App) quickToolbar(c *ui.Context, s *Session, live bool) {
 			widgets.Muted(c, locales.QuickOffline()).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 		}
 		ui.Row(c).Grow(1).Basis(searchMinWidth).MinWidth(0).Gap(8).Wrap().Justify(ui.End).AlignItems(ui.Center).Children(func() {
-			if !a.quickUI.box.shown {
+			// Beside the command editor the search has little room: its
+			// placeholder is the short one, which fits its least width.
+			placeholder := locales.QuickSearch()
+			if a.quickUI.box.shown {
+				placeholder = locales.QuickSearchShort()
+			} else {
 				a.quickTarget(c, "quick")
 			}
-			ui.SearchField(c, &a.quickUI.query).Placeholder(locales.QuickSearch()).Label(locales.QuickSearch()).Basis(220).Shrink(1).MinWidth(searchMinWidth)
+			ui.SearchField(c, &a.quickUI.query).Placeholder(placeholder).Label(locales.QuickSearch()).Basis(220).Shrink(1).MinWidth(searchMinWidth)
 		})
 	})
 }
