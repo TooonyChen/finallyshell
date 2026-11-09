@@ -2,6 +2,26 @@
 
 Each version's notes, newest first, in English and Simplified Chinese. A release's notes on GitHub and in the app's update window are its section here; see [Releasing](docs/en/development.md#releasing).
 
+## 0.3.0
+
+### English
+
+- New Commands tab in the bottom panel, like FinalShell's quick commands: keep the commands you use often as buttons, sorted into groups, and a click sends one to the current session. A command can have several lines, which run one after another; turn off "Press Enter after each line" to leave the last line at the prompt for you to check. "New command" opens the editor. Search by name or command, drag a button to reorder it or onto a group to move it there, and right-click it to edit, duplicate or delete it, or to put it in the command bar. The commands are the same for every host.
+- New Connections page in the bottom-left panel: the switch "Sessions (N) | Connections" at its top shows the connection manager's folders and connections in the main window, next to the terminal. Double-click a connection, or select it and press Enter, to open a session; search by name, address, user or notes; right-click or drag to edit, rename, move or delete, as in the connection manager. A dot after a name shows that it has a session open. Ctrl+Shift+E (Cmd+Shift+E on macOS) switches between the sessions and the connections.
+- A session tab shows the logo of the coding agent running in its shell, such as Claude Code, Codex or Gemini CLI, so several tabs to the same server are easy to tell apart; hover over the logo for the agent's name. It works on Linux servers, as it reads `/proc`, and doesn't see an agent inside `tmux` or `screen`. It is on by default; turn it off with "Show the coding agent running in each tab" in Options › Terminal.
+- The IP location data (ip2region, IPv4) downloads from jsDelivr when GitHub can't be reached, as often happens in mainland China. When both fail, the bar names each host and what it answered.
+- Trace Route with NextTrace shows each hop as it arrives, instead of all of them when the trace ends.
+- The dividers of the Processes and Network tabs keep their positions after a restart, as the window's other dividers do.
+
+### 简体中文
+
+- 底部面板新增“命令”页，相当于 FinalShell 的快捷命令：把常用的命令存成按钮，按分组整理，点一下就发给当前会话。命令可以有多行，逐行执行；关掉“每行发送后按回车”时，最后一行停在提示符后面，等你检查后自己按回车。“新建命令”打开编辑器。可以按名称或命令内容搜索，拖动按钮调整顺序，拖到分组上就移进那个分组；右键按钮可以编辑、复制、删除，或者放进命令输入框。所有主机共用同一份命令。
+- 左下面板新增“连接”页：顶部的切换按钮“会话 (N) | 连接”在主窗口里、终端旁边显示连接管理器的文件夹和连接。双击连接，或选中后按 Enter，打开会话；可以按名称、地址、用户名或备注搜索；右键菜单和拖动可以像在连接管理器里一样编辑、重命名、移动和删除。开着会话的连接名称后面有一个点。Ctrl+Shift+E（macOS 上是 Cmd+Shift+E）在会话和连接之间切换。
+- 会话标签上显示它的 shell 里正在运行的编程智能体的图标，例如 Claude Code、Codex、Gemini CLI，连到同一台服务器的几个标签一眼就能分清；鼠标悬停在图标上显示智能体的名称。它从 `/proc` 读取，所以支持 Linux 服务器，看不到 `tmux` 或 `screen` 里运行的智能体。默认打开，可以在“选项 › 终端”里关掉“在标签上显示其中运行的编程智能体”。
+- IP 归属地数据（ip2region，IPv4）在 GitHub 连不上时改从 jsDelivr 下载，中国大陆常常是这种情况。两处都失败时，提示条列出每个主机和它的回应。
+- 用 NextTrace 路由追踪时，每一跳随到随显示，不用等追踪结束才一起出来。
+- “进程”和“网络”页的分隔条位置在重启后保留，和窗口里其他分隔条一样。
+
 ## 0.2.2
 
 ### English
