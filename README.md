@@ -200,7 +200,7 @@ Thanks to:
 
 Finallyshell is source-available, not open source as the OSI defines it. You may use it under either of these licenses ([LICENSE](LICENSE) has the full text):
 
-- [PolyForm Noncommercial 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Noncommercial-1.0.0.md): any noncommercial use, including forking, changing and sharing it.
-- [PolyForm Internal Use 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Internal-Use-1.0.0.md): use inside your own company, changes included, without distributing it. Using it to manage servers at work falls under this one.
+- [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0): any noncommercial use, including forking, changing and sharing it.
+- [PolyForm Internal Use 1.0.0](https://polyformproject.org/licenses/internal-use/1.0.0): use inside your own company, changes included, without distributing it. Using it to manage servers at work falls under this one.
 
 Selling it, bundling it in a paid product or distributing changed versions for commercial purposes needs a separate commercial license: open an issue to get in touch.

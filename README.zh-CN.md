@@ -200,7 +200,7 @@ cd finallyshell && go tool mygo dev
 
 Finallyshell 公开源码，但不是 OSI 定义的开源软件。你可以在下面两个许可证里任选一个（全文见 [LICENSE](LICENSE)）：
 
-- [PolyForm Noncommercial 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Noncommercial-1.0.0.md)：任何非商业用途，包括 fork、修改和分享。
-- [PolyForm Internal Use 1.0.0](https://github.com/polyformproject/polyform-licenses/blob/master/PolyForm-Internal-Use-1.0.0.md)：你和你的公司内部使用，可以修改，但不能对外分发。在公司上班时用它连服务器属于这一种。
+- [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)：任何非商业用途，包括 fork、修改和分享。
+- [PolyForm Internal Use 1.0.0](https://polyformproject.org/licenses/internal-use/1.0.0)：你和你的公司内部使用，可以修改，但不能对外分发。在公司上班时用它连服务器属于这一种。
 
 出售本软件、把它放进收费产品、以商业目的分发修改版等，需要另外取得商业授权，请开一个 issue 联系。
