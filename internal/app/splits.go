@@ -62,6 +62,7 @@ func (a *App) restoreLayout() {
 	if s.TerminalPercent > 0 && s.TerminalPercent < 100 {
 		a.terminalPct = s.TerminalPercent
 	}
+	a.bottomHidden = s.BottomPanelHidden
 	// The Processes and Network tabs' sizes, which the sessions share.
 	if s.ProcListPercent > 0 && s.ProcListPercent < 100 {
 		a.processes.listPct = s.ProcListPercent
@@ -125,6 +126,7 @@ func (a *App) saveLayout() {
 	a.settings.SidebarWidth = a.sideWidth
 	a.settings.MonitorPercent = a.monitorPct
 	a.settings.TerminalPercent = a.terminalPct
+	a.settings.BottomPanelHidden = a.bottomHidden
 	a.settings.TreeWidth = a.treeWidth
 	a.settings.ProcListPercent = a.processes.listPct
 	a.settings.ProcFieldsPercent = a.processes.fieldsPct

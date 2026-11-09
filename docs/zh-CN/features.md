@@ -70,6 +70,8 @@
 - 右上：终端。
 - 右下：“文件”“传输”“隧道”“进程”“网络”“命令”六页，也可以在单独的标签中打开（见下面）。
 
+底部面板可以收起，只留下底部的一行标签，终端占满其余的高度。标签行右端、“在单独的标签中打开”左边的箭头按钮收起面板（向下箭头，“隐藏面板”），再点一次展开（向上箭头，“显示面板”）；标签行右键菜单的“隐藏面板”“显示面板”和快捷键“显示或隐藏底部面板”（macOS 上 Cmd+J，Windows 和 Linux 上 Ctrl+Shift+J）也一样。收起时点一个标签的名字，面板就在这一页展开，高度和收起前一样；打开面板某一页的操作也会展开它，比如点服务器监控的进程列表会打开“进程”页。是否收起保存在 `settings.json`，下次启动恢复。在单独的标签中打开的面板就是面板本身，不受影响；全屏时都只显示终端。
+
 ## 会话和标签
 
 窗口左下是竖向的会话列表，在顶部切换按钮的“会话 (N)”页。每个会话有一个状态点：绿色是已连接，黄色是连接中，红色是失败。列表可以滚动，会话可以拖动排序。会话的右键菜单有 “重新连接”“复制会话”“断开”“重命名”“关闭”。
@@ -810,7 +812,7 @@ shell 需要的键不让用，框里用红字说明原因：
 
 macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，插件的 `OptionAsAlt`）：开了之后 Option+B 发送 Esc b，而不是输入 ∫。同样对之后连接的会话生效。
 
-在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar` 和 `switchLeftPanel`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar`、`switchLeftPanel` 和 `toggleBottomPanel`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
 
 ### 终端 › 命令输入框
 
@@ -887,6 +889,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 | 切换到第 1–9 个标签 | Cmd+1…9 | Alt+1…9 |
 | 聚焦命令输入框（再按回到终端） | Cmd+Shift+L | Ctrl+Shift+L |
 | 切换会话/连接（左下面板的两页） | Cmd+Shift+E | Ctrl+Shift+E |
+| 显示或隐藏底部面板 | Cmd+J | Ctrl+Shift+J |
 
 说明：
 
@@ -896,11 +899,14 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 - Windows 上 terminal 插件默认还把 Ctrl+C（有选中时复制）和 Ctrl+V（剪贴板有内容时粘贴）绑成复制粘贴。Finallyshell 去掉了这两个，和 Linux 一样留给 shell（中断、原样输入下一个键）。复制粘贴用 Ctrl+Shift+C / Ctrl+Shift+V，或 Ctrl+Insert / Shift+Insert。
 - 聚焦命令输入框不用 Ctrl+Shift+K：Windows 上那是终端的清屏（和 Windows Terminal 一样）。FinalShell 单按 Ctrl 切换，会和 shell 用的每个 Ctrl 键冲突，所以没有照搬。关掉命令输入框后，这个键交给终端。
 - 切换会话/连接用 E，和 VS Code 打开侧栏文件树的“资源管理器”一样；没有终端绑定 Ctrl+Shift+E。macOS 上也加 Shift，因为 Cmd+E 在 Mac 应用里是“用所选内容查找”。Linux 上旧版 IBus 用 Ctrl+Shift+E 输入表情，会先于本程序拿走这个键；按了没反应的话，在“快捷键”页换一个键，或在 IBus 的首选项里改掉。
+- 显示或隐藏底部面板用 J，和 VS Code 一样。只按 Ctrl+J 在 shell 里是换行，所以 Windows 和 Linux 上也加 Shift。全屏时和在单独标签中打开的面板上，这个键不起作用。
 - 只带 Ctrl 的字母键（Ctrl+A……Ctrl+Z 等）都是 shell 的，在 Windows 和 Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
 
 ## 布局和分隔条
 
 拖动窗口各区域之间的分隔条调整大小（获得焦点后也可以用方向键），双击分隔条恢复默认大小。每个区域有最小尺寸，不会被拖到看不见。大小保存在 `finallyshell/settings.json`，下次启动恢复。“进程”和“网络”页的分隔条也一样，所有会话共用，在底部面板里和在单独标签里打开的面板中都是同一个位置。
+
+底部面板还可以收起，只留一行标签（见[窗口布局](#窗口布局)）；分隔条的位置会保留，展开后回到原处，是否收起和大小一起保存。
 
 ## 语言
 

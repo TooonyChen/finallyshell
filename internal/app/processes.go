@@ -136,7 +136,7 @@ func (t *procTab) title() string { return strconv.Itoa(t.pid) + "-" + t.name }
 
 // openProcesses shows the Processes tab of the selected row, as a click
 // on the side panel's process list does.
-func (a *App) openProcesses() { *a.shownBottomTab() = tabProcesses }
+func (a *App) openProcesses() { a.openBottomTab(tabProcesses) }
 
 // pollProcesses keeps s's list read while the tab shows it.
 func (a *App) pollProcesses(s *Session) {

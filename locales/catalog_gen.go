@@ -8572,6 +8572,36 @@ func (msgs Messages) BackToTerminal() string {
 	return Catalog.Format(msgs.locale, "backToTerminal", nil)
 }
 
+// HidePanel says "Hide panel"
+// in the language the app shows.
+func HidePanel() string { return In(i18n.Locale()).HidePanel() }
+
+// HidePanel says "Hide panel"
+// in the language of msgs.
+func (msgs Messages) HidePanel() string {
+	return Catalog.Format(msgs.locale, "hidePanel", nil)
+}
+
+// ShowPanel says "Show panel"
+// in the language the app shows.
+func ShowPanel() string { return In(i18n.Locale()).ShowPanel() }
+
+// ShowPanel says "Show panel"
+// in the language of msgs.
+func (msgs Messages) ShowPanel() string {
+	return Catalog.Format(msgs.locale, "showPanel", nil)
+}
+
+// ScToggleBottomPanel says "Show or hide the bottom panel"
+// in the language the app shows.
+func ScToggleBottomPanel() string { return In(i18n.Locale()).ScToggleBottomPanel() }
+
+// ScToggleBottomPanel says "Show or hide the bottom panel"
+// in the language of msgs.
+func (msgs Messages) ScToggleBottomPanel() string {
+	return Catalog.Format(msgs.locale, "scToggleBottomPanel", nil)
+}
+
 // PanelTabLabel says "{session} | {tab}"
 // in the language the app shows.
 func PanelTabLabel(session string, tab string) string {

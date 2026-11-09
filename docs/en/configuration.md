@@ -194,6 +194,7 @@ default.
 | `monitorHidden` | The parts of the server monitor hidden from its context menu, for every host: any of `uptime`, `cpu`, `processes`, `network`, `latency`, `disks`, such as `["processes", "disks"]`. A part added in a later version shows until hidden. | Every part shows. |
 | `procListPercent`, `procFieldsPercent` | In the Processes tab, the process list's share above the details, and the details' fields' share beside the environment variables, in percent. | The app's defaults. |
 | `netListPercent` | In the Network tab, the table's share above the connections and trace tabs, in percent. | The app's defaults. |
+| `bottomPanelHidden` | `true` collapses the bottom panel under the terminal to its row of tabs. | Open. |
 | `leftPanelPage` | `connections` shows the Connections page in the bottom-left panel. | The session tabs. |
 | `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
@@ -230,7 +231,8 @@ Each settings key is either synced or kept on each computer; the lists are
 `syncedSettings` and `localSettings` in `internal/config/sync.go`. Kept
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `procListPercent`, `procFieldsPercent`, `netListPercent`,
-`monitorHidden`, `termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
+`monitorHidden`, `bottomPanelHidden`,
+`termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are
 where this computer's window was left, as the pane sizes are), and a

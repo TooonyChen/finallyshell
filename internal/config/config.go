@@ -53,6 +53,10 @@ type Settings struct {
 	ProcFieldsPercent float32 `json:"procFieldsPercent,omitempty"`
 	NetListPercent    float32 `json:"netListPercent,omitempty"`
 
+	// BottomPanelHidden collapses the bottom panel under the terminal to
+	// its row of tabs, as the user left it.
+	BottomPanelHidden bool `json:"bottomPanelHidden,omitempty"`
+
 	// The General page of the options. Each is named so that false, as a
 	// file without it reads, is the default.
 	//

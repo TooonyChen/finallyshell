@@ -155,6 +155,9 @@ type App struct {
 	termTheme   *terminal.Theme
 	look        appearance // the rest of the terminal's look
 
+	// bottomHidden collapses the bottom panel to its tabs (panelhide.go).
+	bottomHidden bool
+
 	// The pane sizes changed since they were saved, last at layoutAt.
 	layoutDirty bool
 	layoutAt    time.Time
@@ -323,11 +326,16 @@ func (a *App) sidebar(c *ui.Context) {
 	})
 }
 
-// mainArea is the terminal over the bottom panel, or a panel row's panel
+// mainArea is the terminal over the bottom panel, or over its tabs alone
+// while it is collapsed (panelhide.go), or a panel row's panel
 // (paneltab.go).
 func (a *App) mainArea(c *ui.Context) {
 	if s := a.current(); s.isPanelTab() {
 		a.panelArea(c, s)
+		return
+	}
+	if a.bottomHidden {
+		a.collapsedMainArea(c)
 		return
 	}
 	split := ui.SplitVerticalPercent(c, &a.terminalPct, func() { a.terminalArea(c) }, func() { a.bottomPanel(c, &a.bottomTab) }).SplitReset(defaultTerminalPct).Fill()
@@ -377,15 +385,7 @@ func (a *App) bottomTabs() []bottomTab {
 func (a *App) bottomPanel(c *ui.Context, tab *int) {
 	tabs := a.bottomTabs()
 	ui.Column(c).Fill().Background(theme.Background).Children(func() {
-		ui.Row(c).PaddingX(6).AlignItems(ui.Center).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
-			labels := make([]string, len(tabs))
-			for i, t := range tabs {
-				labels[i] = t.label
-			}
-			ui.Tabs(c, tab, labels...)
-			ui.Spacer(c)
-			a.panelCornerButton(c, *tab)
-		})
+		a.panelTabRow(c, tabs, tab, false)
 		if *tab >= 0 && *tab < len(tabs) {
 			tabs[*tab].page(c)
 		}

@@ -77,6 +77,20 @@ are vertical:
 - Bottom right: the Files, Transfers, Tunnels, Processes, Network and
   Commands tabs, which can also open in a tab of their own (see below).
 
+The bottom panel can collapse to its row of tabs, which stays at the
+bottom, and the terminal takes the rest of the height. The chevron at the
+right end of the tab row, before "Open in its own tab", hides the panel
+(chevron down, "Hide panel") and shows it again (chevron up, "Show
+panel"); so do "Hide panel" and "Show panel" in the tab row's context menu
+and the shortcut "Show or hide the bottom panel" (Cmd+J on macOS,
+Ctrl+Shift+J on Windows and Linux). While the panel is collapsed, a click
+on a tab's label opens it on that tab, at the height it had before, and
+so does anything that opens one of its tabs, such as a click on the
+server monitor's process list, which opens Processes. The choice is kept
+in `settings.json` and restored at the next start. A panel opened in a
+tab of its own is the panel itself and is not affected, and full screen
+shows the terminal alone either way.
+
 ## Sessions and tabs
 
 The bottom left of the window is a vertical list of sessions, on the
@@ -1926,7 +1940,8 @@ In `settings.json`, only changed keys are stored:
 `"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`. The key names
 are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
 `nextTab`, `closeTab`, `connectionManager`, `newTab`, `switchTab` (whose
-value looks like `"Alt+1-9"`), `focusCommandBar` and `switchLeftPanel`. `Super` is Cmd on macOS, and `none` means no
+value looks like `"Alt+1-9"`), `focusCommandBar`, `switchLeftPanel` and
+`toggleBottomPanel`. `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
 
@@ -2069,6 +2084,7 @@ Terminal › Shortcuts page.
 | Switch to tab 1–9 | Cmd+1…9 | Alt+1…9 |
 | Focus command bar (and back to the terminal) | Cmd+Shift+L | Ctrl+Shift+L |
 | Switch sessions / connections (the bottom-left panel's pages) | Cmd+Shift+E | Ctrl+Shift+E |
+| Show or hide the bottom panel | Cmd+J | Ctrl+Shift+J |
 
 Notes:
 
@@ -2104,6 +2120,9 @@ Notes:
   Older versions of IBus on Linux use Ctrl+Shift+E for emoji input and
   take it before the app; change the key on the Shortcuts page, or in
   IBus's preferences, if it does nothing.
+- Show or hide the bottom panel is J as in VS Code. Ctrl+J alone is a
+  newline in the shell, so on Windows and Linux it takes Shift too. It
+  does nothing in full screen and on a panel opened in a tab of its own.
 - Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
   shell and are not used as shortcuts on Windows and Linux. In MyGo's
   legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an
@@ -2118,6 +2137,10 @@ cannot be dragged out of sight. The sizes are saved in
 `finallyshell/settings.json` and restored at the next start. This includes
 the dividers of the Processes and Network tabs, which every session
 shares, in the bottom panel and in a panel opened in a tab of its own.
+
+The bottom panel can also collapse to its row of tabs (see
+[Window layout](#window-layout)); the divider's position is kept for
+when it opens again, and whether it is collapsed is saved with the sizes.
 
 ## Language
 

@@ -164,6 +164,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `monitorHidden` | 在服务器监控的右键菜单里隐藏的部分，对所有主机都一样：`uptime`、`cpu`、`processes`、`network`、`latency`、`disks` 中的任意几个，比如 `["processes", "disks"]`。以后版本新增的部分在隐藏之前都显示。 | 全部显示。 |
 | `procListPercent`、`procFieldsPercent` | “进程”页里进程列表（在详情上方）所占的比例，和详情里字段（在环境变量旁边）所占的比例，单位是百分比。 | 程序的默认值。 |
 | `netListPercent` | “网络”页里表格（在连接和路由追踪标签上方）所占的比例，单位是百分比。 | 程序的默认值。 |
+| `bottomPanelHidden` | `true` 把终端下方的底部面板收起，只留一行标签。 | 展开。 |
 | `leftPanelPage` | `connections` 在左下面板显示“连接”页。 | 会话标签。 |
 | `connectionTreeExpanded` | “连接”页里展开的文件夹的 ID，如 `["f1730000000000000000"]`；`[]` 表示全部收起。按 ID 记，文件夹改名或移动后仍保持展开。 | 全部展开。 |
 | `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
@@ -184,7 +185,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 

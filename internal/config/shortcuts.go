@@ -25,4 +25,7 @@ type Shortcuts struct {
 	// SwitchLeftPanel switches the panel under the server monitor between
 	// the session tabs and the connections.
 	SwitchLeftPanel string `json:"switchLeftPanel,omitempty"`
+	// ToggleBottomPanel collapses the bottom panel under the terminal to
+	// its row of tabs, and opens it again.
+	ToggleBottomPanel string `json:"toggleBottomPanel,omitempty"`
 }

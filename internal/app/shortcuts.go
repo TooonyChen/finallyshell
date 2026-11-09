@@ -45,6 +45,7 @@ const (
 	scSwitchTab
 	scFocusBar
 	scLeftPanel
+	scBottomPanel
 )
 
 // shortcutAction is an action of the shortcuts page.
@@ -142,6 +143,12 @@ var shortcutActions = []shortcutAction{
 		id: scLeftPanel, title: locales.ScSwitchLeftPanel,
 		field: func(s *config.Shortcuts) *string { return &s.SwitchLeftPanel },
 		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyE}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyE},
+	},
+	{
+		// J as VS Code's panel; Ctrl+J alone is a newline in the shell.
+		id: scBottomPanel, title: locales.ScToggleBottomPanel,
+		field: func(s *config.Shortcuts) *string { return &s.ToggleBottomPanel },
+		mac:   keyCombo{ui.Super, ui.KeyJ}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyJ},
 	},
 }
 
@@ -437,6 +444,9 @@ func (a *App) shortcuts(c *ui.Context) {
 		a.toggleBarFocus()
 	case pressed(scLeftPanel):
 		a.switchLeftPanel()
+	case pressed(scBottomPanel) && !a.fullScreen.on && !a.current().isPanelTab():
+		// Only where the panel under the terminal shows.
+		a.toggleBottomPanel()
 	case a.fullScreen.on && !a.terminalLive() && c.Shortcut(0, ui.KeyEscape):
 		// Esc is the shell's while it runs, as vi's; it leaves full screen
 		// where no shell takes it.
