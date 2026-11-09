@@ -154,7 +154,7 @@ func (a *App) missingSecret(h *config.Host) *secretNeed {
 // askSecret shows the password prompt for need; then runs once it is
 // entered (passwordEntered).
 func (a *App) askSecret(need *secretNeed, then func()) {
-	a.pwOpen, a.pwNeed, a.pwThen, a.pwText = true, need, then, ""
+	a.pwOpen, a.pwNeed, a.pwThen, a.pwCancel, a.pwText = true, need, then, nil, ""
 	a.pwRemember, a.pwErr = need.host.RemembersPassword(), nil
 	a.checkSecrets()
 }

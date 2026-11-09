@@ -188,6 +188,7 @@ type App struct {
 	pwOpen     bool
 	pwNeed     *secretNeed
 	pwThen     func()
+	pwCancel   func() // on Cancel, for "Connect all" (connectall.go)
 	pwText     string
 	pwRemember bool  // "Remember password"
 	pwErr      error // why the last one did not work, or nil

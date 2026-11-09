@@ -5840,6 +5840,36 @@ func (msgs Messages) DeleteFolderBodyTop() string {
 	return Catalog.Format(msgs.locale, "deleteFolderBodyTop", nil)
 }
 
+// ConnectAll says "Connect all"
+// in the language the app shows.
+func ConnectAll() string { return In(i18n.Locale()).ConnectAll() }
+
+// ConnectAll says "Connect all"
+// in the language of msgs.
+func (msgs Messages) ConnectAll() string {
+	return Catalog.Format(msgs.locale, "connectAll", nil)
+}
+
+// ConnectAllTitle says "{count, plural, one {Connect to # server?} other {Connect to # servers?}}"
+// in the language the app shows.
+func ConnectAllTitle(count int) string { return In(i18n.Locale()).ConnectAllTitle(count) }
+
+// ConnectAllTitle says "{count, plural, one {Connect to # server?} other {Connect to # servers?}}"
+// in the language of msgs.
+func (msgs Messages) ConnectAllTitle(count int) string {
+	return Catalog.Format(msgs.locale, "connectAllTitle", map[string]any{"count": count})
+}
+
+// ConnectAllBody says "Every connection in “{folder}” and its subfolders opens in a tab of its own."
+// in the language the app shows.
+func ConnectAllBody(folder string) string { return In(i18n.Locale()).ConnectAllBody(folder) }
+
+// ConnectAllBody says "Every connection in “{folder}” and its subfolders opens in a tab of its own."
+// in the language of msgs.
+func (msgs Messages) ConnectAllBody(folder string) string {
+	return Catalog.Format(msgs.locale, "connectAllBody", map[string]any{"folder": folder})
+}
+
 // DeleteForeverTitle says "Delete “{name}” permanently?"
 // in the language the app shows.
 func DeleteForeverTitle(name string) string { return In(i18n.Locale()).DeleteForeverTitle(name) }

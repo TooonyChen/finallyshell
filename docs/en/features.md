@@ -245,8 +245,8 @@ connecting.
   own, apart from the connection manager's.
 - The context menus are the connection manager's: Connect, Edit,
   Duplicate, Rename (F2), Move to folder, Copy host and Delete on a
-  connection; New connection, New subfolder, Rename, Move to folder and
-  Delete on a folder; New connection and New folder on the empty space
+  connection; Connect all, New connection, New subfolder, Rename, Move
+  to folder and Delete on a folder; New connection and New folder on the empty space
   under the rows. F2 and Delete work on the selected row. Rows are
   dragged onto a folder, or onto a connection for its folder, to move
   them, as in the connection manager.
@@ -355,10 +355,21 @@ The context menu of a connection has:
 - Copy host: copies the host address.
 - Delete (the Delete key).
 
-The context menu of a folder has New connection, New subfolder, Rename,
-Move to folder and Delete. Deleting a folder asks first. Its connections
+The context menu of a folder has Connect all, New connection, New
+subfolder, Rename, Move to folder and Delete. Deleting a folder asks first. Its connections
 and subfolders move to its parent folder (or to the top level for a
 top-level folder), and the question says where they go.
+
+Connect all opens a session to every connection in the folder and in its
+subfolders, in the order the tree shows them, each as a double-click
+opens it: the first in the selected tab if it is a new tab, the others in
+tabs of their own, and the connection manager closes if "Close window
+after connecting" is checked. Deleted connections are left out, and on a folder with no
+connection the item is disabled. With more than 10 connections it asks
+first: "Connect to N servers?", naming the folder. A connection whose
+password is not known asks for it, and the next ones wait, so the
+prompts come one at a time; Cancel skips that connection and goes on
+with the next. The Connections page has the same item.
 
 Dragging a connection or folder onto a folder row moves it into that
 folder. Dropping it on a connection row moves it into the folder of that

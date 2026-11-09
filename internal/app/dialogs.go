@@ -9,6 +9,7 @@ import (
 
 func (a *App) dialogs(c *ui.Context) {
 	ui.Modal(c, &a.pwOpen, func() { a.passwordView(c) })
+	a.passwordCancelled()
 	if s := a.pendingHostKey(); s != nil {
 		open := true
 		ui.Modal(c, &open, func() { a.hostKeyView(c, s) })

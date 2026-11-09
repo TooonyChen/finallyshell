@@ -807,6 +807,23 @@
     }
   },
   "deleteFolderBodyTop": "Its connections and folders move to the top level.",
+  "connectAll": "Connect all",
+  "connectAllTitle": "{count, plural, one {Connect to # server?} other {Connect to # servers?}}",
+  "@connectAllTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "connectAllBody": "Every connection in “{folder}” and its subfolders opens in a tab of its own.",
+  "@connectAllBody": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
   "deleteForeverTitle": "Delete “{name}” permanently?",
   "@deleteForeverTitle": {
     "placeholders": {

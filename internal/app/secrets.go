@@ -416,7 +416,7 @@ func (a *App) passwordEntered() {
 		a.secrets.untried[need.key] = a.pwText
 	}
 	then := a.pwThen
-	a.pwOpen, a.pwText, a.pwNeed, a.pwThen, a.pwErr = false, "", nil, nil, nil
+	a.pwOpen, a.pwText, a.pwNeed, a.pwThen, a.pwCancel, a.pwErr = false, "", nil, nil, nil, nil
 	if then != nil {
 		then()
 	}

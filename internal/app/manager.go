@@ -698,6 +698,10 @@ func (a *App) managerItemMenu(c *ui.Context, m *managerState, menu *ui.Menu, it 
 		if f == nil {
 			return
 		}
+		if menu.Item(locales.ConnectAll()).Disabled(len(a.folderHosts(m, f.ID)) == 0).Chosen() {
+			do(func() { a.connectAll(m, f.ID) })
+		}
+		menu.Separator()
 		if menu.Item(locales.NewConnection()).Chosen() {
 			do(func() { a.newConnectionIn(m, f.ID) })
 		}
