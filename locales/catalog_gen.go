@@ -4126,6 +4126,56 @@ func (msgs Messages) OptionConfirmCloseNote() string {
 	return Catalog.Format(msgs.locale, "optionConfirmCloseNote", nil)
 }
 
+// OptionsConnections says "Connections"
+// in the language the app shows.
+func OptionsConnections() string { return In(i18n.Locale()).OptionsConnections() }
+
+// OptionsConnections says "Connections"
+// in the language of msgs.
+func (msgs Messages) OptionsConnections() string {
+	return Catalog.Format(msgs.locale, "optionsConnections", nil)
+}
+
+// OptionKeepAliveBefore says "Send a keepalive every"
+// in the language the app shows.
+func OptionKeepAliveBefore() string { return In(i18n.Locale()).OptionKeepAliveBefore() }
+
+// OptionKeepAliveBefore says "Send a keepalive every"
+// in the language of msgs.
+func (msgs Messages) OptionKeepAliveBefore() string {
+	return Catalog.Format(msgs.locale, "optionKeepAliveBefore", nil)
+}
+
+// OptionKeepAliveAfter says "seconds"
+// in the language the app shows.
+func OptionKeepAliveAfter() string { return In(i18n.Locale()).OptionKeepAliveAfter() }
+
+// OptionKeepAliveAfter says "seconds"
+// in the language of msgs.
+func (msgs Messages) OptionKeepAliveAfter() string {
+	return Catalog.Format(msgs.locale, "optionKeepAliveAfter", nil)
+}
+
+// OptionKeepAliveLabel says "Seconds between keepalives"
+// in the language the app shows.
+func OptionKeepAliveLabel() string { return In(i18n.Locale()).OptionKeepAliveLabel() }
+
+// OptionKeepAliveLabel says "Seconds between keepalives"
+// in the language of msgs.
+func (msgs Messages) OptionKeepAliveLabel() string {
+	return Catalog.Format(msgs.locale, "optionKeepAliveLabel", nil)
+}
+
+// OptionKeepAliveNote says "Keeps quiet connections from being dropped by routers, firewalls and proxies. When three in a row get no answer, the …"
+// in the language the app shows.
+func OptionKeepAliveNote() string { return In(i18n.Locale()).OptionKeepAliveNote() }
+
+// OptionKeepAliveNote says "Keeps quiet connections from being dropped by routers, firewalls and proxies. When three in a row get no answer, the …"
+// in the language of msgs.
+func (msgs Messages) OptionKeepAliveNote() string {
+	return Catalog.Format(msgs.locale, "optionKeepAliveNote", nil)
+}
+
 // MouseSelection says "Selection"
 // in the language the app shows.
 func MouseSelection() string { return In(i18n.Locale()).MouseSelection() }

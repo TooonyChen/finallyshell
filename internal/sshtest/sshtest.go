@@ -1,8 +1,8 @@
 // Package sshtest is an SSH server for tests, in the test's process: it
 // logs in with a password, opens shells that read and print nothing,
 // forwards ports as OpenSSH does with AllowTcpForwarding on and
-// GatewayPorts off, and, started with StartSFTP, serves the local file
-// system over SFTP.
+// GatewayPorts off, answers keepalives, and, started with StartSFTP,
+// serves the local file system over SFTP.
 package sshtest
 
 import (
@@ -13,6 +13,7 @@ import (
 	"net"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/pkg/sftp"
@@ -40,6 +41,10 @@ type Server struct {
 	// connection that asked and the address it was asked for.
 	forwards map[*ssh.ServerConn]map[string]net.Listener
 	wg       sync.WaitGroup
+
+	keepAlives atomic.Int64 // keepalive@openssh.com requests received
+	silent     atomic.Bool  // keepalives go unanswered
+	hangExec   atomic.Bool  // exec requests are accepted and never run
 }
 
 // Start starts a server, which stops as the test ends, with every
@@ -125,6 +130,20 @@ func (s *Server) DropConnections() {
 		c.Close()
 	}
 }
+
+// KeepAlives is how many keepalive@openssh.com requests the server has
+// received, from every client.
+func (s *Server) KeepAlives() int { return int(s.keepAlives.Load()) }
+
+// StopAnswering leaves the keepalives that come from now on without an
+// answer, as a server that hangs, or a network that lost the way back,
+// while connections stay open.
+func (s *Server) StopAnswering() { s.silent.Store(true) }
+
+// HangExec accepts the exec requests that come from now on and runs
+// nothing: the command never prints, ends or exits, as a script stuck on
+// a stale mount. By default exec is refused.
+func (s *Server) HangExec() { s.hangExec.Store(true) }
 
 // Forwards is how many ports the server listens on for clients now.
 func (s *Server) Forwards() int {
@@ -222,7 +241,11 @@ func (s *Server) session(nc ssh.NewChannel) {
 				if ok {
 					start(func() { s.serveSFTP(ch) })
 				}
-			default: // env, exec
+			case "exec":
+				hang := s.hangExec.Load() && !started
+				r.Reply(hang, nil)
+				started = started || hang
+			default: // env
 				r.Reply(false, nil)
 			}
 		}
@@ -330,8 +353,13 @@ func (s *Server) global(sconn *ssh.ServerConn, r *ssh.Request) {
 			ln.Close()
 		}
 		r.Reply(ln != nil, nil)
+	case "keepalive@openssh.com":
+		s.keepAlives.Add(1)
+		if !s.silent.Load() {
+			r.Reply(true, nil)
+		}
 	default:
-		r.Reply(r.Type == "keepalive@openssh.com", nil)
+		r.Reply(false, nil)
 	}
 }
 

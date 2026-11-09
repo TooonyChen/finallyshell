@@ -229,6 +229,10 @@ type App struct {
 	sysInfo     sysInfoPopover
 	readSysInfo sysInfoReader
 
+	// keepAliveUnit is how long a second of the keepalive setting is: a
+	// second when 0, shorter in tests (session.go).
+	keepAliveUnit time.Duration
+
 	// The shortcuts page (shortcutspage.go), and full screen, which shows
 	// the terminal alone (fullscreen.go).
 	shortcutsUI shortcutsPage

@@ -127,6 +127,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `noAutoSelectTab` | `true` 时新会话在后台打开。 | 选中新会话。 |
 | `minimizeToTray` | `true` 时关闭主窗口会把它隐藏到托盘。 | 关闭就退出。 |
 | `noConfirmClose` | `true` 时有会话打开也不问，直接关闭、退出。 | 先问。 |
+| `keepAliveSeconds` | 每个连接发送 SSH 保活消息的间隔秒数，1 到 3600（更大按 3600）；`-1`（任何负数）关闭保活，选项里显示为 0。对新建的连接生效。 | 30（`0` 也是） |
 | `downloadDir` | 下载存到的文件夹。 | 系统的下载文件夹。 |
 | `askDownloadDir` | `true` 时每次下载都问保存位置。 | 用 `downloadDir`。 |
 | `copyOnSelect` | `true` 时把鼠标选中的文字复制到剪贴板。 | 关。 |

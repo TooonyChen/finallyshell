@@ -10,6 +10,11 @@ package sshx
 // the host, which carries the SSH connection. Closing the host's client
 // closes the jump host's too.
 //
+// Keepalives (Options.KeepAlive) go on each SSH connection: the host's,
+// which crosses a SOCKS5 or HTTP proxy as the rest of its traffic does,
+// and each jump host's. When a jump host's connection dies and its
+// keepalive closes it, the host's connection through it ends too.
+//
 // Failures on the way are *HopError, naming the proxy or jump host that
 // failed; those of the host itself are returned as without a proxy.
 
@@ -111,7 +116,7 @@ func dialRoute(h *config.Host, opts Options, cfg *ssh.ClientConfig) (*ssh.Client
 	case config.ProxyHTTP:
 		conn, err = dialHTTP(p, opts.ProxyPassword, addr, cfg.Timeout)
 	case config.ProxyJump:
-		conn, err = dialJump(opts.Jump, addr, cfg.Timeout)
+		conn, err = dialJump(opts.Jump, opts.KeepAlive, addr, cfg.Timeout)
 		if err == nil {
 			// known_hosts again, with what trusting the jump host's key
 			// added: a host may share it, or be its own jump host.
@@ -248,14 +253,17 @@ func dialHTTP(p *config.ProxyConfig, password, addr string, timeout time.Duratio
 	return newHopConn(raw, early, addr, nil), nil
 }
 
-// dialJump logs in to the jump host, the way it says, and opens a
-// connection to addr through it.
-func dialJump(hop *Hop, addr string, timeout time.Duration) (net.Conn, error) {
+// dialJump logs in to the jump host, the way it says, with the
+// keepalive of the host it leads to, and opens a connection to addr
+// through it.
+func dialJump(hop *Hop, keepAlive KeepAliveConfig, addr string, timeout time.Duration) (net.Conn, error) {
 	if hop == nil || hop.Host == nil {
 		return nil, ErrNoJumpHost
 	}
 	name, id := hop.Host.Title(), hop.Host.ID
-	jc, err := Dial(hop.Host, hop.Options)
+	jopts := hop.Options
+	jopts.KeepAlive = keepAlive
+	jc, err := Dial(hop.Host, jopts)
 	if err != nil {
 		var hop *HopError
 		if errors.As(err, &hop) {

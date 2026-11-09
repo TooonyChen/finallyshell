@@ -116,6 +116,10 @@ func (a *App) connect(s *Session, secret string) {
 		s.status, s.err = statusFailed, err
 		return
 	}
+	// On the host's connection and each jump host's, as long as each is
+	// open. One that dies is closed, which ends the shell, so the session
+	// shows "Connection lost" (OnExit below).
+	opts.KeepAlive = a.keepAlive()
 	h := *s.Host
 	topts := a.terminalOptions(&h) // here, on the UI thread, which owns the settings
 	bs, del, enc := a.settings.HostBackspace(&h), a.settings.HostDelete(&h), a.settings.HostEncoding(&h)
@@ -215,6 +219,31 @@ func (a *App) connect(s *Session, secret string) {
 			a.openDir(s, home)
 		})
 	}()
+}
+
+// keepAliveTimeout is the longest a keepalive waits for its answer
+// before it counts as missed, in seconds of the setting; shorter
+// intervals wait an interval.
+const keepAliveTimeout = 15
+
+// keepAlive is the keepalive of a new connection, as the settings have
+// it: every interval, giving up on a connection after three answers in
+// a row have not come. It reads the settings, so it runs on the UI
+// thread.
+func (a *App) keepAlive() sshx.KeepAliveConfig {
+	n := a.settings.KeepAliveInterval()
+	if n == 0 {
+		return sshx.KeepAliveConfig{}
+	}
+	unit := a.keepAliveUnit
+	if unit == 0 {
+		unit = time.Second
+	}
+	return sshx.KeepAliveConfig{
+		Interval:  time.Duration(n) * unit,
+		Timeout:   time.Duration(min(n, keepAliveTimeout)) * unit,
+		MaxMissed: 3,
+	}
 }
 
 // terminalOptions are the options of a new terminal for h as the

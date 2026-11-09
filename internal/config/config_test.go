@@ -464,3 +464,32 @@ func TestFolders(t *testing.T) {
 		t.Errorf("hosts of a removed folder not moved up")
 	}
 }
+
+// TestKeepAliveSetting reads and writes the keepalive interval: nothing
+// in the file is 30 seconds, and 0 in the options, off, is kept as -1.
+func TestKeepAliveSetting(t *testing.T) {
+	var s Settings
+	if n := s.KeepAliveInterval(); n != DefaultKeepAliveSeconds {
+		t.Errorf("unset: %d", n)
+	}
+	for _, c := range []struct{ set, stored, read int }{
+		{0, KeepAliveOff, 0},
+		{-5, KeepAliveOff, 0},
+		{DefaultKeepAliveSeconds, 0, DefaultKeepAliveSeconds},
+		{15, 15, 15},
+		{MaxKeepAliveSeconds + 1, MaxKeepAliveSeconds, MaxKeepAliveSeconds},
+	} {
+		s.SetKeepAliveInterval(c.set)
+		if s.KeepAliveSeconds != c.stored || s.KeepAliveInterval() != c.read {
+			t.Errorf("set %d: stored %d, read %d; want %d, %d", c.set, s.KeepAliveSeconds, s.KeepAliveInterval(), c.stored, c.read)
+		}
+	}
+	// Off is written, so that it syncs; the default is not.
+	s.SetKeepAliveInterval(0)
+	if v, ok := SyncedSettings(s)["keepAliveSeconds"]; !ok || string(v) != "-1" {
+		t.Errorf("off synced as %s", v)
+	}
+	if got := WithSyncedSettings(s, nil); got.KeepAliveInterval() != DefaultKeepAliveSeconds {
+		t.Errorf("without the key: %d", got.KeepAliveInterval())
+	}
+}

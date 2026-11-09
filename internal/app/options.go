@@ -1,6 +1,7 @@
 package app
 
 import (
+	"finallyshell/internal/config"
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
 
@@ -162,6 +163,19 @@ func (a *App) generalPage(c *ui.Context) {
 			a.changeSettings(func() { a.settings.NoConfirmClose = !confirm })
 		}
 		widgets.Muted(c, locales.OptionConfirmCloseNote()).FontSize(12).PaddingStart(18)
+	})
+
+	ui.Column(c).Gap(8).Padding(8, 0, 0, 0).Children(func() {
+		ui.Text(c, locales.OptionsConnections()).Bold()
+		ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+			ui.Text(c, locales.OptionKeepAliveBefore())
+			secs := float64(a.settings.KeepAliveInterval())
+			if ui.NumberInput(c, &secs, 0, config.MaxKeepAliveSeconds, 1).Width(110).Label(locales.OptionKeepAliveLabel()).Changed() {
+				a.changeSettings(func() { a.settings.SetKeepAliveInterval(int(secs)) })
+			}
+			ui.Text(c, locales.OptionKeepAliveAfter())
+		})
+		widgets.Muted(c, locales.OptionKeepAliveNote()).FontSize(12)
 	})
 
 	a.updatesSection(c)

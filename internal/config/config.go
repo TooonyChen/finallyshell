@@ -83,6 +83,11 @@ type Settings struct {
 	// NoConfirmClose quits without asking while sessions are open; by
 	// default closing the window, or quitting, asks first.
 	NoConfirmClose bool `json:"noConfirmClose,omitempty"`
+	// KeepAliveSeconds is the seconds between the keepalives sent on
+	// each connection: 0, as a file without it reads, for
+	// DefaultKeepAliveSeconds, and KeepAliveOff (any negative number)
+	// for none. Read it with KeepAliveInterval.
+	KeepAliveSeconds int `json:"keepAliveSeconds,omitempty"`
 
 	// The Mouse page of the terminal options, zero by default too.
 	//
@@ -244,6 +249,39 @@ const LeftPanelConnections = "connections"
 // Settings.MonitorSide with the monitor, in the column on the terminal's
 // right.
 const PanelRight = "right"
+
+// The keepalive of Settings.KeepAliveSeconds.
+const (
+	DefaultKeepAliveSeconds = 30
+	MaxKeepAliveSeconds     = 3600
+	// KeepAliveOff is KeepAliveSeconds with keepalives off, which the
+	// options show as 0.
+	KeepAliveOff = -1
+)
+
+// KeepAliveInterval is the seconds between keepalives, 0 when they are
+// off.
+func (s Settings) KeepAliveInterval() int {
+	switch {
+	case s.KeepAliveSeconds < 0:
+		return 0
+	case s.KeepAliveSeconds == 0:
+		return DefaultKeepAliveSeconds
+	}
+	return min(s.KeepAliveSeconds, MaxKeepAliveSeconds)
+}
+
+// SetKeepAliveInterval sets KeepAliveSeconds to n seconds, 0 for off.
+func (s *Settings) SetKeepAliveInterval(n int) {
+	switch {
+	case n <= 0:
+		s.KeepAliveSeconds = KeepAliveOff
+	case n == DefaultKeepAliveSeconds:
+		s.KeepAliveSeconds = 0 // the default, written as nothing
+	default:
+		s.KeepAliveSeconds = min(n, MaxKeepAliveSeconds)
+	}
+}
 
 // The values of GeoLocations and GeoLocationsV6.
 const (

@@ -4,6 +4,7 @@
 package sshx
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -73,6 +74,11 @@ type Options struct {
 	// Jump is the jump host of a host whose proxy is one, with what
 	// logging in to it takes, its own jump host included.
 	Jump *Hop
+
+	// KeepAlive is the keepalive Dial starts on the client it returns,
+	// and on the client of each jump host on the way, whose own is not
+	// used: each runs as long as its client is open (see KeepAlive).
+	KeepAlive KeepAliveConfig
 }
 
 var knownHostsMu sync.Mutex
@@ -167,7 +173,7 @@ func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, error) {
 }
 
 // Dial connects and logs in to h, through its proxy or jump host if it
-// has one (see proxy.go).
+// has one (see proxy.go), and starts opts.KeepAlive on the connection.
 func Dial(h *config.Host, opts Options) (*ssh.Client, error) {
 	auth, err := authMethods(h, opts)
 	if err != nil {
@@ -178,7 +184,11 @@ func Dial(h *config.Host, opts Options) (*ssh.Client, error) {
 		return nil, err
 	}
 	cfg := &ssh.ClientConfig{User: h.User, Auth: auth, HostKeyCallback: hk, Timeout: 15 * time.Second}
-	return dialRoute(h, opts, cfg)
+	client, err := dialRoute(h, opts, cfg)
+	if err == nil && opts.KeepAlive.Interval > 0 {
+		go KeepAlive(context.Background(), client, opts.KeepAlive)
+	}
+	return client, err
 }
 
 // Shell is an interactive shell on an SSH connection, which the terminal

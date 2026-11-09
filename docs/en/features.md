@@ -154,6 +154,18 @@ quick connect. When a host's `noMonitor` is `true`, the server status is
 not polled, so no extra exec channel is opened (some jump hosts do not
 allow one).
 
+Each connection sends an SSH keepalive (`keepalive@openssh.com`) every
+30 seconds, as OpenSSH's `ServerAliveInterval` does, so that routers,
+firewalls and proxies don't drop a session that is quiet, or whose
+program prints nothing for a while. It does not need the server monitor
+or its exec channel, and the connection to each jump host on the way
+sends its own; through a SOCKS5 or HTTP proxy, the host's keepalive
+crosses the proxy. Any answer counts. When three in a row get no answer
+(15 seconds each, or the interval when shorter), the connection is
+closed and the session shows "Connection lost", ready to reconnect, rather
+than looking connected until something is typed. The interval is set in
+Options › General; 0 turns keepalives off.
+
 On the first connection to a host, a dialog shows the host key
 fingerprint. Once trusted, it is written to `finallyshell/known_hosts` in
 the config directory. A connection whose host key has changed is refused.
@@ -903,7 +915,9 @@ The top left, or the top of the column on the terminal's right (see
 [Window layout](#window-layout)), shows the current session's server: IP, uptime, load, CPU,
 memory and swap, the processes using the most memory, network speed and
 latency graphs, and disks. It reads `/proc` over SSH every 2 seconds, so
-only Linux servers are supported. When not connected it shows an empty
+only Linux servers are supported. A reading that takes more than 10
+seconds, as when `df` hangs on a stale network mount, is given up, and
+the next one starts on time. When not connected it shows an empty
 placeholder like FinalShell's ("-", 0%). A click on the process list opens
 the [Processes tab](#processes-tab).
 
@@ -1797,7 +1811,8 @@ The gear button next to the "Sessions" title at the bottom left opens the
 Options window. As in FinalShell, it has a tree of pages on the left and
 the page on the right. Every option is saved to `settings.json` as soon as
 it changes, and takes effect at once, except for the two Mouse options
-noted below.
+noted below and the keepalive interval, which applies to connections made
+after the change.
 
 The terminal appearance pages are described under
 [Appearance](#appearance-font-color-scheme-background-image), and the
@@ -1826,6 +1841,9 @@ file icon theme page under [File icon themes](#file-icon-themes).
   menu, Cmd+Q on macOS) asks once first, with the system's message box.
   With the tray option also on, the close button hides the window without
   asking, and only "Quit" asks.
+- Connections: "Send a keepalive every N seconds", 30 by default, 0 to
+  turn keepalives off, up to 3600. See
+  [Sessions and tabs](#sessions-and-tabs). Saved as `keepAliveSeconds`.
 - Updates: the version running, "Check for Updates…", "Check for updates
   automatically" (on by default) and the newer version a check found, or
   why this copy cannot update itself; see [Updates](#updates).

@@ -5,8 +5,10 @@ package monitor
 import (
 	"bufio"
 	"context"
+	"errors"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -66,9 +68,19 @@ df -kP -x tmpfs -x devtmpfs -x overlay -x squashfs 2>/dev/null || df -kP; echo `
 ps -eo rss=,pcpu=,comm= --sort=-rss 2>/dev/null | head -5
 `
 
+// scriptTimeout is how long a read of the stats waits for the server:
+// one that takes longer, as when df hangs on a stale mount, is given up
+// and the next read starts at the next interval.
+const scriptTimeout = 10 * time.Second
+
 // Run polls the server every interval and sends what it reads to
-// publish, until ctx ends.
+// publish, until ctx ends or the connection closes.
 func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publish func(Stats)) {
+	run(ctx, client, interval, scriptTimeout, publish)
+}
+
+// run is Run, with each read of the stats given timeout.
+func run(ctx context.Context, client *ssh.Client, interval, timeout time.Duration, publish func(Stats)) {
 	var (
 		st        Stats
 		prevIdle  uint64
@@ -85,7 +97,7 @@ func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publis
 		st.Latency = time.Since(start)
 		st.LatHist = pushHist(st.LatHist, float64(st.Latency.Microseconds())/1000)
 
-		if out, err := runOutput(client, statsScript); err == nil {
+		if out, err := runOutput(client, statsScript, timeout); err == nil {
 			parts := strings.Split(out, sep+"\n")
 			if len(parts) >= 7 {
 				st.OK = true
@@ -112,14 +124,55 @@ func Run(ctx context.Context, client *ssh.Client, interval time.Duration, publis
 	}
 }
 
-func runOutput(client *ssh.Client, script string) (string, error) {
-	s, err := client.NewSession()
-	if err != nil {
-		return "", err
+// errScriptTimeout is a script that did not end in its time.
+var errScriptTimeout = errors.New("the server did not answer in time")
+
+// runOutput runs script in an exec channel of its own and returns what
+// it prints, giving up after timeout: the channel is then closed, and
+// the connection is left as it is.
+func runOutput(client *ssh.Client, script string, timeout time.Duration) (string, error) {
+	type result struct {
+		out []byte
+		err error
 	}
-	defer s.Close()
-	out, err := s.Output(script)
-	return string(out), err
+	var (
+		mu       sync.Mutex
+		sess     *ssh.Session
+		gaveUp   bool
+		finished = make(chan result, 1)
+	)
+	go func() {
+		s, err := client.NewSession()
+		if err != nil {
+			finished <- result{nil, err}
+			return
+		}
+		mu.Lock()
+		if gaveUp { // opened too late
+			mu.Unlock()
+			s.Close()
+			return
+		}
+		sess = s
+		mu.Unlock()
+		defer s.Close()
+		out, err := s.Output(script)
+		finished <- result{out, err}
+	}()
+	t := time.NewTimer(timeout)
+	defer t.Stop()
+	select {
+	case r := <-finished:
+		return string(r.out), r.err
+	case <-t.C:
+		mu.Lock()
+		gaveUp = true
+		if sess != nil {
+			sess.Close() // ends Output
+		}
+		mu.Unlock()
+		return "", errScriptTimeout
+	}
 }
 
 func pushHist(h []float64, v float64) []float64 {

@@ -157,6 +157,7 @@ default.
 | `noAutoSelectTab` | `true` opens new sessions in the background. | New sessions are selected. |
 | `minimizeToTray` | `true` hides the main window to the tray when it is closed. | Closing quits. |
 | `noConfirmClose` | `true` closes and quits without asking while sessions are open. | Ask first. |
+| `keepAliveSeconds` | Seconds between the SSH keepalives of each connection, 1 to 3600 (higher reads as 3600); `-1` (any negative number) turns them off, which the options show as 0. Applies to new connections. | 30 (also for `0`) |
 | `downloadDir` | Folder downloads go into. | The system's Downloads folder. |
 | `askDownloadDir` | `true` asks where to save each download. | Use `downloadDir`. |
 | `copyOnSelect` | `true` copies the mouse selection to the clipboard. | Off. |
