@@ -45,6 +45,7 @@
   "noSessions": "还没有打开的会话",
   "reconnect": "重新连接",
   "duplicateSession": "复制会话",
+  "resetName": "恢复原名",
   "disconnect": "断开",
   "close": "关闭",
   "closeSession": "关闭会话",

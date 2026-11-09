@@ -92,6 +92,7 @@
   "noSessions": "No open sessions",
   "reconnect": "Reconnect",
   "duplicateSession": "Duplicate session",
+  "resetName": "Reset name",
   "disconnect": "Disconnect",
   "close": "Close",
   "closeSession": "Close session",

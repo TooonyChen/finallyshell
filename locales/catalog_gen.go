@@ -502,6 +502,16 @@ func (msgs Messages) DuplicateSession() string {
 	return Catalog.Format(msgs.locale, "duplicateSession", nil)
 }
 
+// ResetName says "Reset name"
+// in the language the app shows.
+func ResetName() string { return In(i18n.Locale()).ResetName() }
+
+// ResetName says "Reset name"
+// in the language of msgs.
+func (msgs Messages) ResetName() string {
+	return Catalog.Format(msgs.locale, "resetName", nil)
+}
+
 // Disconnect says "Disconnect"
 // in the language the app shows.
 func Disconnect() string { return In(i18n.Locale()).Disconnect() }

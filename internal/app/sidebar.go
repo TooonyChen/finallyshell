@@ -205,6 +205,7 @@ func (a *App) sessionPanel(c *ui.Context) {
 				widgets.Muted(c, locales.NoSessions()).Padding(8, 10)
 			}
 		})
+		a.renameKey(c)
 		if closing != nil {
 			a.closeSession(closing)
 		}
@@ -254,6 +255,8 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 			s.status, s.err = statusClosed, nil
 		}
 		m.Separator()
+		a.renameMenu(m, s)
+		m.Separator()
 		if m.Item(locales.Close()).Danger().Chosen() {
 			closed = true
 		}
@@ -261,8 +264,12 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 	// RowDoubleClicked, not DoubleClicked: that makes this row clickable,
 	// and the press goes to the innermost clickable element, so the
 	// list's row, which chooses the session, would never see a click.
-	if row.RowDoubleClicked() && s.status != statusConnected && s.status != statusConnecting {
+	renaming := a.renaming(s)
+	if row.RowDoubleClicked() && !renaming && s.status != statusConnected && s.status != statusConnecting {
 		a.reconnect(s)
+	}
+	if s.name != "" && !renaming {
+		row.Tooltip(renamedTooltip(s))
 	}
 	row.Children(func() {
 		widgets.StatusDot(c, s.statusColor(theme))
@@ -270,7 +277,11 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		if s.status != statusConnected {
 			sub = s.statusText()
 		}
-		closed = rowText(c, s.label(), sub, active, hovered) || closed
+		name := func() { rowName(c, s.label(), active) }
+		if renaming {
+			name = func() { a.renameField(c, active) }
+		}
+		closed = rowLines(c, name, sub, active, hovered) || closed
 	})
 	return closed
 }
@@ -279,11 +290,14 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 // close button, which shows on the selected row and the row hovered. It
 // reports whether the button was clicked.
 func rowText(c *ui.Context, name, sub string, active, hovered bool) bool {
+	return rowLines(c, func() { rowName(c, name, active) }, sub, active, hovered)
+}
+
+// rowLines is rowText with its name line built by name: the field of a
+// row being renamed (rename.go).
+func rowLines(c *ui.Context, name func(), sub string, active, hovered bool) bool {
 	ui.Column(c).Grow(1).MinWidth(0).Children(func() {
-		t := ui.Text(c, name).SingleLine()
-		if active {
-			t.Bold()
-		}
+		name()
 		ui.Text(c, sub).FontSize(11.5).SingleLine().TextColor(rowSubColor(active))
 	})
 	closeBtn := widgets.IconButton(c, "x", locales.CloseSession()).Size(20, 20)
@@ -291,6 +305,14 @@ func rowText(c *ui.Context, name, sub string, active, hovered bool) bool {
 		closeBtn.Invisible()
 	}
 	return closeBtn.Clicked()
+}
+
+// rowName is the name line of a session row.
+func rowName(c *ui.Context, name string, active bool) {
+	t := ui.Text(c, name).SingleLine()
+	if active {
+		t.Bold()
+	}
 }
 
 func rowSubColor(active bool) ui.Color {

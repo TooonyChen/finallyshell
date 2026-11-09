@@ -59,6 +59,10 @@ type Session struct {
 	find  findState     // the find bar over the terminal
 	bar   cmdBar        // the command bar under the terminal (commandbar.go)
 	shell shellDirState // the shell's directory, which the file panel follows
+
+	// name is the tab's name for this run, "" for the host's title: never
+	// saved (rename.go).
+	name string
 }
 
 // errConnectionLost is a session whose shell ended.
@@ -81,6 +85,9 @@ func newSession(h *config.Host) *Session {
 func (s *Session) label() string {
 	if s.isNewTab() {
 		return locales.NewTab()
+	}
+	if s.name != "" {
+		return s.name
 	}
 	return s.Host.Title()
 }

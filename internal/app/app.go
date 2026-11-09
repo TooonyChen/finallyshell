@@ -144,6 +144,8 @@ type App struct {
 	sessList  ui.ListState
 	start     startState // the start page shown while no row is selected
 
+	rename renameState // the session row being renamed (rename.go)
+
 	sideWidth   float32
 	monitorPct  float32
 	terminalPct float32

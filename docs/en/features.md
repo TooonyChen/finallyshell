@@ -76,7 +76,22 @@ The bottom left of the window is a vertical list of sessions, titled
 "Sessions (N)". Each has a status dot: green for connected, yellow for
 connecting, red for failed. The list scrolls, and sessions can be
 reordered by dragging. The context menu of a session has Reconnect,
-Duplicate session, Disconnect and Close.
+Duplicate session, Disconnect, Rename and Close.
+
+A session tab can have a name of its own for this run, to tell apart
+several tabs open to the same server. "Rename" in its context menu, or F2
+while the session list has the keyboard focus, turns the tab's name into
+a text field in place, with the name selected. Enter keeps the new name;
+Esc, clicking elsewhere or moving the focus away keeps the old one.
+Names are trimmed and kept to one line, and an empty name, or the host's
+own title, goes back to the host's name, as "Reset name" in the context
+menu does. A renamed tab's tooltip shows the host and its address. The
+name is shown wherever the tab is named: the session list and finding a
+row by typing in it, the transfers, and the file editor's tabs opened
+after the rename. It is never saved: it stays through Disconnect and
+Reconnect, and goes when the tab closes. "Duplicate session" opens a tab
+with the host's name. New tabs, which have no host yet, cannot be
+renamed. In the terminal, F2 goes to the program running there.
 
 The "+" button opens a new tab (see below). New tabs can be selected,
 dragged and closed like sessions, but the count in the title does not
