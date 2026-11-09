@@ -1,10 +1,13 @@
 package monitor
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"testing"
@@ -94,22 +97,27 @@ func TestShellDirScript(t *testing.T) {
 	}
 }
 
-// The script tells the program in the terminal's foreground: here a
-// sleep named claude, which a shell with job control (the shell of the
-// connection) runs as a foreground job, in a process group of its own
-// that it gives the terminal, as an interactive shell does.
+// The script tells the program in the terminal's foreground, here a
+// sleep named claude, in the process tree of a connection: a process
+// named sshd leads the terminal's session; its child on the terminal, the
+// shell, runs claude in a process group of its own that it gives the
+// terminal, as an interactive shell does a command; and the script runs
+// without a terminal, as on an exec channel. The shell is this test's
+// binary (foregroundShell), which checks each step and writes how it
+// went, rather than sh with job control, so that a step that fails says
+// so. The tree needs no root and no terminal of the test's own.
 func TestShellScriptForeground(t *testing.T) {
 	sh, err := exec.LookPath("sh")
 	if err != nil {
 		t.Skip("no sh")
 	}
-	setsid, err := exec.LookPath("setsid")
-	if err != nil {
-		t.Skip("no setsid")
-	}
 	sleep, err := exec.LookPath("sleep")
 	if err != nil {
 		t.Skip("no sleep")
+	}
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
 	}
 	tmp := t.TempDir()
 	sshd, claude := filepath.Join(tmp, "sshd"), filepath.Join(tmp, "claude")
@@ -123,14 +131,14 @@ func TestShellScriptForeground(t *testing.T) {
 	if err := os.Mkdir(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	script, out := filepath.Join(tmp, "script.sh"), filepath.Join(tmp, "out")
+	script, out, report := filepath.Join(tmp, "script.sh"), filepath.Join(tmp, "out"), filepath.Join(tmp, "report")
 	if err := os.WriteFile(script, []byte(shellScript), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	_, pts := openPTY(t)
-	cmd := exec.Command(sshd, "-c", `(sleep 0.3; cd / && exec "$1" sh -s <"$3" >"$4") &
-"$2" -c 'set -m; "$0" 30' "$5"
-wait`, "sshd", setsid, sh, script, out, claude)
+	// "exit" after the shell keeps sh from replacing itself with it.
+	cmd := exec.Command(sshd, "-c", `"$1" -test.run='^TestForegroundShell$'; exit $?`, "sshd", self)
+	cmd.Env = append(os.Environ(), foregroundEnv+"="+strings.Join([]string{claude, script, out, report}, "\n"))
 	cmd.Dir = dir
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = pts, pts, pts
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true, Ctty: 0}
@@ -139,32 +147,143 @@ wait`, "sshd", setsid, sh, script, out, claude)
 	}
 	done := make(chan error, 1)
 	go func() { done <- cmd.Wait() }()
-	defer func() {
+	select {
+	case <-done:
+	case <-time.After(30 * time.Second):
+		cmd.Process.Kill()
 		killNamed(claude)
-		select {
-		case <-done:
-		case <-time.After(20 * time.Second):
-			cmd.Process.Kill()
-			t.Error("the shell did not end")
-		}
-	}()
-
-	var got Shell
-	deadline := time.Now().Add(20 * time.Second)
-	for {
-		data, _ := os.ReadFile(out)
-		got = parseShell(string(data))
-		if len(got.Args) == 2 || time.Now().After(deadline) {
-			break
-		}
-		time.Sleep(20 * time.Millisecond)
+		<-done
+		t.Error("the shell did not end")
 	}
+
+	steps, _ := os.ReadFile(report)
+	if !strings.HasSuffix(string(steps), "done\n") {
+		t.Fatalf("the shell's steps:\n%s", steps)
+	}
+	data, err := os.ReadFile(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := parseShell(string(data))
 	if got.Comm != "claude" || len(got.Args) != 2 || got.Args[0] != claude || got.Args[1] != "30" || got.Dir != dir {
-		t.Fatalf("read %+v", got)
+		t.Fatalf("read %+v from %q; the shell's steps:\n%s", got, data, steps)
 	}
 	if a := got.Agent(); a == nil || a.Name != "Claude Code" {
 		t.Errorf("agent %v", a)
 	}
+}
+
+// foregroundEnv gives foregroundShell claude's path, the script's, the
+// output's and the report's, a line each.
+const foregroundEnv = "FINALLYSHELL_TEST_FOREGROUND"
+
+// TestForegroundShell is the shell of TestShellScriptForeground, which
+// runs the test binary with foregroundEnv set; it does nothing else.
+func TestForegroundShell(t *testing.T) {
+	v := os.Getenv(foregroundEnv)
+	if v == "" {
+		t.Skip("the shell of TestShellScriptForeground")
+	}
+	f := strings.Split(v, "\n")
+	if len(f) != 4 {
+		t.Fatalf("%s %q", foregroundEnv, v)
+	}
+	if err := foregroundShell(f[0], f[1], f[2], f[3]); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// foregroundShell runs claude in the foreground of the terminal, checks
+// that it is, runs the script without a terminal into out, and ends
+// claude, writing each step to report and "done" at the end.
+func foregroundShell(claude, script, out, report string) error {
+	rep, err := os.Create(report)
+	if err != nil {
+		return err
+	}
+	defer rep.Close()
+	step := func(format string, args ...any) { fmt.Fprintf(rep, format+"\n", args...) }
+	fail := func(what string, err error) error {
+		step("failed: %s: %v", what, err)
+		return fmt.Errorf("%s: %v", what, err)
+	}
+
+	// The terminal of the session, which sshd leads.
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	if err != nil {
+		return fail("open the controlling terminal", err)
+	}
+	defer tty.Close()
+	fg, err := ttyForeground(tty)
+	if err != nil {
+		return fail("read the terminal's foreground", err)
+	}
+	step("the terminal's foreground: %d (this shell's group %d, the session's leader %d)", fg, syscall.Getpgrp(), os.Getppid())
+
+	// claude in a group of its own, given the terminal. A group not in
+	// the foreground is stopped by SIGTTOU as it gives it, unless it
+	// ignores it, as shells do.
+	signal.Ignore(syscall.SIGTTOU)
+	job := exec.Command(claude, "30")
+	job.SysProcAttr = &syscall.SysProcAttr{Foreground: true, Ctty: int(tty.Fd())}
+	if err := job.Start(); err != nil {
+		return fail("start claude in the foreground", err)
+	}
+	defer func() {
+		job.Process.Kill()
+		job.Wait()
+	}()
+	if fg, err = ttyForeground(tty); err != nil || fg != job.Process.Pid {
+		return fail("give claude the terminal", fmt.Errorf("foreground %d, claude %d, error %v", fg, job.Process.Pid, err))
+	}
+	step("claude %d has the terminal", fg)
+
+	// The script, on no terminal, as on an exec channel.
+	in, err := os.Open(script)
+	if err != nil {
+		return fail("open the script", err)
+	}
+	defer in.Close()
+	o, err := os.Create(out)
+	if err != nil {
+		return fail("create the output", err)
+	}
+	defer o.Close()
+	run := exec.Command("sh", "-s")
+	run.Dir = "/"
+	run.Stdin, run.Stdout = in, o
+	run.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	var stderr bytes.Buffer
+	run.Stderr = &stderr
+	if err := run.Run(); err != nil {
+		return fail("run the script", fmt.Errorf("%v %s", err, stderr.Bytes()))
+	}
+	if data, _ := os.ReadFile(out); !strings.Contains(string(data), procMark+"dir---") {
+		// What the script saw: the processes of the session.
+		stats, _ := filepath.Glob("/proc/[0-9]*/stat")
+		for _, f := range stats {
+			b, _ := os.ReadFile(f)
+			s := string(b)
+			if i := strings.LastIndex(s, ") "); i >= 0 {
+				if fields := strings.Fields(s[i+2:]); len(fields) > 5 && fields[3] == strconv.Itoa(os.Getppid()) {
+					step("  %s", strings.Join(append([]string{s[:i+1]}, fields[:6]...), " "))
+				}
+			}
+		}
+		return fail("read the script's output", fmt.Errorf("%q", data))
+	}
+	step("the script ran")
+	step("done")
+	return nil
+}
+
+// ttyForeground is the foreground process group of the terminal tty.
+func ttyForeground(tty *os.File) (int, error) {
+	var pgrp int32
+	if _, _, e := syscall.Syscall(syscall.SYS_IOCTL, tty.Fd(), syscall.TIOCGPGRP, uintptr(unsafe.Pointer(&pgrp))); e != 0 {
+		return 0, e
+	}
+	return int(pgrp), nil
 }
 
 // killNamed kills the processes whose first argument is prog.
