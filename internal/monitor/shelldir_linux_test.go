@@ -157,8 +157,9 @@ func TestShellScriptForeground(t *testing.T) {
 	}
 
 	steps, _ := os.ReadFile(report)
-	if !strings.HasSuffix(string(steps), "done\n") {
-		t.Fatalf("the shell's steps:\n%s", steps)
+	t.Logf("the shell's steps:\n%s", steps)
+	if !strings.Contains(string(steps), "\ndone\n") {
+		t.Fatal("the shell did not get to the end: its steps are above")
 	}
 	data, err := os.ReadFile(out)
 	if err != nil {
@@ -226,17 +227,23 @@ func foregroundShell(claude, script, out, report string) error {
 	signal.Ignore(syscall.SIGTTOU)
 	job := exec.Command(claude, "30")
 	job.SysProcAttr = &syscall.SysProcAttr{Foreground: true, Ctty: int(tty.Fd())}
+	var jobErr bytes.Buffer
+	job.Stdout, job.Stderr = &jobErr, &jobErr
 	if err := job.Start(); err != nil {
 		return fail("start claude in the foreground", err)
 	}
+	pid := job.Process.Pid
 	defer func() {
+		// Whether claude still ran: a signal is the kill.
+		alive := procState(pid)
 		job.Process.Kill()
-		job.Wait()
+		err := job.Wait()
+		step("claude before the kill: %s; then %v; its output %q", alive, err, jobErr.Bytes())
 	}()
-	if fg, err = ttyForeground(tty); err != nil || fg != job.Process.Pid {
-		return fail("give claude the terminal", fmt.Errorf("foreground %d, claude %d, error %v", fg, job.Process.Pid, err))
+	if fg, err = ttyForeground(tty); err != nil || fg != pid {
+		return fail("give claude the terminal", fmt.Errorf("foreground %d, claude %d, error %v", fg, pid, err))
 	}
-	step("claude %d has the terminal", fg)
+	step("claude %d has the terminal: %s", fg, procState(pid))
 
 	// The script, on no terminal, as on an exec channel.
 	in, err := os.Open(script)
@@ -272,9 +279,24 @@ func foregroundShell(claude, script, out, report string) error {
 		}
 		return fail("read the script's output", fmt.Errorf("%q", data))
 	}
-	step("the script ran")
+	step("the script ran; claude: %s", procState(pid))
 	step("done")
 	return nil
+}
+
+// procState is what /proc tells of process pid: its name and state, and
+// its arguments.
+func procState(pid int) string {
+	stat, err := os.ReadFile(fmt.Sprintf("/proc/%d/stat", pid))
+	if err != nil {
+		return err.Error()
+	}
+	s := string(stat)
+	if i := strings.LastIndex(s, ") "); i >= 0 && len(s) > i+3 {
+		s = s[:i+3] // "pid (name) S"
+	}
+	cmdline, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid))
+	return fmt.Sprintf("%s, cmdline %q %v", s, cmdline, err)
 }
 
 // ttyForeground is the foreground process group of the terminal tty.
