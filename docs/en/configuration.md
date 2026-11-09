@@ -196,7 +196,7 @@ default.
 | `netListPercent` | In the Network tab, the table's share above the connections and trace tabs, in percent. | The app's defaults. |
 | `bottomPanelHidden` | `true` collapses the bottom panel under the terminal to its row of tabs, or, on the right, hides its column. | Open. |
 | `bottomPanelSide` | `right` puts the bottom panel in a column on the terminal's right. | `""`, under the terminal. |
-| `rightPanelWidth` | Width of the column on the terminal's right, in DIPs, as last dragged. | The app's default (420). |
+| `rightPanelWidth` | Width of the column on the terminal's right, in DIPs, as last dragged. | The app's default (460). |
 | `leftPanelPage` | `connections` shows the Connections page in the bottom-left panel. | The session tabs. |
 | `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |

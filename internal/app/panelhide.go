@@ -77,8 +77,10 @@ func (a *App) panelTabRow(c *ui.Context, tabs []bottomTab, tab *int, collapsed b
 			labels[i] = t.label
 		}
 		// The tabs scroll sideways where they do not fit, as in the
-		// right column, so that the buttons stay in view.
-		ui.ScrollHorizontal(c).Grow(1).MinWidth(0).Scrollbars(false).Children(func() {
+		// right column, so that the buttons stay in view; the wheel
+		// scrolls them too (tabsWheel).
+		ui.ScrollHorizontal(c).Grow(1).MinWidth(0).Scrollbars(false).
+			TrackScroll(&a.panelTabsScroll).HandleInput(a.tabsWheel).Children(func() {
 			if collapsed {
 				a.collapsedTabs(c, labels, tab)
 			} else {
@@ -149,4 +151,17 @@ func (a *App) bottomPanelMenu(m *ui.Menu) {
 	if m.Item(a.movePanelLabel()).Chosen() {
 		a.setPanelOnRight(!a.panelOnRight())
 	}
+}
+
+// tabsWheel has the vertical wheel, or a vertical swipe of a touchpad,
+// over the panel's tabs scroll them sideways while they do not fit: down
+// toward the last tab. Sideways scrolling, and any while they fit, goes on
+// to the container as it would without it.
+func (a *App) tabsWheel(ev ui.InputEvent) bool {
+	s := &a.panelTabsScroll
+	if ev.Kind != ui.InputScroll || ev.DX != 0 || ev.DY == 0 || s.MaxX <= 0 || ev.Mods&ui.Ctrl != 0 {
+		return false
+	}
+	s.X = min(max(s.X+ev.DY, 0), s.MaxX)
+	return true
 }

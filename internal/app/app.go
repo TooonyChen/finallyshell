@@ -157,6 +157,9 @@ type App struct {
 
 	// bottomHidden collapses the bottom panel to its tabs (panelhide.go).
 	bottomHidden bool
+	// panelTabsScroll is how far the bottom panel's tabs are scrolled
+	// sideways, where they do not fit.
+	panelTabsScroll ui.ScrollState
 	// bottomSide is where the bottom panel is: "" under the terminal,
 	// config.PanelRight in the right column (rightcolumn.go), rightWidth
 	// wide. rightMonitorPct is the monitor's share of the column when

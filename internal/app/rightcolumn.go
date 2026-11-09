@@ -19,7 +19,7 @@ import (
 
 // defaultRightWidth is the right column's width, in DIPs, when none is
 // saved, and where a double click on its divider puts it back.
-const defaultRightWidth = 420
+const defaultRightWidth = 460
 
 // rightLimits keep the right column wide enough for the panes inside
 // the panel to keep their own least sizes, the widest being the Processes

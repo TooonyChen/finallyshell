@@ -94,11 +94,11 @@ shows the terminal alone either way.
 The bottom panel can also go on the right of the terminal: "Move panel to
 right side" in the tab row's context menu puts it in a column on the
 right, full height, with the terminal and its command bar on the left;
-"Move panel to bottom" puts it back. The column is 420 DIPs wide by
+"Move panel to bottom" puts it back. The column is 460 DIPs wide by
 default and keeps its width when the window is resized, the terminal
 taking the difference. Its tabs scroll sideways where they do not fit
-(with Shift and the wheel, a touchpad, or the keyboard), and so do the
-Files table's columns. Hidden while on the right, the column goes away
+(with the mouse wheel over them, a touchpad, or the keyboard), and so do
+the Files table's columns. Hidden while on the right, the column goes away
 and a thin strip at the terminal's right edge keeps the "Show panel"
 button (chevron left; the hide button in the tab row is a chevron right);
 the shortcut, the strip's context menu and anything that opens one of the
@@ -2161,7 +2161,7 @@ When the bottom panel is on the right, the divider between the terminal
 and the column sets the column's width, from 410 DIPs (what the panes
 inside the panel need, the Processes details' two halves the widest)
 up to what leaves the terminal 320 DIPs; a double click puts it back at
-420. The width is saved with the other sizes, and the terminal's
+460. The width is saved with the other sizes, and the terminal's
 divider under it keeps its position for when the panel goes back to the
 bottom.
 

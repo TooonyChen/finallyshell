@@ -310,3 +310,66 @@ func TestPanelOnRightTabDividers(t *testing.T) {
 		}})
 	}
 }
+
+// In the column at its least width, where the English tabs do not fit,
+// the last comes into view with a plain vertical wheel over the tab row,
+// down toward it, and up goes back to the first; the buttons stay where
+// they are.
+func TestPanelTabsWheel(t *testing.T) {
+	a, _, tt, _, _ := panelApp(t)
+	a.rightWidth = rightLimits.first
+	a.setPanelOnRight(true)
+	tt.Frame()
+	hide, ok := tt.Find(locales.HidePanel())
+	if !ok {
+		t.Fatal("no Hide panel button")
+	}
+	// last is the part of the Commands tab's label in view.
+	last := func() ui.Rect {
+		t.Helper()
+		r, ok := tt.Find(locales.TabCommands())
+		if !ok {
+			t.Fatalf("no Commands tab; texts %q", tt.Texts())
+		}
+		return r
+	}
+	// The label's width, all of it in view at the bottom.
+	full := func() float32 {
+		a.setPanelOnRight(false)
+		tt.Frame()
+		defer func() { a.setPanelOnRight(true); tt.Frame() }()
+		return last().W
+	}()
+	if r := last(); r.W >= full || a.panelTabsScroll.MaxX <= 0 {
+		t.Fatalf("Commands %+v in view at %v DIPs: nothing to scroll", r, a.rightWidth)
+	}
+	files, _ := tt.Find(locales.TabFiles())
+	saveShot(t, tt, "panel-right-tabs-start-en.png")
+
+	y := hide.Y + hide.H/2
+	tt.Wheel(files.X+files.W/2, y, 0, 120)
+	tt.Advance(time.Second)
+	tt.Frame()
+	if r := last(); r.W != full || r.X+r.W > hide.X {
+		t.Errorf("Commands at %+v after the wheel (%v wide), the buttons from %v", r, full, hide.X)
+	}
+	if h, _ := tt.Find(locales.HidePanel()); h != hide {
+		t.Errorf("Hide panel moved to %+v from %+v", h, hide)
+	}
+	saveShot(t, tt, "panel-right-tabs-wheeled-en.png")
+
+	tt.Wheel(files.X+files.W/2, y, 0, -120)
+	tt.Advance(time.Second)
+	tt.Frame()
+	if r, _ := tt.Find(locales.TabFiles()); r.X != files.X {
+		t.Errorf("Files at %+v after the wheel back, was %+v", r, files)
+	}
+
+	// Over the terminal, the wheel leaves the tabs alone.
+	tt.Wheel(termSpotX, termSpotY, 0, 120)
+	tt.Advance(time.Second)
+	tt.Frame()
+	if r, _ := tt.Find(locales.TabFiles()); r.X != files.X {
+		t.Errorf("Files at %+v after the wheel over the terminal", r)
+	}
+}
