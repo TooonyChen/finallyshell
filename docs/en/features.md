@@ -852,6 +852,17 @@ only Linux servers are supported. When not connected it shows an empty
 placeholder like FinalShell's ("-", 0%). A click on the process list opens
 the [Processes tab](#processes-tab).
 
+Right-click anywhere on the monitor to choose which parts show: a check
+box each for "Uptime and load", "CPU, memory, swap", "Processes",
+"Network", "Latency" and "Disks". The IP line and the System info button
+always show. The choice is the same for every host, and the placeholder
+hides the same parts. When every part is hidden, the panel shows the IP
+line and "Right-click to choose what shows". The stats keep being read
+while a part is hidden, so showing it again shows its graph's history at
+once. The interface name above the network graph keeps its own menu (see
+below). The choice is kept in `monitorHidden` in `settings.json`, on this
+computer only.
+
 The network graph shows the busiest interface by default: the one with
 the most bytes since the server started, never `lo`. The interface name
 at the graph's top right opens a menu of "Automatic (busiest)" and every

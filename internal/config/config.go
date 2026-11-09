@@ -39,6 +39,12 @@ type Settings struct {
 	TerminalPercent float32 `json:"terminalPercent,omitempty"`
 	TreeWidth       float32 `json:"treeWidth,omitempty"`
 
+	// MonitorHidden are the parts of the server monitor the user hid, by
+	// key ("uptime", "cpu", "processes", "network", "latency", "disks"),
+	// the same for every host. It lists the hidden ones so that a part
+	// added later shows.
+	MonitorHidden Names `json:"monitorHidden,omitempty"`
+
 	// The dividers of the Processes and Network tabs, in percent of the
 	// room, shared by the sessions: the process list's share above its
 	// details, the details' fields' share beside the environment, and the

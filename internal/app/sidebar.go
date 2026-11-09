@@ -12,20 +12,22 @@ import (
 )
 
 // monitorPanel shows the active session's server, as FinalShell's left
-// column does: the skeleton for a new tab.
+// column does: the skeleton for a new tab. Its context menu chooses the
+// parts that show (monitorparts.go).
 func (a *App) monitorPanel(c *ui.Context) {
 	s := a.connSession()
 	if s != nil && s.isNewTab() {
 		s = nil
 	}
-	ui.Scroll(c).Fill().Children(func() {
+	ui.Scroll(c).Fill().ContextMenu(a.monitorMenu).Children(func() {
 		a.serverView(c, s)
 	})
 }
 
 // serverView is a server as the side panel shows it: its IP, the System
-// info button, and its stats. Without a session, or before the first
-// stats, it is the skeleton FinalShell shows: dashes and empty bars.
+// info button, and its stats, without the parts the user hid. Without a
+// session, or before the first stats, it is the skeleton FinalShell
+// shows: dashes and empty bars.
 func (a *App) serverView(c *ui.Context, s *Session) {
 	ui.Column(c).FillWidth().Padding(10, 10, 8, 10).Gap(6).Children(func() {
 		ui.Row(c).Gap(6).Children(func() {
@@ -57,41 +59,67 @@ func (a *App) serverView(c *ui.Context, s *Session) {
 		default:
 			st = &s.stats
 		}
-		serverStats(c, st, a.netPicker(s), a.openProcesses)
+		serverStats(c, st, a.monitorHidden(), a.netPicker(s), a.openProcesses)
 	})
 }
 
-// serverStats shows st, or the skeleton for nil; net is the choice of
-// network interfaces, and a click on the process list calls openProcs.
-func serverStats(c *ui.Context, st *monitor.Stats, net netPicker, openProcs func()) {
-	if st == nil {
-		ui.Text(c, locales.UptimeUnknown())
-		ui.Text(c, locales.LoadAverage("-"))
-		widgets.UsageBar(c, locales.Cpu(), 0, "0%", colors.cpu)
-		widgets.UsageBar(c, locales.Memory(), 0, "0%", colors.mem)
-		widgets.UsageBar(c, locales.Swap(), 0, "0%", colors.swap)
-		procTable(c, nil, nil)
-		netRow(c, 0, 0, "", "", nil)
-		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatBytes)
-		latencyRow(c, "-")
-		widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatMillis)
-		diskTable(c, nil)
+// serverStats shows st, or the skeleton for nil, without the parts in
+// hidden, or the hint to the panel's menu when every part is; net is the
+// choice of network interfaces, and a click on the process list calls
+// openProcs.
+func serverStats(c *ui.Context, st *monitor.Stats, hidden hiddenParts, net netPicker, openProcs func()) {
+	if hidden.none() {
+		monitorHint(c)
 		return
 	}
-	ui.Text(c, locales.UptimeDays(int(st.Uptime.Hours()/24)))
-	ui.Text(c, locales.LoadAverage(fmt.Sprintf("%.2f, %.2f, %.2f", st.Load[0], st.Load[1], st.Load[2])))
-	widgets.UsageBar(c, locales.Cpu(), st.CPU/100, fmt.Sprintf("%.0f%%", st.CPU), colors.cpu)
-	widgets.UsageBar(c, locales.Memory(), ratio(st.MemUsed, st.MemTotal), usage(st.MemUsed, st.MemTotal), colors.mem)
-	widgets.UsageBar(c, locales.Swap(), ratio(st.SwapUsed, st.SwapTotal), usage(st.SwapUsed, st.SwapTotal), colors.swap)
-
-	procTable(c, st.Procs, openProcs)
-
-	netGraph(c, st, net)
-
-	latencyRow(c, formatLatency(st.Latency))
-	widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.LatHist}, []ui.Color{latencyChart}, formatMillis)
-
-	diskTable(c, st.Disks)
+	if st == nil {
+		if hidden.shows(partUptime) {
+			ui.Text(c, locales.UptimeUnknown())
+			ui.Text(c, locales.LoadAverage("-"))
+		}
+		if hidden.shows(partCPU) {
+			widgets.UsageBar(c, locales.Cpu(), 0, "0%", colors.cpu)
+			widgets.UsageBar(c, locales.Memory(), 0, "0%", colors.mem)
+			widgets.UsageBar(c, locales.Swap(), 0, "0%", colors.swap)
+		}
+		if hidden.shows(partProcesses) {
+			procTable(c, nil, nil)
+		}
+		if hidden.shows(partNetwork) {
+			netRow(c, 0, 0, "", "", nil)
+			widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatBytes)
+		}
+		if hidden.shows(partLatency) {
+			latencyRow(c, "-")
+			widgets.Sparkline(c, monitor.HistoryLen, nil, nil, formatMillis)
+		}
+		if hidden.shows(partDisks) {
+			diskTable(c, nil)
+		}
+		return
+	}
+	if hidden.shows(partUptime) {
+		ui.Text(c, locales.UptimeDays(int(st.Uptime.Hours()/24)))
+		ui.Text(c, locales.LoadAverage(fmt.Sprintf("%.2f, %.2f, %.2f", st.Load[0], st.Load[1], st.Load[2])))
+	}
+	if hidden.shows(partCPU) {
+		widgets.UsageBar(c, locales.Cpu(), st.CPU/100, fmt.Sprintf("%.0f%%", st.CPU), colors.cpu)
+		widgets.UsageBar(c, locales.Memory(), ratio(st.MemUsed, st.MemTotal), usage(st.MemUsed, st.MemTotal), colors.mem)
+		widgets.UsageBar(c, locales.Swap(), ratio(st.SwapUsed, st.SwapTotal), usage(st.SwapUsed, st.SwapTotal), colors.swap)
+	}
+	if hidden.shows(partProcesses) {
+		procTable(c, st.Procs, openProcs)
+	}
+	if hidden.shows(partNetwork) {
+		netGraph(c, st, net)
+	}
+	if hidden.shows(partLatency) {
+		latencyRow(c, formatLatency(st.Latency))
+		widgets.Sparkline(c, monitor.HistoryLen, [][]float64{st.LatHist}, []ui.Color{latencyChart}, formatMillis)
+	}
+	if hidden.shows(partDisks) {
+		diskTable(c, st.Disks)
+	}
 }
 
 func formatMillis(v float64) string { return fmt.Sprintf("%.0f", v) }

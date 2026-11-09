@@ -360,6 +360,76 @@ func (msgs Messages) Latency() string {
 	return Catalog.Format(msgs.locale, "latency", nil)
 }
 
+// MonitorPartUptime says "Uptime and load"
+// in the language the app shows.
+func MonitorPartUptime() string { return In(i18n.Locale()).MonitorPartUptime() }
+
+// MonitorPartUptime says "Uptime and load"
+// in the language of msgs.
+func (msgs Messages) MonitorPartUptime() string {
+	return Catalog.Format(msgs.locale, "monitorPartUptime", nil)
+}
+
+// MonitorPartCpu says "CPU, memory, swap"
+// in the language the app shows.
+func MonitorPartCpu() string { return In(i18n.Locale()).MonitorPartCpu() }
+
+// MonitorPartCpu says "CPU, memory, swap"
+// in the language of msgs.
+func (msgs Messages) MonitorPartCpu() string {
+	return Catalog.Format(msgs.locale, "monitorPartCpu", nil)
+}
+
+// MonitorPartProcesses says "Processes"
+// in the language the app shows.
+func MonitorPartProcesses() string { return In(i18n.Locale()).MonitorPartProcesses() }
+
+// MonitorPartProcesses says "Processes"
+// in the language of msgs.
+func (msgs Messages) MonitorPartProcesses() string {
+	return Catalog.Format(msgs.locale, "monitorPartProcesses", nil)
+}
+
+// MonitorPartNetwork says "Network"
+// in the language the app shows.
+func MonitorPartNetwork() string { return In(i18n.Locale()).MonitorPartNetwork() }
+
+// MonitorPartNetwork says "Network"
+// in the language of msgs.
+func (msgs Messages) MonitorPartNetwork() string {
+	return Catalog.Format(msgs.locale, "monitorPartNetwork", nil)
+}
+
+// MonitorPartLatency says "Latency"
+// in the language the app shows.
+func MonitorPartLatency() string { return In(i18n.Locale()).MonitorPartLatency() }
+
+// MonitorPartLatency says "Latency"
+// in the language of msgs.
+func (msgs Messages) MonitorPartLatency() string {
+	return Catalog.Format(msgs.locale, "monitorPartLatency", nil)
+}
+
+// MonitorPartDisks says "Disks"
+// in the language the app shows.
+func MonitorPartDisks() string { return In(i18n.Locale()).MonitorPartDisks() }
+
+// MonitorPartDisks says "Disks"
+// in the language of msgs.
+func (msgs Messages) MonitorPartDisks() string {
+	return Catalog.Format(msgs.locale, "monitorPartDisks", nil)
+}
+
+// MonitorPartsHint says "Right-click to choose what shows"
+// in the language the app shows.
+func MonitorPartsHint() string { return In(i18n.Locale()).MonitorPartsHint() }
+
+// MonitorPartsHint says "Right-click to choose what shows"
+// in the language of msgs.
+func (msgs Messages) MonitorPartsHint() string {
+	return Catalog.Format(msgs.locale, "monitorPartsHint", nil)
+}
+
 // NetIfaces says "Network interfaces"
 // in the language the app shows.
 func NetIfaces() string { return In(i18n.Locale()).NetIfaces() }
