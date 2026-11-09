@@ -653,7 +653,7 @@ SFTP 每个文件都要来回好几次，传大量小文件的文件夹很慢。
 
 连接右键菜单的“路由追踪”，或工具栏的路由按钮（输入地址或主机名），在表格下方的标签里追踪从服务器出发的路由，标签名形如“路由 8.8.8.8”：跳数、IP、延迟（有回应的探测的平均值）、归属地、ASN 和主机名。
 
-- 标签通过 exec 通道在服务器上运行 `nexttrace --json -M <目标>`：[NextTrace](https://github.com/nxtrace/NTrace-core) 作为独立程序运行，用它自己的服务定位每一跳，这正是它的用途；`-M` 让它不为地图上传路由。程序自己从不调用 NextTrace 的服务。NextTrace 结束时才输出 JSON，所以结束时才显示各跳。
+- 标签通过 exec 通道在服务器上运行 `nexttrace --traceroute --raw -M -g <en|cn> <目标>`：[NextTrace](https://github.com/nxtrace/NTrace-core) 作为独立程序运行，用它自己的服务定位每一跳，这正是它的用途；`-M` 让它不为地图上传路由，`-g` 让它用程序的语言给出归属地（简体中文用 `cn`，其他用 `en`）。程序自己从不调用 NextTrace 的服务。它的 RAW 输出边追踪边逐个探测输出一行，所以各跳随到随显示；一跳有多个路由器回应时显示第一个。NextTrace 的默认模式改成 MTR 后（它的 README 说不早于 2027 年），`--traceroute` 让它保持传统模式；`--help` 里没有这个参数的旧版 NextTrace 不加它运行。
 - 服务器的 PATH（加上 `/usr/local/bin`、`/usr/sbin` 和 `/sbin`）里没有 `nexttrace` 时，标签会说明，并给出 NextTrace README 里的安装命令 `curl -sL https://nxtrace.org/nt | bash` 和复制按钮：程序从不在服务器上安装任何东西。服务器有 `traceroute -n -w 2` 或 `tracepath -n` 时改用它们追踪，各跳随到随显示，下载了 ip2region 数据时用它显示归属地；两个都没有时会说明。
 - 很多服务器上 NextTrace 和 traceroute 需要 root 或发送原始数据包的权限：它们的报错显示在标签里。
 - 标签上的按钮把路由复制成文本，或重新追踪。

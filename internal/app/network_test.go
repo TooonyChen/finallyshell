@@ -33,8 +33,12 @@ type fakeNetwork struct {
 	socks  []monitor.Socket
 	lists  int
 	traces []string // "target lang"
-	// trace is what a trace answers, as its updates.
-	route func(target string) []monitor.TraceResult
+	// route is what a trace answers, as its updates, in lang.
+	route func(target, lang string) []monitor.TraceResult
+	// With hold, a trace waits before its update holdAt until hold is
+	// closed: the route as it is traced.
+	hold   chan struct{}
+	holdAt int
 }
 
 func (f *fakeNetwork) list(ctx context.Context, client *ssh.Client, l *monitor.NetLister) (monitor.NetSnapshot, error) {
@@ -54,10 +58,18 @@ func (f *fakeNetwork) list(ctx context.Context, client *ssh.Client, l *monitor.N
 func (f *fakeNetwork) trace(ctx context.Context, client *ssh.Client, target, lang string, update func(monitor.TraceResult)) monitor.TraceResult {
 	f.mu.Lock()
 	f.traces = append(f.traces, target+" "+lang)
-	steps := f.route(target)
+	steps := f.route(target, lang)
+	hold, holdAt := f.hold, f.holdAt
 	f.mu.Unlock()
 	var last monitor.TraceResult
-	for _, r := range steps {
+	for i, r := range steps {
+		if hold != nil && i == holdAt {
+			select {
+			case <-hold:
+			case <-ctx.Done():
+				return last
+			}
+		}
 		update(r)
 		last = r
 	}
@@ -174,7 +186,7 @@ func networkApp(t *testing.T) (*App, *fakePlatform, *Session, *fakeNetwork, *fak
 	a, p := testApp(t)
 	s := demoSession(a, "web-1", "45.56.78.90")
 	a.active = 0
-	f := &fakeNetwork{socks: demoSockets(), route: func(string) []monitor.TraceResult { return nil }}
+	f := &fakeNetwork{socks: demoSockets(), route: func(string, string) []monitor.TraceResult { return nil }}
 	a.network.api = f
 	g := &fakeGeo{}
 	srv := g.server(t)
@@ -477,39 +489,75 @@ func TestNetworkDownloadFails(t *testing.T) {
 	p.until(t, "the partial file gone", func() bool { return len(geoFiles(t)) == 0 })
 }
 
-func nextTraceHops(t *testing.T) []monitor.TraceHop {
-	data, err := os.ReadFile("../monitor/testdata/nexttrace.json")
+// nextTraceSteps are the updates of a trace with NextTrace, in lang: the
+// recorded RAW output read a line at a time, as monitor.Trace does, then
+// the end.
+func nextTraceSteps(t *testing.T, lang string) []monitor.TraceResult {
+	data, err := os.ReadFile("../monitor/testdata/nexttrace-raw-" + lang + ".txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	hops, err := monitor.ParseNextTrace(data, traceLang())
-	if err != nil {
-		t.Fatal(err)
+	steps := []monitor.TraceResult{{Tool: monitor.ToolNextTrace}}
+	var out strings.Builder
+	for line := range strings.Lines(string(data)) {
+		out.WriteString(line)
+		if strings.Contains(line, "|") {
+			steps = append(steps, monitor.TraceResult{Tool: monitor.ToolNextTrace, Hops: monitor.ParseNextTrace(out.String())})
+		}
 	}
-	return hops
+	end := steps[len(steps)-1]
+	end.Done = true
+	return append(steps, end)
+}
+
+// holdBefore holds the trace before the first update with n hops.
+func holdBefore(t *testing.T, f *fakeNetwork, steps []monitor.TraceResult, n int) chan struct{} {
+	i := slices.IndexFunc(steps, func(r monitor.TraceResult) bool { return len(r.Hops) == n })
+	if i < 0 {
+		t.Fatalf("no update with %d hops", n)
+	}
+	hold := make(chan struct{})
+	f.set(func() { f.hold, f.holdAt = hold, i })
+	return hold
 }
 
 func TestNetworkTrace(t *testing.T) {
 	a, p, s, f, _, tt := networkApp(t)
 	a.geoNever(false)
+	steps := map[string][]monitor.TraceResult{"en": nextTraceSteps(t, "en"), "cn": nextTraceSteps(t, "cn")}
 	f.set(func() {
-		f.route = func(target string) []monitor.TraceResult {
-			hops := nextTraceHops(t)
-			return []monitor.TraceResult{{Tool: monitor.ToolNextTrace}, {Tool: monitor.ToolNextTrace, Hops: hops, Done: true}}
-		}
+		f.route = func(_, lang string) []monitor.TraceResult { return steps[lang] }
 	})
 	a.openNetTab(s, netGroup(t, s, "0.0.0.0:80"))
+
+	// The hops show as NextTrace writes them, while it still traces.
+	hold := holdBefore(t, f, steps["en"], 4)
 	a.startTrace(s, "8.8.8.8")
-	p.until(t, "the route", func() bool { return tt.HasText("dns.google") })
-	for _, want := range []string{"Trace 8.8.8.8", "Hop", "RTT", "ASN", "AS15169", "Australia Victoria Melbourne Cloudflare", "0.45 ms", "*", "NextTrace"} {
+	tr := s.net.tabs[s.net.tab].trace
+	p.until(t, "the first hops", func() bool { return tt.HasText("103.21.244.1") })
+	if !tr.running || tt.HasText("1.0.1.1") || tt.HasText("dns.google") || !tt.HasText("Melbourne Victoria Australia Cloudflare") || !tt.HasText("NextTrace") {
+		t.Errorf("running %v; texts %q", tr.running, tt.Texts())
+	}
+	saveShot(t, tt, "network-trace-streaming-en.png")
+	close(hold)
+	p.until(t, "the route", func() bool { return tt.HasText("dns.google") && !tr.running })
+	for _, want := range []string{"Trace 8.8.8.8", "Hop", "RTT", "ASN", "AS15169", "Melbourne Victoria Australia Cloudflare", "0.45 ms", "*", "NextTrace"} {
 		if !tt.HasText(want) {
 			t.Errorf("missing %q; texts %q", want, tt.Texts())
 		}
 	}
 	saveShot(t, tt, "network-trace-en.png")
 	a.setLanguage("zh-Hans")
-	a.runTrace(s, s.net.tabs[s.net.tab].trace)
-	p.until(t, "the route in Chinese", func() bool { return tt.HasText("澳大利亚 维多利亚州 墨尔本 Cloudflare") })
+	hold = holdBefore(t, f, steps["cn"], 4)
+	a.runTrace(s, tr)
+	p.until(t, "the first hops in Chinese", func() bool { return tt.HasText("澳大利亚 维多利亚州 墨尔本 Cloudflare") })
+	if !tr.running || tt.HasText("dns.google") {
+		t.Errorf("running %v; texts %q", tr.running, tt.Texts())
+	}
+	saveShot(t, tt, "network-trace-streaming-zh.png")
+	close(hold)
+	f.set(func() { f.hold = nil })
+	p.until(t, "the route in Chinese", func() bool { return tt.HasText("dns.google") && !tr.running })
 	saveShot(t, tt, "network-trace-zh.png")
 	a.setLanguage("en")
 	if got := f.traces; !slices.Equal(got, []string{"8.8.8.8 en", "8.8.8.8 cn"}) {
@@ -522,7 +570,7 @@ func TestNetworkTrace(t *testing.T) {
 	// No NextTrace: its install command, and traceroute's route, without
 	// locations (no data).
 	f.set(func() {
-		f.route = func(target string) []monitor.TraceResult {
+		f.route = func(target, _ string) []monitor.TraceResult {
 			r := monitor.TraceResult{Tool: monitor.ToolTraceroute, NoNextTrace: true, Hops: []monitor.TraceHop{
 				{TTL: 1, IP: "10.0.0.1", RTTs: []time.Duration{500 * time.Microsecond}},
 				{TTL: 2},
@@ -544,7 +592,7 @@ func TestNetworkTrace(t *testing.T) {
 
 	// Nothing at all.
 	f.set(func() {
-		f.route = func(string) []monitor.TraceResult {
+		f.route = func(string, string) []monitor.TraceResult {
 			return []monitor.TraceResult{{NoNextTrace: true, Done: true, Err: monitor.ErrNoTraceTool}}
 		}
 	})

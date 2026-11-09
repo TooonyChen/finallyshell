@@ -8352,11 +8352,11 @@ func (msgs Messages) OptionTraceHeading() string {
 	return Catalog.Format(msgs.locale, "optionTraceHeading", nil)
 }
 
-// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTr…"
+// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --traceroute --raw), which locates the hops with its own service …"
 // in the language the app shows.
 func OptionTraceNote() string { return In(i18n.Locale()).OptionTraceNote() }
 
-// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTr…"
+// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --traceroute --raw), which locates the hops with its own service …"
 // in the language of msgs.
 func (msgs Messages) OptionTraceNote() string {
 	return Catalog.Format(msgs.locale, "optionTraceNote", nil)

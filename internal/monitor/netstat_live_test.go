@@ -107,3 +107,52 @@ func TestTraceLive(t *testing.T) {
 	}
 	t.Logf("tool %q, no NextTrace %v, %d hops, err %v", r.Tool, r.NoNextTrace, len(r.Hops), r.Err)
 }
+
+// TestNextTraceStreamLive runs the trace script on a real server with a
+// NextTrace of the test's own, in a folder of its own put first on the
+// script's PATH, which writes the recorded RAW output a probe at a time:
+// the hops come as they are written, before the trace ends.
+func TestNextTraceStreamLive(t *testing.T) {
+	client := dialTestServer(t)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	out, _, err := RunScript(ctx, client, "mktemp -d\n")
+	dir := strings.TrimSpace(out)
+	if err != nil || !strings.HasPrefix(dir, "/") {
+		t.Fatalf("mktemp: %q %v", out, err)
+	}
+	t.Cleanup(func() { RunScript(context.Background(), client, "rm -rf '"+dir+"'\n") })
+	fake := `#!/bin/sh
+if [ "$1" = --help ]; then echo '  -k  --traceroute  Use traditional traceroute mode'; exit 0; fi
+echo "$*" >"` + dir + `/args"
+while IFS= read -r line; do
+	echo "$line"
+	case $line in *'|'*) sleep 0.1 ;; esac
+done <"` + dir + `/out.txt"
+`
+	setup := "cat >'" + dir + "/out.txt' <<'FS_EOF'\n" + readFixture(t, "nexttrace-raw-en.txt") + "FS_EOF\n" +
+		"cat >'" + dir + "/nexttrace' <<'FS_EOF'\n" + fake + "FS_EOF\n" +
+		"chmod +x '" + dir + "/nexttrace'\n"
+	if _, stderr, err := RunScript(ctx, client, setup); err != nil {
+		t.Fatalf("%v: %s", err, stderr)
+	}
+	start := time.Now()
+	var partial time.Duration // when a part of the route came
+	r := runTrace(ctx, client, "PATH='"+dir+"':$PATH\n"+traceScript("8.8.8.8", "en"), func(r TraceResult) {
+		if !r.Done && len(r.Hops) > 0 && len(r.Hops) < 5 && partial == 0 {
+			partial = time.Since(start)
+		}
+	})
+	took := time.Since(start)
+	if r.Err != nil || r.Tool != ToolNextTrace || len(r.Hops) != 5 || r.Hops[4].Host != "dns.google" {
+		t.Fatalf("result %+v", r)
+	}
+	if partial == 0 || took-partial < 500*time.Millisecond {
+		t.Errorf("first hops after %v, the end after %v", partial, took)
+	}
+	t.Logf("first hops after %v, the end after %v", partial, took)
+	args, _, _ := RunScript(ctx, client, "cat '"+dir+"/args'\n")
+	if got := strings.TrimSpace(args); got != "--traceroute --raw -M -g en 8.8.8.8" {
+		t.Errorf("args %q", got)
+	}
+}

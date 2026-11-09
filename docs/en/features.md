@@ -1496,12 +1496,18 @@ server in a tab below the table named like "Trace 8.8.8.8": hop, IP,
 round trip (the average of the probes that answered), location, ASN and
 host name.
 
-- The tab runs `nexttrace --json -M <target>` on the server over an exec
-  channel: [NextTrace](https://github.com/nxtrace/NTrace-core) runs as its
-  own program, and locates the hops with its own service, as it is made
-  to; `-M` keeps it from uploading the route for a map. The app never
-  calls NextTrace's service itself. NextTrace writes its JSON when it
-  ends, so the hops show then.
+- The tab runs `nexttrace --traceroute --raw -M -g <en|cn> <target>` on
+  the server over an exec channel:
+  [NextTrace](https://github.com/nxtrace/NTrace-core) runs as its own
+  program, and locates the hops with its own service, as it is made to;
+  `-M` keeps it from uploading the route for a map, and `-g` asks for the
+  locations in the app's language (`cn` for Simplified Chinese, `en`
+  otherwise). The app never calls NextTrace's service itself. Its RAW
+  output is a line per probe as it goes, so each hop shows as it
+  arrives; a hop that answers from more than one router shows the first.
+  `--traceroute` keeps NextTrace in its traditional mode once its default
+  becomes MTR (no earlier than 2027, its README says); a NextTrace too
+  old to know the flag, as its `--help` shows, runs without it.
 - When `nexttrace` is not on the server's PATH (with `/usr/local/bin`,
   `/usr/sbin` and `/sbin` added), the tab says so, with the install
   command of NextTrace's README, `curl -sL https://nxtrace.org/nt | bash`,

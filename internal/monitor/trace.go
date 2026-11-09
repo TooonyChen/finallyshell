@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"net"
 	"net/netip"
@@ -80,16 +79,32 @@ func ValidTraceTarget(s string) bool {
 }
 
 // traceScript runs the first tool there is on target: NextTrace, with
-// its JSON output and without its map (which it would upload), else
-// traceroute or tracepath. The sbin folders are on the PATH, where
-// traceroute often is. Each tool's stdin is /dev/null, as the script is
-// the shell's.
-func traceScript(target string) string {
+// its RAW output (a line per probe, as it goes), its locations in lang
+// ("en" or "cn") and without its map (which it would upload), else
+// traceroute or tracepath.
+//
+// NextTrace is kept to its traditional mode with --traceroute when its
+// --help has the flag: its README says its default mode becomes MTR no
+// earlier than 2027, and bare --raw then an endless MTR stream. The
+// versions before --traceroute don't know it, and are traditional with
+// bare --raw.
+//
+// The sbin folders are on the PATH, where traceroute often is. Each
+// tool's stdin is /dev/null, as the script is the shell's.
+func traceScript(target, lang string) string {
 	// ValidTraceTarget leaves nothing to escape; quoted all the same.
 	q := "'" + strings.ReplaceAll(target, "'", `'\''`) + "'"
+	if lang != "cn" {
+		lang = "en"
+	}
+	nt := `--raw -M -g ` + lang + ` ` + q + ` </dev/null 2>&1`
 	return `export LC_ALL=C PATH="$PATH:/usr/local/bin:/usr/sbin:/sbin"
 m() { echo "` + netMark + `$1---"; }
-if command -v nexttrace >/dev/null 2>&1; then m nexttrace; exec nexttrace --json -M ` + q + ` </dev/null 2>&1; fi
+if command -v nexttrace >/dev/null 2>&1; then
+	m nexttrace
+	if nexttrace --help </dev/null 2>&1 | grep -q -e --traceroute; then exec nexttrace --traceroute ` + nt + `; fi
+	exec nexttrace ` + nt + `
+fi
 m no-nexttrace
 if command -v traceroute >/dev/null 2>&1; then m traceroute; exec traceroute -n -w 2 ` + q + ` </dev/null; fi
 if command -v tracepath >/dev/null 2>&1; then m tracepath; exec tracepath -n ` + q + ` </dev/null; fi
@@ -102,28 +117,34 @@ m none
 const traceTimeout = 4 * time.Minute
 
 // Trace traces the route from the server to target over an exec channel
-// of client, calling update with the route each time a hop arrives
-// (with NextTrace, whose JSON comes whole, once at the end) and with the
-// end. lang is the language of NextTrace's locations: "en" or "cn".
+// of client, calling update with the route each time a hop arrives and
+// with the end. lang is the language of NextTrace's locations: "en" or
+// "cn".
 func Trace(ctx context.Context, client *ssh.Client, target, lang string, update func(TraceResult)) TraceResult {
+	if !ValidTraceTarget(target) {
+		r := TraceResult{Done: true, Err: &TraceError{Msg: "invalid address: " + target}}
+		update(r)
+		return r
+	}
+	return runTrace(ctx, client, traceScript(target, lang), update)
+}
+
+// runTrace runs a trace script, reading the lines of the tool it runs.
+func runTrace(ctx context.Context, client *ssh.Client, script string, update func(TraceResult)) TraceResult {
 	var r TraceResult
 	finish := func(err error) TraceResult {
 		r.Done, r.Err = true, err
 		update(r)
 		return r
 	}
-	if !ValidTraceTarget(target) {
-		return finish(&TraceError{Msg: "invalid address: " + target})
-	}
 	if client == nil {
 		return finish(errors.New("not connected"))
 	}
 	ctx, cancel := context.WithTimeout(ctx, traceTimeout)
 	defer cancel()
-	var nt bytes.Buffer // NextTrace's output
 	none := false
 	var last string // the last line a tool wrote
-	stderr, err := runLines(ctx, client, traceScript(target), func(line string) {
+	stderr, err := runLines(ctx, client, script, func(line string) {
 		if name, ok := strings.CutPrefix(line, netMark); ok && strings.HasSuffix(name, "---") {
 			switch strings.TrimSuffix(name, "---") {
 			case "nexttrace":
@@ -143,20 +164,17 @@ func Trace(ctx context.Context, client *ssh.Client, target, lang string, update 
 		if strings.TrimSpace(line) != "" {
 			last = strings.TrimSpace(line)
 		}
+		var changed bool
 		switch r.Tool {
 		case ToolNextTrace:
-			nt.WriteString(line)
-			nt.WriteByte('\n')
-		case ToolTraceroute, ToolTracepath:
-			var changed bool
-			if r.Tool == ToolTraceroute {
-				r.Hops, changed = addTracerouteLine(r.Hops, line)
-			} else {
-				r.Hops, changed = addTracepathLine(r.Hops, line)
-			}
-			if changed {
-				update(r)
-			}
+			r.Hops, changed = addNextTraceLine(r.Hops, line)
+		case ToolTraceroute:
+			r.Hops, changed = addTracerouteLine(r.Hops, line)
+		case ToolTracepath:
+			r.Hops, changed = addTracepathLine(r.Hops, line)
+		}
+		if changed {
+			update(r)
 		}
 	})
 	if ctx.Err() != nil {
@@ -168,14 +186,14 @@ func Trace(ctx context.Context, client *ssh.Client, target, lang string, update 
 	if none {
 		return finish(ErrNoTraceTool)
 	}
-	if r.Tool == ToolNextTrace {
-		hops, perr := ParseNextTrace(nt.Bytes(), lang)
-		if perr == nil {
-			r.Hops = hops
-			return finish(nil)
-		}
+	if r.Tool == ToolNextTrace && len(r.Hops) == 0 {
+		// NextTrace writes its errors on stdout too (the script sends
+		// its stderr there), and at least a hop when it works.
 		if last == "" {
-			last = perr.Error()
+			if err == nil {
+				err = errors.New("NextTrace wrote no hops")
+			}
+			last = err.Error()
 		}
 		return finish(&TraceError{Msg: last})
 	}
@@ -218,7 +236,7 @@ func runLines(ctx context.Context, client *ssh.Client, script string, line func(
 		return "", err
 	}
 	sc := bufio.NewScanner(out)
-	sc.Buffer(make([]byte, 64<<10), 16<<20) // NextTrace's JSON is one line
+	sc.Buffer(make([]byte, 64<<10), 1<<20)
 	for sc.Scan() {
 		line(sc.Text())
 	}
@@ -226,94 +244,64 @@ func runLines(ctx context.Context, client *ssh.Client, script string, line func(
 	return errBuf.String(), werr
 }
 
-// nextTraceHop is a probe of NextTrace's --json output: its Go struct
-// as encoding/json writes it (RTT in nanoseconds).
-type nextTraceHop struct {
-	Success bool
-	Address *struct {
-		IP string
+// ParseNextTrace reads the output of nexttrace --traceroute --raw, each
+// line as addNextTraceLine does.
+func ParseNextTrace(out string) []TraceHop {
+	var hops []TraceHop
+	for _, line := range strings.Split(out, "\n") {
+		hops, _ = addNextTraceLine(hops, line)
 	}
-	Hostname string
-	TTL      int
-	RTT      int64
-	Geo      *struct {
-		Asnumber  string `json:"asnumber"`
-		Country   string `json:"country"`
-		CountryEn string `json:"country_en"`
-		Prov      string `json:"prov"`
-		ProvEn    string `json:"prov_en"`
-		City      string `json:"city"`
-		CityEn    string `json:"city_en"`
-		District  string `json:"district"`
-		Owner     string `json:"owner"`
-		Isp       string `json:"isp"`
-	}
+	return hops
 }
 
-// ParseNextTrace reads the output of nexttrace --json: a JSON document
-// whose Hops are, for each TTL, its probes. Lines before the document,
-// as warnings, are skipped. Each hop is the first router that answered,
-// with the round trips of the probes it answered.
-func ParseNextTrace(out []byte, lang string) ([]TraceHop, error) {
-	i := bytes.Index(out, []byte(`{"Hops"`))
-	if i < 0 {
-		i = bytes.IndexByte(out, '{')
+// addNextTraceLine reads a line of nexttrace --traceroute --raw (its
+// EasyPrinter), a probe: its TTL, the router that answered, its name,
+// the round trip in milliseconds, its AS, where it is (country, region,
+// city, district and owner, from NextTrace's own service in the language
+// asked; in English NextTrace puts the city first), its latitude and
+// longitude.
+//
+//	3|103.21.244.1|ae1.mel01.example.net|11.20|13335|澳大利亚|维多利亚州|墨尔本||Cloudflare|-37.8136|144.9631
+//
+// A probe that nothing answered is "3|*||||||", or the same in 12
+// columns, as NextTrace's MTR RAW writes it. A TTL has a line per probe;
+// its hop is the first router that answered, with the round trips of
+// that router's probes, as for traceroute. Other lines, such as the
+// header, are skipped.
+func addNextTraceLine(hops []TraceHop, line string) ([]TraceHop, bool) {
+	f := strings.Split(strings.TrimSpace(line), "|")
+	if len(f) < 8 {
+		return hops, false
 	}
-	if i < 0 {
-		return nil, errors.New("no JSON in NextTrace's output")
+	ttl, err := strconv.Atoi(f[0])
+	if err != nil || ttl <= 0 {
+		return hops, false
 	}
-	var doc struct {
-		Hops [][]nextTraceHop
+	ip := f[1]
+	if ip == "*" {
+		hops, _ = hop(hops, ttl)
+		return hops, true
 	}
-	if err := json.NewDecoder(bytes.NewReader(out[i:])).Decode(&doc); err != nil {
-		return nil, err
+	if len(f) < 12 || !isIP(ip) {
+		return hops, false
 	}
-	var hops []TraceHop
-	for n, probes := range doc.Hops {
-		h := TraceHop{TTL: n + 1}
-		for _, p := range probes {
-			if p.TTL > 0 {
-				h.TTL = p.TTL
-			}
-			if p.Address == nil || p.Address.IP == "" {
-				continue
-			}
-			if h.IP == "" {
-				h.IP = p.Address.IP
-				h.Host = strings.TrimSuffix(p.Hostname, ".")
-				if g := p.Geo; g != nil {
-					h.ASN = g.Asnumber
-					pick := func(cn, en string) string {
-						if lang == "en" && en != "" {
-							return en
-						}
-						return cn
-					}
-					owner := g.Owner
-					if owner == "" {
-						owner = g.Isp
-					}
-					for _, w := range []string{pick(g.Country, g.CountryEn), pick(g.Prov, g.ProvEn), pick(g.City, g.CityEn), g.District, owner} {
-						if w = strings.TrimSpace(w); w != "" && !slices.Contains(h.Where, w) {
-							h.Where = append(h.Where, w)
-						}
-					}
-				}
-			}
-			if p.IP() == h.IP && p.Success && p.RTT > 0 {
-				h.RTTs = append(h.RTTs, time.Duration(p.RTT))
+	hops, h := hop(hops, ttl)
+	if h.IP == "" {
+		h.IP = ip
+		h.Host = strings.TrimSuffix(strings.TrimSpace(f[2]), ".")
+		h.ASN = strings.TrimSpace(f[4])
+		for _, w := range f[5:10] {
+			if w = strings.TrimSpace(w); w != "" && !slices.Contains(h.Where, w) {
+				h.Where = append(h.Where, w)
 			}
 		}
-		hops = append(hops, h)
 	}
-	return hops, nil
-}
-
-func (p nextTraceHop) IP() string {
-	if p.Address == nil {
-		return ""
+	if ip == h.IP {
+		if ms, err := strconv.ParseFloat(f[3], 64); err == nil && ms >= 0 {
+			h.RTTs = append(h.RTTs, time.Duration(ms*float64(time.Millisecond)))
+		}
 	}
-	return p.Address.IP
+	return hops, true
 }
 
 // hop is the hop of ttl in hops, added in order when it is new.
