@@ -202,7 +202,9 @@ How it is told:
   Ctrl+Z, which end or stop an agent without an Enter. While a tab shows
   an agent, it is also read every 10 seconds, so that the logo goes when
   the agent ends by itself. Nothing is read otherwise, and a tab never
-  has more than one read in flight.
+  has more than one read in flight. A read that fails, as one that times
+  out, changes nothing: the logo stays, and so do the reads every 10
+  seconds, until a read that answers.
 - Not seen: an agent inside `tmux` or `screen`, or in an `ssh` to another
   host; servers without `/proc` (macOS, BSD); hosts whose exec channel is
   off (`noMonitor`). An agent run with `sudo` is seen, unless `/proc` is

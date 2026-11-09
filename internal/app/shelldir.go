@@ -70,7 +70,10 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 	var sent *monitor.Agent
 	sentTurn := w.turns.Load()
 	// read reads the directory, when dir, and the foreground program,
-	// when the tabs show agents, and reports whether that is one.
+	// when the tabs show agents, and reports whether the tab shows one
+	// after it. A read that fails, as one that times out, tells nothing:
+	// the tab keeps what it shows, and keeps reading while that is an
+	// agent.
 	read := func(dir, baseline bool) (agent bool) {
 		turn := w.turns.Load() // before on: a turn read is never newer
 		agents := probe && w.on.Load()
@@ -80,24 +83,25 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 		}
 		serverDir := dir && d == "" && probe
 		var sh monitor.Shell
+		var err error
 		if serverDir || agents {
 			rctx, cancel := context.WithTimeout(ctx, shellDirTimeout)
-			sh, _ = readServer(rctx, client)
+			sh, err = readServer(rctx, client)
 			cancel()
 		}
 		if serverDir {
 			d = sh.Dir
 		}
-		var ag *monitor.Agent
-		if agents {
+		ag := sent
+		if agents && err == nil {
 			ag = sh.Agent()
 		}
 		newDir := dir && d != ""
 		// Only a change redraws: one from what was sent, though the UI
 		// thread may not have taken it yet, or since the setting changed.
-		newAgent := agents && (ag != sent || turn != sentTurn)
+		newAgent := agents && err == nil && (ag != sent || turn != sentTurn)
 		if ctx.Err() != nil || !newDir && !newAgent {
-			return ag != nil
+			return agents && ag != nil
 		}
 		if newAgent {
 			sent, sentTurn = ag, turn
@@ -113,7 +117,7 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 				a.shellAgentRead(s, ag)
 			}
 		})
-		return ag != nil
+		return agents && ag != nil
 	}
 	// The first reads, as the shell starts, are where it is before any
 	// command, from which a command that keeps it is told apart: without

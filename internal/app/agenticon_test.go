@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
@@ -130,6 +131,31 @@ func TestAgentIconPendingRead(t *testing.T) {
 	if got := agentShown(tt, s); got != "" {
 		t.Errorf("the tab shows %q after the agent ended", got)
 	}
+}
+
+// A read that fails, as one that times out or whose exec channel the
+// server refuses for a moment, tells nothing: the logo stays and the tab
+// keeps reading; the next read that answers decides.
+func TestAgentIconReadError(t *testing.T) {
+	_, p, s, tt, fd := agentServer(t)
+	fd.run(claudeArgs...)
+	tt.Key(0, ui.KeyEnter)
+	p.until(t, "Claude Code", func() bool { return agentShown(tt, s) == "Claude Code" })
+	settle(p, 100*time.Millisecond)
+
+	fd.failWith(context.DeadlineExceeded)
+	fd.run()
+	n := fd.count()
+	p.until(t, "reads that fail, three of them", func() bool { return fd.count() >= n+3 })
+	tt.Key(ui.Ctrl, ui.KeyC) // and those after a key
+	p.until(t, "the reads after Ctrl+C", func() bool { return fd.count() >= n+3+len(shellDirReads) })
+	settle(p, 50*time.Millisecond)
+	if got := agentShown(tt, s); got != "Claude Code" {
+		t.Fatalf("after reads that failed, the tab shows %q", got)
+	}
+
+	fd.failWith(nil)
+	p.until(t, "a read that answers: no agent", func() bool { return agentShown(tt, s) == "" })
 }
 
 // Turned off in Options › Terminal, no tab shows an agent and none is

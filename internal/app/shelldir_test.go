@@ -155,7 +155,15 @@ type fakeShellDir struct {
 	mu    sync.Mutex
 	dir   string
 	fg    []string // the foreground program's arguments
+	err   error    // what the reads fail with, if they do
 	reads int
+}
+
+// failWith has the reads fail with err; nil reads again.
+func (fd *fakeShellDir) failWith(err error) {
+	fd.mu.Lock()
+	defer fd.mu.Unlock()
+	fd.err = err
 }
 
 // run has the shell run args in its foreground: none for its prompt.
@@ -181,6 +189,9 @@ func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (monitor.S
 	fd.mu.Lock()
 	defer fd.mu.Unlock()
 	fd.reads++
+	if fd.err != nil {
+		return monitor.Shell{}, fd.err
+	}
 	sh := monitor.Shell{Dir: fd.dir, Comm: "bash", Args: []string{"-bash"}}
 	if len(fd.fg) > 0 {
 		sh.Comm, sh.Args = path.Base(fd.fg[0]), fd.fg
