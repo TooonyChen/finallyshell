@@ -8592,6 +8592,26 @@ func (msgs Messages) ShowPanel() string {
 	return Catalog.Format(msgs.locale, "showPanel", nil)
 }
 
+// MovePanelRight says "Move panel to right side"
+// in the language the app shows.
+func MovePanelRight() string { return In(i18n.Locale()).MovePanelRight() }
+
+// MovePanelRight says "Move panel to right side"
+// in the language of msgs.
+func (msgs Messages) MovePanelRight() string {
+	return Catalog.Format(msgs.locale, "movePanelRight", nil)
+}
+
+// MovePanelBottom says "Move panel to bottom"
+// in the language the app shows.
+func MovePanelBottom() string { return In(i18n.Locale()).MovePanelBottom() }
+
+// MovePanelBottom says "Move panel to bottom"
+// in the language of msgs.
+func (msgs Messages) MovePanelBottom() string {
+	return Catalog.Format(msgs.locale, "movePanelBottom", nil)
+}
+
 // ScToggleBottomPanel says "Show or hide the bottom panel"
 // in the language the app shows.
 func ScToggleBottomPanel() string { return In(i18n.Locale()).ScToggleBottomPanel() }

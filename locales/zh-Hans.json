@@ -847,6 +847,8 @@
   "backToTerminal": "返回终端",
   "hidePanel": "隐藏面板",
   "showPanel": "显示面板",
+  "movePanelRight": "将面板移到右侧",
+  "movePanelBottom": "将面板移到底部",
   "scToggleBottomPanel": "显示或隐藏底部面板",
   "panelTabLabel": "{session} | {tab}",
   "tabCommands": "命令",

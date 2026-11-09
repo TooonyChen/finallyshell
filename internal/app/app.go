@@ -157,6 +157,13 @@ type App struct {
 
 	// bottomHidden collapses the bottom panel to its tabs (panelhide.go).
 	bottomHidden bool
+	// bottomSide is where the bottom panel is: "" under the terminal,
+	// config.PanelRight in the right column (rightcolumn.go), rightWidth
+	// wide. rightMonitorPct is the monitor's share of the column when
+	// both are there.
+	bottomSide      string
+	rightWidth      float32
+	rightMonitorPct float32
 
 	// The pane sizes changed since they were saved, last at layoutAt.
 	layoutDirty bool
@@ -254,21 +261,23 @@ type App struct {
 // New makes the app's state, with the hosts and settings saved on disk.
 func New(plat Platform) *App {
 	a := &App{
-		plat:         plat,
-		passwords:    map[string]string{},
-		windows:      map[WindowKind]bool{},
-		active:       -1,
-		manager:      managerState{row: -1, win: WindowManager},
-		connTree:     managerState{row: -1, win: WindowMain},
-		start:        startState{row: -1},
-		sideWidth:    defaultSideWidth,
-		monitorPct:   defaultMonitorPct,
-		terminalPct:  defaultTerminalPct,
-		treeWidth:    defaultTreeWidth,
-		processes:    processesUI{listPct: defaultProcListPct, fieldsPct: defaultProcFieldsPct},
-		network:      networkUI{listPct: defaultNetListPct},
-		saveHosts:    config.SaveHosts,
-		saveSettings: config.SaveSettings,
+		plat:            plat,
+		passwords:       map[string]string{},
+		windows:         map[WindowKind]bool{},
+		active:          -1,
+		manager:         managerState{row: -1, win: WindowManager},
+		connTree:        managerState{row: -1, win: WindowMain},
+		start:           startState{row: -1},
+		sideWidth:       defaultSideWidth,
+		monitorPct:      defaultMonitorPct,
+		terminalPct:     defaultTerminalPct,
+		rightWidth:      defaultRightWidth,
+		rightMonitorPct: defaultRightMonitorPct,
+		treeWidth:       defaultTreeWidth,
+		processes:       processesUI{listPct: defaultProcListPct, fieldsPct: defaultProcFieldsPct},
+		network:         networkUI{listPct: defaultNetListPct},
+		saveHosts:       config.SaveHosts,
+		saveSettings:    config.SaveSettings,
 
 		importSources: allImportSources(),
 		home:          homeDir,
@@ -327,11 +336,20 @@ func (a *App) sidebar(c *ui.Context) {
 }
 
 // mainArea is the terminal over the bottom panel, or over its tabs alone
-// while it is collapsed (panelhide.go), or a panel row's panel
-// (paneltab.go).
+// while it is collapsed (panelhide.go); the terminal beside the panel in
+// the right column, or beside the strip that shows it while it is hidden
+// (rightcolumn.go); or a panel row's panel (paneltab.go).
 func (a *App) mainArea(c *ui.Context) {
 	if s := a.current(); s.isPanelTab() {
 		a.panelArea(c, s)
+		return
+	}
+	if a.panelOnRight() {
+		if a.bottomHidden {
+			a.hiddenRightMainArea(c)
+			return
+		}
+		a.withRightColumn(c, func() { a.terminalArea(c) }, nil, func() { a.bottomPanel(c, &a.bottomTab) })
 		return
 	}
 	if a.bottomHidden {

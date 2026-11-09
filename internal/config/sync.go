@@ -100,7 +100,7 @@ var (
 		"sidebarWidth", "monitorPercent", "terminalPercent", "treeWidth",
 		"procListPercent", "procFieldsPercent", "netListPercent",
 		"monitorHidden", // what this device's monitor shows, as the pane sizes
-		"bottomPanelHidden",
+		"bottomPanelHidden", "bottomPanelSide", "rightPanelWidth",
 		"termBackground", // a file in this device's config folder
 		"downloadDir", "askDownloadDir",
 		"sync",

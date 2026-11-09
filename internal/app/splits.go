@@ -3,6 +3,8 @@ package app
 import (
 	"time"
 
+	"finallyshell/internal/config"
+
 	"github.com/egoist/mygo/ui"
 )
 
@@ -13,6 +15,9 @@ const (
 	defaultMonitorPct  = 62
 	defaultTerminalPct = 64
 	defaultTreeWidth   = 200 // DIPs
+	// The monitor's share of the right column above the bottom panel,
+	// when both are there (#152).
+	defaultRightMonitorPct = 45
 )
 
 // splitLimits are the smallest sizes, in DIPs, a divider's drag leaves to
@@ -38,8 +43,8 @@ var (
 	treeLimits = splitLimits{first: 100, second: 240}
 )
 
-// maxSavedWidth is the widest a saved sidebar or tree may be: more is not
-// a size a divider was dragged to, and is ignored.
+// maxSavedWidth is the widest a saved sidebar, tree or right column may
+// be: more is not a size a divider was dragged to, and is ignored.
 const maxSavedWidth = 1600
 
 // layoutSaveDelay is how long the dividers rest before their sizes are
@@ -63,6 +68,12 @@ func (a *App) restoreLayout() {
 		a.terminalPct = s.TerminalPercent
 	}
 	a.bottomHidden = s.BottomPanelHidden
+	if s.BottomPanelSide == config.PanelRight {
+		a.bottomSide = config.PanelRight
+	}
+	if s.RightPanelWidth >= rightLimits.first && s.RightPanelWidth <= maxSavedWidth {
+		a.rightWidth = s.RightPanelWidth
+	}
 	// The Processes and Network tabs' sizes, which the sessions share.
 	if s.ProcListPercent > 0 && s.ProcListPercent < 100 {
 		a.processes.listPct = s.ProcListPercent
@@ -127,6 +138,8 @@ func (a *App) saveLayout() {
 	a.settings.MonitorPercent = a.monitorPct
 	a.settings.TerminalPercent = a.terminalPct
 	a.settings.BottomPanelHidden = a.bottomHidden
+	a.settings.BottomPanelSide = a.bottomSide
+	a.settings.RightPanelWidth = a.rightWidth
 	a.settings.TreeWidth = a.treeWidth
 	a.settings.ProcListPercent = a.processes.listPct
 	a.settings.ProcFieldsPercent = a.processes.fieldsPct

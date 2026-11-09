@@ -56,6 +56,12 @@ type Settings struct {
 	// BottomPanelHidden collapses the bottom panel under the terminal to
 	// its row of tabs, as the user left it.
 	BottomPanelHidden bool `json:"bottomPanelHidden,omitempty"`
+	// BottomPanelSide is where the bottom panel is: "" under the
+	// terminal, PanelRight in a column on the terminal's right.
+	BottomPanelSide string `json:"bottomPanelSide,omitempty"`
+	// RightPanelWidth is the width of the column on the terminal's right,
+	// in DIPs, as last dragged. Zero is the app's default.
+	RightPanelWidth float32 `json:"rightPanelWidth,omitempty"`
 
 	// The General page of the options. Each is named so that false, as a
 	// file without it reads, is the default.
@@ -225,6 +231,10 @@ type Settings struct {
 // LeftPanelConnections is Settings.LeftPanelPage showing the
 // connections.
 const LeftPanelConnections = "connections"
+
+// PanelRight is Settings.BottomPanelSide with the panel in the column on
+// the terminal's right.
+const PanelRight = "right"
 
 // The values of GeoLocations and GeoLocationsV6.
 const (

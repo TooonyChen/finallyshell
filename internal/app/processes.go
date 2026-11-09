@@ -254,7 +254,7 @@ func (a *App) processPanel(c *ui.Context) {
 func (a *App) procToolbar(c *ui.Context, s *Session) {
 	ps := &s.procs
 	ui.Row(c).Padding(4, 8).Gap(8).AlignItems(ui.Center).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
-		ui.SearchField(c, &ps.filter).Placeholder(locales.ProcFilter()).Label(locales.ProcFilter()).Width(320).Shrink(1)
+		ui.SearchField(c, &ps.filter).Placeholder(locales.ProcFilter()).Label(locales.ProcFilter()).Width(320).Shrink(1).MinWidth(120)
 		switch {
 		case !execAllowed(s.Host):
 			widgets.Muted(c, locales.MonitorOff())
@@ -272,7 +272,7 @@ func (a *App) procToolbar(c *ui.Context, s *Session) {
 			if shown != n {
 				text = locales.ProcCountFiltered(shown, n)
 			}
-			widgets.Muted(c, text).SingleLine()
+			widgets.Muted(c, text).SingleLine().Shrink(0)
 		}
 		ui.Spacer(c)
 		if widgets.IconButton(c, "refresh-cw", locales.Refresh()).Clicked() {

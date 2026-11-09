@@ -1407,6 +1407,8 @@
   "backToTerminal": "Back to terminal",
   "hidePanel": "Hide panel",
   "showPanel": "Show panel",
+  "movePanelRight": "Move panel to right side",
+  "movePanelBottom": "Move panel to bottom",
   "scToggleBottomPanel": "Show or hide the bottom panel",
   "panelTabLabel": "{session} | {tab}",
   "tabCommands": "Commands",
