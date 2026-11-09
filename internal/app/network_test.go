@@ -377,6 +377,17 @@ func TestNetworkLocations(t *testing.T) {
 	if !tt.HasText("美国 加利福尼亚州 旧金山 Cloudflare") || a.settings.GeoLocationsV6 != config.GeoOn {
 		t.Errorf("IPv6: %q", tt.Texts())
 	}
+	// Turned off in the options: no IPv6 locations, nothing looked up.
+	a.setLocationsV6(false)
+	tt.Frame()
+	if tt.HasText("美国 加利福尼亚州 旧金山 Cloudflare") || a.placeOf(netip.MustParseAddr("2606:4700::1111"), true) != "" || a.geo.pending["2606:4700::1111"] {
+		t.Error("IPv6 locations after turning them off")
+	}
+	a.setLocationsV6(true)
+	p.until(t, "the IPv6 data again", func() bool { return a.geo.db[1] != nil })
+	if gets, _ := g.requests(); slices.Index(gets, "/v6.xdb") != len(gets)-1 || len(gets) != 2 {
+		t.Errorf("downloads %v: the IPv6 file is read again, not downloaded", gets)
+	}
 
 	// Online lookups are off: nothing was sent.
 	if _, batches := g.requests(); len(batches) != 0 {
@@ -547,6 +558,15 @@ func TestNetworkTrace(t *testing.T) {
 	if a.network.dlg != nil || f.traces[4] != "example.com en" {
 		t.Errorf("traces %v", f.traces)
 	}
+	// A host whose server monitor is off opens no exec channel for it.
+	s.Host.NoMonitor = true
+	a.startTrace(s, "8.8.8.8")
+	tt.Frame()
+	if len(f.traces) != 5 || !tt.HasText(locales.MonitorOff()) || tt.HasText(locales.TraceRouteTo()) {
+		t.Errorf("traced with the monitor off: %v", f.traces)
+	}
+	s.Host.NoMonitor = false
+
 	// Closing a tab stops its trace.
 	for len(s.net.tabs) > 0 {
 		a.closeNetTab(s, 0)

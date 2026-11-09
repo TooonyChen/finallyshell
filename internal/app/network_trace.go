@@ -62,6 +62,11 @@ func (a *App) runTrace(s *Session, t *traceRun) {
 		t.r = monitor.TraceResult{Done: true, Err: errNoClient}
 		return
 	}
+	if !execAllowed(s.Host) {
+		// The host asks for no extra exec channels.
+		t.r = monitor.TraceResult{Done: true, Err: errMonitorOff}
+		return
+	}
 	ctx, cancel := context.WithCancel(context.Background())
 	gen, client, api, lang := t.gen, s.client, a.netAPI(), traceLang()
 	t.running, t.cancel = true, cancel
@@ -97,7 +102,7 @@ func (a *App) traceTools(c *ui.Context, s *Session, t *netTab) {
 		if widgets.IconButton(c, "copy", locales.Copy()).Clicked() && len(tr.r.Hops) > 0 {
 			c.WriteClipboard(a.traceText(tr))
 		}
-		if widgets.IconButton(c, "refresh-cw", locales.TraceAgain()).Clicked() && s.status == statusConnected {
+		if widgets.IconButton(c, "refresh-cw", locales.TraceAgain()).Clicked() && canTrace(s) {
 			a.runTrace(s, tr)
 		}
 	})
@@ -170,7 +175,7 @@ func (a *App) traceView(c *ui.Context, s *Session, t *netTab) {
 		case r.Done && r.Err != nil:
 			ui.Row(c).Gap(8).AlignItems(ui.Center).Padding(8, 10).Children(func() {
 				ui.Text(c, traceErrorText(r.Err)).TextColor(theme.Danger).Shrink(1).MinWidth(0)
-				if s.status == statusConnected && !errors.Is(r.Err, monitor.ErrNoTraceTool) && ui.Button(c, locales.Retry()).Clicked() {
+				if canTrace(s) && !errors.Is(r.Err, monitor.ErrNoTraceTool) && ui.Button(c, locales.Retry()).Clicked() {
 					a.runTrace(s, tr)
 				}
 			})
@@ -196,7 +201,7 @@ func (a *App) traceView(c *ui.Context, s *Session, t *netTab) {
 				c.WriteClipboard(hops[row].IP)
 			}
 			m.Separator()
-			if m.Item(locales.TraceRoute()).Disabled(s.status != statusConnected).Chosen() && s.status == statusConnected {
+			if m.Item(locales.TraceRoute()).Disabled(!canTrace(s)).Chosen() && canTrace(s) {
 				a.startTrace(s, hops[row].IP)
 			}
 		}
@@ -254,6 +259,8 @@ func traceErrorText(err error) string {
 		return locales.TraceNoTool()
 	case errors.As(err, &te):
 		return locales.TraceFailed(te.Msg)
+	case errors.Is(err, errMonitorOff):
+		return locales.MonitorOff()
 	}
 	return locales.TraceFailed(describeProcError(err))
 }
@@ -277,6 +284,13 @@ func (a *App) traceText(t *traceRun) string {
 	}
 	return b.String()
 }
+
+// errMonitorOff is a trace on a host whose server monitor is off, which
+// opens no exec channels.
+var errMonitorOff = errors.New("the server monitor is off for this host")
+
+// canTrace says whether s can trace a route now.
+func canTrace(s *Session) bool { return s.status == statusConnected && execAllowed(s.Host) }
 
 // traceDialog asks for the address or host to trace the route to.
 type traceDialog struct {
@@ -326,7 +340,7 @@ func (a *App) traceDialogs(c *ui.Context) {
 					return
 				}
 				open = false
-				if d.s.status == statusConnected && slices.Contains(a.sessions, d.s) {
+				if canTrace(d.s) && slices.Contains(a.sessions, d.s) {
 					a.startTrace(d.s, target)
 				}
 			}

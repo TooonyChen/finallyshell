@@ -61,11 +61,12 @@ func (e *TraceError) Error() string { return e.Msg }
 // it on Linux: the app shows it, and never runs it.
 const NextTraceInstall = "curl -sL https://nxtrace.org/nt | bash"
 
-// ValidTraceTarget says whether s can be traced: an IP address, or a
-// host name of letters, digits, dots and hyphens.
+// ValidTraceTarget says whether s can be traced: an IP address without
+// a zone (which may hold any character), or a host name of letters,
+// digits, dots and hyphens.
 func ValidTraceTarget(s string) bool {
-	if _, err := netip.ParseAddr(s); err == nil {
-		return true
+	if a, err := netip.ParseAddr(s); err == nil {
+		return a.Zone() == ""
 	}
 	if s == "" || len(s) > 253 || s[0] == '-' || s[0] == '.' {
 		return false
@@ -84,7 +85,8 @@ func ValidTraceTarget(s string) bool {
 // traceroute often is. Each tool's stdin is /dev/null, as the script is
 // the shell's.
 func traceScript(target string) string {
-	q := "'" + target + "'" // ValidTraceTarget: nothing to escape
+	// ValidTraceTarget leaves nothing to escape; quoted all the same.
+	q := "'" + strings.ReplaceAll(target, "'", `'\''`) + "'"
 	return `export LC_ALL=C PATH="$PATH:/usr/local/bin:/usr/sbin:/sbin"
 m() { echo "` + netMark + `$1---"; }
 if command -v nexttrace >/dev/null 2>&1; then m nexttrace; exec nexttrace --json -M ` + q + ` </dev/null 2>&1; fi

@@ -320,7 +320,7 @@ func (a *App) netToolbar(c *ui.Context, s *Session) {
 			}
 		}
 		ui.Spacer(c)
-		if widgets.IconButton(c, "route", locales.TraceRouteTo()).Clicked() && s.status == statusConnected {
+		if execAllowed(s.Host) && widgets.IconButton(c, "route", locales.TraceRouteTo()).Clicked() && canTrace(s) {
 			a.openTraceDialog(s, "")
 		}
 		if widgets.IconButton(c, "refresh-cw", locales.Refresh()).Clicked() {
@@ -660,8 +660,7 @@ func (a *App) connMenu(c *ui.Context, m *ui.Menu, s *Session, x monitor.Socket) 
 		c.WriteClipboard(x.Remote.String())
 	}
 	m.Separator()
-	connected := s.status == statusConnected
-	if m.Item(locales.TraceRoute()).Disabled(!connected).Chosen() && connected {
+	if m.Item(locales.TraceRoute()).Disabled(!canTrace(s)).Chosen() && canTrace(s) {
 		a.startTrace(s, ip.String())
 	}
 	if a.settings.GeoOnline && a.locationsShown() && !geo.IsLAN(ip) && m.Item(locales.GeoLookUpOnline()).Chosen() {

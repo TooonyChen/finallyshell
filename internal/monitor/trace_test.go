@@ -87,6 +87,7 @@ func TestValidTraceTarget(t *testing.T) {
 	for s, want := range map[string]bool{
 		"8.8.8.8": true, "2606:4700::1111": true, "example.com": true, "a-b.example": true,
 		"": false, "-x": false, "a b": false, "a;rm -rf /": false, "$(id)": false, "'x'": false, ".x": false,
+		"fe80::1%eth0": false, "fe80::1%'$(id)'": false,
 	} {
 		if got := ValidTraceTarget(s); got != want {
 			t.Errorf("%q: %v", s, got)

@@ -132,6 +132,9 @@ func (a *App) loadGeo(v6 bool) {
 				a.geo.missing[i] = true
 				return
 			}
+			if v6 && a.settings.GeoLocationsV6 != config.GeoOn {
+				return // turned off while it loaded
+			}
 			a.geo.db[i], a.geo.missing[i] = db, false
 		})
 	}()
@@ -236,6 +239,7 @@ func (a *App) setLocationsV6(on bool) {
 		if d := a.geo.dl; d != nil && d.v6 {
 			a.cancelGeoDownload()
 		}
+		a.geo.db[1] = nil // the file stays, read again when turned on
 		a.changeSettings(func() { a.settings.GeoLocationsV6 = config.GeoOff })
 		return
 	}
@@ -314,7 +318,7 @@ func (a *App) placeOf(ip netip.Addr, queue bool) string {
 		return locales.GeoLAN()
 	}
 	db := a.geo.db[v6Index(ip.Is6())]
-	if db == nil {
+	if db == nil || ip.Is6() && a.settings.GeoLocationsV6 != config.GeoOn {
 		return ""
 	}
 	loc, _ := db.Lookup(ip)
