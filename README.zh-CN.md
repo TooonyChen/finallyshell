@@ -38,6 +38,8 @@
 | Windows（x64） | 安装程序 `finallyshell-setup-<版本>-amd64.exe`，或免安装的 `.zip` |
 | Debian、Ubuntu（x64） | `finallyshell_<版本>_amd64.deb` |
 | 其他 Linux（x64） | `finallyshell-<版本>-linux-amd64.tar.gz`，运行 `sh install.sh` 装到 `~/.local` |
+| Debian、Ubuntu（ARM64） | `finallyshell_<版本>_arm64.deb` |
+| 其他 Linux（ARM64） | `finallyshell-<版本>-linux-arm64.tar.gz`，运行 `sh install.sh` 装到 `~/.local` |
 
 macOS 版还没有经过 Apple 公证，第一次打开会被拦下。拖进“应用程序”后运行：
 

@@ -7,6 +7,8 @@
 | Windows (x64) | `finallyshell-setup-<version>-amd64.exe`, or the portable `finallyshell-<version>-windows-amd64.zip` |
 | Debian, Ubuntu (x64) | `finallyshell_<version>_amd64.deb` |
 | Other Linux (x64) | `finallyshell-<version>-linux-amd64.tar.gz` with `install.sh`: `sh install.sh` installs it in `~/.local` |
+| Debian, Ubuntu (ARM64) | `finallyshell_<version>_arm64.deb` |
+| Other Linux (ARM64) | `finallyshell-<version>-linux-arm64.tar.gz` with `install.sh`: `sh install.sh` installs it in `~/.local` |
 
 The macOS app is not notarized by Apple yet, so macOS blocks it the first time. After dragging it to Applications, run:
 
@@ -35,6 +37,8 @@ Finallyshell checks for new versions and updates itself (Options › General ›
 | Windows（x64） | 安装程序 `finallyshell-setup-<版本>-amd64.exe`，或便携版 `finallyshell-<版本>-windows-amd64.zip` |
 | Debian、Ubuntu（x64） | `finallyshell_<版本>_amd64.deb` |
 | 其他 Linux（x64） | `finallyshell-<版本>-linux-amd64.tar.gz` 和 `install.sh`：运行 `sh install.sh` 装到 `~/.local` |
+| Debian、Ubuntu（ARM64） | `finallyshell_<版本>_arm64.deb` |
+| 其他 Linux（ARM64） | `finallyshell-<版本>-linux-arm64.tar.gz` 和 `install.sh`：运行 `sh install.sh` 装到 `~/.local` |
 
 macOS 版还没有经过 Apple 公证，第一次打开会被 macOS 拦下。把它拖进“应用程序”文件夹后，运行：
 

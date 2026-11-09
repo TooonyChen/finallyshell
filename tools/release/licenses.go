@@ -16,7 +16,7 @@ import (
 
 // The platforms releases are built for: the modules an app links can
 // differ between them (golang.org/x/sys/windows and so on).
-var platforms = []string{"darwin/arm64", "darwin/amd64", "linux/amd64", "windows/amd64"}
+var platforms = []string{"darwin/arm64", "darwin/amd64", "linux/amd64", "linux/arm64", "windows/amd64"}
 
 //go:embed notices/ghostty.txt
 var ghosttyLicense string

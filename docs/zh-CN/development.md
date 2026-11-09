@@ -104,12 +104,12 @@ go run ./tools/screenshots
 
    上一个 tag 之后的提交类型（Conventional Commits）只用来核对版本号：破坏性改动（`feat!:`、`BREAKING CHANGE:`）应该升主版本（1.0 之前升次版本），`feat` 升次版本，`fix` 和 `perf` 升修订号。版本号比这个低时在运行记录里给出警告，照样发布：0.2.0 之后有 `feat` 提交，0.2.1 就是这种情况。
 2. 跑和 PR 一样的检查（`.github/workflows/ci.yml`：gofmt、`go vet`、`go tool mygo vet`、`go test -race`）。
-3. 编译四个平台：macOS arm64 和 Intel x86_64 在 macOS runner 上（ad hoc 签名、dmg），Linux x86_64 和 Windows x86_64 在 Linux runner 上交叉编译（Windows 安装程序用 apt 装的 NSIS）。版本号只在 runner 里写进 `mygo.json`，main 上的不改。`LICENSE` 和第三方许可证（`go run ./tools/release licenses`）放进 `resources/`，随应用一起打包。
+3. 编译五个平台：macOS arm64 和 Intel x86_64 在 macOS runner 上（ad hoc 签名、dmg），Linux x86_64、Linux arm64 和 Windows x86_64 在 Linux runner 上交叉编译（Windows 安装程序用 apt 装的 NSIS）。两个 Linux 版本写出的 `install.sh` 相同，它按 `uname -m` 选压缩包，发布里只有一份。版本号只在 runner 里写进 `mygo.json`，main 上的不改。`LICENSE` 和第三方许可证（`go run ./tools/release licenses`）放进 `resources/`，随应用一起打包。
 
    编译时有私钥 `MYGO_UPDATER_PRIVATE_KEY`（见[给更新签名](#给更新签名)），所以 `mygo build` 还会写出每个平台的更新：打成压缩包的应用（`finallyshell-<版本>-<平台>.tar.gz`）、从最近三个有更新的发布出发的增量更新（`…-<旧版本>-to-<版本>-….delta`），以及列出它们和签名的清单 `update-<平台>.json`。清单里的说明就是 `CHANGELOG.md` 里这个版本的一节，更新窗口显示的也是它；没有这一节 `mygo build` 会失败。没有这个 secret、没有清单、清单不是这个版本、这个发布的，或者清单里的说明和 `go run ./tools/release notes <版本>` 不一样，任务失败；否则把清单和它列出的文件跟安装包放在一起。
 
-   `mygo build` 从 GitHub 下载每个目标平台的原生库（libghostty-vt），放进缓存目录的 `mygo/natives` 文件夹（macOS runner 上是 `~/Library/Caches/mygo/natives`，Linux runner 上是 `~/.cache/mygo/natives`），遇到超时就放弃。这个任务在两次运行之间保留这个文件夹，按 runner 的系统、目标平台和 `go.sum` 区分，编译成功后保存。编译由 `.github/scripts/build-with-retries.sh` 运行：下载失败时（输出以 `error: downloading …` 结尾）它会重新编译，最多试十分钟，两次之间依次等 15、30 秒，之后每次等 60 秒，时间到了就报最后一次的错误；失败之前下载好的文件留在缓存里，下一次只下载还缺的。其他错误立即让编译失败。`.github/scripts/build-with-retries-test.sh` 用一个假的 `mygo` 测试这个脚本。一个平台失败不会取消其他平台（`fail-fast: false`）；四个平台都编译成功才会发布。
-4. 检查四个平台的清单都在，然后打 tag `v<版本>`，发布 GitHub Release，附上安装包、更新文件、`SHA256SUMS`、`LICENSE.txt`、`THIRD_PARTY_LICENSES.txt`。说明是这个版本的一节（`go run ./tools/release notes <版本>`），后面接上 `.github/release-install.md`，即中英文的安装说明。发布是正式发布，不是草稿，因为已安装的应用读取的是最新发布的清单；`gh release create` 上传文件期间让它保持草稿，所以应用不会看到压缩包还没上传的清单。
+   `mygo build` 从 GitHub 下载每个目标平台的原生库（libghostty-vt），放进缓存目录的 `mygo/natives` 文件夹（macOS runner 上是 `~/Library/Caches/mygo/natives`，Linux runner 上是 `~/.cache/mygo/natives`），遇到超时就放弃。这个任务在两次运行之间保留这个文件夹，按 runner 的系统、目标平台和 `go.sum` 区分，编译成功后保存。编译由 `.github/scripts/build-with-retries.sh` 运行：下载失败时（输出以 `error: downloading …` 结尾）它会重新编译，最多试十分钟，两次之间依次等 15、30 秒，之后每次等 60 秒，时间到了就报最后一次的错误；失败之前下载好的文件留在缓存里，下一次只下载还缺的。其他错误立即让编译失败。`.github/scripts/build-with-retries-test.sh` 用一个假的 `mygo` 测试这个脚本。一个平台失败不会取消其他平台（`fail-fast: false`）；五个平台都编译成功才会发布。
+4. 检查五个平台的清单都在，然后打 tag `v<版本>`，发布 GitHub Release，附上安装包、更新文件、`SHA256SUMS`、`LICENSE.txt`、`THIRD_PARTY_LICENSES.txt`。说明是这个版本的一节（`go run ./tools/release notes <版本>`），后面接上 `.github/release-install.md`，即中英文的安装说明。发布是正式发布，不是草稿，因为已安装的应用读取的是最新发布的清单；`gh release create` 上传文件期间让它保持草稿，所以应用不会看到压缩包还没上传的清单。
 
 `production` 只应该从 main 快进，在仓库设置里给它加分支保护（禁止强推）。
 

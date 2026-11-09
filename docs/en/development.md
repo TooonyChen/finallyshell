@@ -162,10 +162,12 @@ then push main to the `production` branch.
    0.2.0, is one.
 2. Runs the same checks as pull requests (`.github/workflows/ci.yml`:
    gofmt, `go vet`, `go tool mygo vet`, `go test -race`).
-3. Builds for four platforms: macOS arm64 and Intel x86_64 on a macOS
-   runner (ad hoc signed, dmg); Linux x86_64 and Windows x86_64
-   cross-compiled on a Linux runner (the Windows installer uses NSIS
-   installed with apt). The version
+3. Builds for five platforms: macOS arm64 and Intel x86_64 on a macOS
+   runner (ad hoc signed, dmg); Linux x86_64, Linux arm64 and Windows
+   x86_64 cross-compiled on a Linux runner (the Windows installer uses
+   NSIS installed with apt). Both Linux builds write the same
+   `install.sh`, which picks the archive by `uname -m`, and the release
+   has one copy. The version
    is written into `mygo.json` only on the runner; the file on main is not
    changed. `LICENSE` and the third-party licenses
    (`go run ./tools/release licenses`) are put in `resources/` and packaged
@@ -200,8 +202,8 @@ then push main to the `production` branch.
    only what is missing. Any other error fails the build at once.
    `.github/scripts/build-with-retries-test.sh` tests the script against a
    fake `mygo`. One platform failing doesn't cancel the others
-   (`fail-fast: false`); nothing is published unless all four are built.
-4. Checks that the manifests of all four platforms are there, then tags
+   (`fail-fast: false`); nothing is published unless all five are built.
+4. Checks that the manifests of all five platforms are there, then tags
    `v<version>` and publishes a GitHub Release with the installers, the
    updates, `SHA256SUMS`, `LICENSE.txt` and `THIRD_PARTY_LICENSES.txt`.
    Its notes are the version's section

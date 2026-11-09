@@ -38,6 +38,8 @@ Download the latest build from [Releases](https://github.com/TooonyChen/finallys
 | Windows (x64) | `finallyshell-setup-<version>-amd64.exe`, or the portable `.zip` |
 | Debian, Ubuntu (x64) | `finallyshell_<version>_amd64.deb` |
 | Other Linux (x64) | `finallyshell-<version>-linux-amd64.tar.gz`; `sh install.sh` installs it in `~/.local` |
+| Debian, Ubuntu (ARM64) | `finallyshell_<version>_arm64.deb` |
+| Other Linux (ARM64) | `finallyshell-<version>-linux-arm64.tar.gz`; `sh install.sh` installs it in `~/.local` |
 
 The macOS app isn't notarized by Apple yet, so macOS blocks it the first time you open it. After dragging it to Applications, run:
 

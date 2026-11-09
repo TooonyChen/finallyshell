@@ -52,7 +52,7 @@ jobs:
     needs: [version, gate]
     strategy:
       # A platform that fails doesn't cancel the others: the release job
-      # needs all four, so nothing is published unless all are built.
+      # needs all five, so nothing is published unless all are built.
       fail-fast: false
       matrix:
         include:
@@ -66,6 +66,11 @@ jobs:
             # fetches libghostty-vt-darwin-amd64.dylib for it.
             os: macos-latest
           - platform: linux/amd64
+            os: ubuntu-latest
+          - platform: linux/arm64
+            # Cross-built like windows/amd64: MyGo builds with
+            # CGO_ENABLED=0, so no arm64 C toolchain or runner is needed,
+            # and it fetches libghostty-vt-linux-arm64.so for it.
             os: ubuntu-latest
           - platform: windows/amd64
             os: ubuntu-latest
@@ -148,6 +153,9 @@ jobs:
             cp "$dir"/*.dmg upload/
             ;;
           linux/*)
+            # Both Linux jobs upload install.sh, which the release job
+            # merges into one file: it is the same for every target, as
+            # it picks the archive by uname -m.
             cp "$dir"/*.deb "$dir"/*.tar.gz "$dir"/install.sh upload/
             ;;
           windows/*)
@@ -212,7 +220,7 @@ jobs:
         # Apps read the manifests of the latest release: one missing strands
         # that platform's installed copies at their version.
         run: |
-          for p in darwin-arm64 darwin-amd64 linux-amd64 windows-amd64; do
+          for p in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64 windows-amd64; do
             if [ ! -f "upload/update-$p.json" ]; then
               echo "::error::update-$p.json is missing: installed apps could not update to this release"
               exit 1
