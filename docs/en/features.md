@@ -974,14 +974,20 @@ Command bar turns it off, or any of its popups, and lists its keys (see
   the commands of the server's `~/.bash_history` and `~/.zsh_history`,
   read over SFTP once per connection, so commands typed in the terminal
   show up too (bash writes its history file when the shell exits).
+- The button between the input and "History" chooses where Enter
+  sends: the current session (the button shows only its icon), all
+  sessions ("All (5)") or the sessions chosen ("3 sessions"). It is the
+  same send target as the Commands tab's "Send to" (see
+  [Commands tab](#commands-tab)), and the line goes to each session as
+  it would to one: its encoding, its folder following, its host's
+  history.
 - Esc closes the popup; Esc again gives the keyboard back to the
   terminal. "Focus command bar" (Ctrl+Shift+L, Cmd+Shift+L on macOS)
   moves the keyboard to the bar and back.
 - New tabs show no bar. In a session that is connecting or disconnected,
   the bar is shown disabled.
 
-Not supported: sending a line to several sessions at once. Commands you
-send often can be kept as buttons in the
+Commands you send often can be kept as buttons in the
 [Commands tab](#commands-tab).
 
 ### Appearance: font, color scheme, background image
@@ -1677,9 +1683,28 @@ and kept in `quickcommands.json` (see
   it waits at the prompt for you to check it and press Enter; the lines
   before it still run. In the session's row, the terminal then has the
   keyboard.
+- "Send to", in the toolbar before the search box, chooses where the
+  buttons send: "Current session" (the default), "All sessions", every
+  session that is connected, or "Choose sessions…", a popover with a
+  check box for each session, with its status dot and name. The command
+  bar's target button sets the same target. While it is not the current
+  session, both are in the warning color.
+  - Each session gets the command once (a panel row is its session, not
+    another one). New tabs and sessions that are not connected are
+    skipped; the others still get it.
+  - The first send after the target changes to anything but the current
+    session asks "Send to N sessions?", listing them, with Send and
+    Cancel. Later sends to the same target don't ask again.
+  - The target is not saved: every start sends to the current session.
+    A session closed drops out of the sessions chosen; with none left,
+    the target is the current session again.
+  - The terminal of the current session keeps the keyboard after a
+    send, and "Put in the command bar" still fills the current session's
+    bar only.
 - The buttons are dimmed and send nothing while the session is not
   connected, in a new tab, and in a panel row whose session is not
-  connected; the commands can still be added, edited and arranged.
+  connected (with another target: while none of its sessions is
+  connected); the commands can still be added, edited and arranged.
 - Right-click a button for Send, Put in the command bar (a one-line
   command only: it fills the bar without sending it, and gives the bar
   the keyboard), Edit…, Duplicate (right after it, as "name (copy)"),
@@ -1696,8 +1721,7 @@ and kept in `quickcommands.json` (see
   [above](#bottom-panel-in-a-tab-of-its-own)), for a board of commands
   as high as the window; its buttons send to its session.
 
-Not supported: sending a command to several sessions at once, commands
-with parameters to fill in, commands of one host only, syncing the
+Not supported: commands with parameters to fill in, commands of one host only, syncing the
 commands, and a shortcut per command.
 
 ## Options window

@@ -241,6 +241,10 @@ type App struct {
 
 	// The Commands tab's quick commands (quickcmds.go).
 	quickUI quickState
+
+	// Where the command bar and the Commands tab send (sendtarget.go):
+	// never saved, the current session at every start.
+	sendTo sendTarget
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.

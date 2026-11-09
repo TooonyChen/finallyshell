@@ -1455,5 +1455,51 @@
         "type": "String"
       }
     }
-  }
+  },
+  "sendTo": "Send to",
+  "sendToTip": "Send to: {target}",
+  "@sendToTip": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "sendToCurrent": "Current session",
+  "sendToAll": "All sessions",
+  "sendToChoose": "Choose sessions…",
+  "sendToAllCount": "All ({count})",
+  "@sendToAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendToAllSessionsCount": "All sessions ({count})",
+  "@sendToAllSessionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendToSessions": "{count, plural, one {# session} other {# sessions}}",
+  "@sendToSessions": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendToNoSessions": "No sessions are open.",
+  "sendToConfirm": "{count, plural, one {Send to # session?} other {Send to # sessions?}}",
+  "@sendToConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendToConfirmNote": "Each of them runs what is sent. Later sends to the same sessions don't ask again."
 }

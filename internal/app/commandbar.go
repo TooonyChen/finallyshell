@@ -128,6 +128,8 @@ func (a *App) commandBar(c *ui.Context, s *Session) {
 		// The icon says what the bar is for: it has no placeholder.
 		ui.Icon(c, icons.Get("terminal")).FontSize(13).TextColor(theme.TextMuted)
 		input = ui.TextInput(c, &b.text).Grow(1).MinWidth(0).Label(locales.CmdBarLabel()).Disabled(!live)
+		// Where Enter sends (sendtarget.go).
+		a.barTarget(c, s, live)
 		if a.historyOn() {
 			// FinalShell's History button, at the bar's end.
 			button = ui.Button(c, locales.CmdBarHistory()).Shrink(0).Disabled(!live).Clicked()
@@ -221,14 +223,23 @@ func (a *App) barKey(s *Session, k ui.TextKey) bool {
 
 // sendBar sends the bar's line to the shell, with a carriage return, as
 // Enter typed in the terminal, and keeps it in the host's history,
-// without the blanks around it.
+// without the blanks around it: to s's shell, or to each session of the
+// send target (sendtarget.go). The bar is emptied once it is sent; while
+// the target's question shows, it keeps the line.
 func (a *App) sendBar(s *Session, e barEdit) {
 	if !barLive(s) {
 		return
 	}
-	a.sendLine(s, e.text, true)
 	s.bar.popup = popupNone
-	s.bar.setBar(e, "", 0)
+	line := e.text
+	send := func(t *Session) { a.sendLine(t, line, true) }
+	asked := func() {
+		b := &s.bar
+		b.text, b.newCaret, b.caretSet, b.focus = "", 0, true, true
+	}
+	if a.sendToTargets(s, send, asked) {
+		s.bar.setBar(e, "", 0)
+	}
 }
 
 // sendLine sends line to s's shell as typed in the terminal, through the

@@ -8803,3 +8803,113 @@ func QuickLoadFailed(error string) string { return In(i18n.Locale()).QuickLoadFa
 func (msgs Messages) QuickLoadFailed(error string) string {
 	return Catalog.Format(msgs.locale, "quickLoadFailed", map[string]any{"error": error})
 }
+
+// SendTo says "Send to"
+// in the language the app shows.
+func SendTo() string { return In(i18n.Locale()).SendTo() }
+
+// SendTo says "Send to"
+// in the language of msgs.
+func (msgs Messages) SendTo() string {
+	return Catalog.Format(msgs.locale, "sendTo", nil)
+}
+
+// SendToTip says "Send to: {target}"
+// in the language the app shows.
+func SendToTip(target string) string { return In(i18n.Locale()).SendToTip(target) }
+
+// SendToTip says "Send to: {target}"
+// in the language of msgs.
+func (msgs Messages) SendToTip(target string) string {
+	return Catalog.Format(msgs.locale, "sendToTip", map[string]any{"target": target})
+}
+
+// SendToCurrent says "Current session"
+// in the language the app shows.
+func SendToCurrent() string { return In(i18n.Locale()).SendToCurrent() }
+
+// SendToCurrent says "Current session"
+// in the language of msgs.
+func (msgs Messages) SendToCurrent() string {
+	return Catalog.Format(msgs.locale, "sendToCurrent", nil)
+}
+
+// SendToAll says "All sessions"
+// in the language the app shows.
+func SendToAll() string { return In(i18n.Locale()).SendToAll() }
+
+// SendToAll says "All sessions"
+// in the language of msgs.
+func (msgs Messages) SendToAll() string {
+	return Catalog.Format(msgs.locale, "sendToAll", nil)
+}
+
+// SendToChoose says "Choose sessions…"
+// in the language the app shows.
+func SendToChoose() string { return In(i18n.Locale()).SendToChoose() }
+
+// SendToChoose says "Choose sessions…"
+// in the language of msgs.
+func (msgs Messages) SendToChoose() string {
+	return Catalog.Format(msgs.locale, "sendToChoose", nil)
+}
+
+// SendToAllCount says "All ({count})"
+// in the language the app shows.
+func SendToAllCount(count int) string { return In(i18n.Locale()).SendToAllCount(count) }
+
+// SendToAllCount says "All ({count})"
+// in the language of msgs.
+func (msgs Messages) SendToAllCount(count int) string {
+	return Catalog.Format(msgs.locale, "sendToAllCount", map[string]any{"count": count})
+}
+
+// SendToAllSessionsCount says "All sessions ({count})"
+// in the language the app shows.
+func SendToAllSessionsCount(count int) string { return In(i18n.Locale()).SendToAllSessionsCount(count) }
+
+// SendToAllSessionsCount says "All sessions ({count})"
+// in the language of msgs.
+func (msgs Messages) SendToAllSessionsCount(count int) string {
+	return Catalog.Format(msgs.locale, "sendToAllSessionsCount", map[string]any{"count": count})
+}
+
+// SendToSessions says "{count, plural, one {# session} other {# sessions}}"
+// in the language the app shows.
+func SendToSessions(count int) string { return In(i18n.Locale()).SendToSessions(count) }
+
+// SendToSessions says "{count, plural, one {# session} other {# sessions}}"
+// in the language of msgs.
+func (msgs Messages) SendToSessions(count int) string {
+	return Catalog.Format(msgs.locale, "sendToSessions", map[string]any{"count": count})
+}
+
+// SendToNoSessions says "No sessions are open."
+// in the language the app shows.
+func SendToNoSessions() string { return In(i18n.Locale()).SendToNoSessions() }
+
+// SendToNoSessions says "No sessions are open."
+// in the language of msgs.
+func (msgs Messages) SendToNoSessions() string {
+	return Catalog.Format(msgs.locale, "sendToNoSessions", nil)
+}
+
+// SendToConfirm says "{count, plural, one {Send to # session?} other {Send to # sessions?}}"
+// in the language the app shows.
+func SendToConfirm(count int) string { return In(i18n.Locale()).SendToConfirm(count) }
+
+// SendToConfirm says "{count, plural, one {Send to # session?} other {Send to # sessions?}}"
+// in the language of msgs.
+func (msgs Messages) SendToConfirm(count int) string {
+	return Catalog.Format(msgs.locale, "sendToConfirm", map[string]any{"count": count})
+}
+
+// SendToConfirmNote says "Each of them runs what is sent. Later sends to the same sessions don't ask again."
+// in the language the app shows.
+func SendToConfirmNote() string { return In(i18n.Locale()).SendToConfirmNote() }
+
+// SendToConfirmNote says "Each of them runs what is sent. Later sends to the same sessions don't ask again."
+// in the language of msgs.
+func (msgs Messages) SendToConfirmNote() string {
+	return Catalog.Format(msgs.locale, "sendToConfirmNote", nil)
+}

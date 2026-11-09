@@ -319,6 +319,7 @@ internal/
     network_trace.go trace route in the Network tab: its tabs, the missing NextTrace notice, the dialog for a typed address
     quickcmds.go     the Commands tab: groups, the buttons of quick commands, sending them through the command bar's sendLine, dragging, the context menu
     quickcmds_editor.go the quick command editor's window
+    sendtarget.go    the send target of the bar and the Commands tab: current, all or chosen sessions, its controls, the question before the first send
     geo.go           IP locations: the download bar, loading the data off the UI thread, the Location column's text, the online lookups' queue
     options_network.go the Network monitor page of the options
     manager.go       connection manager window: folder tree, search, dragging, delete and restore, a.deleteHostForever(h); the tree's state (managerState) and actions, which the Connections page shares

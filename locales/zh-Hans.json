@@ -867,5 +867,16 @@
   "quickEnterOff": "最后一行只放进终端、不按回车，你检查后自己按回车。前面的行仍会执行。",
   "quickErrCommand": "请输入命令",
   "quickLoadBroken": "无法读取 quickcommands.json，列表从空开始。原文件已另存为 {file}。",
-  "quickLoadFailed": "无法读取 quickcommands.json（{error}）。为避免覆盖该文件，更改不会保存。"
+  "quickLoadFailed": "无法读取 quickcommands.json（{error}）。为避免覆盖该文件，更改不会保存。",
+  "sendTo": "发送到",
+  "sendToTip": "发送到：{target}",
+  "sendToCurrent": "当前会话",
+  "sendToAll": "全部会话",
+  "sendToChoose": "选择会话…",
+  "sendToAllCount": "全部（{count}）",
+  "sendToAllSessionsCount": "全部会话（{count}）",
+  "sendToSessions": "{count, plural, other {# 个会话}}",
+  "sendToNoSessions": "没有打开的会话。",
+  "sendToConfirm": "{count, plural, other {发送到 # 个会话？}}",
+  "sendToConfirmNote": "这些会话都会执行发送的内容。之后发送到同样的会话不会再询问。"
 }

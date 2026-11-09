@@ -88,32 +88,35 @@ func (a *App) saveQuick() error {
 	return q.saveErr
 }
 
-// quickSession is the session the tab sends to, nil in a new tab, and
-// whether it can send now: its shell is there.
+// quickSession is the session the tab belongs to, nil in a new tab,
+// and whether it can send now: a session of the send target
+// (sendtarget.go) is connected, its own for Current session.
 func (a *App) quickSession() (*Session, bool) {
 	s := a.connSession()
 	if s == nil || s.isNewTab() {
-		return nil, false
+		s = nil
 	}
-	return s, barLive(s)
+	return s, len(a.sendTargets(s)) > 0
 }
 
-// sendQuick sends cmd to s's shell, line by line, as the bar does:
-// each line followed by a carriage return, but the last when cmd's Enter
-// is off. In the session's row the terminal then has the keyboard, to
-// press Enter there or type on.
+// sendQuick sends cmd to the shell of each session of the send target,
+// s's for Current session, line by line, as the bar does: each line
+// followed by a carriage return, but the last when cmd's Enter is off.
+// In the session's row the terminal then has the keyboard, to press
+// Enter there or type on.
 func (a *App) sendQuick(c *ui.Context, s *Session, cmd *config.QuickCommand) {
-	if s == nil || !barLive(s) {
-		return
-	}
 	lines := config.QuickCommandLines(cmd.Text)
-	for i, line := range lines {
-		a.sendLine(s, line, cmd.Enter || i < len(lines)-1)
+	send := func(t *Session) {
+		for i, line := range lines {
+			a.sendLine(t, line, cmd.Enter || i < len(lines)-1)
+		}
 	}
-	if !a.current().isPanelTab() {
-		s.bar.popup, s.bar.toTerm = popupNone, true
-		c.Invalidate()
-	}
+	a.sendToTargets(s, send, func() {
+		if s != nil && barLive(s) && !a.current().isPanelTab() {
+			s.bar.popup, s.bar.toTerm = popupNone, true
+		}
+	})
+	c.Invalidate()
 }
 
 // barLine is the line "Put in the command bar" puts there: the command's
@@ -376,6 +379,7 @@ func (a *App) quickToolbar(c *ui.Context, s *Session, live bool) {
 			widgets.Muted(c, locales.QuickOffline()).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 		}
 		ui.Spacer(c)
+		a.quickTarget(c)
 		ui.SearchField(c, &a.quickUI.query).Placeholder(locales.QuickSearch()).Label(locales.QuickSearch()).Width(220).Shrink(1).MinWidth(120)
 	})
 }
