@@ -16,22 +16,28 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// followServer is a session connected to a test server over SFTP, with
-// folders a, b and c in its home, the keyboard in the terminal, and the
-// directory reads soon after Enter. monitor turns the host's exec
-// channels on, for the reads of the server (which the test server
-// refuses, so tests stand in for them).
-func followServer(t *testing.T, monitor bool) (*App, *fakePlatform, *Session, *ui.Tester, string) {
+// followHome is a home folder with folders a, b and c in it.
+func followHome(t *testing.T) string {
 	t.Helper()
-	reads := shellDirReads
-	shellDirReads = []time.Duration{10 * time.Millisecond, 30 * time.Millisecond}
-	t.Cleanup(func() { shellDirReads = reads })
 	home := filepath.ToSlash(t.TempDir())
 	for _, d := range []string{"a", "b", "c"} {
 		if err := os.Mkdir(filepath.Join(home, d), 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
+	return home
+}
+
+// followServer is a session connected to a test server that serves home
+// over SFTP, with the keyboard in the terminal, and the directory reads
+// soon after Enter. monitor turns the host's exec channels on, for the
+// reads of the server (which the test server refuses, so tests stand in
+// for them).
+func followServer(t *testing.T, home string, monitor bool) (*App, *fakePlatform, *Session, *ui.Tester) {
+	t.Helper()
+	reads := shellDirReads
+	shellDirReads = []time.Duration{10 * time.Millisecond, 30 * time.Millisecond}
+	t.Cleanup(func() { shellDirReads = reads })
 	srv := sshtest.StartSFTP(t, home)
 	a, p := testApp(t)
 	h := &config.Host{ID: "follow", Name: "web-1", Addr: srv.Host, Port: srv.Port, User: "tester", Auth: config.AuthPassword, NoMonitor: !monitor}
@@ -54,7 +60,7 @@ func followServer(t *testing.T, monitor bool) (*App, *fakePlatform, *Session, *u
 	t.Cleanup(a.CloseAll)
 	s.term.Feed([]byte("tester@web-1:~$ "))
 	tt.ClickAt(760, 200) // in the terminal
-	return a, p, s, tt, home
+	return a, p, s, tt
 }
 
 // reportDir has the shell report dir as shells do with OSC 7.
@@ -85,7 +91,8 @@ func settle(p *fakePlatform, d time.Duration) {
 // session, and back on at the shell's folder; a folder SFTP can't open
 // leaves the panel as it was, with no error.
 func TestFilesFollowShell(t *testing.T) {
-	a, p, s, tt, home := followServer(t, false)
+	home := followHome(t)
+	a, p, s, tt := followServer(t, home, false)
 	f := &s.files
 
 	reportDir(s, home+"/a")
@@ -167,27 +174,40 @@ func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (string, e
 	return fd.dir, nil
 }
 
-// A shell that reports nothing is read from the server after a command,
-// typed in the terminal or sent by the command bar, and never otherwise.
+// A shell that reports nothing is read from the server as the session
+// starts, and after a command, typed in the terminal or sent by the
+// command bar, and never otherwise. The reads at the start tell a first
+// command that stays in the folder from a cd: a folder the user browsed
+// to before it stays.
 func TestFilesFollowShellRead(t *testing.T) {
-	fd := &fakeShellDir{}
+	home := followHome(t)
+	fd := &fakeShellDir{dir: home}
 	read := readShellDir
 	readShellDir = fd.read
 	t.Cleanup(func() { readShellDir = read })
-	a, p, s, tt, home := followServer(t, true)
+	a, p, s, tt := followServer(t, home, true)
 	f := &s.files
 
 	settle(p, 150*time.Millisecond)
-	if n := fd.count(); n != 0 {
-		t.Fatalf("%d reads before any command", n)
+	start := len(shellDirReads)
+	if n := fd.count(); n != start {
+		t.Fatalf("%d reads before any command, want %d", n, start)
 	}
+	a.openDir(s, home+"/c")
+	p.until(t, "the panel in c", func() bool { return f.cwd == home+"/c" && !f.loading })
+	tt.ClickAt(760, 200)
+	tt.Key(0, ui.KeyEnter) // ls, in the home folder
+	settle(p, 150*time.Millisecond)
+	if f.cwd != home+"/c" {
+		t.Fatalf("the first command, which kept the shell's folder, moved the panel to %q", f.cwd)
+	}
+	if n := fd.count(); n != start+len(shellDirReads) {
+		t.Errorf("%d reads after a command, want %d", n, start+len(shellDirReads))
+	}
+
 	fd.set(home + "/a")
 	tt.Key(0, ui.KeyEnter)
 	p.until(t, "the panel in a", func() bool { return f.cwd == home+"/a" && !f.loading })
-	settle(p, 150*time.Millisecond)
-	if n := fd.count(); n != len(shellDirReads) {
-		t.Errorf("%d reads after a command, want %d", n, len(shellDirReads))
-	}
 
 	// The command bar's line, and the path picker's folder.
 	fd.set(home + "/b")

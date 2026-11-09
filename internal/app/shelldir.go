@@ -16,9 +16,10 @@ import (
 // shellDirState follows the working directory of a session's shell, for
 // the file panel to go where the shell goes (see followShell).
 type shellDirState struct {
-	// dir is the shell's directory as last read: "" before the first
-	// read of the connection. The panel moves when it changes, so a
-	// command that leaves it, as ls, keeps the folder the user browsed.
+	// dir is the shell's directory as last read, first as the shell
+	// starts: "" before that. The panel moves when a command changes it,
+	// so a command that leaves it, as ls, keeps the folder the user
+	// browsed.
 	dir string
 	// wake asks the connection's follower to read the directory, after
 	// a command: nil while none runs.
@@ -45,7 +46,7 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 	wake := make(chan struct{}, 1)
 	s.shell = shellDirState{wake: wake}
 	delays, readServer := shellDirReads, readShellDir // as tests set them now
-	read := func() {
+	read := func(baseline bool) {
 		d := term.Dir()
 		if d == "" && probe {
 			rctx, cancel := context.WithTimeout(ctx, shellDirTimeout)
@@ -57,11 +58,18 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 		}
 		a.post(func() {
 			if ctx.Err() == nil && s.shell.wake == wake {
-				a.shellDirRead(s, d)
+				a.shellDirRead(s, d, baseline)
 			}
 		})
 	}
+	// The first reads, as the shell starts, are where it is before any
+	// command, from which a command that keeps it is told apart: without
+	// them, the first command's read would always be a change, and take
+	// the panel from a folder the user browsed to. They don't move the
+	// panel, which the user may be browsing already.
+	wake <- struct{}{}
 	go func() {
+		baseline := true
 		for {
 			select {
 			case <-ctx.Done():
@@ -72,14 +80,15 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 				select {
 				case <-ctx.Done():
 					return
-				case <-wake: // another command: wait for it from the start
-					i = 0
+				case <-wake: // a command: wait for it from the start
+					i, baseline = 0, false
 					continue
 				case <-time.After(delays[i]):
 				}
-				read()
+				read(baseline)
 				i++
 			}
+			baseline = false
 		}
 	}()
 }
@@ -97,13 +106,16 @@ func (s *Session) shellCommandSent() {
 }
 
 // shellDirRead takes a read of s's shell directory, moving the file panel
-// there when it changed and the panel follows the terminal.
-func (a *App) shellDirRead(s *Session, dir string) {
+// there when it changed and the panel follows the terminal; a baseline
+// read, as the shell starts, only keeps it.
+func (a *App) shellDirRead(s *Session, dir string, baseline bool) {
 	if dir == s.shell.dir {
 		return
 	}
 	s.shell.dir = dir
-	a.followShellDir(s)
+	if !baseline {
+		a.followShellDir(s)
+	}
 }
 
 // followShellDir moves s's file panel to the shell's directory, if the

@@ -895,9 +895,12 @@ the panel goes to the shell's folder at once. It is on by default.
   of the program in the foreground of the shell's terminal, else the
   shell's. This needs the host's server monitor to be on (it uses the
   same exec channels), no root and no tools beyond the shell.
-- It reads after Enter in the terminal, or a line the command bar sends:
-  about a quarter of a second later and again after a second and a half.
-  Nothing is read while nothing is typed.
+- It reads as the session connects, for where the shell starts, without
+  moving the panel; then after Enter in the terminal, or a line the
+  command bar sends: about a quarter of a second later and again after a
+  second and a half. Nothing else is read while nothing is typed. A shell
+  whose login scripts `cd` elsewhere leaves the panel at the home folder
+  until the next `cd`.
 - Not followed: macOS and other servers without `/proc` whose shell
   doesn't report OSC 7, root shells from `sudo -i` or `su` (the user can't
   read root's processes), and shells inside tmux or screen. A folder the

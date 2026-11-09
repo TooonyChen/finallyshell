@@ -223,24 +223,34 @@ func TestSSHProcesses(t *testing.T) {
 
 // The file panel follows a cd in the shell, which a plain bash doesn't
 // report (no OSC 7): the server's /proc tells. A command that keeps the
-// directory leaves the folder the user browsed.
+// directory, the first one too, leaves the folder the user browsed.
 func TestSSHFollowShell(t *testing.T) {
 	a, p, s := connectTestServer(t)
 	defer a.CloseAll()
 	p.until(t, "the home directory", func() bool { return s.files.cwd != "" && !s.files.loading })
+	home := s.files.cwd
+	p.until(t, "the shell's folder as it starts", func() bool { return s.shell.dir == home })
 	run := func(cmd string) {
 		s.term.Send([]byte(cmd + "\r"))
 		s.shellCommandSent() // as Enter does
 	}
+	stays := func(dir string) {
+		t.Helper()
+		settle(p, 2*time.Second)
+		if s.files.cwd != dir {
+			t.Errorf("a command in the same folder moved the panel to %q, from %q", s.files.cwd, dir)
+		}
+	}
+	a.openDir(s, "/etc")
+	p.until(t, "the panel in /etc", func() bool { return s.files.cwd == "/etc" && !s.files.loading })
+	run("true")
+	stays("/etc")
 	run("cd /usr/share")
 	p.until(t, "the panel in /usr/share", func() bool { return s.files.cwd == "/usr/share" && !s.files.loading })
 	a.openDir(s, "/etc")
 	p.until(t, "the panel in /etc", func() bool { return s.files.cwd == "/etc" && !s.files.loading })
 	run("true")
-	settle(p, 2*time.Second)
-	if s.files.cwd != "/etc" {
-		t.Errorf("a command in the same folder moved the panel to %q", s.files.cwd)
-	}
+	stays("/etc")
 	run("cd /var")
 	p.until(t, "the panel in /var", func() bool { return s.files.cwd == "/var" && !s.files.loading })
 }
