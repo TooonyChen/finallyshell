@@ -280,7 +280,11 @@ func (a *App) View(c *ui.Context) {
 	a.saveLayoutAtRest(c)
 	a.syncTick(c)
 	if a.fullScreen.on {
-		a.terminalArea(c)
+		if s := a.current(); s.isPanelTab() {
+			a.panelArea(c, s)
+		} else {
+			a.terminalArea(c)
+		}
 		a.dialogs(c)
 		return
 	}
@@ -302,13 +306,19 @@ func (a *App) sidebar(c *ui.Context) {
 	})
 }
 
+// mainArea is the terminal over the bottom panel, or a panel row's panel
+// (paneltab.go).
 func (a *App) mainArea(c *ui.Context) {
-	split := ui.SplitVerticalPercent(c, &a.terminalPct, func() { a.terminalArea(c) }, func() { a.bottomPanel(c) }).SplitReset(defaultTerminalPct).Fill()
+	if s := a.current(); s.isPanelTab() {
+		a.panelArea(c, s)
+		return
+	}
+	split := ui.SplitVerticalPercent(c, &a.terminalPct, func() { a.terminalArea(c) }, func() { a.bottomPanel(c, &a.bottomTab) }).SplitReset(defaultTerminalPct).Fill()
 	a.splitMoved(c, split, &a.terminalPct, terminalLimits)
 }
 
-// The bottom panel's tabs, in order: their index in a.bottomTab and in
-// bottomTabs.
+// The bottom panel's tabs, in order: their index in a.bottomTab, a panel
+// row's panelTab and bottomTabs.
 const (
 	tabFiles = iota
 	tabTransfers
@@ -330,7 +340,7 @@ func (a *App) bottomTabs() []bottomTab {
 		transfersLabel = locales.TabTransfersActive(n)
 	}
 	tunnelsLabel := locales.TabTunnels()
-	if s := a.current(); s != nil && s.listening() > 0 {
+	if s := a.connSession(); s != nil && s.listening() > 0 {
 		tunnelsLabel = locales.TabTunnelsActive(s.listening())
 	}
 	return []bottomTab{
@@ -343,19 +353,22 @@ func (a *App) bottomTabs() []bottomTab {
 }
 
 // bottomPanel is the files of the active session, the transfers, and
-// the session's other tabs.
-func (a *App) bottomPanel(c *ui.Context) {
+// the session's other tabs, on the tab *tab: a.bottomTab under the
+// terminal, a panel row's own in it.
+func (a *App) bottomPanel(c *ui.Context, tab *int) {
 	tabs := a.bottomTabs()
 	ui.Column(c).Fill().Background(theme.Background).Children(func() {
-		ui.Row(c).PaddingX(6).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
+		ui.Row(c).PaddingX(6).AlignItems(ui.Center).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
 			labels := make([]string, len(tabs))
 			for i, t := range tabs {
 				labels[i] = t.label
 			}
-			ui.Tabs(c, &a.bottomTab, labels...)
+			ui.Tabs(c, tab, labels...)
+			ui.Spacer(c)
+			a.panelCornerButton(c, *tab)
 		})
-		if a.bottomTab >= 0 && a.bottomTab < len(tabs) {
-			tabs[a.bottomTab].page(c)
+		if *tab >= 0 && *tab < len(tabs) {
+			tabs[*tab].page(c)
 		}
 	})
 }
@@ -387,7 +400,7 @@ func (a *App) openSessionIn(tab *Session, h *config.Host) {
 		return
 	}
 	pw := a.passwords[h.ID]
-	if tab != nil && tab.isNewTab() && slices.Contains(a.sessions, tab) {
+	if tab != nil && tab.isNewTab() && !tab.isPanelTab() && slices.Contains(a.sessions, tab) {
 		a.fillTab(tab, h, pw)
 		return
 	}
@@ -416,13 +429,21 @@ func (a *App) reconnect(s *Session) {
 	a.connect(s, a.passwords[s.Host.ID])
 }
 
+// closeSession closes the row of s: its session, with its panel row, or
+// a panel row alone, which ends nothing.
 func (a *App) closeSession(s *Session) {
 	i := slices.Index(a.sessions, s)
 	if i < 0 {
 		return
 	}
-	a.transfers.cancelSession(s)
-	s.disconnect()
+	if !s.isPanelTab() {
+		if p := a.panelRowOf(s); p != nil {
+			a.closeSession(p)
+			i = slices.Index(a.sessions, s)
+		}
+		a.transfers.cancelSession(s)
+		s.disconnect()
+	}
 	a.sessions = slices.Delete(a.sessions, i, i+1)
 	if a.active >= len(a.sessions) || a.active > i {
 		a.active--
@@ -441,16 +462,36 @@ func (a *App) CloseAll() {
 		a.saveLayout()
 	}
 	for _, s := range a.sessions {
+		if s.isPanelTab() {
+			continue // its session's
+		}
 		a.transfers.cancelSession(s)
 		s.disconnect()
 	}
 }
 
+// moveSessions moves the rows dragged before the row to, as the list
+// asks. A session takes its panel row along, right below it; a panel row
+// does not move alone, and a drop between a session and its panel row
+// goes below the panel row.
 func (a *App) moveSessions(rows []int, to int) {
 	cur := a.current()
 	moved := make([]*Session, 0, len(rows))
 	for _, r := range rows {
-		moved = append(moved, a.sessions[r])
+		s := a.sessions[r]
+		if s.isPanelTab() || slices.Contains(moved, s) {
+			continue
+		}
+		moved = append(moved, s)
+		if p := a.panelRowOf(s); p != nil {
+			moved = append(moved, p)
+		}
+	}
+	if len(moved) == 0 {
+		return
+	}
+	if to < len(a.sessions) && a.sessions[to].isPanelTab() {
+		to++
 	}
 	var rest []*Session
 	insert := 0

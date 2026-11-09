@@ -161,6 +161,7 @@ internal/
     app.go           App 状态、整体布局、打开/关闭会话
     session.go       一个会话：连接、终端、监控、SFTP；错误信息的翻译
     sidebar.go       左侧：监控面板、竖向会话列表
+    paneltab.go      面板行：会话的底部面板单独成列表里的一行，共用会话的连接（connSession）
     netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
     terminal.go      终端区域

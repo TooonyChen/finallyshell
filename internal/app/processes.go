@@ -134,9 +134,9 @@ type procTab struct {
 
 func (t *procTab) title() string { return strconv.Itoa(t.pid) + "-" + t.name }
 
-// openProcesses shows the Processes tab, as a click on the side panel's
-// process list does.
-func (a *App) openProcesses() { a.bottomTab = tabProcesses }
+// openProcesses shows the Processes tab of the selected row, as a click
+// on the side panel's process list does.
+func (a *App) openProcesses() { *a.shownBottomTab() = tabProcesses }
 
 // pollProcesses keeps s's list read while the tab shows it.
 func (a *App) pollProcesses(s *Session) {
@@ -230,7 +230,7 @@ func (ps *procState) shown() []monitor.Process {
 // processPanel is the "Processes" tab: the active session's processes,
 // and the details of those opened, below them.
 func (a *App) processPanel(c *ui.Context) {
-	s := a.current()
+	s := a.connSession()
 	if s == nil || s.isNewTab() {
 		return
 	}

@@ -152,7 +152,7 @@ func tunnelStatusColumns() []ui.TableColumn {
 // tunnelPanel is the "Tunnels" tab: the active session's tunnels, their
 // state and what they carried, with a button to start or stop each.
 func (a *App) tunnelPanel(c *ui.Context) {
-	s := a.current()
+	s := a.connSession()
 	if s == nil || s.isNewTab() {
 		return
 	}

@@ -51,7 +51,7 @@ func (a *App) NewTab() {
 
 // selectedNewTab is the selected row when it is a new tab, else nil.
 func (a *App) selectedNewTab() *Session {
-	if s := a.current(); s != nil && s.isNewTab() {
+	if s := a.current(); s != nil && s.isNewTab() && !s.isPanelTab() {
 		return s
 	}
 	return nil

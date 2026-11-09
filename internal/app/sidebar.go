@@ -14,7 +14,7 @@ import (
 // monitorPanel shows the active session's server, as FinalShell's left
 // column does: the skeleton for a new tab.
 func (a *App) monitorPanel(c *ui.Context) {
-	s := a.current()
+	s := a.connSession()
 	if s != nil && s.isNewTab() {
 		s = nil
 	}
@@ -190,7 +190,7 @@ func (a *App) sessionPanel(c *ui.Context) {
 		// same row. a.active is the app's: closeSession and moveSessions
 		// keep it on the right row.
 		a.sessList.Selected = &a.active
-		a.sessList.Label = func(i int) string { return a.sessions[i].label() }
+		a.sessList.Label = func(i int) string { return listLabel(a.sessions[i]) }
 		a.sessList.Reorder = a.moveSessions
 		// A row asks to close its session, which closes once the list is
 		// built: closing it in the row would leave the rows after it to
@@ -212,7 +212,8 @@ func (a *App) sessionPanel(c *ui.Context) {
 	})
 }
 
-// sessionCount is the number of sessions, new tabs left out.
+// sessionCount is the number of sessions, new tabs and panel rows left
+// out: neither has a Host.
 func (a *App) sessionCount() int {
 	n := 0
 	for _, s := range a.sessions {
@@ -225,6 +226,9 @@ func (a *App) sessionCount() int {
 
 // sessionRow is the tab of s. It reports whether the user closed it.
 func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
+	if s.isPanelTab() {
+		return a.panelRow(c, s, active)
+	}
 	row := ui.Row(c).Gap(8).Padding(5, 4, 5, 8).Radius(5)
 	hovered := row.Hovered()
 	if s.isNewTab() {

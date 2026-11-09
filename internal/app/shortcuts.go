@@ -421,7 +421,8 @@ func (a *App) shortcuts(c *ui.Context) {
 		}
 	case pressed(scFind):
 		a.openFind()
-	case pressed(scFullScreen):
+	case pressed(scFullScreen) && (a.fullScreen.on || !a.current().isPanelTab()):
+		// A panel row has no terminal to show alone; it leaves full screen.
 		a.setFullScreen(!a.fullScreen.on)
 	case a.commandBarOn() && pressed(scFocusBar):
 		a.toggleBarFocus()

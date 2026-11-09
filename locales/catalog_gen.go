@@ -8309,3 +8309,35 @@ func OptionTraceNote() string { return In(i18n.Locale()).OptionTraceNote() }
 func (msgs Messages) OptionTraceNote() string {
 	return Catalog.Format(msgs.locale, "optionTraceNote", nil)
 }
+
+// OpenPanelTab says "Open in its own tab"
+// in the language the app shows.
+func OpenPanelTab() string { return In(i18n.Locale()).OpenPanelTab() }
+
+// OpenPanelTab says "Open in its own tab"
+// in the language of msgs.
+func (msgs Messages) OpenPanelTab() string {
+	return Catalog.Format(msgs.locale, "openPanelTab", nil)
+}
+
+// BackToTerminal says "Back to terminal"
+// in the language the app shows.
+func BackToTerminal() string { return In(i18n.Locale()).BackToTerminal() }
+
+// BackToTerminal says "Back to terminal"
+// in the language of msgs.
+func (msgs Messages) BackToTerminal() string {
+	return Catalog.Format(msgs.locale, "backToTerminal", nil)
+}
+
+// PanelTabLabel says "{session} | {tab}"
+// in the language the app shows.
+func PanelTabLabel(session string, tab string) string {
+	return In(i18n.Locale()).PanelTabLabel(session, tab)
+}
+
+// PanelTabLabel says "{session} | {tab}"
+// in the language of msgs.
+func (msgs Messages) PanelTabLabel(session string, tab string) string {
+	return Catalog.Format(msgs.locale, "panelTabLabel", map[string]any{"session": session, "tab": tab})
+}

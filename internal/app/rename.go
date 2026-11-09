@@ -27,8 +27,9 @@ type renameState struct {
 }
 
 // canRename reports whether s's tab can be renamed: a new tab has no host
-// to name it after yet.
-func canRename(s *Session) bool { return !s.isNewTab() }
+// to name it after yet, and a panel row (paneltab.go) is named after its
+// session and its tab.
+func canRename(s *Session) bool { return !s.isNewTab() && !s.isPanelTab() }
 
 // startRename shows the field in place of the name of s's row.
 func (a *App) startRename(s *Session) {

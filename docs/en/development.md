@@ -291,6 +291,7 @@ internal/
     app.go           App state, overall layout, opening and closing sessions
     session.go       one session: connection, terminal, monitor, SFTP; translating error messages
     sidebar.go       left side: monitor panel, vertical session list
+    paneltab.go      panel rows: a session's bottom panel in a row of the list of its own, sharing the session's connection (connSession)
     netifaces.go     the network graph's interface menu: its label, choosing interfaces and keeping the choice per host
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
     terminal.go      terminal area

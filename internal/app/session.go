@@ -63,6 +63,12 @@ type Session struct {
 	// name is the tab's name for this run, "" for the host's title: never
 	// saved (rename.go).
 	name string
+
+	// A panel row's session, whose bottom panel it shows, and the tab of
+	// the panel it has chosen (paneltab.go): panelOf is nil on every
+	// other row.
+	panelOf  *Session
+	panelTab int
 }
 
 // errConnectionLost is a session whose shell ended.

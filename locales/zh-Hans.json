@@ -818,5 +818,8 @@
   "optionGeoOnline": "在线查询 IP 归属地（ip-api.com）",
   "optionGeoOnlineNote": "下载的数据中没有城市或运营商的地址会发送给第三方 ip-api.com（它繁忙时改用 ip.sb）。ip-api.com 的免费服务不加密（HTTP），仅限非商业用途。查询结果保存 30 天；内网和局域网地址从不发送。",
   "optionTraceHeading": "路由追踪",
-  "optionTraceNote": "路由追踪在服务器上运行 NextTrace（nexttrace --json），由它自己的服务定位每一跳。服务器上没有 NextTrace 时改用 traceroute 或 tracepath，并用下载的位置数据显示归属地。应用从不在服务器上安装任何东西。"
+  "optionTraceNote": "路由追踪在服务器上运行 NextTrace（nexttrace --json），由它自己的服务定位每一跳。服务器上没有 NextTrace 时改用 traceroute 或 tracepath，并用下载的位置数据显示归属地。应用从不在服务器上安装任何东西。",
+  "openPanelTab": "在单独的标签中打开",
+  "backToTerminal": "返回终端",
+  "panelTabLabel": "{session} | {tab}"
 }

@@ -9,6 +9,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 
 - [Window layout](#window-layout)
 - [Sessions and tabs](#sessions-and-tabs)
+  - [Bottom panel in a tab of its own](#bottom-panel-in-a-tab-of-its-own)
 - [New tab and quick connect](#new-tab-and-quick-connect)
 - [Connection manager](#connection-manager)
 - [Import connections](#import-connections)
@@ -68,7 +69,8 @@ are vertical:
 - Top left: the server monitor of the current session.
 - Bottom left: the vertical session list.
 - Top right: the terminal.
-- Bottom right: the Files, Transfers, Tunnels and Processes tabs.
+- Bottom right: the Files, Transfers, Tunnels, Processes and Network
+  tabs, which can also open in a tab of their own (see below).
 
 ## Sessions and tabs
 
@@ -106,6 +108,41 @@ allow one).
 On the first connection to a host, a dialog shows the host key
 fingerprint. Once trusted, it is written to `finallyshell/known_hosts` in
 the config directory. A connection whose host key has changed is refused.
+
+### Bottom panel in a tab of its own
+
+The button at the right end of the bottom panel's tabs ("Open in its own
+tab", two arrows pointing out) opens a panel row: a row in the session
+list, indented right below its session, that shows the bottom panel in
+the whole right side, without the terminal, for the tables that want
+height, such as Processes and Network. The row shows the icon and the
+name of the tab it shows, such as "Network". Its tooltip, and the text
+the list finds as you type, is "server1 | Network", with the session's
+current name; a panel row is not renamed itself. The session's own row
+keeps its terminal and its bottom panel as before.
+
+- The panel row is another view of the same session, not a second
+  connection: it uses the session's connection, files, tunnels,
+  processes and network lists. A folder opened in the panel row is the
+  one the session's row shows too.
+- It has its own selected tab, which starts at the one selected when it
+  opened; the row's icon and name follow it. A click on the side panel's
+  process list shows its Processes tab.
+- A session has at most one panel row: the button selects it when it is
+  already open.
+- In the panel row the button is "Back to terminal" (two arrows pointing
+  in), which selects the session's row. The panel row stays until it is
+  closed with its × or its context menu (Back to terminal, Close).
+- Dragging the session moves its panel row with it; the panel row cannot
+  be dragged alone. Closing the session closes its panel row too, and
+  reconnecting keeps it, showing the new connection. Closing the panel
+  row ends nothing.
+- A panel row is not a session: the count in "Sessions (N)" and the
+  question when quitting leave it out.
+- The terminal's actions do nothing in a panel row: full screen, find,
+  the command bar.
+- A new tab has no button. A session that failed or was disconnected
+  still opens its panel row, whose pages show the session's state.
 
 ## New tab and quick connect
 
@@ -745,6 +782,9 @@ system's full screen. Pressing it again leaves full screen.
   when the app leaves its full screen.
 - Leaving the system's full screen by the system's means (the green button
   on macOS) also leaves the app's full screen.
+- On a [panel row](#bottom-panel-in-a-tab-of-its-own), which has no
+  terminal, the key does nothing. Going to a panel row while in full
+  screen shows its panel alone.
 
 ### Command bar
 

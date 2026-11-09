@@ -267,7 +267,7 @@ func (ns *netState) group(key string) (monitor.NetGroup, bool) {
 // networkPanel is the "Network" tab: the active session's listening
 // sockets and processes with connections, and the tabs opened below.
 func (a *App) networkPanel(c *ui.Context) {
-	s := a.current()
+	s := a.connSession()
 	if s == nil || s.isNewTab() {
 		return
 	}

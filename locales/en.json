@@ -1364,5 +1364,8 @@
   "optionGeoOnline": "Look up IP locations online (ip-api.com)",
   "optionGeoOnlineNote": "Addresses the downloaded data has no city or ISP for are sent to ip-api.com, a third party (to ip.sb while ip-api.com is busy). The free ip-api.com service is unencrypted (HTTP) and for non-commercial use only. Answers are kept for 30 days; private and LAN addresses are never sent.",
   "optionTraceHeading": "Trace route",
-  "optionTraceNote": "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTrace is not installed, traceroute or tracepath is used, with the downloaded location data. The app never installs anything on the server."
+  "optionTraceNote": "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTrace is not installed, traceroute or tracepath is used, with the downloaded location data. The app never installs anything on the server.",
+  "openPanelTab": "Open in its own tab",
+  "backToTerminal": "Back to terminal",
+  "panelTabLabel": "{session} | {tab}"
 }
