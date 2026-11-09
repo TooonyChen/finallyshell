@@ -1987,6 +1987,9 @@ Notes:
 - Switch sessions / connections is E as in VS Code's Explorer, which
   shows its side bar's tree; no terminal binds Ctrl+Shift+E. On macOS it
   takes Shift too, as Cmd+E is "Use Selection for Find" in Mac apps.
+  Older versions of IBus on Linux use Ctrl+Shift+E for emoji input and
+  take it before the app; change the key on the Shortcuts page, or in
+  IBus's preferences, if it does nothing.
 - Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
   shell and are not used as shortcuts on Windows and Linux. In MyGo's
   legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an

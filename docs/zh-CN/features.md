@@ -850,7 +850,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 - macOS 上切换标签只用 Cmd+数字：Option+数字会输入字符（¡、™、£……）。
 - Windows 上 terminal 插件默认还把 Ctrl+C（有选中时复制）和 Ctrl+V（剪贴板有内容时粘贴）绑成复制粘贴。Finallyshell 去掉了这两个，和 Linux 一样留给 shell（中断、原样输入下一个键）。复制粘贴用 Ctrl+Shift+C / Ctrl+Shift+V，或 Ctrl+Insert / Shift+Insert。
 - 聚焦命令输入框不用 Ctrl+Shift+K：Windows 上那是终端的清屏（和 Windows Terminal 一样）。FinalShell 单按 Ctrl 切换，会和 shell 用的每个 Ctrl 键冲突，所以没有照搬。关掉命令输入框后，这个键交给终端。
-- 切换会话/连接用 E，和 VS Code 打开侧栏文件树的“资源管理器”一样；没有终端绑定 Ctrl+Shift+E。macOS 上也加 Shift，因为 Cmd+E 在 Mac 应用里是“用所选内容查找”。
+- 切换会话/连接用 E，和 VS Code 打开侧栏文件树的“资源管理器”一样；没有终端绑定 Ctrl+Shift+E。macOS 上也加 Shift，因为 Cmd+E 在 Mac 应用里是“用所选内容查找”。Linux 上旧版 IBus 用 Ctrl+Shift+E 输入表情，会先于本程序拿走这个键；按了没反应的话，在“快捷键”页换一个键，或在 IBus 的首选项里改掉。
 - 只带 Ctrl 的字母键（Ctrl+A……Ctrl+Z 等）都是 shell 的，在 Windows 和 Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
 
 ## 布局和分隔条
