@@ -95,11 +95,11 @@ func (a *App) splitMoved(c *ui.Context, split ui.Element, size *float32, l split
 		// With no room for both, the first pane keeps its size.
 		// A size within the limits stays as it is, not converted back
 		// and forth: a double click saves the default itself.
-		if c := max(min(v, room-l.second), l.first); c != v {
+		if clamped := max(min(v, room-l.second), l.first); clamped != v {
 			if l.percent {
-				c = c * 100 / room
+				clamped = clamped * 100 / room
 			}
-			*size = c
+			*size = clamped
 		}
 	}
 	a.layoutDirty, a.layoutAt = true, c.Now()
