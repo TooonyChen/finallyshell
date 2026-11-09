@@ -151,7 +151,8 @@ internal/
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
   termenc/           终端的连接在服务器的编码（GBK、Big5……）和终端读的 UTF-8 之间转换
   sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发，StartSFTP 还提供 SFTP（本机文件系统）
-  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计
+  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计；netstat.go 是网络页的 socket（ss，或 /proc/net 和 /proc/<pid>/fd）、速度和行；trace.go 是通过 exec 通道的路由追踪（NextTrace 的 JSON、traceroute、tracepath）
+  geo/               IP 归属地：通过官方 Go 绑定读取 ip2region 数据（xdb.go），按校验和下载数据（download.go），ip-api.com 和 ip.sb 的在线查询（online.go）及其缓存（cache.go）；geotest/ 为测试生成小的 .xdb 文件
   remotefs/          SFTP 列目录、上传、下载（带进度和取消），重命名、新建、删除（ops.go）；textfile.go 是编辑器的读取（认出二进制文件）和安全保存；archive.go 是打包传输：打包和安全解包 tar.gz 数据流，在 exec 通道上运行 tar
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）
   fileicons/         VS Code 文件图标主题：读 VSIX 和扩展目录、按名字找图标、字体转换、安装和查找已装的主题；bundled/ 是内置的 Material 和 Seti，languages_gen.go 是 VS Code 的语言表，internal/gen 生成它们
@@ -181,6 +182,10 @@ internal/
     fileeditor_view.go、fileeditor_text.go
                      编辑器窗口的界面（标签、工具栏、提示、状态栏、询问框），编码和换行符、按 #! 认语言
     tunnels.go       会话的隧道：连接后启动、断开时停止，“隧道”页
+    network.go       “网络”页：监听 socket 和进程的表格，它们的连接标签
+    network_trace.go 网络页的路由追踪：标签、没有 NextTrace 时的提示、输入地址的对话框
+    geo.go           IP 归属地：下载提示条、在后台加载数据、“归属地”列的文字、在线查询队列
+    options_network.go 选项的“网络监控”页
     manager.go       连接管理器窗口：文件夹树、搜索、拖动、删除和恢复，a.deleteHostForever(h)
     import.go        “导入连接”窗口：选择来源、查找或选择它的文件或目录、预览和勾选、导入后在连接管理器里显示、列表里的密码存进密钥库
     import_sources.go 导入窗口里每个来源的文案（importTexts），以及来源给出的原因和说明的文案

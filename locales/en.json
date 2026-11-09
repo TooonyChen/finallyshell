@@ -1256,5 +1256,111 @@
   "syncErrNotEnvelope": "The remote file is not a Finallyshell sync file.",
   "syncErrNewerFormat": "The remote file was written by a newer version of Finallyshell. Update to sync.",
   "syncErrTimeout": "The service did not answer in time.",
-  "syncErrOther": "Could not sync: {error}"
+  "syncErrOther": "Could not sync: {error}",
+  "tabNetwork": "Network",
+  "colNetListen": "Listen IP",
+  "colNetPort": "Port",
+  "colNetProto": "Protocol",
+  "colNetRemoteIPs": "Remote IPs",
+  "colNetConns": "Connections",
+  "colNetUpRate": "Upload/s",
+  "colNetDownRate": "Download/s",
+  "colNetUp": "Uploaded",
+  "colNetDown": "Downloaded",
+  "colNetLocation": "Location",
+  "colNetIP": "IP",
+  "colNetState": "State",
+  "netFilter": "Filter by name, PID, port or IP",
+  "netListFailed": "Could not read the connections: {error}",
+  "netCount": "{count, plural, one {# entry} other {# entries}}",
+  "@netCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netCountFiltered": "{shown} of {count, plural, one {# entry} other {# entries}}",
+  "@netCountFiltered": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netNeedsRoot": "Needs root for other users' processes",
+  "netOpenConns": "Open Connections",
+  "netCopyAddress": "Copy Address",
+  "netCopyIP": "Copy IP",
+  "netConnCount": "{count, plural, one {# connection} other {# connections}}",
+  "@netConnCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "netConnCountLimited": "{shown} of {count, plural, one {# connection} other {# connections}} shown",
+  "@netConnCountLimited": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "traceRoute": "Trace Route",
+  "traceRouteTo": "Trace route",
+  "traceTab": "Trace {target}",
+  "traceAgain": "Trace Again",
+  "tracing": "Tracing…",
+  "tracingTo": "Tracing the route to {target}…",
+  "colTraceHop": "Hop",
+  "colTraceRTT": "RTT",
+  "colTraceASN": "ASN",
+  "colTraceHost": "Host name",
+  "nextTraceMissing": "NextTrace is not on the server. To install it:",
+  "nextTraceMissingFallback": "NextTrace is not on the server, so {tool} traced the route. To install it:",
+  "traceNoTool": "None of NextTrace, traceroute and tracepath is on the server.",
+  "traceFailed": "Trace route failed: {error}",
+  "tracePlaceholder": "IP address or host name",
+  "traceInvalid": "Enter an IP address or a host name.",
+  "geoAskV4": "Show where IP addresses are? This downloads about {size} of location data (ip2region).",
+  "geoAskV6": "Show where IPv6 addresses are too? This downloads about {size} more (ip2region).",
+  "geoDownload": "Download",
+  "geoNotNow": "Not Now",
+  "geoNever": "Don't Ask Again",
+  "geoDownloading": "Downloading location data… {percent}%",
+  "@geoDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "geoDownloadFailed": "Could not download the location data: {error}",
+  "geoChecksum": "the file is not the one expected (its checksum does not match)",
+  "geoLAN": "LAN",
+  "geoLookUpOnline": "Look Up Online",
+  "geoCredit": "IP location data: ip2region (https://github.com/lionsoul2014/ip2region), Apache-2.0 license.",
+  "geoDeleteTitle": "Delete the downloaded location data?",
+  "geoDeleteDetail": "The ip2region files and the cache of online lookups are deleted, and IP locations are turned off. They can be downloaded again.",
+  "geoDeleteYes": "Delete",
+  "optionsNetwork": "Network monitor",
+  "optionGeoHeading": "IP locations",
+  "optionShowLocations": "Show IP locations (downloads ip2region data, about {size})",
+  "optionShowLocationsNote": "The connections in the Network tab show the country, region, city and ISP of each address. The data is downloaded once into the app's config folder and checked against the checksum the app keeps. Until it is downloaded, the tab shows addresses only and nothing is looked up.",
+  "optionLocationsV6": "Include IPv6 addresses (about {size} more)",
+  "optionGeoData": "Downloaded location data: {size}",
+  "optionGeoNoData": "No location data downloaded",
+  "geoDeleteData": "Delete Downloaded Location Data",
+  "optionGeoOnline": "Look up IP locations online (ip-api.com)",
+  "optionGeoOnlineNote": "Addresses the downloaded data has no city or ISP for are sent to ip-api.com, a third party (to ip.sb while ip-api.com is busy). The free ip-api.com service is unencrypted (HTTP) and for non-commercial use only. Answers are kept for 30 days; private and LAN addresses are never sent.",
+  "optionTraceHeading": "Trace route",
+  "optionTraceNote": "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTrace is not installed, traceroute or tracepath is used, with the downloaded location data. The app never installs anything on the server."
 }

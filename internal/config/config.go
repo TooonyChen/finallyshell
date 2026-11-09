@@ -168,7 +168,31 @@ type Settings struct {
 	// NoServerHistory keeps the history picker from reading the server's
 	// ~/.bash_history and ~/.zsh_history.
 	NoServerHistory bool `json:"noServerHistory,omitempty"`
+
+	// The Network monitor page of the options.
+	//
+	// GeoLocations is whether the Network tab shows where IP addresses
+	// are, from ip2region's data, downloaded into GeoDir only once the
+	// user agrees: "" before the user was asked, GeoOn, or GeoOff when
+	// the user said "Don't ask again" or turned it off.
+	GeoLocations string `json:"geoLocations,omitempty"`
+	// GeoLocationsV6 is the same for the IPv6 data, which is asked for
+	// apart, the first time an IPv6 address shows.
+	GeoLocationsV6 string `json:"geoLocationsV6,omitempty"`
+	// GeoOnline looks up online (ip-api.com) the addresses ip2region
+	// leaves without a city or ISP, while locations are shown.
+	GeoOnline bool `json:"geoOnline,omitempty"`
 }
+
+// The values of GeoLocations and GeoLocationsV6.
+const (
+	GeoOn  = "on"
+	GeoOff = "off"
+)
+
+// GeoDir is where the IP location data the user downloads is kept, with
+// the cache of the online lookups.
+func GeoDir() string { return filepath.Join(Dir(), "geo") }
 
 // IconThemesDir is where the VSIX files of the icon themes the user
 // installs are kept.

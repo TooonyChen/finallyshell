@@ -40,6 +40,7 @@ instead.
 | `sync-state.json` | What the last sync synced (see [Sync](#sync)). |
 | `hosts.before-sync.json` | `hosts.json` as it was before the last sync that changed it. |
 | `history/<host ID>.txt` | The command bar's history of each host (see [Command history](#command-history)). |
+| `geo/` | IP location data, downloaded only when you agree: `ip2region_v4.xdb`, `ip2region_v6.xdb`, and `cache.json`, the online lookups' answers (see [IP locations](features.md#ip-locations)). |
 
 `mygo dev`, `go run` and the installed app all use the same directory, so
 they share hosts and settings.
@@ -180,6 +181,9 @@ default.
 | `noCommandBarHistory` | `true` turns the history picker off, and keeping the commands sent. | On. |
 | `noCommandBarCommands` | `true` turns command completion off. | On. |
 | `noServerHistory` | `true` keeps the server's `~/.bash_history` and `~/.zsh_history` out of the history picker. | Read. |
+| `geoLocations` | `on` shows where IP addresses are, from the downloaded ip2region data; `off` hides it (also "Don't Ask Again"). | Not asked yet: the Network tab asks. |
+| `geoLocationsV6` | The same for the IPv6 data. | Asked the first time an IPv6 peer shows. |
+| `geoOnline` | `true` looks up online (ip-api.com) the addresses the data has no city or ISP for. | Off. |
 | `sidebarWidth`, `treeWidth` | Widths of the sidebar and the file panel's folder tree, as last dragged. | The app's defaults. |
 | `monitorPercent`, `terminalPercent` | The server monitor's share of the sidebar and the terminal's share of the main area, in percent. | The app's defaults. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
@@ -190,6 +194,7 @@ Details of each option are in [features.md](features.md): see
 [Terminal › Mouse](features.md#terminal--mouse),
 [Terminal › Shortcuts](features.md#terminal--shortcuts),
 [Terminal › Command bar](features.md#terminal--command-bar),
+[Network monitor](features.md#network-monitor),
 [Appearance](features.md#appearance-font-color-scheme-background-image),
 [File icon themes](features.md#file-icon-themes),
 [Connection manager](features.md#connection-manager) and
@@ -213,7 +218,8 @@ object of `settings.json`, missing while sync has never been set up:
 Each settings key is either synced or kept on each computer; the lists are
 `syncedSettings` and `localSettings` in `internal/config/sync.go`. Kept
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
-`termBackground`, `downloadDir`, `askDownloadDir` and `sync`, and a
+`termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
+`geoLocations`, `geoLocationsV6` and `geoOnline`, and a
 `fileIconTheme` installed from a VSIX or found in an editor's extensions.
 
 Two more files belong to sync, next to `hosts.json`:

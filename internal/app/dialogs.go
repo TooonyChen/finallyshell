@@ -33,6 +33,7 @@ func (a *App) dialogs(c *ui.Context) {
 		}
 	}
 	a.signalDialogs(c)
+	a.traceDialogs(c)
 }
 
 func (a *App) passwordView(c *ui.Context) {

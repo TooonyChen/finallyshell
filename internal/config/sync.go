@@ -100,6 +100,11 @@ var (
 		"termBackground", // a file in this device's config folder
 		"downloadDir", "askDownloadDir",
 		"sync",
+		// Agreeing to download the location data, or to send the
+		// server's peers to an online service, is each device's own:
+		// the data is downloaded on each, over its own network, and a
+		// work computer may not send what a home one may.
+		"geoLocations", "geoLocationsV6", "geoOnline",
 	}
 )
 

@@ -220,3 +220,55 @@ func TestSSHProcesses(t *testing.T) {
 		t.Errorf("signal to an ended process: gone %v, err %v", d.gone, d.err)
 	}
 }
+
+// The Network tab on a real server: a listener the test starts, found by
+// its port, with its connection; and a trace route, which says what the
+// server lacks.
+func TestSSHNetwork(t *testing.T) {
+	a, p, s := connectTestServer(t)
+	defer a.CloseAll()
+	port := strconv.Itoa(40000 + rand.IntN(20000))
+	py := `import socket, time; l = socket.socket(); l.bind(("127.0.0.1", ` + port + `)); l.listen(); c = socket.create_connection(("127.0.0.1", ` + port + `)); s, _ = l.accept(); time.sleep(60)`
+	s.term.Send([]byte("python3 -c '" + py + "' &\r"))
+	a.bottomTab = tabNetwork
+	tt := ui.NewTester(a.View, 1280, 820)
+	p.tt = tt
+	title := "127.0.0.1:" + port
+	var row monitor.NetGroup
+	p.until(t, "the listener", func() bool {
+		for _, g := range s.net.snap.Groups {
+			if g.Listen && g.Title() == title && len(g.Conns) == 1 {
+				row = g
+				return true
+			}
+		}
+		return false
+	})
+	if row.Name != "python3" || row.PID == 0 || row.Conns[0].Remote.Addr().String() != "127.0.0.1" {
+		t.Errorf("row %+v", row)
+	}
+	s.net.filter = port
+	p.until(t, "the row alone", func() bool { return len(s.net.shown()) >= 1 && tt.HasText("127.0.0.1") })
+	a.openNetTab(s, row)
+	tt.Frame()
+	if !tt.HasText("ESTAB") || tt.HasText("Location") {
+		t.Errorf("connections: %q", tt.Texts())
+	}
+	saveShot(t, tt, "ssh-network-en.png")
+
+	a.startTrace(s, "127.0.0.1")
+	tr := s.net.tabs[s.net.tab].trace
+	p.until(t, "the trace", func() bool { return !tr.running })
+	tt.Frame()
+	switch r := tr.r; {
+	case r.NoNextTrace && r.Tool == "":
+		if !errors.Is(r.Err, monitor.ErrNoTraceTool) || !tt.HasText(monitor.NextTraceInstall) {
+			t.Errorf("no tool: %+v", r)
+		}
+	case r.Err == nil:
+		if len(r.Hops) == 0 {
+			t.Errorf("%s: no hops", r.Tool)
+		}
+	}
+	saveShot(t, tt, "ssh-network-trace-en.png")
+}
