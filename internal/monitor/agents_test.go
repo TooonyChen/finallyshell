@@ -10,6 +10,7 @@ func TestFindAgent(t *testing.T) {
 	for _, tc := range []struct{ comm, args, want string }{
 		// Each row, by its command and by its package.
 		{"claude", "claude", "Claude Code"},
+		{"claude", "", "Claude Code"}, // a zombie: its name, no arguments
 		{"node", "node /usr/lib/node_modules/@anthropic-ai/claude-code/cli.js --resume", "Claude Code"},
 		{"codex", "/usr/local/lib/node_modules/@openai/codex/vendor/x86_64/codex/codex", "Codex"},
 		{"node", "node /usr/bin/codex", "Codex"},

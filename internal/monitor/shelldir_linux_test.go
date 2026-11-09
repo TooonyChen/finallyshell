@@ -97,23 +97,24 @@ func TestShellDirScript(t *testing.T) {
 	}
 }
 
-// The script tells the program in the terminal's foreground, here a
-// sleep named claude, in the process tree of a connection: a process
-// named sshd leads the terminal's session; its child on the terminal, the
+// The script tells the program in the terminal's foreground, here one
+// named claude, in the process tree of a connection: a process named
+// sshd leads the terminal's session; its child on the terminal, the
 // shell, runs claude in a process group of its own that it gives the
 // terminal, as an interactive shell does a command; and the script runs
 // without a terminal, as on an exec channel. The shell is this test's
 // binary (foregroundShell), which checks each step and writes how it
 // went, rather than sh with job control, so that a step that fails says
 // so. The tree needs no root and no terminal of the test's own.
+//
+// claude is this test's binary too (TestForegroundJob), under a link of
+// that name, which waits: not a link to sleep, as uutils' coreutils, a
+// multi-call binary that Ubuntu ships, refuses to run under a name that
+// is not its own, and the "claude" would end at once.
 func TestShellScriptForeground(t *testing.T) {
 	sh, err := exec.LookPath("sh")
 	if err != nil {
 		t.Skip("no sh")
-	}
-	sleep, err := exec.LookPath("sleep")
-	if err != nil {
-		t.Skip("no sleep")
 	}
 	self, err := os.Executable()
 	if err != nil {
@@ -124,7 +125,7 @@ func TestShellScriptForeground(t *testing.T) {
 	if err := os.Symlink(sh, sshd); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(sleep, claude); err != nil {
+	if err := os.Symlink(self, claude); err != nil {
 		t.Fatal(err)
 	}
 	dir := filepath.Join(tmp, "project")
@@ -166,7 +167,7 @@ func TestShellScriptForeground(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := parseShell(string(data))
-	if got.Comm != "claude" || len(got.Args) != 2 || got.Args[0] != claude || got.Args[1] != "30" || got.Dir != dir {
+	if got.Comm != "claude" || len(got.Args) != 2 || got.Args[0] != claude || got.Args[1] != foregroundJobArg || got.Dir != dir {
 		t.Fatalf("read %+v from %q; the shell's steps:\n%s", got, data, steps)
 	}
 	if a := got.Agent(); a == nil || a.Name != "Claude Code" {
@@ -182,7 +183,7 @@ const foregroundEnv = "FINALLYSHELL_TEST_FOREGROUND"
 // runs the test binary with foregroundEnv set; it does nothing else.
 func TestForegroundShell(t *testing.T) {
 	v := os.Getenv(foregroundEnv)
-	if v == "" {
+	if v == "" || v == "job" {
 		t.Skip("the shell of TestShellScriptForeground")
 	}
 	f := strings.Split(v, "\n")
@@ -192,6 +193,19 @@ func TestForegroundShell(t *testing.T) {
 	if err := foregroundShell(f[0], f[1], f[2], f[3]); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// foregroundJobArg runs TestForegroundJob alone.
+const foregroundJobArg = "-test.run=^TestForegroundJob$"
+
+// TestForegroundJob is the claude of TestShellScriptForeground, which
+// runs the test binary as claude with foregroundEnv set to "job": it
+// waits until it is killed.
+func TestForegroundJob(t *testing.T) {
+	if os.Getenv(foregroundEnv) != "job" {
+		t.Skip("the claude of TestShellScriptForeground")
+	}
+	time.Sleep(time.Minute)
 }
 
 // foregroundShell runs claude in the foreground of the terminal, checks
@@ -225,7 +239,8 @@ func foregroundShell(claude, script, out, report string) error {
 	// the foreground is stopped by SIGTTOU as it gives it, unless it
 	// ignores it, as shells do.
 	signal.Ignore(syscall.SIGTTOU)
-	job := exec.Command(claude, "30")
+	job := exec.Command(claude, foregroundJobArg)
+	job.Env = append(os.Environ(), foregroundEnv+"=job")
 	job.SysProcAttr = &syscall.SysProcAttr{Foreground: true, Ctty: int(tty.Fd())}
 	var jobErr bytes.Buffer
 	job.Stdout, job.Stderr = &jobErr, &jobErr
