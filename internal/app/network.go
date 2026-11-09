@@ -273,9 +273,6 @@ func (a *App) networkPanel(c *ui.Context) {
 	}
 	a.pollNetwork(s)
 	a.geoTick()
-	if a.network.listPct == 0 {
-		a.network.listPct = defaultNetListPct
-	}
 	ns := &s.net
 	ui.Column(c.Key(s.ID)).Grow(1).MinHeight(0).Children(func() {
 		if s.status != statusConnected {

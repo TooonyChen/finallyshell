@@ -187,6 +187,8 @@ default.
 | `geoOnline` | `true` looks up online (ip-api.com) the addresses the data has no city or ISP for. | Off. |
 | `sidebarWidth`, `treeWidth` | Widths of the sidebar and the file panel's folder tree, as last dragged. | The app's defaults. |
 | `monitorPercent`, `terminalPercent` | The server monitor's share of the sidebar and the terminal's share of the main area, in percent. | The app's defaults. |
+| `procListPercent`, `procFieldsPercent` | In the Processes tab, the process list's share above the details, and the details' fields' share beside the environment variables, in percent. | The app's defaults. |
+| `netListPercent` | In the Network tab, the table's share above the connections and trace tabs, in percent. | The app's defaults. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
 
 Details of each option are in [features.md](features.md): see
@@ -219,6 +221,7 @@ object of `settings.json`, missing while sync has never been set up:
 Each settings key is either synced or kept on each computer; the lists are
 `syncedSettings` and `localSettings` in `internal/config/sync.go`. Kept
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
+`procListPercent`, `procFieldsPercent`, `netListPercent`,
 `termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6` and `geoOnline`, and a
 `fileIconTheme` installed from a VSIX or found in an editor's extensions.

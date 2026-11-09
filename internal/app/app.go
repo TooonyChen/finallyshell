@@ -248,6 +248,8 @@ func New(plat Platform) *App {
 		monitorPct:   defaultMonitorPct,
 		terminalPct:  defaultTerminalPct,
 		treeWidth:    defaultTreeWidth,
+		processes:    processesUI{listPct: defaultProcListPct, fieldsPct: defaultProcFieldsPct},
+		network:      networkUI{listPct: defaultNetListPct},
 		saveHosts:    config.SaveHosts,
 		saveSettings: config.SaveSettings,
 

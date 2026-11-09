@@ -62,6 +62,16 @@ func (a *App) restoreLayout() {
 	if s.TerminalPercent > 0 && s.TerminalPercent < 100 {
 		a.terminalPct = s.TerminalPercent
 	}
+	// The Processes and Network tabs' sizes, which the sessions share.
+	if s.ProcListPercent > 0 && s.ProcListPercent < 100 {
+		a.processes.listPct = s.ProcListPercent
+	}
+	if s.ProcFieldsPercent > 0 && s.ProcFieldsPercent < 100 {
+		a.processes.fieldsPct = s.ProcFieldsPercent
+	}
+	if s.NetListPercent > 0 && s.NetListPercent < 100 {
+		a.network.listPct = s.NetListPercent
+	}
 }
 
 // splitMoved keeps the panes of split at least l's sizes when the user
@@ -83,11 +93,14 @@ func (a *App) splitMoved(c *ui.Context, split ui.Element, size *float32, l split
 			v = v / 100 * room
 		}
 		// With no room for both, the first pane keeps its size.
-		v = max(min(v, room-l.second), l.first)
-		if l.percent {
-			v = v * 100 / room
+		// A size within the limits stays as it is, not converted back
+		// and forth: a double click saves the default itself.
+		if c := max(min(v, room-l.second), l.first); c != v {
+			if l.percent {
+				c = c * 100 / room
+			}
+			*size = c
 		}
-		*size = v
 	}
 	a.layoutDirty, a.layoutAt = true, c.Now()
 	c.After(layoutSaveDelay)
@@ -113,5 +126,8 @@ func (a *App) saveLayout() {
 	a.settings.MonitorPercent = a.monitorPct
 	a.settings.TerminalPercent = a.terminalPct
 	a.settings.TreeWidth = a.treeWidth
+	a.settings.ProcListPercent = a.processes.listPct
+	a.settings.ProcFieldsPercent = a.processes.fieldsPct
+	a.settings.NetListPercent = a.network.listPct
 	a.saveSettings(a.settings)
 }

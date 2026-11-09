@@ -39,6 +39,14 @@ type Settings struct {
 	TerminalPercent float32 `json:"terminalPercent,omitempty"`
 	TreeWidth       float32 `json:"treeWidth,omitempty"`
 
+	// The dividers of the Processes and Network tabs, in percent of the
+	// room, shared by the sessions: the process list's share above its
+	// details, the details' fields' share beside the environment, and the
+	// network table's share above its tabs. Zero is the app's default.
+	ProcListPercent   float32 `json:"procListPercent,omitempty"`
+	ProcFieldsPercent float32 `json:"procFieldsPercent,omitempty"`
+	NetListPercent    float32 `json:"netListPercent,omitempty"`
+
 	// The General page of the options. Each is named so that false, as a
 	// file without it reads, is the default.
 	//

@@ -1864,7 +1864,9 @@ The dividers between the areas of the window can be dragged to resize them
 (or moved with the arrow keys once they have focus), and double-clicking a
 divider restores the default size. Every area has a minimum size, so it
 cannot be dragged out of sight. The sizes are saved in
-`finallyshell/settings.json` and restored at the next start.
+`finallyshell/settings.json` and restored at the next start. This includes
+the dividers of the Processes and Network tabs, which every session
+shares, in the bottom panel and in a panel opened in a tab of its own.
 
 ## Language
 

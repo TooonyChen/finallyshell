@@ -236,9 +236,6 @@ func (a *App) processPanel(c *ui.Context) {
 	}
 	ps := &s.procs
 	a.pollProcesses(s)
-	if a.processes.listPct == 0 {
-		a.processes.listPct, a.processes.fieldsPct = defaultProcListPct, defaultProcFieldsPct
-	}
 	ui.Column(c.Key(s.ID)).Grow(1).MinHeight(0).Children(func() {
 		if s.status != statusConnected {
 			a.statusBanner(c, s)

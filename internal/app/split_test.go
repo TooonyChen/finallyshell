@@ -377,6 +377,177 @@ func TestSplitSizesOutOfRangeIgnored(t *testing.T) {
 	}
 }
 
+// tabDivider is a divider of the Processes or Network tab: where its
+// handle is, found anew as it moves, the size it moves, and where the
+// settings keep it.
+type tabDivider struct {
+	name     string
+	vertical bool
+	at       func() (x, y float32)
+	size     *float32
+	def      float32
+	saved    func(config.Settings) float32
+	restored func(*App) float32
+}
+
+// handleNear finds a divider's handle from (x, y), moving the pointer by
+// (dx, dy) until it shows cursor, and returns the handle's middle.
+func handleNear(t *testing.T, tt *ui.Tester, x, y, dx, dy float32, cursor ui.Cursor) (float32, float32) {
+	t.Helper()
+	x0, y0 := x, y
+	for range 200 {
+		tt.Move(x, y)
+		if tt.Cursor() == cursor {
+			n := float32(0)
+			for tt.Move(x+dx*(n+1), y+dy*(n+1)); tt.Cursor() == cursor; tt.Move(x+dx*(n+1), y+dy*(n+1)) {
+				n++
+			}
+			return x + dx*n/2, y + dy*n/2
+		}
+		x, y = x+dx, y+dy
+	}
+	t.Fatalf("no divider from (%.1f, %.1f) by (%.1f, %.1f)", x0, y0, dx, dy)
+	return 0, 0
+}
+
+// testTabDividers drags each of ds, waits for the save, starts a new App
+// on the same settings, and then puts them back with a double click.
+func testTabDividers(t *testing.T, a *App, tt *ui.Tester, ds []tabDivider) {
+	t.Helper()
+	var saved []config.Settings
+	a.saveSettings = func(s config.Settings) error {
+		saved = append(saved, s)
+		return config.SaveSettings(s)
+	}
+	for _, d := range ds {
+		if *d.size != d.def {
+			t.Fatalf("%s: starts at %v, want %v", d.name, *d.size, d.def)
+		}
+		x, y := d.at()
+		tt.Press(x, y)
+		for i := float32(1); i <= 4; i++ {
+			if d.vertical {
+				tt.Move(x, y+10*i)
+			} else {
+				tt.Move(x+10*i, y)
+			}
+		}
+		if d.vertical {
+			tt.Release(x, y+40)
+		} else {
+			tt.Release(x+40, y)
+		}
+		if *d.size <= d.def {
+			t.Errorf("%s: dragged 40 DIPs, size %v", d.name, *d.size)
+		}
+	}
+	if len(saved) != 0 {
+		t.Errorf("saved %d times while dragging", len(saved))
+	}
+	tt.Advance(time.Second)
+	if len(saved) != 1 {
+		t.Fatalf("saved %d times once the dividers rested", len(saved))
+	}
+	got := config.LoadSettings()
+	b := New(a.plat)
+	for _, d := range ds {
+		if v := d.saved(got); v != *d.size {
+			t.Errorf("%s: saved %v, shown %v", d.name, v, *d.size)
+		}
+		if v := d.restored(b); v != *d.size {
+			t.Errorf("%s: the next start has %v, saved %v", d.name, v, *d.size)
+		}
+	}
+
+	// A double click puts them back, and that is saved too.
+	for _, d := range ds {
+		x, y := d.at()
+		tt.ClickAt(x, y)
+		tt.ClickAt(x, y)
+		if *d.size != d.def {
+			t.Errorf("%s: double click: size %v, want %v", d.name, *d.size, d.def)
+		}
+	}
+	tt.Advance(time.Second)
+	got = config.LoadSettings()
+	b = New(a.plat)
+	for _, d := range ds {
+		if v := d.saved(got); v != d.def {
+			t.Errorf("%s: saved %v after the reset, want %v", d.name, v, d.def)
+		}
+		if v := d.restored(b); v != d.def {
+			t.Errorf("%s: the next start has %v after the reset", d.name, v)
+		}
+	}
+}
+
+func TestProcessesSplitSizesPersist(t *testing.T) {
+	a, p, s, _, tt := processesApp(t)
+	a.openProcTab(s, s.procs.shown()[0]) // java
+	p.until(t, "the details", func() bool { return !s.procs.tabs[0].loading })
+	tt.Frame()
+	testTabDividers(t, a, tt, []tabDivider{
+		{
+			name: "list", vertical: true, size: &a.processes.listPct, def: defaultProcListPct,
+			at: func() (float32, float32) {
+				// Above the details' tabs.
+				box, _ := tt.Find("7267-java")
+				return handleNear(t, tt, box.X+box.W/2, box.Y, 0, -0.5, ui.CursorResizeNS)
+			},
+			saved:    func(s config.Settings) float32 { return s.ProcListPercent },
+			restored: func(b *App) float32 { return b.processes.listPct },
+		},
+		{
+			name: "fields", size: &a.processes.fieldsPct, def: defaultProcFieldsPct,
+			at: func() (float32, float32) {
+				// Left of the environment's title.
+				box, _ := tt.Find(locales.ProcEnvironment())
+				return handleNear(t, tt, box.X, box.Y+box.H/2, -0.5, 0, ui.CursorResizeEW)
+			},
+			saved:    func(s config.Settings) float32 { return s.ProcFieldsPercent },
+			restored: func(b *App) float32 { return b.processes.fieldsPct },
+		},
+	})
+}
+
+func TestNetworkSplitSizePersists(t *testing.T) {
+	a, _, s, _, _, tt := networkApp(t)
+	// In the panel's tab of its own, which shares the sessions' size.
+	a.openPanelTab(s, tabNetwork)
+	a.openNetTab(s, netGroup(t, s, "0.0.0.0:80"))
+	tt.Frame()
+	testTabDividers(t, a, tt, []tabDivider{{
+		name: "list", vertical: true, size: &a.network.listPct, def: defaultNetListPct,
+		at: func() (float32, float32) {
+			// Above the count of the connections, right of the tabs.
+			box, _ := tt.Find("4 connections")
+			return handleNear(t, tt, box.X+box.W/2, box.Y, 0, -0.5, ui.CursorResizeNS)
+		},
+		saved:    func(s config.Settings) float32 { return s.NetListPercent },
+		restored: func(b *App) float32 { return b.network.listPct },
+	}})
+}
+
+func TestTabSplitSizesOutOfRangeIgnored(t *testing.T) {
+	_, p := testApp(t)
+	for _, tc := range []struct {
+		s    config.Settings
+		want [3]float32
+	}{
+		{config.Settings{}, [3]float32{defaultProcListPct, defaultProcFieldsPct, defaultNetListPct}},
+		{config.Settings{ProcListPercent: 30, ProcFieldsPercent: 70, NetListPercent: 42.5}, [3]float32{30, 70, 42.5}},
+		{config.Settings{ProcListPercent: 100, ProcFieldsPercent: -5, NetListPercent: 250}, [3]float32{defaultProcListPct, defaultProcFieldsPct, defaultNetListPct}},
+	} {
+		if err := config.SaveSettings(tc.s); err != nil {
+			t.Fatal(err)
+		}
+		a := New(p)
+		if got := [3]float32{a.processes.listPct, a.processes.fieldsPct, a.network.listPct}; got != tc.want {
+			t.Errorf("saved %+v: restored %v, want %v", tc.s, got, tc.want)
+		}
+	}
+}
+
 // TestSSHResize drags dividers in a live session and checks that the
 // server's terminal takes the new size:
 //

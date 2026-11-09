@@ -98,6 +98,7 @@ var (
 	}
 	localSettings = []string{
 		"sidebarWidth", "monitorPercent", "terminalPercent", "treeWidth",
+		"procListPercent", "procFieldsPercent", "netListPercent",
 		"termBackground", // a file in this device's config folder
 		"downloadDir", "askDownloadDir",
 		"sync",
