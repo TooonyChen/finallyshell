@@ -140,6 +140,7 @@
   "parentFolder": "Parent folder",
   "refresh": "Refresh",
   "homeFolder": "Home folder",
+  "followTerminalDir": "Follow the terminal's folder",
   "copyPath": "Copy path",
   "sftpUnavailable": "SFTP unavailable: {error}",
   "cannotOpenFolder": "Cannot open {dir}: {error}",

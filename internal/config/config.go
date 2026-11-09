@@ -145,6 +145,10 @@ type Settings struct {
 	// "<publisher>.<extension>/<theme>" for one installed from a VSIX or in
 	// an editor such as VS Code.
 	FileIconTheme string `json:"fileIconTheme,omitempty"`
+	// NoFollowTerminalDir keeps the file panel where the user browsed it
+	// when the shell's working directory changes; by default the panel
+	// goes to it (the toggle in the panel's toolbar).
+	NoFollowTerminalDir bool `json:"noFollowTerminalDir,omitempty"`
 
 	// Sync is the Sync page of the options: where connections and
 	// settings are synced, if anywhere (sync.go).

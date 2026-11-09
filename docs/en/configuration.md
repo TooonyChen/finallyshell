@@ -175,6 +175,7 @@ default.
 | `termBackgroundOpacity` | Image opacity in percent, 5 to 100. | 30 |
 | `keepManagerOpen` | `true` keeps the connection manager open after connecting. | It closes. |
 | `fileIconTheme` | `minimal`, `bundled:seti`, or `<publisher>.<name>/<theme ID>`. | Material Icon Theme |
+| `noFollowTerminalDir` | `true` keeps the file panel where it is when the shell's folder changes. | It follows. |
 | `noCommandBar` | `true` hides the command bar under the terminal, and all it does. | Shown. |
 | `noCommandBarPaths` | `true` turns the command bar's path picker off. | On. |
 | `noCommandBarHistory` | `true` turns the history picker off, and keeping the commands sent. | On. |

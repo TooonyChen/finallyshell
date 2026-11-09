@@ -17,6 +17,27 @@ func IconButton(c *ui.Context, icon, label string) ui.Element {
 	return IconButtonBadge(c, icon, label, 0)
 }
 
+// ToggleIconButton is an IconButton that stays pressed while on, as a
+// toggle button: tinted with the accent then. Ask Clicked on what it
+// returns, and flip the value.
+func ToggleIconButton(c *ui.Context, icon, label string, on bool) ui.Element {
+	t := c.Theme()
+	b := ui.Box(c.Key(icon+"|"+label)).Size(24, 24).Center().Radius(5).
+		Role(ui.RoleToggleButton).Checked(on).Label(label).Tooltip(label).Shrink(0)
+	color := t.TextMuted
+	switch {
+	case on:
+		b.Background(t.Accent.Alpha(0.16))
+		color = t.Accent
+	case b.Hovered():
+		b.Background(t.Text.Alpha(0.07))
+	}
+	b.Children(func() {
+		ui.Icon(c, icons.Get(icon)).FontSize(15).TextColor(color)
+	})
+	return b
+}
+
 // IconButtonBadge is an IconButton with count in a small badge at its
 // top right corner, none for 0.
 func IconButtonBadge(c *ui.Context, icon, label string, count int) ui.Element {

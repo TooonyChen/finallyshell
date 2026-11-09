@@ -912,6 +912,16 @@ func (msgs Messages) HomeFolder() string {
 	return Catalog.Format(msgs.locale, "homeFolder", nil)
 }
 
+// FollowTerminalDir says "Follow the terminal's folder"
+// in the language the app shows.
+func FollowTerminalDir() string { return In(i18n.Locale()).FollowTerminalDir() }
+
+// FollowTerminalDir says "Follow the terminal's folder"
+// in the language of msgs.
+func (msgs Messages) FollowTerminalDir() string {
+	return Catalog.Format(msgs.locale, "followTerminalDir", nil)
+}
+
 // CopyPath says "Copy path"
 // in the language the app shows.
 func CopyPath() string { return In(i18n.Locale()).CopyPath() }

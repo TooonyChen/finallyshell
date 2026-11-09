@@ -75,24 +75,35 @@ func (f *fileState) chosenNames() []string {
 }
 
 // openDir lists dir in the table and makes it the current directory.
-func (a *App) openDir(s *Session, dir string) {
+func (a *App) openDir(s *Session, dir string) { a.listDir(s, dir, false) }
+
+// listDir is openDir; quiet leaves the panel as it was, with no error,
+// when dir can't be read, as when it follows the shell into a folder
+// SFTP can't open.
+func (a *App) listDir(s *Session, dir string, quiet bool) {
 	if s.sftp == nil {
 		return
 	}
 	dir = path.Clean(dir)
 	f := &s.files
-	f.loading, f.err = true, nil
-	f.pathEdit = dir
+	f.loading = true
+	if !quiet {
+		f.err = nil
+		f.pathEdit = dir
+	}
 	sc := s.sftp
 	go func() {
 		entries, err := remotefs.ReadDir(sc, dir)
 		a.post(func() {
 			f.loading = false
 			if err != nil {
-				f.err = &dirError{dir, err}
-				f.pathEdit = f.cwd
+				if !quiet {
+					f.err = &dirError{dir, err}
+					f.pathEdit = f.cwd
+				}
 				return
 			}
+			f.err = nil
 			if dir != f.cwd {
 				f.chosen.Clear()
 				f.row = -1
@@ -211,6 +222,7 @@ func (a *App) filePanel(c *ui.Context) {
 					a.openDir(s, home)
 				}
 			}
+			a.followButton(c, s)
 			ui.Box(c).Size(1, 16).Background(colors.line).Margin(0, 4)
 			// Their context menus also have the archive transfers.
 			uploadMenu := func(m *ui.Menu) { a.uploadMenuItems(m, s, f.cwd) }

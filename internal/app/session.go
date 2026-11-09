@@ -54,9 +54,10 @@ type Session struct {
 	hostKeyQ *sshx.HostKeyQuestion
 	cancel   context.CancelFunc
 
-	start startState // the start page, while it is a new tab
-	find  findState  // the find bar over the terminal
-	bar   cmdBar     // the command bar under the terminal (commandbar.go)
+	start startState    // the start page, while it is a new tab
+	find  findState     // the find bar over the terminal
+	bar   cmdBar        // the command bar under the terminal (commandbar.go)
+	shell shellDirState // the shell's directory, which the file panel follows
 }
 
 // errConnectionLost is a session whose shell ended.
@@ -134,7 +135,13 @@ func (a *App) connect(s *Session, secret string) {
 			return
 		}
 		topts.Conn = termenc.Wrap(shell, enc)
-		topts.OnKey = keySequences(bs, del, func() *terminal.Terminal { return s.term })
+		keys := keySequences(bs, del, func() *terminal.Terminal { return s.term })
+		topts.OnKey = func(mods ui.Modifiers, key ui.Key) bool {
+			if key == ui.KeyEnter {
+				s.shellCommandSent() // for the file panel to follow a cd
+			}
+			return keys != nil && keys(mods, key)
+		}
 		topts.OnExit = func(int) {
 			a.post(func() {
 				if s.status == statusConnected && s.cancel != nil {
@@ -161,6 +168,7 @@ func (a *App) connect(s *Session, secret string) {
 				return
 			}
 			s.client, s.term, s.ip = client, term, ip
+			a.startShellDir(ctx, s, client, term, execAllowed(&h))
 			a.updateTerminal(term, topts)
 			s.status, s.err = statusConnected, nil
 			a.noteConnected(s.Host)

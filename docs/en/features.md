@@ -31,6 +31,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Command bar](#command-bar)
   - [Appearance: font, color scheme, background image](#appearance-font-color-scheme-background-image)
 - [File panel](#file-panel)
+  - [Following the terminal's folder](#following-the-terminals-folder)
   - [File icon themes](#file-icon-themes)
   - [Symbolic links](#symbolic-links)
   - [File operations](#file-operations)
@@ -761,7 +762,9 @@ Command bar turns it off, or any of its popups, and lists its keys (see
     and `/bin` over SFTP instead.
   - any other word opens the path picker for the current folder.
 - Relative paths are read from the shell's working directory when the
-  shell reports it (OSC 7), else from the file panel's folder; `~` is the
+  shell reports it (OSC 7) or the app read it from the server (see
+  [Following the terminal's folder](#following-the-terminals-folder)),
+  else from the file panel's folder; `~` is the
   home folder. Folders are listed over the session's SFTP, so a server
   without SFTP shows the error in the popup, while sending and the history
   still work.
@@ -875,6 +878,31 @@ In `settings.json` these are `termFontFamily`, `termFontSize`,
 The "Files" tab at the bottom right browses the server over SFTP: a folder
 tree on the left, a file table on the right (with multiple selection), and
 a path bar where a path can be typed directly.
+
+### Following the terminal's folder
+
+When the shell's working directory changes, as after `cd /var/log`, the
+file panel goes there too. The toggle button after the home button in the
+panel's toolbar turns this off and on, for every session; turned back on,
+the panel goes to the shell's folder at once. It is on by default.
+
+- The panel moves only when the shell's folder changes. A folder the user
+  browsed in the panel stays after a command such as `ls`, until the next
+  `cd`.
+- A shell that reports its folder (OSC 7: fish, and zsh or bash set up to)
+  tells it. Otherwise, on a Linux server, the app reads it from `/proc`
+  over a channel of its own on the same connection: the working directory
+  of the program in the foreground of the shell's terminal, else the
+  shell's. This needs the host's server monitor to be on (it uses the
+  same exec channels), no root and no tools beyond the shell.
+- It reads after Enter in the terminal, or a line the command bar sends:
+  about a quarter of a second later and again after a second and a half.
+  Nothing is read while nothing is typed.
+- Not followed: macOS and other servers without `/proc` whose shell
+  doesn't report OSC 7, root shells from `sudo -i` or `su` (the user can't
+  read root's processes), and shells inside tmux or screen. A folder the
+  panel can't open, such as one on another host the shell went to with
+  ssh, leaves the panel where it was.
 
 ### File icon themes
 

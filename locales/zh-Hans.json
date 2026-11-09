@@ -86,6 +86,7 @@
   "parentFolder": "上级目录",
   "refresh": "刷新",
   "homeFolder": "主目录",
+  "followTerminalDir": "跟随终端目录",
   "copyPath": "复制路径",
   "sftpUnavailable": "SFTP 不可用：{error}",
   "cannotOpenFolder": "无法打开 {dir}：{error}",

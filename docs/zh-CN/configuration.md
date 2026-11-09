@@ -145,6 +145,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `termBackgroundOpacity` | 图片的不透明度（百分比），5 到 100。 | 30 |
 | `keepManagerOpen` | `true` 时连接后不关闭连接管理器。 | 关闭。 |
 | `fileIconTheme` | `minimal`、`bundled:seti` 或 `<发布者>.<名称>/<主题 ID>`。 | Material Icon Theme |
+| `noFollowTerminalDir` | `true` 时 shell 的目录变了，文件面板也留在原处。 | 跟随。 |
 | `noCommandBar` | `true` 时不显示终端下方的命令输入框，它的功能也都不用。 | 显示。 |
 | `noCommandBarPaths` | `true` 时关掉命令输入框的路径选择。 | 开。 |
 | `noCommandBarHistory` | `true` 时关掉历史列表，也不再保存发送的命令。 | 开。 |

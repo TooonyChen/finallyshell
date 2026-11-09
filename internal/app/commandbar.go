@@ -227,6 +227,7 @@ func (a *App) sendBar(s *Session, e barEdit) {
 		return
 	}
 	s.term.Send([]byte(e.text + "\r"))
+	s.shellCommandSent()
 	if cmd := strings.TrimSpace(e.text); a.historyOn() && config.Keepable(cmd) {
 		a.addHistory(s.Host.ID, cmd)
 	}

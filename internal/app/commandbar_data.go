@@ -299,8 +299,9 @@ func readTail(sc *sftp.Client, p string, limit int64) ([]byte, error) {
 // listKey is the folder the path picker lists for dirRaw, the folder
 // part of the word: an absolute path, or one starting with ~ for the
 // home folder, which the listing resolves. A relative one is from the
-// shell's working directory, as it reports it (OSC 7), else from the
-// file panel's folder, else from the home folder.
+// shell's working directory, as it reports it (OSC 7) or the server
+// tells (shellDir), else from the file panel's folder, else from the
+// home folder.
 func (a *App) listKey(s *Session, dirRaw string) string {
 	dir := unescape(dirRaw)
 	switch {
@@ -309,10 +310,7 @@ func (a *App) listKey(s *Session, dirRaw string) string {
 	case dir == "~" || strings.HasPrefix(dir, "~/"):
 		return homeKey(dir[1:])
 	}
-	base := ""
-	if s.term != nil {
-		base = s.term.Dir()
-	}
+	base := s.shellDir()
 	if base == "" {
 		base = s.files.cwd
 	}
