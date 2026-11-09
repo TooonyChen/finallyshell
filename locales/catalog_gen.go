@@ -8130,6 +8130,58 @@ func (msgs Messages) GeoChecksum() string {
 	return Catalog.Format(msgs.locale, "geoChecksum", nil)
 }
 
+// GeoSourceFailed says "{host}: {error}"
+// in the language the app shows.
+func GeoSourceFailed(host string, error string) string {
+	return In(i18n.Locale()).GeoSourceFailed(host, error)
+}
+
+// GeoSourceFailed says "{host}: {error}"
+// in the language of msgs.
+func (msgs Messages) GeoSourceFailed(host string, error string) string {
+	return Catalog.Format(msgs.locale, "geoSourceFailed", map[string]any{"host": host, "error": error})
+}
+
+// GeoSourcesSeparator says "; "
+// in the language the app shows.
+func GeoSourcesSeparator() string { return In(i18n.Locale()).GeoSourcesSeparator() }
+
+// GeoSourcesSeparator says "; "
+// in the language of msgs.
+func (msgs Messages) GeoSourcesSeparator() string {
+	return Catalog.Format(msgs.locale, "geoSourcesSeparator", nil)
+}
+
+// GeoNoAnswer says "no answer in time"
+// in the language the app shows.
+func GeoNoAnswer() string { return In(i18n.Locale()).GeoNoAnswer() }
+
+// GeoNoAnswer says "no answer in time"
+// in the language of msgs.
+func (msgs Messages) GeoNoAnswer() string {
+	return Catalog.Format(msgs.locale, "geoNoAnswer", nil)
+}
+
+// GeoRefused says "connection refused"
+// in the language the app shows.
+func GeoRefused() string { return In(i18n.Locale()).GeoRefused() }
+
+// GeoRefused says "connection refused"
+// in the language of msgs.
+func (msgs Messages) GeoRefused() string {
+	return Catalog.Format(msgs.locale, "geoRefused", nil)
+}
+
+// GeoNoHost says "host not found"
+// in the language the app shows.
+func GeoNoHost() string { return In(i18n.Locale()).GeoNoHost() }
+
+// GeoNoHost says "host not found"
+// in the language of msgs.
+func (msgs Messages) GeoNoHost() string {
+	return Catalog.Format(msgs.locale, "geoNoHost", nil)
+}
+
 // GeoLAN says "LAN"
 // in the language the app shows.
 func GeoLAN() string { return In(i18n.Locale()).GeoLAN() }

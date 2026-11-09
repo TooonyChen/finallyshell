@@ -163,7 +163,7 @@ func (f *fakeGeo) server(t *testing.T) *httptest.Server {
 
 func dataFile(name, url string, data []byte) geo.DataFile {
 	h := sha256.Sum256(data)
-	return geo.DataFile{Name: name, URL: url, Size: int64(len(data)), SHA256: hex.EncodeToString(h[:])}
+	return geo.DataFile{Name: name, URLs: []string{url}, Size: int64(len(data)), SHA256: hex.EncodeToString(h[:])}
 }
 
 // networkApp is an app showing a connected session's Network tab, on
@@ -420,10 +420,14 @@ func TestNetworkLocations(t *testing.T) {
 
 }
 
-// A download that fails leaves no file and offers Retry; a canceled
-// one leaves no file either.
+// A download that fails from every source leaves no file, says why for
+// each and offers Retry; one whose first source fails comes from the
+// next; a canceled one leaves no file either.
 func TestNetworkDownloadFails(t *testing.T) {
 	a, p, _, _, g, tt := networkApp(t)
+	f := &a.geo.files[0]
+	host := strings.TrimPrefix(f.URLs[0][:strings.LastIndex(f.URLs[0], "/")], "http://")
+	f.URLs = append([]string{"http://" + host + "/gone.xdb"}, f.URLs...)
 	g.mu.Lock()
 	g.status = http.StatusInternalServerError
 	g.mu.Unlock()
@@ -432,9 +436,16 @@ func TestNetworkDownloadFails(t *testing.T) {
 	}
 	p.until(t, "the failure", func() bool { return a.geo.dl != nil && a.geo.dl.err != nil })
 	tt.Frame()
-	if !tt.HasText(locales.Retry()) || !strings.Contains(strings.Join(tt.Texts(), "\n"), "500") {
-		t.Errorf("texts %q", tt.Texts())
+	want := locales.GeoDownloadFailed(host + ": 500 Internal Server Error; " + host + ": 500 Internal Server Error")
+	if !tt.HasText(locales.Retry()) || !tt.HasText(want) {
+		t.Errorf("texts %q, want %q", tt.Texts(), want)
 	}
+	a.setLanguage("zh-Hans")
+	tt.Frame()
+	if want := "无法下载位置数据：" + host + "：500 Internal Server Error；" + host + "：500 Internal Server Error"; !tt.HasText(want) {
+		t.Errorf("Chinese: %q, want %q", tt.Texts(), want)
+	}
+	a.setLanguage("en")
 	if names := geoFiles(t); len(names) != 0 {
 		t.Errorf("files %v", names)
 	}
@@ -446,6 +457,9 @@ func TestNetworkDownloadFails(t *testing.T) {
 		t.Fatal(err)
 	}
 	p.until(t, "the progress", func() bool { return a.geo.dl != nil && a.geo.dl.done > 0 })
+	if gets, _ := g.requests(); !slices.Equal(gets[len(gets)-2:], []string{"/gone.xdb", "/v4.xdb"}) {
+		t.Errorf("asked %v", gets)
+	}
 	tt.Frame()
 	if pct := int(100 * a.geo.dl.done / a.geo.dl.total); !tt.HasText(locales.GeoDownloading(pct)) {
 		t.Errorf("progress: %q", tt.Texts())

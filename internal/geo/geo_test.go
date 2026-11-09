@@ -160,7 +160,7 @@ func TestDownload(t *testing.T) {
 		w.Write(data[len(data)/2:])
 	}))
 	defer srv.Close()
-	f := DataFile{Name: "ip2region_v4.xdb", URL: srv.URL + "/v4.xdb", Size: int64(len(data)), SHA256: sum(data)}
+	f := DataFile{Name: "ip2region_v4.xdb", URLs: []string{srv.URL + "/v4.xdb"}, Size: int64(len(data)), SHA256: sum(data)}
 	files := func(dir string) []string {
 		entries, _ := os.ReadDir(dir)
 		var names []string
@@ -199,8 +199,8 @@ func TestDownload(t *testing.T) {
 		f    DataFile
 		st   int
 	}{
-		{"checksum", DataFile{Name: f.Name, URL: f.URL, Size: f.Size, SHA256: strings.Repeat("0", 64)}, http.StatusOK},
-		{"size", DataFile{Name: f.Name, URL: f.URL, Size: f.Size - 1, SHA256: f.SHA256}, http.StatusOK},
+		{"checksum", DataFile{Name: f.Name, URLs: f.URLs, Size: f.Size, SHA256: strings.Repeat("0", 64)}, http.StatusOK},
+		{"size", DataFile{Name: f.Name, URLs: f.URLs, Size: f.Size - 1, SHA256: f.SHA256}, http.StatusOK},
 		{"status", f, http.StatusNotFound},
 	} {
 		dir := filepath.Join(t.TempDir(), "geo")

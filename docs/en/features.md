@@ -1448,12 +1448,23 @@ column.
   where IP addresses are? This downloads about 11 MB of location data
   (ip2region)." with Download, Not Now and Don't Ask Again.
   - Download fetches `ip2region_v4.xdb` of [ip2region](https://github.com/lionsoul2014/ip2region)'s
-    release v3.18.0 from GitHub into `geo/` in the config directory, with
-    its progress in the bar and Cancel. The file is written under a
+    release v3.18.0 into `geo/` in the config directory, with its
+    progress in the bar and Cancel. The file is written under a
     temporary name and kept only when its SHA-256 is the one the app
     keeps for it; a failed or canceled download leaves nothing behind,
     and the bar offers Retry. The data is read into memory off the UI
     thread, its checksum checked again each time.
+  - The file comes from GitHub (`raw.githubusercontent.com`), and, when
+    GitHub cannot be reached, sends nothing within about 15 seconds,
+    answers with an error or serves a file of the wrong size or
+    checksum, from jsDelivr (`cdn.jsdelivr.net`), which mirrors the same
+    release and is often reachable where GitHub is not, as in mainland
+    China. Both serve the same file: the checksum is the same whichever
+    serves it. The progress starts from 0 again when the download moves
+    to jsDelivr; Cancel stops it without trying jsDelivr. When both fail,
+    the bar names each host and what it answered. The IPv6 file is too
+    large for jsDelivr (it serves files of up to 20 MB) and comes from
+    GitHub only.
   - Not Now hides the bar until the app starts again.
   - Don't Ask Again turns locations off (`geoLocations` `"off"`) until
     they are turned on in the options.

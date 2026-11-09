@@ -7,6 +7,7 @@ import (
 	"maps"
 	"net/http"
 	"net/netip"
+	"net/url"
 	"os"
 	"path/filepath"
 	"slices"
@@ -16,6 +17,7 @@ import (
 	"finallyshell/internal/config"
 	"finallyshell/internal/geo"
 	"finallyshell/internal/icons"
+	"finallyshell/internal/sshx"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/i18n"
@@ -73,7 +75,7 @@ func v6Index(v6 bool) int {
 }
 
 func (a *App) geoFile(v6 bool) geo.DataFile {
-	if f := a.geo.files[v6Index(v6)]; f.URL != "" {
+	if f := a.geo.files[v6Index(v6)]; len(f.URLs) > 0 {
 		return f
 	}
 	if v6 {
@@ -542,12 +544,45 @@ func (a *App) geoBar(c *ui.Context) {
 	})
 }
 
+// geoErrorText is why a download failed: for each source, its host and
+// what it answered ("raw.githubusercontent.com: connection refused;
+// cdn.jsdelivr.net: 404 Not Found").
 func geoErrorText(err error) string {
-	if errors.Is(err, geo.ErrChecksum) {
-		return locales.GeoChecksum()
+	var de *geo.DownloadError
+	if !errors.As(err, &de) {
+		return geoSourceText(err)
 	}
-	msg := describeError(err)
-	return strings.TrimSpace(msg)
+	msgs := make([]string, len(de.Sources))
+	for i, s := range de.Sources {
+		msgs[i] = locales.GeoSourceFailed(s.Host, geoSourceText(s.Err))
+	}
+	return strings.Join(msgs, locales.GeoSourcesSeparator())
+}
+
+// geoSourceText is why the download from one source failed.
+func geoSourceText(err error) string {
+	var st *geo.StatusError
+	var ue *url.Error
+	switch {
+	case errors.Is(err, geo.ErrChecksum):
+		return locales.GeoChecksum()
+	case errors.Is(err, geo.ErrNoAnswer):
+		return locales.GeoNoAnswer()
+	case errors.As(err, &st):
+		return st.Status
+	}
+	switch sshx.Classify(err) {
+	case "refused":
+		return locales.GeoRefused()
+	case "timeout":
+		return locales.GeoNoAnswer()
+	case "nohost":
+		return locales.GeoNoHost()
+	}
+	if errors.As(err, &ue) {
+		err = ue.Err // without the URL, which the host already says
+	}
+	return strings.TrimSpace(err.Error())
 }
 
 // geoDownloadSize is about how much a data file downloads, as the
