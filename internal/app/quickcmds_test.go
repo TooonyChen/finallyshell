@@ -285,6 +285,39 @@ func TestQuickCommandsEditor(t *testing.T) {
 	p.SetLocale("en")
 }
 
+// Groups of one name, and one named as another's label would be, each
+// have a label of their own in the editor's group picker, which picks
+// that group.
+func TestQuickCommandsEditorSameNames(t *testing.T) {
+	a, p := testApp(t)
+	q := config.NewQuickCommands()
+	g1, g2, g3 := q.AddGroup("Logs"), q.AddGroup("Logs"), q.AddGroup("Logs (2)")
+	a.quickUI.store = q
+	ids, labels := quickGroupChoices(q)
+	want := []string{locales.QuickNoGroup(), "Logs", "Logs (2)", "Logs (2) (2)"}
+	if !slices.Equal(labels, want) || !slices.Equal(ids, []string{"", g1.ID, g2.ID, g3.ID}) {
+		t.Fatalf("labels %q, ids %q", labels, ids)
+	}
+	for i, g := range []*config.QuickGroup{g1, g2, g3} {
+		a.newQuickCommand()
+		ed := p.show(t, WindowQuickCommand)
+		choose(t, ed, locales.QuickFieldGroup(), want[i+1])
+		if a.quickUI.ed.group != g.ID {
+			t.Errorf("%q picked group %q, want %q", want[i+1], a.quickUI.ed.group, g.ID)
+		}
+		a.quickUI.ed.text = "ls"
+		if err := ed.Click(locales.Save()); err != nil {
+			t.Fatal(err)
+		}
+		if a.windowOpen(WindowQuickCommand) {
+			t.Fatal("the editor stayed open")
+		}
+		if cmds := q.InGroup(g.ID); len(cmds) != 1 {
+			t.Errorf("group %d holds %d commands", i+1, len(cmds))
+		}
+	}
+}
+
 // Groups: New group names one in place and shows it; a group's menu
 // renames it and deletes it, after asking, its commands kept under All.
 // A command dropped on a group moves into it.

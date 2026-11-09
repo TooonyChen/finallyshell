@@ -97,16 +97,19 @@ func (a *App) saveQuickEditor() {
 }
 
 // quickGroupChoices are the editor's group choices: No group, then the
-// groups, labels that two groups of one name would share told apart.
+// groups. The select picks by label, so every label is unique: a name
+// already taken, by another group or by a label made before it, gets the
+// first " (n)" that no other label has, as Logs, Logs (2) and a group
+// named Logs (2), which becomes Logs (2) (2).
 func quickGroupChoices(store *config.QuickCommands) (ids, labels []string) {
 	ids, labels = []string{""}, []string{locales.QuickNoGroup()}
-	seen := map[string]int{labels[0]: 1}
+	used := map[string]bool{labels[0]: true}
 	for _, g := range store.Groups {
 		label := g.Name
-		if n := seen[label]; n > 0 {
-			label = fmt.Sprintf("%s (%d)", g.Name, n+1)
+		for n := 2; used[label]; n++ {
+			label = fmt.Sprintf("%s (%d)", g.Name, n)
 		}
-		seen[g.Name]++
+		used[label] = true
 		ids, labels = append(ids, g.ID), append(labels, label)
 	}
 	return ids, labels
