@@ -110,9 +110,9 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 	// the panel from a folder the user browsed to. They don't move the
 	// panel, which the user may be browsing already.
 	wake <- struct{}{}
+	shellFollowers.Add(1) // here, so that it counts from the start
 	go func() {
 		defer shellFollowers.Add(-1)
-		shellFollowers.Add(1)
 		baseline, agent := true, false
 		for {
 			// While the tab shows an agent, it reads again now and then.
