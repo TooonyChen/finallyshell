@@ -1,0 +1,42 @@
+---FINALLYSHELL:uname---
+Linux
+---FINALLYSHELL:uid---
+0
+---FINALLYSHELL:ss---
+udp UNCONN 0      0      127.0.0.53%lo:53         0.0.0.0:*     users:(("systemd-resolve",pid=612,fd=13))
+udp UNCONN 0      0            0.0.0.0:68         0.0.0.0:*     users:(("dhclient",pid=540,fd=6))
+udp ESTAB  0      0         10.0.0.5:41234   9.9.9.9:53    users:(("java",pid=7267,fd=120))
+udp UNCONN 0      0               [::]:123           [::]:*     users:(("chronyd",pid=700,fd=7))
+tcp LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*     users:(("systemd-resolve",pid=612,fd=14))
+
+tcp LISTEN 0      128          0.0.0.0:22         0.0.0.0:*     users:(("sshd",pid=1290,fd=3))
+
+tcp LISTEN 0      511          0.0.0.0:80         0.0.0.0:*     users:(("nginx",pid=1201,fd=6),("nginx",pid=1200,fd=6),("nginx",pid=1202,fd=6))
+
+tcp LISTEN 0      100          0.0.0.0:110        0.0.0.0:*     users:(("dovecot",pid=880,fd=24))
+
+tcp LISTEN 0      128             [::]:22            [::]:*     users:(("sshd",pid=1290,fd=4))
+
+tcp LISTEN 0      4096               *:8080             *:*     users:(("java",pid=7267,fd=45))
+
+tcp ESTAB  0      0           10.0.0.5:22     45.56.78.90:51234 users:(("sshd",pid=4012,fd=4),("sshd",pid=4001,fd=4))
+	 bytes_sent:1234567 bytes_acked:1234568 bytes_received:56789
+tcp ESTAB  0      0           10.0.0.5:22     45.56.78.90:51240 users:(("sshd",pid=4100,fd=4))
+	 bytes_sent:2001 bytes_acked:2001 bytes_received:3001
+tcp ESTAB  0      0           10.0.0.5:110     1.0.1.7:40001 users:(("dovecot",pid=880,fd=30))
+	 bytes_sent:500 bytes_acked:501 bytes_received:200
+tcp TIME-WAIT 0   0           10.0.0.5:80     8.8.8.8:60000
+
+tcp ESTAB  0      0      [::ffff:10.0.0.5]:8080 [::ffff:203.0.113.9]:55001 users:(("java",pid=7267,fd=90))
+	 bytes_acked:9001 bytes_received:7000
+tcp ESTAB  0      0      [2001:db8::5]:22 [2606:4700::1111]:60022 users:(("sshd",pid=5000,fd=4))
+	 bytes_sent:100 bytes_acked:101 bytes_received:50
+tcp ESTAB  0      0           10.0.0.5:43182  103.21.244.10:443   users:(("java",pid=7267,fd=101))
+	 bytes_sent:209730 bytes_acked:209731 bytes_received:34234
+tcp ESTAB  0      0           10.0.0.5:43186  103.21.244.10:443   users:(("java",pid=7267,fd=102))
+	 bytes_sent:100 bytes_acked:101 bytes_received:100
+tcp SYN-SENT 0    1           10.0.0.5:43190  114.114.114.114:443 users:(("curl \"x\"",pid=9100,fd=5))
+
+tcp ESTAB  0      0           10.0.0.5:33482  34.149.66.165:443
+	 bytes_sent:12473 bytes_acked:12474 bytes_received:3968
+---FINALLYSHELL:end---

@@ -30,6 +30,7 @@ const (
 	pageCommandBar = "terminal/commandbar"
 	pageFiles      = "files"
 	pageFileIcons  = "files/icons"
+	pageNetwork    = "network"
 	pageSync       = "sync"
 )
 
@@ -91,6 +92,10 @@ var optionPages = []optionPage{
 	{
 		id: pageFileIcons, parent: pageFiles, title: locales.OptionsFileIcons,
 		view: (*App).fileIconsPage,
+	},
+	{
+		id: pageNetwork, title: locales.OptionsNetwork,
+		view: (*App).networkPage,
 	},
 	{
 		id: pageSync, title: locales.OptionsSync,

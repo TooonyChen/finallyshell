@@ -225,9 +225,12 @@ type App struct {
 	history cmdHistories
 
 	// The polls of the bottom panel's tabs (polling.go), and the
-	// Processes tab's shared state (processes.go).
+	// Processes and Network tabs' shared state (processes.go,
+	// network.go), with where IP addresses are (geo.go).
 	polls     pollSet
 	processes processesUI
+	network   networkUI
+	geo       geoState
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -309,6 +312,7 @@ const (
 	tabTransfers
 	tabTunnels
 	tabProcesses
+	tabNetwork
 )
 
 // bottomTab is a tab of the bottom panel: its label, and its page.
@@ -332,6 +336,7 @@ func (a *App) bottomTabs() []bottomTab {
 		tabTransfers: {transfersLabel, a.transferPanel},
 		tabTunnels:   {tunnelsLabel, a.tunnelPanel},
 		tabProcesses: {locales.TabProcesses(), a.processPanel},
+		tabNetwork:   {locales.TabNetwork(), a.networkPanel},
 	}
 }
 

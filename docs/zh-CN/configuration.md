@@ -33,6 +33,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `sync-state.json` | 上次同步的状态（见[同步](#同步)）。 |
 | `hosts.before-sync.json` | 上次改动了它的同步之前的 `hosts.json`。 |
 | `history/<主机 ID>.txt` | 命令输入框按主机保存的历史（见[命令历史](#命令历史)）。 |
+| `geo/` | IP 位置数据，只在你同意时下载：`ip2region_v4.xdb`、`ip2region_v6.xdb`，以及在线查询结果的缓存 `cache.json`（见 [IP 归属地](features.md#ip-归属地)）。 |
 
 `mygo dev`、`go run` 和安装版用的是同一个目录，所以共用主机和设置。
 
@@ -151,11 +152,14 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `noCommandBarHistory` | `true` 时关掉历史列表，也不再保存发送的命令。 | 开。 |
 | `noCommandBarCommands` | `true` 时关掉命令补全。 | 开。 |
 | `noServerHistory` | `true` 时历史列表里不加服务器的 `~/.bash_history` 和 `~/.zsh_history`。 | 读取。 |
+| `geoLocations` | `on` 用下载的 ip2region 数据显示 IP 归属地；`off` 不显示（“不再询问”也是它）。 | 还没问过：网络页会询问。 |
+| `geoLocationsV6` | IPv6 数据的同样设置。 | 第一次出现 IPv6 对端时询问。 |
+| `geoOnline` | `true` 在线查询（ip-api.com）数据中没有城市或运营商的地址。 | 关闭。 |
 | `sidebarWidth`、`treeWidth` | 左边栏和文件面板目录树的宽度，最后一次拖动的结果。 | 程序的默认值。 |
 | `monitorPercent`、`terminalPercent` | 服务器监控占左边栏的比例、终端占主区域的比例，单位是百分比。 | 程序的默认值。 |
 | `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
 
-每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)和[布局和分隔条](features.md#布局和分隔条)。
+每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[网络监控](features.md#网络监控)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)和[布局和分隔条](features.md#布局和分隔条)。
 
 ## 同步
 
@@ -171,7 +175,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`termBackground`、`downloadDir`、`askDownloadDir` 和 `sync`，以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6` 和 `geoOnline`，以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 

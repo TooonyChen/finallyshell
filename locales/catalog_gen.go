@@ -7643,3 +7643,659 @@ func SyncErrOther(error string) string { return In(i18n.Locale()).SyncErrOther(e
 func (msgs Messages) SyncErrOther(error string) string {
 	return Catalog.Format(msgs.locale, "syncErrOther", map[string]any{"error": error})
 }
+
+// TabNetwork says "Network"
+// in the language the app shows.
+func TabNetwork() string { return In(i18n.Locale()).TabNetwork() }
+
+// TabNetwork says "Network"
+// in the language of msgs.
+func (msgs Messages) TabNetwork() string {
+	return Catalog.Format(msgs.locale, "tabNetwork", nil)
+}
+
+// ColNetListen says "Listen IP"
+// in the language the app shows.
+func ColNetListen() string { return In(i18n.Locale()).ColNetListen() }
+
+// ColNetListen says "Listen IP"
+// in the language of msgs.
+func (msgs Messages) ColNetListen() string {
+	return Catalog.Format(msgs.locale, "colNetListen", nil)
+}
+
+// ColNetPort says "Port"
+// in the language the app shows.
+func ColNetPort() string { return In(i18n.Locale()).ColNetPort() }
+
+// ColNetPort says "Port"
+// in the language of msgs.
+func (msgs Messages) ColNetPort() string {
+	return Catalog.Format(msgs.locale, "colNetPort", nil)
+}
+
+// ColNetProto says "Protocol"
+// in the language the app shows.
+func ColNetProto() string { return In(i18n.Locale()).ColNetProto() }
+
+// ColNetProto says "Protocol"
+// in the language of msgs.
+func (msgs Messages) ColNetProto() string {
+	return Catalog.Format(msgs.locale, "colNetProto", nil)
+}
+
+// ColNetRemoteIPs says "Remote IPs"
+// in the language the app shows.
+func ColNetRemoteIPs() string { return In(i18n.Locale()).ColNetRemoteIPs() }
+
+// ColNetRemoteIPs says "Remote IPs"
+// in the language of msgs.
+func (msgs Messages) ColNetRemoteIPs() string {
+	return Catalog.Format(msgs.locale, "colNetRemoteIPs", nil)
+}
+
+// ColNetConns says "Connections"
+// in the language the app shows.
+func ColNetConns() string { return In(i18n.Locale()).ColNetConns() }
+
+// ColNetConns says "Connections"
+// in the language of msgs.
+func (msgs Messages) ColNetConns() string {
+	return Catalog.Format(msgs.locale, "colNetConns", nil)
+}
+
+// ColNetUpRate says "Upload/s"
+// in the language the app shows.
+func ColNetUpRate() string { return In(i18n.Locale()).ColNetUpRate() }
+
+// ColNetUpRate says "Upload/s"
+// in the language of msgs.
+func (msgs Messages) ColNetUpRate() string {
+	return Catalog.Format(msgs.locale, "colNetUpRate", nil)
+}
+
+// ColNetDownRate says "Download/s"
+// in the language the app shows.
+func ColNetDownRate() string { return In(i18n.Locale()).ColNetDownRate() }
+
+// ColNetDownRate says "Download/s"
+// in the language of msgs.
+func (msgs Messages) ColNetDownRate() string {
+	return Catalog.Format(msgs.locale, "colNetDownRate", nil)
+}
+
+// ColNetUp says "Uploaded"
+// in the language the app shows.
+func ColNetUp() string { return In(i18n.Locale()).ColNetUp() }
+
+// ColNetUp says "Uploaded"
+// in the language of msgs.
+func (msgs Messages) ColNetUp() string {
+	return Catalog.Format(msgs.locale, "colNetUp", nil)
+}
+
+// ColNetDown says "Downloaded"
+// in the language the app shows.
+func ColNetDown() string { return In(i18n.Locale()).ColNetDown() }
+
+// ColNetDown says "Downloaded"
+// in the language of msgs.
+func (msgs Messages) ColNetDown() string {
+	return Catalog.Format(msgs.locale, "colNetDown", nil)
+}
+
+// ColNetLocation says "Location"
+// in the language the app shows.
+func ColNetLocation() string { return In(i18n.Locale()).ColNetLocation() }
+
+// ColNetLocation says "Location"
+// in the language of msgs.
+func (msgs Messages) ColNetLocation() string {
+	return Catalog.Format(msgs.locale, "colNetLocation", nil)
+}
+
+// ColNetIP says "IP"
+// in the language the app shows.
+func ColNetIP() string { return In(i18n.Locale()).ColNetIP() }
+
+// ColNetIP says "IP"
+// in the language of msgs.
+func (msgs Messages) ColNetIP() string {
+	return Catalog.Format(msgs.locale, "colNetIP", nil)
+}
+
+// ColNetState says "State"
+// in the language the app shows.
+func ColNetState() string { return In(i18n.Locale()).ColNetState() }
+
+// ColNetState says "State"
+// in the language of msgs.
+func (msgs Messages) ColNetState() string {
+	return Catalog.Format(msgs.locale, "colNetState", nil)
+}
+
+// NetFilter says "Filter by name, PID, port or IP"
+// in the language the app shows.
+func NetFilter() string { return In(i18n.Locale()).NetFilter() }
+
+// NetFilter says "Filter by name, PID, port or IP"
+// in the language of msgs.
+func (msgs Messages) NetFilter() string {
+	return Catalog.Format(msgs.locale, "netFilter", nil)
+}
+
+// NetListFailed says "Could not read the connections: {error}"
+// in the language the app shows.
+func NetListFailed(error string) string { return In(i18n.Locale()).NetListFailed(error) }
+
+// NetListFailed says "Could not read the connections: {error}"
+// in the language of msgs.
+func (msgs Messages) NetListFailed(error string) string {
+	return Catalog.Format(msgs.locale, "netListFailed", map[string]any{"error": error})
+}
+
+// NetCount says "{count, plural, one {# entry} other {# entries}}"
+// in the language the app shows.
+func NetCount(count int) string { return In(i18n.Locale()).NetCount(count) }
+
+// NetCount says "{count, plural, one {# entry} other {# entries}}"
+// in the language of msgs.
+func (msgs Messages) NetCount(count int) string {
+	return Catalog.Format(msgs.locale, "netCount", map[string]any{"count": count})
+}
+
+// NetCountFiltered says "{shown} of {count, plural, one {# entry} other {# entries}}"
+// in the language the app shows.
+func NetCountFiltered(shown int, count int) string {
+	return In(i18n.Locale()).NetCountFiltered(shown, count)
+}
+
+// NetCountFiltered says "{shown} of {count, plural, one {# entry} other {# entries}}"
+// in the language of msgs.
+func (msgs Messages) NetCountFiltered(shown int, count int) string {
+	return Catalog.Format(msgs.locale, "netCountFiltered", map[string]any{"shown": shown, "count": count})
+}
+
+// NetNeedsRoot says "Needs root for other users' processes"
+// in the language the app shows.
+func NetNeedsRoot() string { return In(i18n.Locale()).NetNeedsRoot() }
+
+// NetNeedsRoot says "Needs root for other users' processes"
+// in the language of msgs.
+func (msgs Messages) NetNeedsRoot() string {
+	return Catalog.Format(msgs.locale, "netNeedsRoot", nil)
+}
+
+// NetOpenConns says "Open Connections"
+// in the language the app shows.
+func NetOpenConns() string { return In(i18n.Locale()).NetOpenConns() }
+
+// NetOpenConns says "Open Connections"
+// in the language of msgs.
+func (msgs Messages) NetOpenConns() string {
+	return Catalog.Format(msgs.locale, "netOpenConns", nil)
+}
+
+// NetCopyAddress says "Copy Address"
+// in the language the app shows.
+func NetCopyAddress() string { return In(i18n.Locale()).NetCopyAddress() }
+
+// NetCopyAddress says "Copy Address"
+// in the language of msgs.
+func (msgs Messages) NetCopyAddress() string {
+	return Catalog.Format(msgs.locale, "netCopyAddress", nil)
+}
+
+// NetCopyIP says "Copy IP"
+// in the language the app shows.
+func NetCopyIP() string { return In(i18n.Locale()).NetCopyIP() }
+
+// NetCopyIP says "Copy IP"
+// in the language of msgs.
+func (msgs Messages) NetCopyIP() string {
+	return Catalog.Format(msgs.locale, "netCopyIP", nil)
+}
+
+// NetConnCount says "{count, plural, one {# connection} other {# connections}}"
+// in the language the app shows.
+func NetConnCount(count int) string { return In(i18n.Locale()).NetConnCount(count) }
+
+// NetConnCount says "{count, plural, one {# connection} other {# connections}}"
+// in the language of msgs.
+func (msgs Messages) NetConnCount(count int) string {
+	return Catalog.Format(msgs.locale, "netConnCount", map[string]any{"count": count})
+}
+
+// NetConnCountLimited says "{shown} of {count, plural, one {# connection} other {# connections}} shown"
+// in the language the app shows.
+func NetConnCountLimited(shown int, count int) string {
+	return In(i18n.Locale()).NetConnCountLimited(shown, count)
+}
+
+// NetConnCountLimited says "{shown} of {count, plural, one {# connection} other {# connections}} shown"
+// in the language of msgs.
+func (msgs Messages) NetConnCountLimited(shown int, count int) string {
+	return Catalog.Format(msgs.locale, "netConnCountLimited", map[string]any{"shown": shown, "count": count})
+}
+
+// TraceRoute says "Trace Route"
+// in the language the app shows.
+func TraceRoute() string { return In(i18n.Locale()).TraceRoute() }
+
+// TraceRoute says "Trace Route"
+// in the language of msgs.
+func (msgs Messages) TraceRoute() string {
+	return Catalog.Format(msgs.locale, "traceRoute", nil)
+}
+
+// TraceRouteTo says "Trace route"
+// in the language the app shows.
+func TraceRouteTo() string { return In(i18n.Locale()).TraceRouteTo() }
+
+// TraceRouteTo says "Trace route"
+// in the language of msgs.
+func (msgs Messages) TraceRouteTo() string {
+	return Catalog.Format(msgs.locale, "traceRouteTo", nil)
+}
+
+// TraceTab says "Trace {target}"
+// in the language the app shows.
+func TraceTab(target string) string { return In(i18n.Locale()).TraceTab(target) }
+
+// TraceTab says "Trace {target}"
+// in the language of msgs.
+func (msgs Messages) TraceTab(target string) string {
+	return Catalog.Format(msgs.locale, "traceTab", map[string]any{"target": target})
+}
+
+// TraceAgain says "Trace Again"
+// in the language the app shows.
+func TraceAgain() string { return In(i18n.Locale()).TraceAgain() }
+
+// TraceAgain says "Trace Again"
+// in the language of msgs.
+func (msgs Messages) TraceAgain() string {
+	return Catalog.Format(msgs.locale, "traceAgain", nil)
+}
+
+// Tracing says "Tracing…"
+// in the language the app shows.
+func Tracing() string { return In(i18n.Locale()).Tracing() }
+
+// Tracing says "Tracing…"
+// in the language of msgs.
+func (msgs Messages) Tracing() string {
+	return Catalog.Format(msgs.locale, "tracing", nil)
+}
+
+// TracingTo says "Tracing the route to {target}…"
+// in the language the app shows.
+func TracingTo(target string) string { return In(i18n.Locale()).TracingTo(target) }
+
+// TracingTo says "Tracing the route to {target}…"
+// in the language of msgs.
+func (msgs Messages) TracingTo(target string) string {
+	return Catalog.Format(msgs.locale, "tracingTo", map[string]any{"target": target})
+}
+
+// ColTraceHop says "Hop"
+// in the language the app shows.
+func ColTraceHop() string { return In(i18n.Locale()).ColTraceHop() }
+
+// ColTraceHop says "Hop"
+// in the language of msgs.
+func (msgs Messages) ColTraceHop() string {
+	return Catalog.Format(msgs.locale, "colTraceHop", nil)
+}
+
+// ColTraceRTT says "RTT"
+// in the language the app shows.
+func ColTraceRTT() string { return In(i18n.Locale()).ColTraceRTT() }
+
+// ColTraceRTT says "RTT"
+// in the language of msgs.
+func (msgs Messages) ColTraceRTT() string {
+	return Catalog.Format(msgs.locale, "colTraceRTT", nil)
+}
+
+// ColTraceASN says "ASN"
+// in the language the app shows.
+func ColTraceASN() string { return In(i18n.Locale()).ColTraceASN() }
+
+// ColTraceASN says "ASN"
+// in the language of msgs.
+func (msgs Messages) ColTraceASN() string {
+	return Catalog.Format(msgs.locale, "colTraceASN", nil)
+}
+
+// ColTraceHost says "Host name"
+// in the language the app shows.
+func ColTraceHost() string { return In(i18n.Locale()).ColTraceHost() }
+
+// ColTraceHost says "Host name"
+// in the language of msgs.
+func (msgs Messages) ColTraceHost() string {
+	return Catalog.Format(msgs.locale, "colTraceHost", nil)
+}
+
+// NextTraceMissing says "NextTrace is not on the server. To install it:"
+// in the language the app shows.
+func NextTraceMissing() string { return In(i18n.Locale()).NextTraceMissing() }
+
+// NextTraceMissing says "NextTrace is not on the server. To install it:"
+// in the language of msgs.
+func (msgs Messages) NextTraceMissing() string {
+	return Catalog.Format(msgs.locale, "nextTraceMissing", nil)
+}
+
+// NextTraceMissingFallback says "NextTrace is not on the server, so {tool} traced the route. To install it:"
+// in the language the app shows.
+func NextTraceMissingFallback(tool string) string {
+	return In(i18n.Locale()).NextTraceMissingFallback(tool)
+}
+
+// NextTraceMissingFallback says "NextTrace is not on the server, so {tool} traced the route. To install it:"
+// in the language of msgs.
+func (msgs Messages) NextTraceMissingFallback(tool string) string {
+	return Catalog.Format(msgs.locale, "nextTraceMissingFallback", map[string]any{"tool": tool})
+}
+
+// TraceNoTool says "None of NextTrace, traceroute and tracepath is on the server."
+// in the language the app shows.
+func TraceNoTool() string { return In(i18n.Locale()).TraceNoTool() }
+
+// TraceNoTool says "None of NextTrace, traceroute and tracepath is on the server."
+// in the language of msgs.
+func (msgs Messages) TraceNoTool() string {
+	return Catalog.Format(msgs.locale, "traceNoTool", nil)
+}
+
+// TraceFailed says "Trace route failed: {error}"
+// in the language the app shows.
+func TraceFailed(error string) string { return In(i18n.Locale()).TraceFailed(error) }
+
+// TraceFailed says "Trace route failed: {error}"
+// in the language of msgs.
+func (msgs Messages) TraceFailed(error string) string {
+	return Catalog.Format(msgs.locale, "traceFailed", map[string]any{"error": error})
+}
+
+// TracePlaceholder says "IP address or host name"
+// in the language the app shows.
+func TracePlaceholder() string { return In(i18n.Locale()).TracePlaceholder() }
+
+// TracePlaceholder says "IP address or host name"
+// in the language of msgs.
+func (msgs Messages) TracePlaceholder() string {
+	return Catalog.Format(msgs.locale, "tracePlaceholder", nil)
+}
+
+// TraceInvalid says "Enter an IP address or a host name."
+// in the language the app shows.
+func TraceInvalid() string { return In(i18n.Locale()).TraceInvalid() }
+
+// TraceInvalid says "Enter an IP address or a host name."
+// in the language of msgs.
+func (msgs Messages) TraceInvalid() string {
+	return Catalog.Format(msgs.locale, "traceInvalid", nil)
+}
+
+// GeoAskV4 says "Show where IP addresses are? This downloads about {size} of location data (ip2region)."
+// in the language the app shows.
+func GeoAskV4(size string) string { return In(i18n.Locale()).GeoAskV4(size) }
+
+// GeoAskV4 says "Show where IP addresses are? This downloads about {size} of location data (ip2region)."
+// in the language of msgs.
+func (msgs Messages) GeoAskV4(size string) string {
+	return Catalog.Format(msgs.locale, "geoAskV4", map[string]any{"size": size})
+}
+
+// GeoAskV6 says "Show where IPv6 addresses are too? This downloads about {size} more (ip2region)."
+// in the language the app shows.
+func GeoAskV6(size string) string { return In(i18n.Locale()).GeoAskV6(size) }
+
+// GeoAskV6 says "Show where IPv6 addresses are too? This downloads about {size} more (ip2region)."
+// in the language of msgs.
+func (msgs Messages) GeoAskV6(size string) string {
+	return Catalog.Format(msgs.locale, "geoAskV6", map[string]any{"size": size})
+}
+
+// GeoDownload says "Download"
+// in the language the app shows.
+func GeoDownload() string { return In(i18n.Locale()).GeoDownload() }
+
+// GeoDownload says "Download"
+// in the language of msgs.
+func (msgs Messages) GeoDownload() string {
+	return Catalog.Format(msgs.locale, "geoDownload", nil)
+}
+
+// GeoNotNow says "Not Now"
+// in the language the app shows.
+func GeoNotNow() string { return In(i18n.Locale()).GeoNotNow() }
+
+// GeoNotNow says "Not Now"
+// in the language of msgs.
+func (msgs Messages) GeoNotNow() string {
+	return Catalog.Format(msgs.locale, "geoNotNow", nil)
+}
+
+// GeoNever says "Don't Ask Again"
+// in the language the app shows.
+func GeoNever() string { return In(i18n.Locale()).GeoNever() }
+
+// GeoNever says "Don't Ask Again"
+// in the language of msgs.
+func (msgs Messages) GeoNever() string {
+	return Catalog.Format(msgs.locale, "geoNever", nil)
+}
+
+// GeoDownloading says "Downloading location data… {percent}%"
+// in the language the app shows.
+func GeoDownloading(percent int) string { return In(i18n.Locale()).GeoDownloading(percent) }
+
+// GeoDownloading says "Downloading location data… {percent}%"
+// in the language of msgs.
+func (msgs Messages) GeoDownloading(percent int) string {
+	return Catalog.Format(msgs.locale, "geoDownloading", map[string]any{"percent": percent})
+}
+
+// GeoDownloadFailed says "Could not download the location data: {error}"
+// in the language the app shows.
+func GeoDownloadFailed(error string) string { return In(i18n.Locale()).GeoDownloadFailed(error) }
+
+// GeoDownloadFailed says "Could not download the location data: {error}"
+// in the language of msgs.
+func (msgs Messages) GeoDownloadFailed(error string) string {
+	return Catalog.Format(msgs.locale, "geoDownloadFailed", map[string]any{"error": error})
+}
+
+// GeoChecksum says "the file is not the one expected (its checksum does not match)"
+// in the language the app shows.
+func GeoChecksum() string { return In(i18n.Locale()).GeoChecksum() }
+
+// GeoChecksum says "the file is not the one expected (its checksum does not match)"
+// in the language of msgs.
+func (msgs Messages) GeoChecksum() string {
+	return Catalog.Format(msgs.locale, "geoChecksum", nil)
+}
+
+// GeoLAN says "LAN"
+// in the language the app shows.
+func GeoLAN() string { return In(i18n.Locale()).GeoLAN() }
+
+// GeoLAN says "LAN"
+// in the language of msgs.
+func (msgs Messages) GeoLAN() string {
+	return Catalog.Format(msgs.locale, "geoLAN", nil)
+}
+
+// GeoLookUpOnline says "Look Up Online"
+// in the language the app shows.
+func GeoLookUpOnline() string { return In(i18n.Locale()).GeoLookUpOnline() }
+
+// GeoLookUpOnline says "Look Up Online"
+// in the language of msgs.
+func (msgs Messages) GeoLookUpOnline() string {
+	return Catalog.Format(msgs.locale, "geoLookUpOnline", nil)
+}
+
+// GeoCredit says "IP location data: ip2region (https://github.com/lionsoul2014/ip2region), Apache-2.0 license."
+// in the language the app shows.
+func GeoCredit() string { return In(i18n.Locale()).GeoCredit() }
+
+// GeoCredit says "IP location data: ip2region (https://github.com/lionsoul2014/ip2region), Apache-2.0 license."
+// in the language of msgs.
+func (msgs Messages) GeoCredit() string {
+	return Catalog.Format(msgs.locale, "geoCredit", nil)
+}
+
+// GeoDeleteTitle says "Delete the downloaded location data?"
+// in the language the app shows.
+func GeoDeleteTitle() string { return In(i18n.Locale()).GeoDeleteTitle() }
+
+// GeoDeleteTitle says "Delete the downloaded location data?"
+// in the language of msgs.
+func (msgs Messages) GeoDeleteTitle() string {
+	return Catalog.Format(msgs.locale, "geoDeleteTitle", nil)
+}
+
+// GeoDeleteDetail says "The ip2region files and the cache of online lookups are deleted, and IP locations are turned off. They can be downloa…"
+// in the language the app shows.
+func GeoDeleteDetail() string { return In(i18n.Locale()).GeoDeleteDetail() }
+
+// GeoDeleteDetail says "The ip2region files and the cache of online lookups are deleted, and IP locations are turned off. They can be downloa…"
+// in the language of msgs.
+func (msgs Messages) GeoDeleteDetail() string {
+	return Catalog.Format(msgs.locale, "geoDeleteDetail", nil)
+}
+
+// GeoDeleteYes says "Delete"
+// in the language the app shows.
+func GeoDeleteYes() string { return In(i18n.Locale()).GeoDeleteYes() }
+
+// GeoDeleteYes says "Delete"
+// in the language of msgs.
+func (msgs Messages) GeoDeleteYes() string {
+	return Catalog.Format(msgs.locale, "geoDeleteYes", nil)
+}
+
+// OptionsNetwork says "Network monitor"
+// in the language the app shows.
+func OptionsNetwork() string { return In(i18n.Locale()).OptionsNetwork() }
+
+// OptionsNetwork says "Network monitor"
+// in the language of msgs.
+func (msgs Messages) OptionsNetwork() string {
+	return Catalog.Format(msgs.locale, "optionsNetwork", nil)
+}
+
+// OptionGeoHeading says "IP locations"
+// in the language the app shows.
+func OptionGeoHeading() string { return In(i18n.Locale()).OptionGeoHeading() }
+
+// OptionGeoHeading says "IP locations"
+// in the language of msgs.
+func (msgs Messages) OptionGeoHeading() string {
+	return Catalog.Format(msgs.locale, "optionGeoHeading", nil)
+}
+
+// OptionShowLocations says "Show IP locations (downloads ip2region data, about {size})"
+// in the language the app shows.
+func OptionShowLocations(size string) string { return In(i18n.Locale()).OptionShowLocations(size) }
+
+// OptionShowLocations says "Show IP locations (downloads ip2region data, about {size})"
+// in the language of msgs.
+func (msgs Messages) OptionShowLocations(size string) string {
+	return Catalog.Format(msgs.locale, "optionShowLocations", map[string]any{"size": size})
+}
+
+// OptionShowLocationsNote says "The connections in the Network tab show the country, region, city and ISP of each address. The data is downloaded onc…"
+// in the language the app shows.
+func OptionShowLocationsNote() string { return In(i18n.Locale()).OptionShowLocationsNote() }
+
+// OptionShowLocationsNote says "The connections in the Network tab show the country, region, city and ISP of each address. The data is downloaded onc…"
+// in the language of msgs.
+func (msgs Messages) OptionShowLocationsNote() string {
+	return Catalog.Format(msgs.locale, "optionShowLocationsNote", nil)
+}
+
+// OptionLocationsV6 says "Include IPv6 addresses (about {size} more)"
+// in the language the app shows.
+func OptionLocationsV6(size string) string { return In(i18n.Locale()).OptionLocationsV6(size) }
+
+// OptionLocationsV6 says "Include IPv6 addresses (about {size} more)"
+// in the language of msgs.
+func (msgs Messages) OptionLocationsV6(size string) string {
+	return Catalog.Format(msgs.locale, "optionLocationsV6", map[string]any{"size": size})
+}
+
+// OptionGeoData says "Downloaded location data: {size}"
+// in the language the app shows.
+func OptionGeoData(size string) string { return In(i18n.Locale()).OptionGeoData(size) }
+
+// OptionGeoData says "Downloaded location data: {size}"
+// in the language of msgs.
+func (msgs Messages) OptionGeoData(size string) string {
+	return Catalog.Format(msgs.locale, "optionGeoData", map[string]any{"size": size})
+}
+
+// OptionGeoNoData says "No location data downloaded"
+// in the language the app shows.
+func OptionGeoNoData() string { return In(i18n.Locale()).OptionGeoNoData() }
+
+// OptionGeoNoData says "No location data downloaded"
+// in the language of msgs.
+func (msgs Messages) OptionGeoNoData() string {
+	return Catalog.Format(msgs.locale, "optionGeoNoData", nil)
+}
+
+// GeoDeleteData says "Delete Downloaded Location Data"
+// in the language the app shows.
+func GeoDeleteData() string { return In(i18n.Locale()).GeoDeleteData() }
+
+// GeoDeleteData says "Delete Downloaded Location Data"
+// in the language of msgs.
+func (msgs Messages) GeoDeleteData() string {
+	return Catalog.Format(msgs.locale, "geoDeleteData", nil)
+}
+
+// OptionGeoOnline says "Look up IP locations online (ip-api.com)"
+// in the language the app shows.
+func OptionGeoOnline() string { return In(i18n.Locale()).OptionGeoOnline() }
+
+// OptionGeoOnline says "Look up IP locations online (ip-api.com)"
+// in the language of msgs.
+func (msgs Messages) OptionGeoOnline() string {
+	return Catalog.Format(msgs.locale, "optionGeoOnline", nil)
+}
+
+// OptionGeoOnlineNote says "Addresses the downloaded data has no city or ISP for are sent to ip-api.com, a third party (to ip.sb while ip-api.com…"
+// in the language the app shows.
+func OptionGeoOnlineNote() string { return In(i18n.Locale()).OptionGeoOnlineNote() }
+
+// OptionGeoOnlineNote says "Addresses the downloaded data has no city or ISP for are sent to ip-api.com, a third party (to ip.sb while ip-api.com…"
+// in the language of msgs.
+func (msgs Messages) OptionGeoOnlineNote() string {
+	return Catalog.Format(msgs.locale, "optionGeoOnlineNote", nil)
+}
+
+// OptionTraceHeading says "Trace route"
+// in the language the app shows.
+func OptionTraceHeading() string { return In(i18n.Locale()).OptionTraceHeading() }
+
+// OptionTraceHeading says "Trace route"
+// in the language of msgs.
+func (msgs Messages) OptionTraceHeading() string {
+	return Catalog.Format(msgs.locale, "optionTraceHeading", nil)
+}
+
+// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTr…"
+// in the language the app shows.
+func OptionTraceNote() string { return In(i18n.Locale()).OptionTraceNote() }
+
+// OptionTraceNote says "Trace Route runs NextTrace on the server (nexttrace --json), which locates the hops with its own service. When NextTr…"
+// in the language of msgs.
+func (msgs Messages) OptionTraceNote() string {
+	return Catalog.Format(msgs.locale, "optionTraceNote", nil)
+}

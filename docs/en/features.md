@@ -43,6 +43,9 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Remote file editor](#remote-file-editor)
 - [Tunnels tab](#tunnels-tab)
 - [Processes tab](#processes-tab)
+- [Network tab](#network-tab)
+  - [IP locations](#ip-locations)
+  - [Trace route](#trace-route)
 - [Options window](#options-window)
   - [General](#general)
   - [Transfers](#transfers)
@@ -50,6 +53,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Terminal › Mouse](#terminal--mouse)
   - [Terminal › Shortcuts](#terminal--shortcuts)
   - [Terminal › Command bar](#terminal--command-bar)
+  - [Network monitor](#network-monitor)
   - [Sync](#sync)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Layout and split dividers](#layout-and-split-dividers)
@@ -1332,6 +1336,117 @@ monitor's: `ps` for the users, memory and command lines, `cat` of every
 opens. Signals are sent with `kill`, by a script that first checks the
 PID's start time in `/proc/<pid>/stat` against the one the list read.
 
+## Network tab
+
+The "Network" tab at the bottom right is the network monitor of the
+current session, as FinalShell's "advanced network monitor": which
+processes listen on which ports, who is connected to them, and how much
+each moves.
+
+- The table has a row for each listening socket (TCP in LISTEN, and UDP
+  sockets waiting for packets) and a row for each process with other
+  connections, those it opened: PID, name, listen IP, port, protocol,
+  remote IPs, connections, upload and download per second, and the bytes
+  uploaded and downloaded. The connections to a listening socket count
+  under it, whichever process holds them (a forked `sshd`, nginx's
+  workers); a socket several processes share is the lowest PID's. A
+  click on a header sorts by that column. The filter matches the name,
+  the PID, the listen address and port, and the remote addresses of a
+  row's connections.
+- The table is read again every 2 seconds while the tab is shown, and not
+  at all while another tab or session is shown; Refresh reads it at once.
+  The chosen row stays on its socket or process as the rows move.
+- Upload is what the server sent, download what it received. The rates
+  are the difference between two readings of each TCP connection's byte
+  counts (`bytes_acked` and `bytes_received` of `ss -i`): a new connection
+  shows 0 until the next reading. UDP has no connections in the TCP
+  sense: its sockets show "-" for the counts.
+- Without root, the processes of other users' sockets can't be read:
+  those connections are under a row "-", and the count says "Needs root
+  for other users' processes". Connections in TIME-WAIT belong to no
+  process.
+- A double click, Enter or "Open Connections" in the context menu opens
+  the row in a tab below the table, named like `0.0.0.0:80` or
+  `7267-java`, with each connection: location (only with the location
+  data, below), IP, port, state, upload and download per second, and the
+  totals. A busy server's tab shows the first 5000 connections, and says
+  so. The context menu of a connection copies its IP or address, traces
+  the route to it, and, when online lookups are on, looks it up online.
+- When the session disconnects, the last reading stays, greyed, under the
+  reconnect bar. Servers that are not Linux, and hosts whose server
+  monitor is off, show it, as the Processes tab does.
+
+Each reading is one POSIX sh script over an exec channel: `ss -tunapiH`
+(iproute2), with `awk` keeping only the byte counts of its TCP
+information. Without `ss`, as on BusyBox, it reads `/proc/net/tcp`,
+`tcp6`, `udp` and `udp6`, finds each socket's process by the socket links
+in `/proc/<pid>/fd`, and its name in `/proc/<pid>/stat`; `/proc` has no
+byte counts, so rates and totals show "-".
+
+### IP locations
+
+Nothing for IP locations is in the app, and without the data nothing is
+looked up anywhere: the tables show IP addresses only, with no Location
+column.
+
+- The first time the Network tab shows, a bar above the table asks "Show
+  where IP addresses are? This downloads about 11 MB of location data
+  (ip2region)." with Download, Not Now and Don't Ask Again.
+  - Download fetches `ip2region_v4.xdb` of [ip2region](https://github.com/lionsoul2014/ip2region)'s
+    release v3.18.0 from GitHub into `geo/` in the config directory, with
+    its progress in the bar and Cancel. The file is written under a
+    temporary name and kept only when its SHA-256 is the one the app
+    keeps for it; a failed or canceled download leaves nothing behind,
+    and the bar offers Retry. The data is read into memory off the UI
+    thread, its checksum checked again each time.
+  - Not Now hides the bar until the app starts again.
+  - Don't Ask Again turns locations off (`geoLocations` `"off"`) until
+    they are turned on in the options.
+- With the data, the connections show the country, region, city and ISP
+  of each address, from the data, which has Chinese names in China and
+  English ones elsewhere. Private, loopback, link-local, CGNAT
+  (100.64.0.0/10) and multicast addresses show "LAN" and are never looked
+  up.
+- IPv6 addresses need a data file of their own, about 37 MB more: the bar
+  asks for it the first time an IPv6 peer shows (`geoLocationsV6`).
+- Looking up online is off by default and turned on in the options (see
+  [Network monitor](#network-monitor)). Then the addresses of the rows
+  shown for which the data has no city or ISP are sent to ip-api.com,
+  100 in a request, in the app's language (English or Chinese names),
+  keeping to its limit of 15 requests a minute with the counts it sends
+  back; while it answers 429, ip.sb is asked instead, one address at a
+  time. The answers fill in what the data lacks, and are kept for 30
+  days in `geo/cache.json`. "Look Up Online" in a connection's menu asks
+  again, and prefers the online answer.
+
+The data is ip2region's (Apache-2.0 or MIT). ip-api.com's free service is
+unencrypted (HTTP) and for non-commercial use only.
+
+### Trace route
+
+"Trace Route" in a connection's menu, or the route button of the
+toolbar for an address or host name typed in, traces the route from the
+server in a tab below the table named like "Trace 8.8.8.8": hop, IP,
+round trip (the average of the probes that answered), location, ASN and
+host name.
+
+- The tab runs `nexttrace --json -M <target>` on the server over an exec
+  channel: [NextTrace](https://github.com/nxtrace/NTrace-core) runs as its
+  own program, and locates the hops with its own service, as it is made
+  to; `-M` keeps it from uploading the route for a map. The app never
+  calls NextTrace's service itself. NextTrace writes its JSON when it
+  ends, so the hops show then.
+- When `nexttrace` is not on the server's PATH (with `/usr/local/bin`,
+  `/usr/sbin` and `/sbin` added), the tab says so, with the install
+  command of NextTrace's README, `curl -sL https://nxtrace.org/nt | bash`,
+  and a Copy button: the app never installs anything on the server. It
+  traces with `traceroute -n -w 2` or `tracepath -n` instead when the
+  server has one, the hops showing as they arrive, located with the
+  ip2region data when it is downloaded; with neither, it says so.
+- NextTrace and traceroute need root, or the capability to send raw
+  packets, on many servers: their error shows in the tab.
+- The tab's buttons copy the route as text and trace it again.
+
 ## Options window
 
 The gear button next to the "Sessions" title at the bottom left opens the
@@ -1538,6 +1653,26 @@ The keys are named for turning each part off, so `true` means off.
 "Clear history of all hosts…" asks first, then deletes the history the
 app keeps of every host (the `history` folder); the servers' own history
 files are not changed.
+
+### Network monitor
+
+The page of the [Network tab](#network-tab)'s IP locations and trace
+route. The explanations are here, so that the tab stays quiet.
+
+| Option | Key | |
+|---|---|---|
+| Show IP locations (downloads ip2region data, about 11 MB) | `geoLocations` | `"on"` shows the Location column; turning it on downloads the data when it is not there. `"off"` hides the column and keeps the files; it is also "Don't Ask Again". Missing until the user answers the bar. |
+| Include IPv6 addresses (about 37 MB more) | `geoLocationsV6` | The same for the IPv6 data. |
+| Look up IP locations online (ip-api.com) | `geoOnline` | `true` looks up online the addresses the data has no city or ISP for. Off by default, and only while locations are shown. |
+
+The page shows how much the downloaded data takes on disk, and "Delete
+Downloaded Location Data" asks first, then deletes `geo/` (the data and
+the online lookups' cache) and turns locations and online lookups off.
+The note under the online switch says that the addresses go to a third
+party, and that ip-api.com's free service is unencrypted and for
+non-commercial use. A last section says what Trace Route runs on the
+server. None of these keys is synced: agreeing to a download, or to
+sending the server's peers to a service, is each computer's own.
 
 ### Sync
 

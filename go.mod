@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/egoist/mygo v0.8.1
+	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20261028042204-6a276cc7c4f9
 	github.com/pkg/sftp v1.13.12
 	github.com/tdewolff/font v0.0.0-20261010204837-88a7f6b56918
 	golang.org/x/crypto v0.58.0
