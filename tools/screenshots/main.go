@@ -49,6 +49,7 @@ var shots = []shot{
 	{from: "readme-quick-connect-%s", to: "quick-connect", title: locales.AppTitle},
 	{from: "readme-sysinfo-%s", to: "system-info", title: locales.AppTitle, crop: image.Rect(0, 0, 720, 480)},
 	{from: "readme-transfers-%s", to: "transfers", title: locales.AppTitle, crop: image.Rect(560, 110, 1280, 590)},
+	{from: "readme-quick-commands-%s", to: "quick-commands", title: locales.AppTitle, crop: image.Rect(240, 487, 1280, 820)},
 	{from: "manager-%s", to: "connection-manager", title: locales.ManagerTitle},
 	{from: "editor-proxy-jump-%s", to: "connection-proxy", title: locales.EditConnection},
 	{from: "editor-tunnels-rows-%s", to: "connection-tunnels", title: locales.EditConnection},

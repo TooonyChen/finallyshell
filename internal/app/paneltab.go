@@ -11,8 +11,8 @@ import (
 )
 
 // A panel row shows a session's bottom panel (Files, Transfers, Tunnels,
-// Processes, Network) in the whole main area, without the terminal, as
-// FinalShell opens a panel in a tab of its own. The button at the right
+// Processes, Network, Commands) in the whole main area, without the
+// terminal, as FinalShell opens a panel in a tab of its own. The button at the right
 // of the bottom panel's tabs opens it, right below its session in the
 // list, indented, with the icon and the name of the tab it shows.
 //
@@ -112,8 +112,8 @@ func (a *App) panelCornerButton(c *ui.Context, tab int) {
 // panelTabIcons and panelTabNames are the icon and the name of each tab
 // of the bottom panel, by its constant, as a panel row shows it.
 var (
-	panelTabIcons = [...]string{tabFiles: "folder", tabTransfers: "arrow-down-up", tabTunnels: "cable", tabProcesses: "cpu", tabNetwork: "network"}
-	panelTabNames = [...]func() string{tabFiles: locales.TabFiles, tabTransfers: locales.TabTransfers, tabTunnels: locales.TabTunnels, tabProcesses: locales.TabProcesses, tabNetwork: locales.TabNetwork}
+	panelTabIcons = [...]string{tabFiles: "folder", tabTransfers: "arrow-down-up", tabTunnels: "cable", tabProcesses: "cpu", tabNetwork: "network", tabCommands: "square-terminal"}
+	panelTabNames = [...]func() string{tabFiles: locales.TabFiles, tabTransfers: locales.TabTransfers, tabTunnels: locales.TabTunnels, tabProcesses: locales.TabProcesses, tabNetwork: locales.TabNetwork, tabCommands: locales.TabCommands}
 )
 
 // panelTabName is the name of the panel row p: its tab's.

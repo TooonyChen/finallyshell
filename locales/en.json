@@ -1372,5 +1372,79 @@
   "optionTraceNote": "Trace Route runs NextTrace on the server (nexttrace --traceroute --raw), which locates the hops with its own service and shows each as it arrives. When NextTrace is not installed, traceroute or tracepath is used, with the downloaded location data. The app never installs anything on the server.",
   "openPanelTab": "Open in its own tab",
   "backToTerminal": "Back to terminal",
-  "panelTabLabel": "{session} | {tab}"
+  "panelTabLabel": "{session} | {tab}",
+  "tabCommands": "Commands",
+  "quickAll": "All",
+  "quickNewCommand": "New command",
+  "quickEditCommand": "Edit command",
+  "quickNewGroup": "New group",
+  "quickGroupName": "Group name",
+  "quickSearch": "Search commands",
+  "quickLines": "{count, plural, one {# line} other {# lines}}",
+  "@quickLines": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quickSend": "Send",
+  "quickPutInBar": "Put in the command bar",
+  "quickEdit": "Edit…",
+  "quickDuplicate": "Duplicate",
+  "quickMoveTo": "Move to group",
+  "quickNoGroup": "No group",
+  "quickCopyName": "{name} (copy)",
+  "@quickCopyName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quickDeleteTitle": "Delete the quick command “{name}”?",
+  "@quickDeleteTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quickDeleteDetail": "This cannot be undone.",
+  "quickDeleteGroupTitle": "Delete the group “{name}”?",
+  "@quickDeleteGroupTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "quickDeleteGroupDetail": "Its commands are kept, under All.",
+  "quickNone": "No quick commands yet. New command saves one; a click on it then sends it to the session.",
+  "quickNoneInGroup": "No commands in this group. Drag one onto the group, or make a new one.",
+  "quickNoMatches": "No commands match.",
+  "quickOffline": "Connect a session to send commands.",
+  "quickFieldGroup": "Group",
+  "quickFieldCommand": "Command",
+  "quickNamePlaceholder": "The command's first line",
+  "quickEnter": "Press Enter after each line",
+  "quickEnterOn": "Every line runs, as if typed and followed by Enter.",
+  "quickEnterOff": "The last line is typed without Enter, for you to check it and press Enter yourself. The lines before it still run.",
+  "quickErrCommand": "Enter a command",
+  "quickLoadBroken": "quickcommands.json could not be read, so the list starts empty. The file was kept as {file}.",
+  "@quickLoadBroken": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "quickLoadFailed": "quickcommands.json could not be read ({error}). Changes are not saved, so that the file is not replaced.",
+  "@quickLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -47,6 +47,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Network tab](#network-tab)
   - [IP locations](#ip-locations)
   - [Trace route](#trace-route)
+- [Commands tab](#commands-tab)
 - [Options window](#options-window)
   - [General](#general)
   - [Transfers](#transfers)
@@ -69,8 +70,8 @@ are vertical:
 - Top left: the server monitor of the current session.
 - Bottom left: the vertical session list.
 - Top right: the terminal.
-- Bottom right: the Files, Transfers, Tunnels, Processes and Network
-  tabs, which can also open in a tab of their own (see below).
+- Bottom right: the Files, Transfers, Tunnels, Processes, Network and
+  Commands tabs, which can also open in a tab of their own (see below).
 
 ## Sessions and tabs
 
@@ -850,8 +851,9 @@ Command bar turns it off, or any of its popups, and lists its keys (see
 - New tabs show no bar. In a session that is connecting or disconnected,
   the bar is shown disabled.
 
-Not supported: sending a line to several sessions at once, and quick
-command buttons.
+Not supported: sending a line to several sessions at once. Commands you
+send often can be kept as buttons in the
+[Commands tab](#commands-tab).
 
 ### Appearance: font, color scheme, background image
 
@@ -1518,6 +1520,56 @@ host name.
 - NextTrace and traceroute need root, or the capability to send raw
   packets, on many servers: their error shows in the tab.
 - The tab's buttons copy the route as text and trace it again.
+
+## Commands tab
+
+The "Commands" tab at the bottom right holds quick commands, as
+FinalShell's quick command panel: commands you keep, as buttons, to send
+to the current session with a click. They are the same for every host,
+and kept in `quickcommands.json` (see
+[configuration.md](configuration.md#quickcommandsjson)).
+
+- The groups are on the left: "All", which shows every command, then
+  your groups in their order, each with how many commands it has, and
+  "New group", which names a new group in place (Enter keeps the name,
+  Esc gives it up). A group's context menu renames it or deletes it,
+  after asking; its commands are kept, in no group, under "All".
+- The commands of the group chosen are buttons on the right, in rows
+  that wrap. A button shows the command's name and, in gray, the command
+  when it is one line, or how many lines it has; its tooltip is the
+  whole command. The search box above them filters by name and by
+  command, ignoring case.
+- A click sends the command to the session, through the same path as
+  the command bar's Enter: in the session's encoding, the file panel
+  following the shell's folder as it does after Enter, and each line that
+  runs kept in the host's command bar history. Each line is followed by a
+  carriage return, so a command of several lines runs line by line. With
+  "Press Enter after each line" off, the last line is sent without one:
+  it waits at the prompt for you to check it and press Enter; the lines
+  before it still run. In the session's row, the terminal then has the
+  keyboard.
+- The buttons are dimmed and send nothing while the session is not
+  connected, in a new tab, and in a panel row whose session is not
+  connected; the commands can still be added, edited and arranged.
+- Right-click a button for Send, Put in the command bar (a one-line
+  command only: it fills the bar without sending it, and gives the bar
+  the keyboard), Edit…, Duplicate (right after it, as "name (copy)"),
+  Move to group, and Delete, which asks first.
+- Drag a button onto another to move it there, onto the empty space
+  after the buttons to move it to the end, or onto a group to move it
+  into that group.
+- "New command" opens the editor in a window of its own: the name, the
+  group (the one shown, for a new command), the command, which can have
+  several lines, and "Press Enter after each line" (on by default). An
+  empty name shows the command's first line instead. Save keeps it; Esc
+  or Cancel gives up the changes.
+- The Commands tab can open in a tab of its own (see
+  [above](#bottom-panel-in-a-tab-of-its-own)), for a board of commands
+  as high as the window; its buttons send to its session.
+
+Not supported: sending a command to several sessions at once, commands
+with parameters to fill in, commands of one host only, syncing the
+commands, and a shortcut per command.
 
 ## Options window
 

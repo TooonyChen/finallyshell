@@ -16,6 +16,7 @@ behind each setting.
 - [settings.json](#settingsjson)
 - [Sync](#sync)
 - [Command history](#command-history)
+- [quickcommands.json](#quickcommandsjson)
 - [updater.json](#updaterjson)
 - [Updates in mygo.json](#updates-in-mygojson)
 - [Where passwords are stored](#where-passwords-are-stored)
@@ -40,6 +41,8 @@ instead.
 | `sync-state.json` | What the last sync synced (see [Sync](#sync)). |
 | `hosts.before-sync.json` | `hosts.json` as it was before the last sync that changed it. |
 | `history/<host ID>.txt` | The command bar's history of each host (see [Command history](#command-history)). |
+| `quickcommands.json` | The Commands tab's quick commands (see [quickcommands.json](#quickcommandsjson)). |
+| `quickcommands.json.broken-<date-time>` | A copy of a `quickcommands.json` that could not be read. |
 | `geo/` | IP location data, downloaded only when you agree: `ip2region_v4.xdb`, `ip2region_v6.xdb`, and `cache.json`, the online lookups' answers (see [IP locations](features.md#ip-locations)). |
 
 `mygo dev`, `go run` and the installed app all use the same directory, so
@@ -265,6 +268,40 @@ it in a run.
 
 Sync does not carry the history yet; the format is kept this simple so
 that it could.
+
+## quickcommands.json
+
+The [Commands tab](features.md#commands-tab)'s quick commands, the same
+for every host:
+
+```json
+{
+  "version": 1,
+  "groups": [{"id": "g1", "name": "Common"}],
+  "commands": [
+    {"id": "c1", "group": "g1", "name": "Update system", "text": "apt update\napt -y upgrade", "enter": true},
+    {"id": "c2", "name": "", "text": "tail -f /var/log/syslog", "enter": false}
+  ]
+}
+```
+
+- `groups` and `commands` are in the order the tab shows them. A
+  command's `group` is a group's `id`; a command without one, or whose
+  group is gone, is in no group and shows under "All" only.
+- `name` is the button's text; an empty one shows the first line of
+  `text`. `text` is the command, its lines separated by `\n`; empty
+  lines at its end are not sent.
+- `enter` sends a carriage return after each line; `false` leaves it off
+  after the last line. A command without the key has it on.
+- Keys the app does not know are kept as they are when it saves, and a
+  newer `version` too.
+
+The file is written as it changes, through a temporary file renamed over
+it. If it cannot be parsed, the app copies it as is to
+`quickcommands.json.broken-<YYYYMMDD-HHMMSS>` first, shows the tab empty
+with a note naming the copy, and the next change replaces the file. If it
+cannot be read at all (or the copy fails), the tab says so and nothing
+is saved to it until the app starts again.
 
 ## updater.json
 

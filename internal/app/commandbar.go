@@ -226,13 +226,26 @@ func (a *App) sendBar(s *Session, e barEdit) {
 	if !barLive(s) {
 		return
 	}
-	s.term.Send([]byte(e.text + "\r"))
-	s.shellCommandSent()
-	if cmd := strings.TrimSpace(e.text); a.historyOn() && config.Keepable(cmd) {
-		a.addHistory(s.Host.ID, cmd)
-	}
+	a.sendLine(s, e.text, true)
 	s.bar.popup = popupNone
 	s.bar.setBar(e, "", 0)
+}
+
+// sendLine sends line to s's shell as typed in the terminal, through the
+// session's encoding. With enter it is followed by a carriage return, as
+// Enter: the line runs, the folder follower looks again, and the line is
+// kept in the host's history. Without, it is only typed, for the user to
+// finish; the bar and the quick commands (quickcmds.go) send through it.
+func (a *App) sendLine(s *Session, line string, enter bool) {
+	if !enter {
+		s.term.Send([]byte(line))
+		return
+	}
+	s.term.Send([]byte(line + "\r"))
+	s.shellCommandSent()
+	if cmd := strings.TrimSpace(line); a.historyOn() && config.Keepable(cmd) {
+		a.addHistory(s.Host.ID, cmd)
+	}
 }
 
 // complete is Tab: it opens the path picker or command completion for

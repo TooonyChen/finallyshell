@@ -115,6 +115,12 @@ Pick a font, size, line height and weight, with or without ligatures, any of the
 
 Under the terminal is FinalShell's command bar: type a command and Enter sends it to the shell. <kbd>Tab</kbd> lists the server's folder for the path you are typing, in columns, or the commands on its PATH for the first word; <kbd>↑</kbd>, <kbd>Alt</kbd>+<kbd>H</kbd> or its History button lists the commands you sent to that host before, and those in its shell history, and <kbd>←</kbd> <kbd>→</kbd> pick one word out of a command. Don't need it? Turn it, or any part of it, off in Options › Terminal › Command bar.
 
+Commands you run often can be kept as buttons in the Commands tab, in groups of your own: a click sends one to the session, a command of several lines runs line by line, and one saved without Enter waits at the prompt for you to check it. Drag the buttons to arrange them, or open the tab in a tab of its own for a board of dozens.
+
+<p align="center">
+  <img src="docs/screenshots/quick-commands-en.png" width="720" alt="Quick commands in groups, as buttons">
+</p>
+
 Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, Big5, Shift_JIS, EUC-JP, EUC-KR, ISO-8859-1 and Windows-1252, set once in Options or per host. What Backspace and Delete send can be changed the same way.
 
 <table>

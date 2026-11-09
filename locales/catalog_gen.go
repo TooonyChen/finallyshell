@@ -8393,3 +8393,323 @@ func PanelTabLabel(session string, tab string) string {
 func (msgs Messages) PanelTabLabel(session string, tab string) string {
 	return Catalog.Format(msgs.locale, "panelTabLabel", map[string]any{"session": session, "tab": tab})
 }
+
+// TabCommands says "Commands"
+// in the language the app shows.
+func TabCommands() string { return In(i18n.Locale()).TabCommands() }
+
+// TabCommands says "Commands"
+// in the language of msgs.
+func (msgs Messages) TabCommands() string {
+	return Catalog.Format(msgs.locale, "tabCommands", nil)
+}
+
+// QuickAll says "All"
+// in the language the app shows.
+func QuickAll() string { return In(i18n.Locale()).QuickAll() }
+
+// QuickAll says "All"
+// in the language of msgs.
+func (msgs Messages) QuickAll() string {
+	return Catalog.Format(msgs.locale, "quickAll", nil)
+}
+
+// QuickNewCommand says "New command"
+// in the language the app shows.
+func QuickNewCommand() string { return In(i18n.Locale()).QuickNewCommand() }
+
+// QuickNewCommand says "New command"
+// in the language of msgs.
+func (msgs Messages) QuickNewCommand() string {
+	return Catalog.Format(msgs.locale, "quickNewCommand", nil)
+}
+
+// QuickEditCommand says "Edit command"
+// in the language the app shows.
+func QuickEditCommand() string { return In(i18n.Locale()).QuickEditCommand() }
+
+// QuickEditCommand says "Edit command"
+// in the language of msgs.
+func (msgs Messages) QuickEditCommand() string {
+	return Catalog.Format(msgs.locale, "quickEditCommand", nil)
+}
+
+// QuickNewGroup says "New group"
+// in the language the app shows.
+func QuickNewGroup() string { return In(i18n.Locale()).QuickNewGroup() }
+
+// QuickNewGroup says "New group"
+// in the language of msgs.
+func (msgs Messages) QuickNewGroup() string {
+	return Catalog.Format(msgs.locale, "quickNewGroup", nil)
+}
+
+// QuickGroupName says "Group name"
+// in the language the app shows.
+func QuickGroupName() string { return In(i18n.Locale()).QuickGroupName() }
+
+// QuickGroupName says "Group name"
+// in the language of msgs.
+func (msgs Messages) QuickGroupName() string {
+	return Catalog.Format(msgs.locale, "quickGroupName", nil)
+}
+
+// QuickSearch says "Search commands"
+// in the language the app shows.
+func QuickSearch() string { return In(i18n.Locale()).QuickSearch() }
+
+// QuickSearch says "Search commands"
+// in the language of msgs.
+func (msgs Messages) QuickSearch() string {
+	return Catalog.Format(msgs.locale, "quickSearch", nil)
+}
+
+// QuickLines says "{count, plural, one {# line} other {# lines}}"
+// in the language the app shows.
+func QuickLines(count int) string { return In(i18n.Locale()).QuickLines(count) }
+
+// QuickLines says "{count, plural, one {# line} other {# lines}}"
+// in the language of msgs.
+func (msgs Messages) QuickLines(count int) string {
+	return Catalog.Format(msgs.locale, "quickLines", map[string]any{"count": count})
+}
+
+// QuickSend says "Send"
+// in the language the app shows.
+func QuickSend() string { return In(i18n.Locale()).QuickSend() }
+
+// QuickSend says "Send"
+// in the language of msgs.
+func (msgs Messages) QuickSend() string {
+	return Catalog.Format(msgs.locale, "quickSend", nil)
+}
+
+// QuickPutInBar says "Put in the command bar"
+// in the language the app shows.
+func QuickPutInBar() string { return In(i18n.Locale()).QuickPutInBar() }
+
+// QuickPutInBar says "Put in the command bar"
+// in the language of msgs.
+func (msgs Messages) QuickPutInBar() string {
+	return Catalog.Format(msgs.locale, "quickPutInBar", nil)
+}
+
+// QuickEdit says "Edit…"
+// in the language the app shows.
+func QuickEdit() string { return In(i18n.Locale()).QuickEdit() }
+
+// QuickEdit says "Edit…"
+// in the language of msgs.
+func (msgs Messages) QuickEdit() string {
+	return Catalog.Format(msgs.locale, "quickEdit", nil)
+}
+
+// QuickDuplicate says "Duplicate"
+// in the language the app shows.
+func QuickDuplicate() string { return In(i18n.Locale()).QuickDuplicate() }
+
+// QuickDuplicate says "Duplicate"
+// in the language of msgs.
+func (msgs Messages) QuickDuplicate() string {
+	return Catalog.Format(msgs.locale, "quickDuplicate", nil)
+}
+
+// QuickMoveTo says "Move to group"
+// in the language the app shows.
+func QuickMoveTo() string { return In(i18n.Locale()).QuickMoveTo() }
+
+// QuickMoveTo says "Move to group"
+// in the language of msgs.
+func (msgs Messages) QuickMoveTo() string {
+	return Catalog.Format(msgs.locale, "quickMoveTo", nil)
+}
+
+// QuickNoGroup says "No group"
+// in the language the app shows.
+func QuickNoGroup() string { return In(i18n.Locale()).QuickNoGroup() }
+
+// QuickNoGroup says "No group"
+// in the language of msgs.
+func (msgs Messages) QuickNoGroup() string {
+	return Catalog.Format(msgs.locale, "quickNoGroup", nil)
+}
+
+// QuickCopyName says "{name} (copy)"
+// in the language the app shows.
+func QuickCopyName(name string) string { return In(i18n.Locale()).QuickCopyName(name) }
+
+// QuickCopyName says "{name} (copy)"
+// in the language of msgs.
+func (msgs Messages) QuickCopyName(name string) string {
+	return Catalog.Format(msgs.locale, "quickCopyName", map[string]any{"name": name})
+}
+
+// QuickDeleteTitle says "Delete the quick command “{name}”?"
+// in the language the app shows.
+func QuickDeleteTitle(name string) string { return In(i18n.Locale()).QuickDeleteTitle(name) }
+
+// QuickDeleteTitle says "Delete the quick command “{name}”?"
+// in the language of msgs.
+func (msgs Messages) QuickDeleteTitle(name string) string {
+	return Catalog.Format(msgs.locale, "quickDeleteTitle", map[string]any{"name": name})
+}
+
+// QuickDeleteDetail says "This cannot be undone."
+// in the language the app shows.
+func QuickDeleteDetail() string { return In(i18n.Locale()).QuickDeleteDetail() }
+
+// QuickDeleteDetail says "This cannot be undone."
+// in the language of msgs.
+func (msgs Messages) QuickDeleteDetail() string {
+	return Catalog.Format(msgs.locale, "quickDeleteDetail", nil)
+}
+
+// QuickDeleteGroupTitle says "Delete the group “{name}”?"
+// in the language the app shows.
+func QuickDeleteGroupTitle(name string) string { return In(i18n.Locale()).QuickDeleteGroupTitle(name) }
+
+// QuickDeleteGroupTitle says "Delete the group “{name}”?"
+// in the language of msgs.
+func (msgs Messages) QuickDeleteGroupTitle(name string) string {
+	return Catalog.Format(msgs.locale, "quickDeleteGroupTitle", map[string]any{"name": name})
+}
+
+// QuickDeleteGroupDetail says "Its commands are kept, under All."
+// in the language the app shows.
+func QuickDeleteGroupDetail() string { return In(i18n.Locale()).QuickDeleteGroupDetail() }
+
+// QuickDeleteGroupDetail says "Its commands are kept, under All."
+// in the language of msgs.
+func (msgs Messages) QuickDeleteGroupDetail() string {
+	return Catalog.Format(msgs.locale, "quickDeleteGroupDetail", nil)
+}
+
+// QuickNone says "No quick commands yet. New command saves one; a click on it then sends it to the session."
+// in the language the app shows.
+func QuickNone() string { return In(i18n.Locale()).QuickNone() }
+
+// QuickNone says "No quick commands yet. New command saves one; a click on it then sends it to the session."
+// in the language of msgs.
+func (msgs Messages) QuickNone() string {
+	return Catalog.Format(msgs.locale, "quickNone", nil)
+}
+
+// QuickNoneInGroup says "No commands in this group. Drag one onto the group, or make a new one."
+// in the language the app shows.
+func QuickNoneInGroup() string { return In(i18n.Locale()).QuickNoneInGroup() }
+
+// QuickNoneInGroup says "No commands in this group. Drag one onto the group, or make a new one."
+// in the language of msgs.
+func (msgs Messages) QuickNoneInGroup() string {
+	return Catalog.Format(msgs.locale, "quickNoneInGroup", nil)
+}
+
+// QuickNoMatches says "No commands match."
+// in the language the app shows.
+func QuickNoMatches() string { return In(i18n.Locale()).QuickNoMatches() }
+
+// QuickNoMatches says "No commands match."
+// in the language of msgs.
+func (msgs Messages) QuickNoMatches() string {
+	return Catalog.Format(msgs.locale, "quickNoMatches", nil)
+}
+
+// QuickOffline says "Connect a session to send commands."
+// in the language the app shows.
+func QuickOffline() string { return In(i18n.Locale()).QuickOffline() }
+
+// QuickOffline says "Connect a session to send commands."
+// in the language of msgs.
+func (msgs Messages) QuickOffline() string {
+	return Catalog.Format(msgs.locale, "quickOffline", nil)
+}
+
+// QuickFieldGroup says "Group"
+// in the language the app shows.
+func QuickFieldGroup() string { return In(i18n.Locale()).QuickFieldGroup() }
+
+// QuickFieldGroup says "Group"
+// in the language of msgs.
+func (msgs Messages) QuickFieldGroup() string {
+	return Catalog.Format(msgs.locale, "quickFieldGroup", nil)
+}
+
+// QuickFieldCommand says "Command"
+// in the language the app shows.
+func QuickFieldCommand() string { return In(i18n.Locale()).QuickFieldCommand() }
+
+// QuickFieldCommand says "Command"
+// in the language of msgs.
+func (msgs Messages) QuickFieldCommand() string {
+	return Catalog.Format(msgs.locale, "quickFieldCommand", nil)
+}
+
+// QuickNamePlaceholder says "The command's first line"
+// in the language the app shows.
+func QuickNamePlaceholder() string { return In(i18n.Locale()).QuickNamePlaceholder() }
+
+// QuickNamePlaceholder says "The command's first line"
+// in the language of msgs.
+func (msgs Messages) QuickNamePlaceholder() string {
+	return Catalog.Format(msgs.locale, "quickNamePlaceholder", nil)
+}
+
+// QuickEnter says "Press Enter after each line"
+// in the language the app shows.
+func QuickEnter() string { return In(i18n.Locale()).QuickEnter() }
+
+// QuickEnter says "Press Enter after each line"
+// in the language of msgs.
+func (msgs Messages) QuickEnter() string {
+	return Catalog.Format(msgs.locale, "quickEnter", nil)
+}
+
+// QuickEnterOn says "Every line runs, as if typed and followed by Enter."
+// in the language the app shows.
+func QuickEnterOn() string { return In(i18n.Locale()).QuickEnterOn() }
+
+// QuickEnterOn says "Every line runs, as if typed and followed by Enter."
+// in the language of msgs.
+func (msgs Messages) QuickEnterOn() string {
+	return Catalog.Format(msgs.locale, "quickEnterOn", nil)
+}
+
+// QuickEnterOff says "The last line is typed without Enter, for you to check it and press Enter yourself. The lines before it still run."
+// in the language the app shows.
+func QuickEnterOff() string { return In(i18n.Locale()).QuickEnterOff() }
+
+// QuickEnterOff says "The last line is typed without Enter, for you to check it and press Enter yourself. The lines before it still run."
+// in the language of msgs.
+func (msgs Messages) QuickEnterOff() string {
+	return Catalog.Format(msgs.locale, "quickEnterOff", nil)
+}
+
+// QuickErrCommand says "Enter a command"
+// in the language the app shows.
+func QuickErrCommand() string { return In(i18n.Locale()).QuickErrCommand() }
+
+// QuickErrCommand says "Enter a command"
+// in the language of msgs.
+func (msgs Messages) QuickErrCommand() string {
+	return Catalog.Format(msgs.locale, "quickErrCommand", nil)
+}
+
+// QuickLoadBroken says "quickcommands.json could not be read, so the list starts empty. The file was kept as {file}."
+// in the language the app shows.
+func QuickLoadBroken(file string) string { return In(i18n.Locale()).QuickLoadBroken(file) }
+
+// QuickLoadBroken says "quickcommands.json could not be read, so the list starts empty. The file was kept as {file}."
+// in the language of msgs.
+func (msgs Messages) QuickLoadBroken(file string) string {
+	return Catalog.Format(msgs.locale, "quickLoadBroken", map[string]any{"file": file})
+}
+
+// QuickLoadFailed says "quickcommands.json could not be read ({error}). Changes are not saved, so that the file is not replaced."
+// in the language the app shows.
+func QuickLoadFailed(error string) string { return In(i18n.Locale()).QuickLoadFailed(error) }
+
+// QuickLoadFailed says "quickcommands.json could not be read ({error}). Changes are not saved, so that the file is not replaced."
+// in the language of msgs.
+func (msgs Messages) QuickLoadFailed(error string) string {
+	return Catalog.Format(msgs.locale, "quickLoadFailed", map[string]any{"error": error})
+}

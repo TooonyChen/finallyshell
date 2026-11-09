@@ -119,6 +119,17 @@ func TestReadmeScreenshots(t *testing.T) {
 				saveShot(t, tt, "readme-transfers-"+lang+".png")
 			})
 
+			t.Run("quick-commands", func(t *testing.T) {
+				a, _, tt, _ := readmeApp(t, lang)
+				demoQuick(a, lang != "en")
+				a.bottomTab = tabCommands
+				tt.Frame()
+				if !tt.HasText(locales.QuickNewCommand()) || !tt.HasText("df -h") {
+					t.Errorf("no quick commands; texts %q", tt.Texts())
+				}
+				saveShot(t, tt, "readme-quick-commands-"+lang+".png")
+			})
+
 			t.Run("quick-connect", func(t *testing.T) {
 				a, p := testApp(t)
 				p.SetLocale(lang)

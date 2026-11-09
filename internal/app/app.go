@@ -233,6 +233,9 @@ type App struct {
 	processes processesUI
 	network   networkUI
 	geo       geoState
+
+	// The Commands tab's quick commands (quickcmds.go).
+	quickUI quickState
 }
 
 // New makes the app's state, with the hosts and settings saved on disk.
@@ -327,6 +330,7 @@ const (
 	tabTunnels
 	tabProcesses
 	tabNetwork
+	tabCommands
 )
 
 // bottomTab is a tab of the bottom panel: its label, and its page.
@@ -351,6 +355,7 @@ func (a *App) bottomTabs() []bottomTab {
 		tabTunnels:   {tunnelsLabel, a.tunnelPanel},
 		tabProcesses: {locales.TabProcesses(), a.processPanel},
 		tabNetwork:   {locales.TabNetwork(), a.networkPanel},
+		tabCommands:  {locales.TabCommands(), a.quickPanel},
 	}
 }
 

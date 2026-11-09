@@ -13,6 +13,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 - [settings.json](#settingsjson)
 - [同步](#同步)
 - [命令历史](#命令历史)
+- [quickcommands.json](#quickcommandsjson)
 - [updater.json](#updaterjson)
 - [mygo.json 里的 updates](#mygojson-里的-updates)
 - [密码存在哪里](#密码存在哪里)
@@ -33,6 +34,8 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `sync-state.json` | 上次同步的状态（见[同步](#同步)）。 |
 | `hosts.before-sync.json` | 上次改动了它的同步之前的 `hosts.json`。 |
 | `history/<主机 ID>.txt` | 命令输入框按主机保存的历史（见[命令历史](#命令历史)）。 |
+| `quickcommands.json` | 命令页的快捷命令（见 [quickcommands.json](#quickcommandsjson)）。 |
+| `quickcommands.json.broken-<日期-时间>` | 读不出来的 `quickcommands.json` 的副本。 |
 | `geo/` | IP 位置数据，只在你同意时下载：`ip2region_v4.xdb`、`ip2region_v6.xdb`，以及在线查询结果的缓存 `cache.json`（见 [IP 归属地](features.md#ip-归属地)）。 |
 
 `mygo dev`、`go run` 和安装版用的是同一个目录，所以共用主机和设置。
@@ -191,6 +194,28 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 [命令输入框](features.md#命令输入框)把从它发送的命令存在 `history/<主机 ID>.txt`，每台主机一个文件，文件名是主机在 `hosts.json` 里的 `id`：UTF-8 纯文本，一行一条命令，最旧的在前，每条只留一次（再次发送的移到最后）。条数不限；文件超过 10 MB 时删掉最旧的。空命令和含有控制字符（制表符除外，比如第二行、转义序列）的命令不保存，文件里有也不读取。彻底删除主机时一起删除它的文件（删到“显示已删除”时不删），“选项 › 终端 › 命令输入框 › 清空所有主机的历史…”删除整个文件夹。程序关闭时可以编辑或删除这些文件；每次运行中，历史列表第一次用到时才读取。
 
 同步暂时不包括历史；文件格式保持简单，以便以后同步。
+
+## quickcommands.json
+
+[命令页](features.md#命令页)的快捷命令，所有主机共用：
+
+```json
+{
+  "version": 1,
+  "groups": [{"id": "g1", "name": "常用"}],
+  "commands": [
+    {"id": "c1", "group": "g1", "name": "更新系统", "text": "apt update\napt -y upgrade", "enter": true},
+    {"id": "c2", "name": "", "text": "tail -f /var/log/syslog", "enter": false}
+  ]
+}
+```
+
+- `groups` 和 `commands` 的顺序就是页面上显示的顺序。命令的 `group` 是某个分组的 `id`；没有它，或者分组已经不在了的命令，不属于任何分组，只显示在“全部”下。
+- `name` 是按钮上的文字，为空时显示 `text` 的第一行。`text` 是命令，各行用 `\n` 分隔；末尾的空行不发送。
+- `enter` 表示每行后面发送回车；为 `false` 时最后一行后面不发送。没有这个键的命令视为开启。
+- 程序不认识的键在保存时原样保留，更高的 `version` 也一样。
+
+文件在每次修改时写入，先写临时文件再改名替换。如果文件解析失败，程序会先把它原样复制为 `quickcommands.json.broken-<YYYYMMDD-HHMMSS>`，页面显示为空，并提示副本的名称，下次修改时才替换原文件。如果文件根本读不了（或复制失败），页面会说明，并且在程序重新启动前不会写入它。
 
 ## updater.json
 
