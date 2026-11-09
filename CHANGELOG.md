@@ -2,6 +2,36 @@
 
 Each version's notes, newest first, in English and Simplified Chinese. A release's notes on GitHub and in the app's update window are its section here; see [Releasing](docs/en/development.md#releasing).
 
+## 0.2.2
+
+### English
+
+- Command bar under the terminal, as in FinalShell: type a command and Enter sends it to the shell. Tab lists the server's folder for the path you are typing, or the commands on its PATH for the first word. Up, Alt+H or the History button lists the commands you sent to that host before and those in its shell history, and Left and Right pick one word out of a command. Ctrl+Shift+L (Cmd+Shift+L on macOS) moves the keyboard to the bar and back. Turn it, or any part of it, off in Options › Terminal › Command bar.
+- The file panel follows the shell: after `cd` in the terminal it opens the same folder. The toggle after the home button in the panel's toolbar turns this off. Shells that report their folder (OSC 7) work anywhere; for the others the folder is read from `/proc`, so on Linux servers.
+- New Processes tab at the bottom right: every process of the server, sortable and filterable, refreshed every 2 seconds. Open one to see its command line, executable, working directory and environment, and send it a signal or kill it after confirming. A click on the side panel's process list opens it.
+- New Network tab: the ports processes listen on, who is connected to them and how much each uploads and downloads. Agree to download ip2region's location data (about 11 MB) to see where the peers are; online lookups are off unless you turn them on in Options › Network monitor. "Trace Route" traces the route from the server with NextTrace, or `traceroute`/`tracepath` when NextTrace is not installed.
+- "Open in its own tab", at the right end of the bottom panel's tabs, shows the bottom panel in a row of its own under the session, using the whole right side, for the tall tables of Processes and Network. It is the same session, not a second connection.
+- Rename a session tab for this run with "Rename" in its context menu or F2, to tell apart several tabs open to the same server. The name is not saved, and "Reset name" goes back to the host's name.
+- "Download as archive" and "Upload as archive…" in the file panel's context menus send a folder of many small files packed with tar and gzip as it streams, much faster than one file at a time over SFTP. When the server has no `tar`, "Retry over SFTP" sends it the usual way.
+- Sync connections and settings between computers through storage of your own: a GitHub gist, a WebDAV folder (Jianguoyun, Nextcloud...) or S3-compatible storage (Cloudflare R2, Backblaze B2...). Everything is encrypted on your computer with a sync password only you know, and saved passwords are synced only if you choose to. It is off until you set it up in Options › Sync.
+- The network speed graph's interface name opens a menu to choose which interfaces it shows, one or several summed; the choice is kept per host. By default it shows the busiest one.
+- macOS on Intel: there is now an `amd64` build for Intel Macs.
+- The empty start page, shown before any connection is added, has a "Connection manager" button, to import connections from another client first.
+
+### 简体中文
+
+- 终端下面多了命令输入框，和 FinalShell 一样：输入命令，回车发给 shell。Tab 列出正在输入的路径所在的服务器文件夹，在第一个词上则列出服务器 PATH 里的命令。↑、Alt+H 或“历史”按钮列出以前发给这台主机的命令和它的 shell 历史，← → 可以从一条命令里只取一个词。Ctrl+Shift+L（macOS 上是 Cmd+Shift+L）在输入框和终端之间切换键盘焦点。用不上的话，在“选项 › 终端 › 命令输入框”里关掉它，或者只关掉其中一部分。
+- 文件面板跟随终端目录：在终端里 `cd` 之后，文件面板也进入同一个文件夹。文件面板工具栏里主目录按钮后面的开关可以关掉它。会报告当前目录（OSC 7）的 shell 在哪都能用；其他 shell 要从 `/proc` 读目录，所以只支持 Linux 服务器。
+- 右下角新增“进程”页：列出服务器的所有进程，可排序、可筛选，每 2 秒刷新。打开一个进程能看它的命令行、可执行文件、工作目录和环境变量，确认后可以发送信号或结束它。点左侧面板的进程列表也会打开这一页。
+- 新增“网络”页：进程监听的端口、谁连着它们、各自上传下载多少。同意下载 ip2region 位置数据（约 11 MB）后显示对端的归属地；在线查询默认关闭，要在“选项 › 网络监控”里打开。“路由追踪”在服务器上用 NextTrace 追踪路由，没装 NextTrace 时改用 `traceroute` 或 `tracepath`。
+- 底部面板标签栏右端的“在单独的标签中打开”，会在会话下面多出一行，用整个右侧显示底部面板，方便看“进程”“网络”这类需要高度的表格。它还是同一个会话，不是新的连接。
+- 会话标签可以临时改名：右键菜单里的“重命名”或按 F2，方便区分连到同一台服务器的多个标签。名字不会保存，“恢复原名”可以改回主机名。
+- 文件面板右键菜单里的“打包下载”和“打包上传…”，用 tar 和 gzip 边打包边传，传大量小文件的文件夹比 SFTP 逐个传快得多。服务器上没有 `tar` 时，可以“改用 SFTP 重试”。
+- 连接和设置可以在多台电脑之间同步，用的是你自己的存储：GitHub gist、WebDAV 文件夹（坚果云、Nextcloud 等）或 S3 兼容存储（Cloudflare R2、Backblaze B2 等）。所有内容在本机用只有你知道的同步密码加密，已保存的密码只有你勾选了才会同步。在“选项 › 同步”里设置之前不会启用。
+- 网速图右上角的网卡名可以打开菜单，选择显示哪块网卡，也可以多选求和；每台主机分别记住。默认显示流量最大的那块。
+- macOS Intel：新增给 Intel 芯片 Mac 用的 `amd64` 版本。
+- 还没添加任何连接时，空白的起始页多了“连接管理器”按钮，可以先从其他客户端导入连接。
+
 ## 0.2.1
 
 ### English
