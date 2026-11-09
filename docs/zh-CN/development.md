@@ -145,7 +145,7 @@ tools/natives/       CI 跑测试前先下载 libghostty-vt，最多重试五分
 tools/release/       发布用的工具：从 CHANGELOG.md 读出下一个版本号和更新说明，按提交列出草稿，收集第三方许可证（notices/ 是以二进制打包的库的许可证）
 tools/screenshots/   从 internal/app 的测试重新生成 docs/screenshots/ 里的 README 截图
 internal/
-  config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置；keys.go 是退格键和删除键发送什么；sync.go 是“同步”页的设置、哪些设置要同步、sync-state.json 和同步前 hosts.json 的副本；history.go 是命令输入框的历史文件，以及读取 bash 和 zsh 的历史文件；quickcommands.go 是“命令”页的 quickcommands.json
+  config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置；keys.go 是退格键和删除键发送什么；sync.go 是“同步”页的设置、哪些设置要同步、sync-state.json 和同步前 hosts.json 的副本；history.go 是命令输入框的历史文件，以及读取 bash 和 zsh 的历史文件；quickcommands.go 是“命令”页的 quickcommands.json；cmdeditor.go 是命令编辑器的 commandeditor.txt
   cloudsync/         通过用户自己的存储同步：crypto.go 加密文件（Argon2id、AES-256-GCM），merge.go 做三方合并，sync.go 读取、合并、写回（冲突时重试）；gist.go、webdav.go、s3.go 是各个服务（s3.go 手写 SigV4 签名），remotehttp.go 是它们共用的 HTTP 代码
   importer/          读其他客户端的连接：importer.go 是来源列表（readers）、读出的连接和问题、文本解码（UTF-8、UTF-16、GB18030）、判重、按文件夹导入；finalshell.go 找 FinalShell 的目录、读 conn 里的连接和文件夹；xshell.go 找 Xshell 的 Sessions 文件夹、读 .xsh 会话文件和 .xts 导出文件；securecrt.go 找 SecureCRT 的配置目录、读它 Sessions 文件夹里的 .ini 文件；mobaxterm.go 找 MobaXterm.ini、读里面的书签段，以及 .mxtsessions 和 .moba 导出文件；sshconfig.go 读 OpenSSH 的 ~/.ssh/config（Host 块和通配模式、Include、ProxyJump）；table.go 读 CSV 文件或 .xlsx 第一个工作表里的服务器列表，.xlsx 由自己写的 xlsx.go 读（archive/zip 和 encoding/xml，有防 zip 炸弹的限制）；testdata 是编造的样例
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
@@ -173,7 +173,7 @@ internal/
     options_commandbar.go “终端 › 命令输入框”页
     fullscreen.go    全屏：只显示终端区域，窗口进入系统全屏
     start.go         新标签页：快速连接、搜索、清空最近连接
-    splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复
+    splits.go        分隔条：各区域的最小尺寸，大小的保存和恢复，从末端算大小的分隔
     files.go         文件面板：目录树、文件表格、拖入上传
     fileops.go       重命名、删除、新建文件夹和文件：对话框和目录树的右键菜单
     fileicons.go     文件面板的图标主题：后台读取、显示图标、安装和删除
@@ -189,6 +189,7 @@ internal/
     network_trace.go 网络页的路由追踪：标签、没有 NextTrace 时的提示、输入地址的对话框
     quickcmds.go     “命令”页：分组、快捷命令按钮、通过命令输入框的 sendLine 发送、拖动、右键菜单
     quickcmds_editor.go 快捷命令编辑器窗口
+    cmdeditor.go     “命令”页的命令编辑器：在按钮旁边或下面的窗格，发送文本或选中的部分，它的选项，保存文本
     sendtarget.go    命令输入框和“命令”页的发送目标：当前、全部或选中的会话，它的控件，第一次发送前的询问
     geo.go           IP 归属地：下载提示条、在后台加载数据、“归属地”列的文字、在线查询队列
     options_network.go 选项的“网络监控”页

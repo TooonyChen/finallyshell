@@ -102,6 +102,10 @@ var (
 		"monitorHidden", // what this device's monitor shows, as the pane sizes
 		"bottomPanelHidden", "bottomPanelSide", "rightPanelWidth",
 		"monitorSide", "rightMonitorPercent",
+		// The command editor's layout and options, with its text in a
+		// file of this device's own.
+		"commandEditorShown", "commandEditorWidth", "commandEditorPercent",
+		"commandEditorNoEnter", "commandEditorClear",
 		"termBackground", // a file in this device's config folder
 		"downloadDir", "askDownloadDir",
 		"sync",

@@ -14,6 +14,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 - [同步](#同步)
 - [命令历史](#命令历史)
 - [quickcommands.json](#quickcommandsjson)
+- [commandeditor.txt](#commandeditortxt)
 - [updater.json](#updaterjson)
 - [mygo.json 里的 updates](#mygojson-里的-updates)
 - [密码存在哪里](#密码存在哪里)
@@ -36,6 +37,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `history/<主机 ID>.txt` | 命令输入框按主机保存的历史（见[命令历史](#命令历史)）。 |
 | `quickcommands.json` | 命令页的快捷命令（见 [quickcommands.json](#quickcommandsjson)）。 |
 | `quickcommands.json.broken-<日期-时间>` | 读不出来的 `quickcommands.json` 的副本。 |
+| `commandeditor.txt` | 命令页里命令编辑器的文本（见 [commandeditor.txt](#commandeditortxt)）。 |
 | `geo/` | IP 位置数据，只在你同意时下载：`ip2region_v4.xdb`、`ip2region_v6.xdb`，以及在线查询结果的缓存 `cache.json`（见 [IP 归属地](features.md#ip-归属地)）。 |
 
 `mygo dev`、`go run` 和安装版用的是同一个目录，所以共用主机和设置。
@@ -170,11 +172,16 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `rightPanelWidth` | 终端右边那一栏的宽度，单位 DIP，最后一次拖动的结果。 | 程序的默认值（460）。 |
 | `monitorSide` | `right` 把服务器监控放到终端右边那一栏的上部，会话列表占满左边一栏。 | `""`，在左上。 |
 | `rightMonitorPercent` | 监控和底部面板都在右边时，监控占右边一栏高度的比例，单位是百分比。 | 程序的默认值（45）。 |
+| `commandEditorShown` | `true` 在命令页里显示命令编辑器。 | 隐藏。 |
+| `commandEditorWidth` | 命令编辑器在命令按钮旁边时的宽度，单位 DIP，最后一次拖动的结果。 | 程序的默认值（460）。 |
+| `commandEditorPercent` | 命令页太窄、命令编辑器放在按钮下面时，命令按钮占命令页高度的比例，单位是百分比。 | 程序的默认值（40）。 |
+| `commandEditorNoEnter` | `true` 关掉命令编辑器的“每行发送后按回车”：发送的最后一行不带回车。 | 每一行都执行。 |
+| `commandEditorClear` | `true` 打开命令编辑器的“发送后清空”。 | 关闭。 |
 | `leftPanelPage` | `connections` 在左下面板显示“连接”页。 | 会话标签。 |
 | `connectionTreeExpanded` | “连接”页里展开的文件夹的 ID，如 `["f1730000000000000000"]`；`[]` 表示全部收起。按 ID 记，文件夹改名或移动后仍保持展开。 | 全部展开。 |
 | `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
 
-每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[网络监控](features.md#网络监控)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)、[“连接”页](features.md#连接页)和[布局和分隔条](features.md#布局和分隔条)。
+每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[网络监控](features.md#网络监控)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)、[“连接”页](features.md#连接页)、[命令编辑器](features.md#命令编辑器)和[布局和分隔条](features.md#布局和分隔条)。
 
 ## 同步
 
@@ -190,7 +197,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 
@@ -226,6 +233,10 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 - 程序不认识的键在保存时原样保留，更高的 `version` 也一样。
 
 文件在每次修改时写入，先写临时文件再改名替换。如果文件解析失败，程序会先把它原样复制为 `quickcommands.json.broken-<YYYYMMDD-HHMMSS>`，页面显示为空，并提示副本的名称，下次修改时才替换原文件。如果文件根本读不了（或复制失败），页面会说明，并且在程序重新启动前不会写入它。
+
+## commandeditor.txt
+
+命令页里[命令编辑器](features.md#命令编辑器)的文本，原样保存，UTF-8 编码，换行是 `\n`：所有会话共用，不参与同步。停止输入一秒后、以及退出应用时写入，先写临时文件再改名替换；文件不存在时编辑器为空。如果文件读不出来，编辑器里会提示，并且在程序重新启动前不会写入它。
 
 ## updater.json
 

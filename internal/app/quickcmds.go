@@ -46,6 +46,7 @@ type quickState struct {
 	query  string // the search
 	naming *groupNaming
 	ed     *quickEditor // the editor window's fields, while it is open
+	box    cmdEditor    // the command editor beside the buttons (cmdeditor.go)
 }
 
 // groupNaming is the group whose name is being typed in place, in the
@@ -150,15 +151,22 @@ func (a *App) quickPanel(c *ui.Context) {
 		q.group = ""
 	}
 	s, live := a.quickSession()
-	ui.Column(c.Key("quick-commands")).Grow(1).MinHeight(0).Children(func() {
+	tab := ui.Column(c.Key("quick-commands")).Grow(1).MinHeight(0)
+	tab.Children(func() {
 		a.quickBanner(c)
-		ui.Row(c).Grow(1).MinHeight(0).AlignItems(ui.Stretch).Children(func() {
-			a.quickGroups(c, store)
+		buttons := func() {
 			ui.Column(c).Grow(1).MinWidth(0).Children(func() {
 				a.quickToolbar(c, s, live)
 				a.quickButtons(c, store, s, live)
 			})
-		})
+		}
+		commands := func(buttons func()) {
+			ui.Row(c).Grow(1).MinHeight(0).AlignItems(ui.Stretch).Children(func() {
+				a.quickGroups(c, store)
+				buttons()
+			})
+		}
+		a.withCmdEditor(c, tab, s, live, commands, buttons)
 	})
 }
 
@@ -191,11 +199,14 @@ func (a *App) quickBanner(c *ui.Context) {
 	})
 }
 
+// quickGroupsWidth is the width of the list of groups, in DIPs.
+const quickGroupsWidth = 170
+
 // quickGroups is the list of groups at the tab's left: All, the user's
 // groups, and New group.
 func (a *App) quickGroups(c *ui.Context, store *config.QuickCommands) {
 	q := &a.quickUI
-	ui.Column(c).Width(170).Shrink(0).BorderWidth(0, 1, 0, 0).BorderColor(colors.line).Children(func() {
+	ui.Column(c).Width(quickGroupsWidth).Shrink(0).BorderWidth(0, 1, 0, 0).BorderColor(colors.line).Children(func() {
 		ui.Scroll(c).Grow(1).MinHeight(0).Padding(6).Gap(2).Children(func() {
 			a.quickGroupRow(c, store, nil)
 			for _, g := range store.Groups {
@@ -364,10 +375,13 @@ func (a *App) askDeleteQuick(cmd *config.QuickCommand) {
 	}()
 }
 
-// quickToolbar is the row above the buttons: New command, why they are
-// disabled, and the search.
+// quickToolbar is the row above the buttons: New command, the command
+// editor's toggle, why the buttons are disabled, Send to and the search.
 func (a *App) quickToolbar(c *ui.Context, s *Session, live bool) {
-	ui.Row(c).Padding(6, 8).Gap(8).AlignItems(ui.Center).Children(func() {
+	// Narrow, as in the right column or beside the command editor, it
+	// wraps: Send to and the search go to a row of their own, at its end.
+	// While the command editor shows, Send to is the one by its Send.
+	ui.Row(c).Padding(6, 8).Gap(8).Wrap().AlignItems(ui.Center).Children(func() {
 		add := ui.Button(c, "").Label(locales.QuickNewCommand()).Shrink(0).Children(func() {
 			ui.Icon(c, icons.Get("plus")).FontSize(13)
 			ui.Text(c, locales.QuickNewCommand()).SingleLine()
@@ -375,14 +389,21 @@ func (a *App) quickToolbar(c *ui.Context, s *Session, live bool) {
 		if add.Clicked() {
 			a.newQuickCommand()
 		}
+		a.cmdEditorToggle(c)
 		if !live && s != nil {
 			widgets.Muted(c, locales.QuickOffline()).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 		}
-		ui.Spacer(c)
-		a.quickTarget(c)
-		ui.SearchField(c, &a.quickUI.query).Placeholder(locales.QuickSearch()).Label(locales.QuickSearch()).Width(220).Shrink(1).MinWidth(120)
+		ui.Row(c).Grow(1).Basis(searchMinWidth).MinWidth(0).Gap(8).Wrap().Justify(ui.End).AlignItems(ui.Center).Children(func() {
+			if !a.quickUI.box.shown {
+				a.quickTarget(c, "quick")
+			}
+			ui.SearchField(c, &a.quickUI.query).Placeholder(locales.QuickSearch()).Label(locales.QuickSearch()).Basis(220).Shrink(1).MinWidth(searchMinWidth)
+		})
 	})
 }
+
+// searchMinWidth is the least width of the toolbar's search, in DIPs.
+const searchMinWidth = 100
 
 // shownQuick are the commands the buttons show: the group's, or every
 // one under All, that the search finds in their names or their text,

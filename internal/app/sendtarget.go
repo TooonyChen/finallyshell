@@ -46,7 +46,8 @@ type sendTarget struct {
 	// target asks again.
 	confirmed bool
 	// picking is the control whose Choose sessions popover is open, ""
-	// for none: "quick" for the Commands tab's, "bar-<ID>" for a bar's.
+	// for none: "quick" for the Commands tab's, "editor" for its command
+	// editor's, "bar-<ID>" for a bar's.
 	picking string
 	ask     *sendAsk // the question shown before the first send
 }
@@ -220,12 +221,13 @@ func (a *App) barTarget(c *ui.Context, s *Session, live bool) {
 	a.targetPicker(c, b, anchor)
 }
 
-// quickTarget is the Commands tab's Send to drop-down.
-func (a *App) quickTarget(c *ui.Context) {
+// quickTarget is a Send to drop-down of the Commands tab: its toolbar's,
+// anchor "quick", or its command editor's, "editor".
+func (a *App) quickTarget(c *ui.Context, anchor string) {
 	widgets.Muted(c, locales.SendTo()).SingleLine().Shrink(0)
-	b := ui.MenuButton(c, a.targetLabel(false), func(m *ui.Menu) { a.targetMenu(m, "quick") }).Shrink(0)
+	b := ui.MenuButton(c, a.targetLabel(false), func(m *ui.Menu) { a.targetMenu(m, anchor) }).Shrink(0)
 	a.warnTarget(b)
-	a.targetPicker(c, b, "quick")
+	a.targetPicker(c, b, anchor)
 }
 
 // targetPicker is Choose sessions' popover below anchor, when it is the

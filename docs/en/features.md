@@ -50,6 +50,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [IP locations](#ip-locations)
   - [Trace route](#trace-route)
 - [Commands tab](#commands-tab)
+  - [Command editor](#command-editor)
 - [Options window](#options-window)
   - [General](#general)
   - [Transfers](#transfers)
@@ -1765,7 +1766,8 @@ and kept in `quickcommands.json` (see
   before it still run. In the session's row, the terminal then has the
   keyboard.
 - "Send to", in the toolbar before the search box, chooses where the
-  buttons send: "Current session" (the default), "All sessions", every
+  buttons send (while the [command editor](#command-editor) shows, the
+  one beside its Send, which sets the same target, takes its place): "Current session" (the default), "All sessions", every
   session that is connected, or "Choose sessions…", a popover with a
   check box for each session, with its status dot and name. The command
   bar's target button sets the same target. While it is not the current
@@ -1804,6 +1806,62 @@ and kept in `quickcommands.json` (see
 
 Not supported: commands with parameters to fill in, commands of one host only, syncing the
 commands, and a shortcut per command.
+
+### Command editor
+
+FinalShell's command editor: a box beside the buttons to write a few
+lines in and send them, without saving them as a quick command first.
+
+- "Command editor", in the toolbar after "New command", shows it or hides
+  it, and is pressed while it shows. It is on the right of the buttons,
+  the groups keeping the tab's left; the divider between them sets its
+  width, from 280 DIPs up to what leaves the buttons 220, and a double
+  click puts it back at 460. Where the tab is narrower than 670 DIPs, as
+  in the right column, it is under the groups and the buttons, the tab's
+  whole width, the divider setting the buttons' share of the height (40%
+  by default). Whether it shows and both sizes are saved with the other
+  pane sizes (see [Layout and split dividers](#layout-and-split-dividers)).
+- At the top: "Command editor", "Save as command" and "Clear", which
+  empties it (Cmd+Z, Ctrl+Z elsewhere, brings the text back). The text has
+  line numbers and a monospaced font, and no highlighting: what is typed
+  is what is sent. Enter is a new line, Tab indents, and Esc gives the
+  keyboard back to the terminal, as in the command bar.
+- At the bottom: "Options", "Send to" and "Send".
+  - "Send", or Cmd+Enter (Ctrl+Enter on Linux and Windows) in the text,
+    sends the text selected, or all of it with none selected; the
+    button says "Send selection" while there is a selection. The text is
+    sent as a quick command of those lines is: line by line, each
+    through the command bar's path (the session's encoding, the folder
+    follower, the host's history), each followed by a carriage return.
+    Lines are sent as they are, control characters included, as a quick
+    command's are. Empty lines at the end are left out.
+  - "Send to" is the same target as the toolbar's and the command bar's
+    (see above): its warning color, its question before the first send
+    to a new target, and each connected session getting the text once.
+  - "Options" has "Press Enter after each line" (on by default; off, the
+    last line waits at the prompt, and the terminal takes the keyboard
+    for you to press Enter there) and "Clear after sending" (off by
+    default), which takes what was sent out of the editor: the selection,
+    or all of it. Otherwise the text stays, and keeps the keyboard. Both
+    are saved in `settings.json` (`commandEditorNoEnter`,
+    `commandEditorClear`).
+  - "Send" is disabled, and Cmd+Enter sends nothing, while the editor is
+    empty or no session of the target is connected, as the buttons are.
+- "Save as command" opens the quick command editor on a new command of
+  the text selected, or all of it, with the editor's "Press Enter after
+  each line".
+- The text is the same in every session and in a panel row's Commands
+  tab, and is kept across restarts: it is saved in `commandeditor.txt` in
+  the settings folder (see
+  [configuration.md](configuration.md#commandeditortxt)) a second after
+  typing stops, and as the app quits. It is not synced. A file that
+  cannot be read is said in the editor, and is not saved over.
+- There is no limit to the text beyond the file's: the editor lays out
+  the lines in view only, and the text is split into lines only to send
+  it.
+
+Not supported: syntax highlighting, several editor tabs, variables in
+commands, and opening the editor in a window of its own.
 
 ## Options window
 
@@ -2204,6 +2262,10 @@ between them sets the monitor's share of the column's height, 45% by
 default, leaving the monitor its IP line and the panel its tabs and a row
 of its table; a double click puts it back at 45%. It is saved with the
 other sizes. The column's width is the same whichever of them is in it.
+
+The Commands tab's command editor has a divider of its own, beside the
+buttons or under them; it is saved with the other sizes (see
+[Command editor](#command-editor)).
 
 ## Language
 

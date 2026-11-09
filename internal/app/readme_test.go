@@ -124,8 +124,13 @@ func TestReadmeScreenshots(t *testing.T) {
 				a, _, tt, _ := readmeApp(t, lang)
 				demoQuick(a, lang != "en")
 				a.bottomTab = tabCommands
+				// The command editor beside the buttons, two lines
+				// selected (cmdeditor_test.go).
+				a.quickUI.box.shown = true
 				tt.Frame()
-				if !tt.HasText(locales.QuickNewCommand()) || !tt.HasText("df -h") {
+				setCmdText(a, tt, cmdDemo[lang])
+				selectLines(a, tt, 2, 3)
+				if !tt.HasText(locales.QuickNewCommand()) || !tt.HasText("df -h") || !tt.HasText(locales.CmdEditorSendSelection()) {
 					t.Errorf("no quick commands; texts %q", tt.Texts())
 				}
 				saveShot(t, tt, "readme-quick-commands-"+lang+".png")

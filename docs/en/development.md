@@ -277,7 +277,7 @@ tools/natives/       downloads libghostty-vt for the tests before CI runs them, 
 tools/release/       release tools: the next version and its notes from CHANGELOG.md, a draft of them from the commits, the third-party licenses (notices/ has the licenses of libraries packaged as binaries)
 tools/screenshots/   regenerates the README screenshots in docs/screenshots/ from the internal/app tests
 internal/
-  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send; sync.go is the Sync page's settings, which settings are synced, sync-state.json and the copy of hosts.json before a sync; history.go is the command bar's history files and reading bash's and zsh's history files; quickcommands.go is the Commands tab's quickcommands.json
+  config/            reading and writing hosts and folders (hosts.json) and settings, the background image copy, the config directory; proxy.go is the proxy settings and the jump host chain (finding loops); tunnels.go is the tunnel settings; keys.go is what Backspace and Delete send; sync.go is the Sync page's settings, which settings are synced, sync-state.json and the copy of hosts.json before a sync; history.go is the command bar's history files and reading bash's and zsh's history files; quickcommands.go is the Commands tab's quickcommands.json; cmdeditor.go is the command editor's commandeditor.txt
   cloudsync/         sync through the user's own storage: crypto.go encrypts the file (Argon2id, AES-256-GCM), merge.go merges three ways, sync.go reads, merges and writes it (retrying on a conflict); gist.go, webdav.go and s3.go are the services (s3.go signs with SigV4 by hand), remotehttp.go their shared HTTP code
   importer/          reads other clients' connections: importer.go is the list of sources (readers), the entries and problems they read, the text decoder (UTF-8, UTF-16, GB18030), finding duplicates and importing by folder; finalshell.go finds FinalShell's folder and reads the connections and folders in conn; xshell.go finds Xshell's Sessions folder and reads its .xsh files and .xts exports; securecrt.go finds SecureCRT's config folder and reads the .ini files of its Sessions folder; mobaxterm.go finds MobaXterm.ini and reads its bookmark sections, and .mxtsessions and .moba exports; sshconfig.go reads OpenSSH's ~/.ssh/config (Host blocks and patterns, Include, ProxyJump); table.go reads a server list in a CSV file, or the first sheet of an .xlsx with xlsx.go, a reader of its own (archive/zip and encoding/xml, with limits against zip bombs); testdata has made-up samples
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
@@ -305,7 +305,7 @@ internal/
     options_commandbar.go the Terminal › Command bar page
     fullscreen.go    full screen: only the terminal area, window in the system's full screen
     start.go         new tab: quick connect, search, clearing recent connections
-    splits.go        split dividers: minimum sizes of the areas, saving and restoring sizes
+    splits.go        split dividers: minimum sizes of the areas, saving and restoring sizes, a split sized from its end edge
     files.go         file panel: folder tree, file table, drop to upload
     fileops.go       rename, delete, new folder and file: their dialog and the tree's menu
     fileicons.go     icon themes in the file panel: background loading, showing icons, installing and removing
@@ -321,6 +321,7 @@ internal/
     network_trace.go trace route in the Network tab: its tabs, the missing NextTrace notice, the dialog for a typed address
     quickcmds.go     the Commands tab: groups, the buttons of quick commands, sending them through the command bar's sendLine, dragging, the context menu
     quickcmds_editor.go the quick command editor's window
+    cmdeditor.go     the Commands tab's command editor: its pane beside or under the buttons, sending its text or selection, its options, saving its text
     sendtarget.go    the send target of the bar and the Commands tab: current, all or chosen sessions, its controls, the question before the first send
     geo.go           IP locations: the download bar, loading the data off the UI thread, the Location column's text, the online lookups' queue
     options_network.go the Network monitor page of the options

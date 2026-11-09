@@ -80,6 +80,7 @@ func (a *App) restoreLayout() {
 	if s.RightMonitorPercent > 0 && s.RightMonitorPercent < 100 {
 		a.rightMonitorPct = s.RightMonitorPercent
 	}
+	a.restoreCmdEditor()
 	// The Processes and Network tabs' sizes, which the sessions share.
 	if s.ProcListPercent > 0 && s.ProcListPercent < 100 {
 		a.processes.listPct = s.ProcListPercent
@@ -124,6 +125,29 @@ func (a *App) splitMoved(c *ui.Context, split ui.Element, size *float32, l split
 	c.After(layoutSaveDelay)
 }
 
+// endSplit lays out start and end side by side, end at the end, with a
+// divider between them that sizes end: its width, *size, is kept from
+// the end edge, so that more room goes to start. It returns the row
+// that holds them, to size.
+//
+// ui.Split sizes its first pane, so the split is laid out in the other
+// direction, where its first pane is the end one, and the panes are put
+// back in the window's own direction.
+func (a *App) endSplit(c *ui.Context, size *float32, reset float32, l splitLimits, start, end func()) ui.Element {
+	dir := c.Direction()
+	flipped := ui.RightToLeft
+	if dir == ui.RightToLeft {
+		flipped = ui.LeftToRight
+	}
+	pane := func(build func()) func() {
+		return func() { ui.Column(c).Direction(dir).Fill().Children(build) }
+	}
+	return ui.Row(c).Direction(flipped).Children(func() {
+		split := ui.Split(c, size, pane(end), pane(start)).SplitReset(reset).Fill()
+		a.splitMoved(c, split, size, l)
+	})
+}
+
 // saveLayoutAtRest saves the pane sizes once the dividers stopped moving,
 // asking for the frame that does while they wait: a frame asks only for
 // the next one it needs.
@@ -152,5 +176,6 @@ func (a *App) saveLayout() {
 	a.settings.ProcListPercent = a.processes.listPct
 	a.settings.ProcFieldsPercent = a.processes.fieldsPct
 	a.settings.NetListPercent = a.network.listPct
+	a.keepCmdEditorLayout()
 	a.saveSettings(a.settings)
 }

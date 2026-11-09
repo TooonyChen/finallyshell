@@ -9024,6 +9024,106 @@ func (msgs Messages) QuickLoadFailed(error string) string {
 	return Catalog.Format(msgs.locale, "quickLoadFailed", map[string]any{"error": error})
 }
 
+// CmdEditor says "Command editor"
+// in the language the app shows.
+func CmdEditor() string { return In(i18n.Locale()).CmdEditor() }
+
+// CmdEditor says "Command editor"
+// in the language of msgs.
+func (msgs Messages) CmdEditor() string {
+	return Catalog.Format(msgs.locale, "cmdEditor", nil)
+}
+
+// CmdEditorSaveAs says "Save as command"
+// in the language the app shows.
+func CmdEditorSaveAs() string { return In(i18n.Locale()).CmdEditorSaveAs() }
+
+// CmdEditorSaveAs says "Save as command"
+// in the language of msgs.
+func (msgs Messages) CmdEditorSaveAs() string {
+	return Catalog.Format(msgs.locale, "cmdEditorSaveAs", nil)
+}
+
+// CmdEditorClear says "Clear"
+// in the language the app shows.
+func CmdEditorClear() string { return In(i18n.Locale()).CmdEditorClear() }
+
+// CmdEditorClear says "Clear"
+// in the language of msgs.
+func (msgs Messages) CmdEditorClear() string {
+	return Catalog.Format(msgs.locale, "cmdEditorClear", nil)
+}
+
+// CmdEditorOptions says "Options"
+// in the language the app shows.
+func CmdEditorOptions() string { return In(i18n.Locale()).CmdEditorOptions() }
+
+// CmdEditorOptions says "Options"
+// in the language of msgs.
+func (msgs Messages) CmdEditorOptions() string {
+	return Catalog.Format(msgs.locale, "cmdEditorOptions", nil)
+}
+
+// CmdEditorOptionsLabel says "Command editor options"
+// in the language the app shows.
+func CmdEditorOptionsLabel() string { return In(i18n.Locale()).CmdEditorOptionsLabel() }
+
+// CmdEditorOptionsLabel says "Command editor options"
+// in the language of msgs.
+func (msgs Messages) CmdEditorOptionsLabel() string {
+	return Catalog.Format(msgs.locale, "cmdEditorOptionsLabel", nil)
+}
+
+// CmdEditorClearAfter says "Clear after sending"
+// in the language the app shows.
+func CmdEditorClearAfter() string { return In(i18n.Locale()).CmdEditorClearAfter() }
+
+// CmdEditorClearAfter says "Clear after sending"
+// in the language of msgs.
+func (msgs Messages) CmdEditorClearAfter() string {
+	return Catalog.Format(msgs.locale, "cmdEditorClearAfter", nil)
+}
+
+// CmdEditorSendSelection says "Send selection"
+// in the language the app shows.
+func CmdEditorSendSelection() string { return In(i18n.Locale()).CmdEditorSendSelection() }
+
+// CmdEditorSendSelection says "Send selection"
+// in the language of msgs.
+func (msgs Messages) CmdEditorSendSelection() string {
+	return Catalog.Format(msgs.locale, "cmdEditorSendSelection", nil)
+}
+
+// CmdEditorSendTip says "Send ({key})"
+// in the language the app shows.
+func CmdEditorSendTip(key string) string { return In(i18n.Locale()).CmdEditorSendTip(key) }
+
+// CmdEditorSendTip says "Send ({key})"
+// in the language of msgs.
+func (msgs Messages) CmdEditorSendTip(key string) string {
+	return Catalog.Format(msgs.locale, "cmdEditorSendTip", map[string]any{"key": key})
+}
+
+// CmdEditorPlaceholder says "Commands to send, one per line"
+// in the language the app shows.
+func CmdEditorPlaceholder() string { return In(i18n.Locale()).CmdEditorPlaceholder() }
+
+// CmdEditorPlaceholder says "Commands to send, one per line"
+// in the language of msgs.
+func (msgs Messages) CmdEditorPlaceholder() string {
+	return Catalog.Format(msgs.locale, "cmdEditorPlaceholder", nil)
+}
+
+// CmdEditorLoadFailed says "commandeditor.txt could not be read ({error}). The editor's text is not saved, so that the file is not replaced."
+// in the language the app shows.
+func CmdEditorLoadFailed(error string) string { return In(i18n.Locale()).CmdEditorLoadFailed(error) }
+
+// CmdEditorLoadFailed says "commandeditor.txt could not be read ({error}). The editor's text is not saved, so that the file is not replaced."
+// in the language of msgs.
+func (msgs Messages) CmdEditorLoadFailed(error string) string {
+	return Catalog.Format(msgs.locale, "cmdEditorLoadFailed", map[string]any{"error": error})
+}
+
 // SendTo says "Send to"
 // in the language the app shows.
 func SendTo() string { return In(i18n.Locale()).SendTo() }

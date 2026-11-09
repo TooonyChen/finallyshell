@@ -317,6 +317,7 @@ func (a *App) View(c *ui.Context) {
 	useTheme(c)
 	a.shortcuts(c)
 	a.saveLayoutAtRest(c)
+	a.saveCmdTextAtRest(c)
 	a.syncTick(c)
 	if a.fullScreen.on {
 		if s := a.current(); s.isPanelTab() {
@@ -524,13 +525,15 @@ func (a *App) closeSession(s *Session) {
 }
 
 // CloseAll ends every connection, as the main window closes, closes the
-// secondary windows, and saves the pane sizes the user changed.
+// secondary windows, and saves the pane sizes the user changed and the
+// command editor's text.
 func (a *App) CloseAll() {
 	a.fe.discard = true // the editor's changes go with the app
 	a.closeWindows()
 	if a.layoutDirty {
 		a.saveLayout()
 	}
+	a.saveCmdText()
 	for _, s := range a.sessions {
 		if s.isPanelTab() {
 			continue // its session's

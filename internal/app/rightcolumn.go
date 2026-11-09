@@ -60,29 +60,13 @@ func (a *App) setPanelOnRight(right bool) {
 // its right holding top and bottom, either of which may be nil: with
 // both, top is above bottom, divided at rightMonitorPct; with one, it
 // fills the column; with neither, main takes the whole width.
-//
-// The column's width is fixed from the right edge: ui.Split sizes its
-// first pane, so the split is laid out in the other direction, where its
-// first pane is the end one, and the panes are put back in the window's
-// own direction.
 func (a *App) withRightColumn(c *ui.Context, main, top, bottom func()) {
 	if top == nil && bottom == nil {
 		main()
 		return
 	}
-	dir := c.Direction()
-	flipped := ui.RightToLeft
-	if dir == ui.RightToLeft {
-		flipped = ui.LeftToRight
-	}
-	pane := func(build func()) func() {
-		return func() { ui.Column(c).Direction(dir).Fill().Children(build) }
-	}
-	column := pane(func() { a.rightColumn(c, top, bottom) })
-	ui.Row(c).Direction(flipped).Fill().Children(func() {
-		split := ui.Split(c, &a.rightWidth, column, pane(main)).SplitReset(defaultRightWidth).Fill()
-		a.splitMoved(c, split, &a.rightWidth, rightLimits)
-	})
+	column := func() { a.rightColumn(c, top, bottom) }
+	a.endSplit(c, &a.rightWidth, defaultRightWidth, rightLimits, main, column).Fill()
 }
 
 // rightColumn is the right column's content: top over bottom, or the one

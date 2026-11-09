@@ -71,6 +71,24 @@ type Settings struct {
 	// app's default.
 	RightMonitorPercent float32 `json:"rightMonitorPercent,omitempty"`
 
+	// The command editor of the Commands tab, this device's own as the
+	// pane sizes; its text is in CommandEditorFile.
+	//
+	// CommandEditorShown shows it, as the user left it.
+	CommandEditorShown bool `json:"commandEditorShown,omitempty"`
+	// CommandEditorWidth is its width in DIPs beside the command
+	// buttons, and CommandEditorPercent the buttons' share of the tab's
+	// height above it where the tab is too narrow to have it beside
+	// them, as last dragged. Zero is the app's default.
+	CommandEditorWidth   float32 `json:"commandEditorWidth,omitempty"`
+	CommandEditorPercent float32 `json:"commandEditorPercent,omitempty"`
+	// CommandEditorNoEnter sends the last line of what the editor sends
+	// without Enter, for the user to check it; by default every line
+	// runs.
+	CommandEditorNoEnter bool `json:"commandEditorNoEnter,omitempty"`
+	// CommandEditorClear empties the editor of what it sent.
+	CommandEditorClear bool `json:"commandEditorClear,omitempty"`
+
 	// The General page of the options. Each is named so that false, as a
 	// file without it reads, is the default.
 	//

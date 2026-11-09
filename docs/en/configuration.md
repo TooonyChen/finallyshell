@@ -17,6 +17,7 @@ behind each setting.
 - [Sync](#sync)
 - [Command history](#command-history)
 - [quickcommands.json](#quickcommandsjson)
+- [commandeditor.txt](#commandeditortxt)
 - [updater.json](#updaterjson)
 - [Updates in mygo.json](#updates-in-mygojson)
 - [Where passwords are stored](#where-passwords-are-stored)
@@ -43,6 +44,7 @@ instead.
 | `history/<host ID>.txt` | The command bar's history of each host (see [Command history](#command-history)). |
 | `quickcommands.json` | The Commands tab's quick commands (see [quickcommands.json](#quickcommandsjson)). |
 | `quickcommands.json.broken-<date-time>` | A copy of a `quickcommands.json` that could not be read. |
+| `commandeditor.txt` | The text of the Commands tab's command editor (see [commandeditor.txt](#commandeditortxt)). |
 | `geo/` | IP location data, downloaded only when you agree: `ip2region_v4.xdb`, `ip2region_v6.xdb`, and `cache.json`, the online lookups' answers (see [IP locations](features.md#ip-locations)). |
 
 `mygo dev`, `go run` and the installed app all use the same directory, so
@@ -200,6 +202,11 @@ default.
 | `rightPanelWidth` | Width of the column on the terminal's right, in DIPs, as last dragged. | The app's default (460). |
 | `monitorSide` | `right` puts the server monitor at the top of the column on the terminal's right; the session list then fills the left column. | `""`, at the top left. |
 | `rightMonitorPercent` | The server monitor's share of the right column's height, above the bottom panel, when both are there, in percent. | The app's default (45). |
+| `commandEditorShown` | `true` shows the command editor in the Commands tab. | Hidden. |
+| `commandEditorWidth` | The command editor's width beside the command buttons, in DIPs, as last dragged. | The app's default (460). |
+| `commandEditorPercent` | The command buttons' share of the Commands tab's height above the command editor, where the tab is too narrow to have it beside them, in percent. | The app's default (40). |
+| `commandEditorNoEnter` | `true` turns off the command editor's "Press Enter after each line": the last line it sends goes without a carriage return. | Every line runs. |
+| `commandEditorClear` | `true` turns on the command editor's "Clear after sending". | Off. |
 | `leftPanelPage` | `connections` shows the Connections page in the bottom-left panel. | The session tabs. |
 | `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
@@ -214,7 +221,8 @@ Details of each option are in [features.md](features.md): see
 [Appearance](features.md#appearance-font-color-scheme-background-image),
 [File icon themes](features.md#file-icon-themes),
 [Connection manager](features.md#connection-manager),
-[Connections page](features.md#connections-page) and
+[Connections page](features.md#connections-page),
+[Command editor](features.md#command-editor) and
 [Layout and split dividers](features.md#layout-and-split-dividers).
 
 ## Sync
@@ -237,7 +245,9 @@ Each settings key is either synced or kept on each computer; the lists are
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `procListPercent`, `procFieldsPercent`, `netListPercent`,
 `monitorHidden`, `bottomPanelHidden`, `bottomPanelSide`, `rightPanelWidth`,
-`monitorSide`, `rightMonitorPercent`, `termBackground`, `downloadDir`,
+`monitorSide`, `rightMonitorPercent`, `commandEditorShown`,
+`commandEditorWidth`, `commandEditorPercent`, `commandEditorNoEnter`,
+`commandEditorClear`, `termBackground`, `downloadDir`,
 `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are
@@ -317,6 +327,16 @@ it. If it cannot be parsed, the app copies it as is to
 with a note naming the copy, and the next change replaces the file. If it
 cannot be read at all (or the copy fails), the tab says so and nothing
 is saved to it until the app starts again.
+
+## commandeditor.txt
+
+The text of the Commands tab's
+[command editor](features.md#command-editor), as typed, in UTF-8 with
+`\n` line ends: the same for every session, and not synced. It is
+written a second after typing stops, and as the app quits, through a
+temporary file renamed over it; missing, the editor starts empty. If it
+cannot be read, the editor says so and nothing is saved to it until the
+app starts again.
 
 ## updater.json
 

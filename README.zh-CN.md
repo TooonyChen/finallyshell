@@ -123,10 +123,10 @@ macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>
 
 终端下面是 FinalShell 的命令输入框：输入命令，回车发给 shell。<kbd>Tab</kbd> 分多列列出正在输入的路径所在的服务器文件夹，在第一个词上则列出服务器 PATH 里的命令；<kbd>↑</kbd>、<kbd>Alt</kbd>+<kbd>H</kbd> 或“历史”按钮列出以前发给这台主机的命令，以及它的 shell 历史里的命令，<kbd>←</kbd> <kbd>→</kbd> 可以从一条命令里只取一个词。用不上的话，在“选项 › 终端 › 命令输入框”里关掉它，或者只关掉其中一部分。
 
-常用的命令可以存成“命令”页里的按钮，按你自己的分组放好：点一下就发给会话，多行命令逐行执行，不带回车保存的命令会停在提示符后面等你检查。按钮可以拖动排序，这一页也可以在单独的标签中打开，放下几十个命令。
+常用的命令可以存成“命令”页里的按钮，按你自己的分组放好：点一下就发给会话，多行命令逐行执行，不带回车保存的命令会停在提示符后面等你检查。按钮可以拖动排序，这一页也可以在单独的标签中打开，放下几十个命令。不值得保存的几行命令，可以写在按钮旁边的命令编辑器里，用 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd> 发送全部或只发送选中的几行，文本重启后仍在。
 
 <p align="center">
-  <img src="docs/screenshots/quick-commands-zh-CN.png" width="720" alt="分组的快捷命令按钮">
+  <img src="docs/screenshots/quick-commands-zh-CN.png" width="720" alt="分组的快捷命令按钮和命令编辑器">
 </p>
 
 locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、Big5、Shift_JIS、EUC-JP、EUC-KR、ISO-8859-1 和 Windows-1252，在“选项”里统一设置，也可以按主机单独设置。退格键和删除键发送什么也一样可以改。
