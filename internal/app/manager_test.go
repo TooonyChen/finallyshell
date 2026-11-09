@@ -212,7 +212,7 @@ func TestManagerEditorModal(t *testing.T) {
 		t.Fatalf("host %+v", h)
 	}
 	tt.Frame()
-	if it, _ := a.managerChosen(); it.host != h.ID || !slices.Contains(shown(a), "  lab.example.com") {
+	if it, _ := a.manager.chosen(); it.host != h.ID || !slices.Contains(shown(a), "  lab.example.com") {
 		t.Errorf("chosen %v, rows %q", it, shown(a))
 	}
 
@@ -244,7 +244,7 @@ func TestManagerSearch(t *testing.T) {
 		{"old-box", nil}, // deleted
 	} {
 		a.manager.query = q.query
-		a.searchChanged()
+		a.searchChanged(&a.manager)
 		tt.Frame()
 		if got := shown(a); !slices.Equal(got, q.want) {
 			t.Errorf("%q: %q, want %q", q.query, got, q.want)
@@ -264,7 +264,7 @@ func TestManagerSearch(t *testing.T) {
 	if got := shown(a); !slices.Equal(got, []string{"Lab", "  raspberry"}) {
 		t.Fatalf("typed: %q", got)
 	}
-	if it, _ := a.managerChosen(); it.host != "pi" {
+	if it, _ := a.manager.chosen(); it.host != "pi" {
 		t.Errorf("chosen %v", it)
 	}
 	saveShot(t, tt, "manager-search-en.png")
@@ -276,7 +276,7 @@ func TestManagerSearch(t *testing.T) {
 	// With deleted hosts shown, it finds them too.
 	a.manager.showDeleted = true
 	a.manager.query = "old"
-	a.searchChanged()
+	a.searchChanged(&a.manager)
 	tt.Frame()
 	if got := shown(a); !slices.Equal(got, []string{"Lab", "  old-box"}) {
 		t.Errorf("deleted: %q", got)
@@ -326,7 +326,7 @@ func TestManagerFolders(t *testing.T) {
 	if got := shown(a); !slices.Equal(got[5:8], []string{"Lab", "  Pis", "  raspberry"}) {
 		t.Errorf("rows %q", got)
 	}
-	if it, _ := a.managerChosen(); it.folder != f.ID {
+	if it, _ := a.manager.chosen(); it.folder != f.ID {
 		t.Errorf("chosen %v", it)
 	}
 
@@ -411,8 +411,8 @@ func TestManagerMove(t *testing.T) {
 		t.Fatalf("Lab in %q; rows %q", f.Parent, shown(a))
 	}
 	// Not into itself or a folder inside it.
-	a.moveItems(managerDrag{{folder: "prod"}}, "lab")
-	a.moveItems(managerDrag{{folder: "prod"}}, "prod")
+	a.moveItems(&a.manager, managerDrag{{folder: "prod"}}, "lab")
+	a.moveItems(&a.manager, managerDrag{{folder: "prod"}}, "prod")
 	if f := a.hosts.Folder("prod"); f.Parent != "" || saves != 3 {
 		t.Fatalf("Production in %q, %d saves", f.Parent, saves)
 	}
@@ -486,7 +486,7 @@ func TestManagerSoftDeleteAndRestore(t *testing.T) {
 	if h.Deleted() || !a.windowOpen(WindowManager) {
 		t.Fatalf("restored %v", h.DeletedAt)
 	}
-	if it, _ := a.managerChosen(); it.host != "web-2" {
+	if it, _ := a.manager.chosen(); it.host != "web-2" {
 		t.Errorf("chosen %v", it)
 	}
 	tt.Click(locales.ShowDeleted())
@@ -546,7 +546,7 @@ func TestManagerDuplicateRenameCopy(t *testing.T) {
 		a.passwords[dup.ID] != "phrase" || !dup.LastConnectedAt.IsZero() || time.Since(dup.CreatedAt) > time.Minute {
 		t.Fatalf("copy %+v", dup)
 	}
-	if it, _ := a.managerChosen(); it.host != dup.ID {
+	if it, _ := a.manager.chosen(); it.host != dup.ID {
 		t.Errorf("chosen %v", it)
 	}
 

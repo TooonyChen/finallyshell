@@ -239,7 +239,7 @@ func TestStartPageShowsNewHost(t *testing.T) {
 	shownInOrder(t, tt, "backup", locales.OtherHosts(), "just-added", "new-app")
 
 	// Duplicated, the copy is newer still.
-	a.duplicateHost(hosts["staging"])
+	a.duplicateHost(&a.manager, hosts["staging"])
 	dup := a.hosts.Live()[slices.Index(a.hosts.Live(), hosts["staging"])+1]
 	if time.Since(dup.CreatedAt) > time.Minute || dup.CreatedAt.Before(h.CreatedAt) {
 		t.Errorf("duplicate created %v, the host %v", dup.CreatedAt, h.CreatedAt)

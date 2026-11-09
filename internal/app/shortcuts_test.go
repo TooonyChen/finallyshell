@@ -19,9 +19,9 @@ import (
 // checks let through, and no two alike.
 func TestShortcutDefaults(t *testing.T) {
 	want := map[string][]string{
-		"darwin": {"⌘C", "⌘V", "⌘F", "⌘↩", "↩", "⌘[", "⌘]", "⌘W", "⌘O", "⌘T", "⌘1…9", "⇧⌘L"},
+		"darwin": {"⌘C", "⌘V", "⌘F", "⌘↩", "↩", "⌘[", "⌘]", "⌘W", "⌘O", "⌘T", "⌘1…9", "⇧⌘L", "⇧⌘E"},
 		"linux": {"Ctrl+Shift+C", "Ctrl+Shift+V", "Ctrl+Shift+F", "Ctrl+Shift+Enter", "Enter", "Ctrl+Shift+Tab", "Ctrl+Tab",
-			"Ctrl+Shift+W", "Ctrl+Shift+O", "Ctrl+Shift+T", "Alt+1…9", "Ctrl+Shift+L"},
+			"Ctrl+Shift+W", "Ctrl+Shift+O", "Ctrl+Shift+T", "Alt+1…9", "Ctrl+Shift+L", "Ctrl+Shift+E"},
 	}
 	want["windows"] = want["linux"]
 	for goos, labels := range want {

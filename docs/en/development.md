@@ -291,6 +291,7 @@ internal/
     app.go           App state, overall layout, opening and closing sessions
     session.go       one session: connection, terminal, monitor, SFTP; translating error messages
     sidebar.go       left side: monitor panel, vertical session list
+    conntree.go      the left panel's Connections page: the switch between its pages, the connection manager's tree in one column, the folders kept open
     paneltab.go      panel rows: a session's bottom panel in a row of the list of its own, sharing the session's connection (connSession)
     netifaces.go     the network graph's interface menu: its label, choosing interfaces and keeping the choice per host
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
@@ -319,7 +320,7 @@ internal/
     quickcmds_editor.go the quick command editor's window
     geo.go           IP locations: the download bar, loading the data off the UI thread, the Location column's text, the online lookups' queue
     options_network.go the Network monitor page of the options
-    manager.go       connection manager window: folder tree, search, dragging, delete and restore, a.deleteHostForever(h)
+    manager.go       connection manager window: folder tree, search, dragging, delete and restore, a.deleteHostForever(h); the tree's state (managerState) and actions, which the Connections page shares
     import.go        the "Import connections" window: choosing the source, finding or choosing its file or folder, preview and checkboxes, showing the result in the connection manager, a list's passwords into the keychain
     import_sources.go the import window's texts of each source (importTexts), and of the reasons and notes the sources give
     import_table.go  a server list's parts of the import window: the template "Save template…" writes in the app's language, the texts of the list's errors

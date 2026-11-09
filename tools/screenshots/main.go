@@ -47,6 +47,7 @@ var langs = []struct{ test, out string }{{"en", "en"}, {"zh-Hans", "zh-CN"}}
 var shots = []shot{
 	{from: "readme-main-%s", to: "main", title: locales.AppTitle},
 	{from: "readme-quick-connect-%s", to: "quick-connect", title: locales.AppTitle},
+	{from: "readme-connections-%s", to: "connections", title: locales.AppTitle, crop: image.Rect(0, 390, 640, 820)},
 	{from: "readme-sysinfo-%s", to: "system-info", title: locales.AppTitle, crop: image.Rect(0, 0, 720, 480)},
 	{from: "readme-transfers-%s", to: "transfers", title: locales.AppTitle, crop: image.Rect(560, 110, 1280, 590)},
 	{from: "readme-quick-commands-%s", to: "quick-commands", title: locales.AppTitle, crop: image.Rect(240, 487, 1280, 820)},

@@ -172,18 +172,15 @@ func diskTable(c *ui.Context, disks []monitor.Disk) {
 	})
 }
 
-// sessionPanel is the list of open sessions: the vertical tabs.
+// sessionPanel is the list of open sessions: the vertical tabs, or the
+// saved connections on the other page of the panel (conntree.go).
 func (a *App) sessionPanel(c *ui.Context) {
 	ui.Column(c).Fill().BorderWidth(1, 0, 0, 0).BorderColor(colors.frame).Children(func() {
-		ui.Row(c).Padding(6, 6, 6, 10).Gap(2).Children(func() {
-			ui.Text(c, locales.SessionsTitle(a.sessionCount())).Bold().Grow(1)
-			if widgets.IconButton(c, "settings", locales.Options()).Clicked() {
-				a.openOptions()
-			}
-			if widgets.IconButton(c, "plus", locales.NewTab()).Clicked() {
-				a.NewTab()
-			}
-		})
+		a.leftPanelHeader(c)
+		if a.left.page == leftConnections {
+			a.connectionPage(c)
+			return
+		}
 		// No Key: with one, the list follows the chosen session by it, and
 		// chooses none once that session is gone, even though a.active
 		// already holds the neighbor closeSession picked, which is on the

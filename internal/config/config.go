@@ -147,6 +147,18 @@ type Settings struct {
 	// "Close window after connecting", checked, does.
 	KeepManagerOpen bool `json:"keepManagerOpen,omitempty"`
 
+	// The panel under the server monitor, this device's own layout.
+	//
+	// LeftPanelPage is the page it shows: "" for the session tabs,
+	// LeftPanelConnections for the tree of the saved connections.
+	LeftPanelPage string `json:"leftPanelPage,omitempty"`
+	// ConnectionTreeExpanded are the IDs of the folders open in that
+	// tree, which stay as folders are renamed and moved: nil, before the
+	// tree's folders were first opened or closed, opens every folder, and
+	// an empty list none. A pointer keeps Settings comparable; it is
+	// replaced, never changed through.
+	ConnectionTreeExpanded *[]string `json:"connectionTreeExpanded,omitempty"`
+
 	// FileIconTheme is the file panel's icon theme, as package fileicons
 	// names it: "" for Material Icon Theme, "minimal" for the app's own
 	// file and folder icons, "bundled:seti" for Seti, or
@@ -195,6 +207,10 @@ type Settings struct {
 	// leaves without a city or ISP, while locations are shown.
 	GeoOnline bool `json:"geoOnline,omitempty"`
 }
+
+// LeftPanelConnections is Settings.LeftPanelPage showing the
+// connections.
+const LeftPanelConnections = "connections"
 
 // The values of GeoLocations and GeoLocationsV6.
 const (

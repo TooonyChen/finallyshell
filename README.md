@@ -57,6 +57,12 @@ After that, Finallyshell updates itself, except the `.deb`, which you update by 
 
 Open the connection manager with <kbd>Cmd</kbd>+<kbd>O</kbd> on macOS or <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> elsewhere. Hosts live in a tree of folders, as in FinalShell: drag them between folders, search by name, address, user or notes, duplicate a host, or delete it to a "Show deleted" list from which it can be restored.
 
+The same tree stays in the main window too: the panel under the server stats switches between your sessions and Connections, where a double click opens a session and a green dot marks the hosts you have open. <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>) switches between them.
+
+<p align="center">
+  <img src="docs/screenshots/connections-en.png" width="560" alt="The Connections page in the main window's left panel: folders of hosts, a dot on those with a session open">
+</p>
+
 <p align="center">
   <img src="docs/screenshots/connection-manager-en.png" width="720" alt="The connection manager with folders of hosts">
 </p>
@@ -161,6 +167,7 @@ The defaults follow FinalShell. Change them in Options › Terminal › Shortcut
 | New tab | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | Go to tab 1 to 9 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
 | Command bar, and back to the terminal | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
+| Sessions or connections in the left panel | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-en.png" width="720" alt="The shortcuts page in Options">

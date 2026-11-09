@@ -482,6 +482,66 @@ func (msgs Messages) NoSessions() string {
 	return Catalog.Format(msgs.locale, "noSessions", nil)
 }
 
+// LeftPanelPages says "Sessions or connections"
+// in the language the app shows.
+func LeftPanelPages() string { return In(i18n.Locale()).LeftPanelPages() }
+
+// LeftPanelPages says "Sessions or connections"
+// in the language of msgs.
+func (msgs Messages) LeftPanelPages() string {
+	return Catalog.Format(msgs.locale, "leftPanelPages", nil)
+}
+
+// ConnectionsPage says "Connections"
+// in the language the app shows.
+func ConnectionsPage() string { return In(i18n.Locale()).ConnectionsPage() }
+
+// ConnectionsPage says "Connections"
+// in the language of msgs.
+func (msgs Messages) ConnectionsPage() string {
+	return Catalog.Format(msgs.locale, "connectionsPage", nil)
+}
+
+// SearchConnections says "Search connections"
+// in the language the app shows.
+func SearchConnections() string { return In(i18n.Locale()).SearchConnections() }
+
+// SearchConnections says "Search connections"
+// in the language of msgs.
+func (msgs Messages) SearchConnections() string {
+	return Catalog.Format(msgs.locale, "searchConnections", nil)
+}
+
+// ConnTreeEmpty says "No connections yet. Click + to add one."
+// in the language the app shows.
+func ConnTreeEmpty() string { return In(i18n.Locale()).ConnTreeEmpty() }
+
+// ConnTreeEmpty says "No connections yet. Click + to add one."
+// in the language of msgs.
+func (msgs Messages) ConnTreeEmpty() string {
+	return Catalog.Format(msgs.locale, "connTreeEmpty", nil)
+}
+
+// DeleteHostBody says "It moves to the deleted connections, which “Show deleted” in the connection manager lists to restore."
+// in the language the app shows.
+func DeleteHostBody() string { return In(i18n.Locale()).DeleteHostBody() }
+
+// DeleteHostBody says "It moves to the deleted connections, which “Show deleted” in the connection manager lists to restore."
+// in the language of msgs.
+func (msgs Messages) DeleteHostBody() string {
+	return Catalog.Format(msgs.locale, "deleteHostBody", nil)
+}
+
+// ScSwitchLeftPanel says "Switch sessions / connections"
+// in the language the app shows.
+func ScSwitchLeftPanel() string { return In(i18n.Locale()).ScSwitchLeftPanel() }
+
+// ScSwitchLeftPanel says "Switch sessions / connections"
+// in the language of msgs.
+func (msgs Messages) ScSwitchLeftPanel() string {
+	return Catalog.Format(msgs.locale, "scSwitchLeftPanel", nil)
+}
+
 // Reconnect says "Reconnect"
 // in the language the app shows.
 func Reconnect() string { return In(i18n.Locale()).Reconnect() }

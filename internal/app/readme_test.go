@@ -4,6 +4,7 @@ import (
 	"io"
 	"testing"
 
+	"finallyshell/internal/config"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
@@ -128,6 +129,45 @@ func TestReadmeScreenshots(t *testing.T) {
 					t.Errorf("no quick commands; texts %q", tt.Texts())
 				}
 				saveShot(t, tt, "readme-quick-commands-"+lang+".png")
+			})
+
+			// The left panel on its Connections page, the open sessions'
+			// hosts in folders among others.
+			t.Run("connections", func(t *testing.T) {
+				a, _, tt, _ := readmeApp(t, lang)
+				s := a.hosts
+				s.Folders = []*config.Folder{
+					{ID: "prod", Name: "Production"},
+					{ID: "db", Name: "Databases", Parent: "prod"},
+					{ID: "staging", Name: "Staging"},
+					{ID: "lab", Name: "Lab"},
+				}
+				for _, h := range s.Hosts {
+					switch h.Name {
+					case "web-1":
+						h.Folder = "prod"
+					case "db-1":
+						h.Folder = "db"
+					case "staging":
+						h.Folder = "staging"
+					}
+				}
+				for _, h := range []*config.Host{
+					{ID: "web-2", Name: "web-2", Addr: "45.56.78.91", User: "root", Folder: "prod"},
+					{ID: "db-2", Name: "db-2", Addr: "10.0.0.13", User: "postgres", Folder: "db"},
+					{ID: "pi", Name: "raspberry", Addr: "192.168.1.20", User: "pi", Folder: "lab"},
+				} {
+					s.Add(h)
+				}
+				for _, f := range []string{"prod", "db", "staging"} {
+					a.connTree.tree.Open.Add(managerItem{folder: f})
+				}
+				a.setLeftPage(leftConnections)
+				tt.Frame()
+				if !tt.HasText("Databases") || !tt.HasText("db-2") {
+					t.Errorf("no tree; texts %q", tt.Texts())
+				}
+				saveShot(t, tt, "readme-connections-"+lang+".png")
 			})
 
 			t.Run("quick-connect", func(t *testing.T) {

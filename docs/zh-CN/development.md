@@ -161,6 +161,7 @@ internal/
     app.go           App 状态、整体布局、打开/关闭会话
     session.go       一个会话：连接、终端、监控、SFTP；错误信息的翻译
     sidebar.go       左侧：监控面板、竖向会话列表
+    conntree.go      左侧面板的“连接”页：两页之间的切换、连接管理器的树（只有一列）、记住展开的文件夹
     paneltab.go      面板行：会话的底部面板单独成列表里的一行，共用会话的连接（connSession）
     netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
@@ -189,7 +190,7 @@ internal/
     quickcmds_editor.go 快捷命令编辑器窗口
     geo.go           IP 归属地：下载提示条、在后台加载数据、“归属地”列的文字、在线查询队列
     options_network.go 选项的“网络监控”页
-    manager.go       连接管理器窗口：文件夹树、搜索、拖动、删除和恢复，a.deleteHostForever(h)
+    manager.go       连接管理器窗口：文件夹树、搜索、拖动、删除和恢复，a.deleteHostForever(h)；树的状态（managerState）和操作，“连接”页也用它们
     import.go        “导入连接”窗口：选择来源、查找或选择它的文件或目录、预览和勾选、导入后在连接管理器里显示、列表里的密码存进密钥库
     import_sources.go 导入窗口里每个来源的文案（importTexts），以及来源给出的原因和说明的文案
     import_table.go  导入窗口里服务器列表的部分：“保存模板…”按界面语言写的模板、列表特有错误的文案

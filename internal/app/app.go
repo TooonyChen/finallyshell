@@ -167,6 +167,11 @@ type App struct {
 	// The connection manager's window.
 	manager managerState
 
+	// The left panel's page, and the tree of the Connections page
+	// (conntree.go).
+	left     leftPanel
+	connTree managerState
+
 	// The connection editor's fields, while its window is open.
 	editor *connEditor
 
@@ -245,7 +250,8 @@ func New(plat Platform) *App {
 		passwords:    map[string]string{},
 		windows:      map[WindowKind]bool{},
 		active:       -1,
-		manager:      managerState{row: -1},
+		manager:      managerState{row: -1, win: WindowManager},
+		connTree:     managerState{row: -1, win: WindowMain},
 		start:        startState{row: -1},
 		sideWidth:    defaultSideWidth,
 		monitorPct:   defaultMonitorPct,
@@ -264,6 +270,7 @@ func New(plat Platform) *App {
 	a.settings = config.LoadSettings()
 	a.loadAppearance()
 	a.restoreLayout()
+	a.restoreLeftPanel()
 	a.transfers.init()
 	return a
 }

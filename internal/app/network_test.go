@@ -301,9 +301,13 @@ func TestNetworkWithoutLocations(t *testing.T) {
 		t.Errorf("by a remote IP: %d rows", n)
 	}
 	s.net.filter = ""
-	if err := tt.Click("Connections"); err != nil {
-		t.Fatal(err)
+	// The column's header: the left panel's Connections page has the
+	// same text.
+	head, ok := tt.AccessByRole(ui.RoleColumnHeader, "Connections")
+	if !ok {
+		t.Fatalf("no Connections column; texts %q", tt.Texts())
 	}
+	tt.ClickAt(head.Bounds.X+head.Bounds.W/2, head.Bounds.Y+head.Bounds.H/2)
 	tt.Frame()
 	if v := s.net.shown(); s.net.sort.Column != "conns" || len(v[len(v)-1].Conns) != 4 {
 		t.Errorf("by connections: %+v", s.net.sort)

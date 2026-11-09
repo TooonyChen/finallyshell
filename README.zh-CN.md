@@ -57,6 +57,12 @@ Linux 上托盘图标需要 `libayatana-appindicator3`，记住密码需要 Secr
 
 macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> 打开连接管理器。和 FinalShell 一样，主机按文件夹组织成树：可以拖到别的文件夹，按名称、地址、用户名、备注搜索，复制连接；删除的连接先进“显示已删除”，还能恢复。
 
+同一棵树也一直留在主窗口里：服务器状态下面的面板可以在会话和“连接”之间切换，在“连接”页双击就打开会话，已经打开的主机后面有绿点。<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>（<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>）在两页之间切换。
+
+<p align="center">
+  <img src="docs/screenshots/connections-zh-CN.png" width="560" alt="主窗口左侧面板的“连接”页：按文件夹排列的主机，打开了会话的主机后面有一个点">
+</p>
+
 <p align="center">
   <img src="docs/screenshots/connection-manager-zh-CN.png" width="720" alt="连接管理器，主机按文件夹排列">
 </p>
@@ -161,6 +167,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 | 新标签页 | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | 切换到第 1 到 9 个标签 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
 | 命令输入框，再按回到终端 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
+| 左侧面板切换会话/连接 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-zh-CN.png" width="720" alt="选项里的快捷键页">

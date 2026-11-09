@@ -10,6 +10,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Window layout](#window-layout)
 - [Sessions and tabs](#sessions-and-tabs)
   - [Bottom panel in a tab of its own](#bottom-panel-in-a-tab-of-its-own)
+- [Connections page](#connections-page)
 - [New tab and quick connect](#new-tab-and-quick-connect)
 - [Connection manager](#connection-manager)
 - [Import connections](#import-connections)
@@ -68,15 +69,18 @@ The main window follows FinalShell's layout, except that the session tabs
 are vertical:
 
 - Top left: the server monitor of the current session.
-- Bottom left: the vertical session list.
+- Bottom left: the vertical session list, or, on its other page, the
+  saved connections in their folders (see
+  [Connections page](#connections-page)).
 - Top right: the terminal.
 - Bottom right: the Files, Transfers, Tunnels, Processes, Network and
   Commands tabs, which can also open in a tab of their own (see below).
 
 ## Sessions and tabs
 
-The bottom left of the window is a vertical list of sessions, titled
-"Sessions (N)". Each has a status dot: green for connected, yellow for
+The bottom left of the window is a vertical list of sessions, on the
+"Sessions (N)" page of the switch at its top. Each has a status dot:
+green for connected, yellow for
 connecting, red for failed. The list scrolls, and sessions can be
 reordered by dragging. The context menu of a session has Reconnect,
 Duplicate session, Disconnect, Rename and Close.
@@ -144,6 +148,60 @@ keeps its terminal and its bottom panel as before.
   the command bar.
 - A new tab has no button. A session that failed or was disconnected
   still opens its panel row, whose pages show the session's state.
+
+## Connections page
+
+The switch at the top of the bottom-left panel, "Sessions (N) |
+Connections", shows the session tabs or the saved connections. The
+Connections page is the connection manager's tree of folders and
+connections, kept in the main window as MobaXterm's session tree and
+Xshell's Sessions pane are, without taking width from the terminal. It
+shows the names only, in the order the connection manager shows them
+unsorted, and never the deleted connections. A connection's tooltip
+shows `user@host:port` and the first line of its notes. A connection
+with a session open has a dot after its name, in the color of that
+session's dot in the session list: green when connected, yellow while
+connecting.
+
+- Double-click a connection, or select it and press Enter, to open a
+  session, in the selected tab if it is a new tab, as quick connect does.
+  The session shows on the right, and the panel stays on Connections, so
+  several connections can be opened in a row; "Sessions (N)" counts the
+  new ones. Double-click or Enter on a folder opens or closes it, as do
+  its arrow and the Left and Right keys.
+- The search box at the top filters as the connection manager's does:
+  every word must be in the name, address, user or notes, ignoring case.
+  The folders holding the results open and the first result is
+  selected, so Enter connects to it; Down moves to the tree; Esc clears
+  the search and closes again the folders it opened. Its search is its
+  own, apart from the connection manager's.
+- The context menus are the connection manager's: Connect, Edit,
+  Duplicate, Rename (F2), Move to folder, Copy host and Delete on a
+  connection; New connection, New subfolder, Rename, Move to folder and
+  Delete on a folder; New connection and New folder on the empty space
+  under the rows. F2 and Delete work on the selected row. Rows are
+  dragged onto a folder, or onto a connection for its folder, to move
+  them, as in the connection manager.
+- Deleting asks first, for a connection too: it moves to the deleted
+  connections, which the page does not list, and which "Show deleted" in
+  the connection manager lists to restore.
+- The "+" in the header is New connection while the page is shown: in
+  the selected folder, or the folder of the selected connection. The
+  editor it opens, and Edit, belong to the main window (not modal); once
+  saved, the page selects the connection.
+- Both places read the same connections, so a rename, move or delete in
+  either shows in the other at once.
+- The key "Switch sessions / connections" (Cmd+Shift+E on macOS,
+  Ctrl+Shift+E elsewhere, changed on the Shortcuts page) switches the
+  pages: to Connections with the keyboard in the search, leaving full
+  screen first, and back to the sessions with the keyboard in the
+  terminal.
+
+The page shown is `leftPanelPage` in `settings.json`, and the folders
+open are `connectionTreeExpanded`, by folder ID, so a folder keeps being
+open as it is renamed or moved. Until a folder is opened or closed on the
+page, every folder is open. Neither is synced: they are where this
+computer's window was left, as the pane sizes are.
 
 ## New tab and quick connect
 
@@ -255,6 +313,9 @@ A connection editor opened from the connection manager is a modal window
 of the connection manager (see
 [Child windows](development.md#child-windows)). After it saves, the
 connection manager shows and selects the connection right away.
+
+The main window's [Connections page](#connections-page) shows the same
+tree, and what changes in one shows in the other at once.
 
 ## Import connections
 
@@ -1751,7 +1812,7 @@ In `settings.json`, only changed keys are stored:
 `"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`. The key names
 are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
 `nextTab`, `closeTab`, `connectionManager`, `newTab`, `switchTab` (whose
-value looks like `"Alt+1-9"`) and `focusCommandBar`. `Super` is Cmd on macOS, and `none` means no
+value looks like `"Alt+1-9"`), `focusCommandBar` and `switchLeftPanel`. `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
 
@@ -1893,6 +1954,7 @@ Terminal › Shortcuts page.
 | New tab | Cmd+T | Ctrl+Shift+T |
 | Switch to tab 1–9 | Cmd+1…9 | Alt+1…9 |
 | Focus command bar (and back to the terminal) | Cmd+Shift+L | Ctrl+Shift+L |
+| Switch sessions / connections (the bottom-left panel's pages) | Cmd+Shift+E | Ctrl+Shift+E |
 
 Notes:
 
@@ -1922,6 +1984,9 @@ Notes:
   with a lone Ctrl press, which would clash with every Ctrl key the shell
   uses, so it isn't copied. With the command bar off, the key goes to the
   terminal.
+- Switch sessions / connections is E as in VS Code's Explorer, which
+  shows its side bar's tree; no terminal binds Ctrl+Shift+E. On macOS it
+  takes Shift too, as Cmd+E is "Use Selection for Find" in Mac apps.
 - Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
   shell and are not used as shortcuts on Windows and Linux. In MyGo's
   legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an

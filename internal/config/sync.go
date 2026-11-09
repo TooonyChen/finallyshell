@@ -107,6 +107,9 @@ var (
 		// the data is downloaded on each, over its own network, and a
 		// work computer may not send what a home one may.
 		"geoLocations", "geoLocationsV6", "geoOnline",
+		// The left panel's page and the folders open in its tree are
+		// where this device's window was left, as the pane sizes.
+		"leftPanelPage", "connectionTreeExpanded",
 	}
 )
 

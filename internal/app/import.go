@@ -558,7 +558,7 @@ func (a *App) importChosen(st *importState, statuses []importStatus) {
 	}
 	if m.query != "" {
 		m.query = ""
-		a.searchChanged()
+		a.searchChanged(m)
 	}
 	if len(added) > 0 {
 		m.reveal(managerItem{host: added[0].ID})

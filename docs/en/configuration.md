@@ -192,6 +192,8 @@ default.
 | `monitorPercent`, `terminalPercent` | The server monitor's share of the sidebar and the terminal's share of the main area, in percent. | The app's defaults. |
 | `procListPercent`, `procFieldsPercent` | In the Processes tab, the process list's share above the details, and the details' fields' share beside the environment variables, in percent. | The app's defaults. |
 | `netListPercent` | In the Network tab, the table's share above the connections and trace tabs, in percent. | The app's defaults. |
+| `leftPanelPage` | `connections` shows the Connections page in the bottom-left panel. | The session tabs. |
+| `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
 
 Details of each option are in [features.md](features.md): see
@@ -203,7 +205,8 @@ Details of each option are in [features.md](features.md): see
 [Network monitor](features.md#network-monitor),
 [Appearance](features.md#appearance-font-color-scheme-background-image),
 [File icon themes](features.md#file-icon-themes),
-[Connection manager](features.md#connection-manager) and
+[Connection manager](features.md#connection-manager),
+[Connections page](features.md#connections-page) and
 [Layout and split dividers](features.md#layout-and-split-dividers).
 
 ## Sync
@@ -226,7 +229,9 @@ Each settings key is either synced or kept on each computer; the lists are
 local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `procListPercent`, `procFieldsPercent`, `netListPercent`,
 `termBackground`, `downloadDir`, `askDownloadDir`, `sync`,
-`geoLocations`, `geoLocationsV6` and `geoOnline`, and a
+`geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
+`connectionTreeExpanded` (the left panel's page and the folders open are
+where this computer's window was left, as the pane sizes are), and a
 `fileIconTheme` installed from a VSIX or found in an editor's extensions.
 
 Two more files belong to sync, next to `hosts.json`:

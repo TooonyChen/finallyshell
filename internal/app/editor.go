@@ -90,6 +90,9 @@ type connEditor struct {
 	proxy                   proxyFields  // the Proxy page (editor_proxy.go)
 	tunnels                 tunnelEditor // see editor_tunnels.go
 	folder                  string       // a new host's, from the manager
+	// tree is the tree of hosts that opened the editor, which shows the
+	// host once saved: the manager's when nil.
+	tree *managerState
 
 	// readingSecret is set while the host's saved password, or
 	// passphrase, is read from the credential store into the fields.
@@ -236,8 +239,13 @@ func (a *App) saveEditor() {
 	a.saveProxy(h, &ed.proxy)
 	h.Tunnels = ed.tunnels.result()
 	a.keepProxySecret(h, ed.remember, ed.readingProxySecret)
-	a.manager.reveal(managerItem{host: h.ID})
-	a.redraw() // the manager and the sessions show the host
+	tree := ed.tree
+	if tree == nil {
+		tree = &a.manager
+	}
+	tree.reveal(managerItem{host: h.ID})
+	a.redraw() // the manager, the Connections page and the sessions show the host
+
 	if err := a.saveHosts(a.hosts); err != nil {
 		ed.saveErr = func() string { return locales.ErrSaveFailed(err.Error()) }
 		return

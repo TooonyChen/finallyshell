@@ -345,7 +345,7 @@ func TestImportFinalShell(t *testing.T) {
 	// it went.
 	manager.Frame()
 	manager.Frame()
-	if it, ok := a.managerChosen(); !ok || it.host != added[0].ID {
+	if it, ok := a.manager.chosen(); !ok || it.host != added[0].ID {
 		t.Errorf("chosen %+v", it)
 	}
 	if got := shown(a); !slices.Contains(got, "    树莓派") || !slices.Contains(got, "  bastion") {

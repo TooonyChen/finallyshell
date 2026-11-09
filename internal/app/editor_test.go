@@ -194,7 +194,7 @@ func TestEditorNewFromManager(t *testing.T) {
 	}
 	manager := p.show(t, WindowManager)
 	manager.Frame()
-	if it, _ := a.managerChosen(); it.host != h.ID || !manager.HasText("example.com") || !manager.HasText("2222") || !manager.HasText("deploy") {
+	if it, _ := a.manager.chosen(); it.host != h.ID || !manager.HasText("example.com") || !manager.HasText("2222") || !manager.HasText("deploy") {
 		t.Errorf("manager does not list it (chosen %v); texts %q", it, manager.Texts())
 	}
 

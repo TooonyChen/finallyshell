@@ -44,6 +44,7 @@ const (
 	scNewTab
 	scSwitchTab
 	scFocusBar
+	scLeftPanel
 )
 
 // shortcutAction is an action of the shortcuts page.
@@ -133,6 +134,14 @@ var shortcutActions = []shortcutAction{
 		id: scFocusBar, title: locales.ScFocusCommandBar,
 		field: func(s *config.Shortcuts) *string { return &s.FocusCommandBar },
 		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyL}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyL},
+	},
+	{
+		// E as VS Code's Explorer, which shows its side bar's tree; no
+		// terminal binds it. With Shift on macOS too, as the command bar's
+		// key: Cmd+E is "Use Selection for Find" in Mac apps.
+		id: scLeftPanel, title: locales.ScSwitchLeftPanel,
+		field: func(s *config.Shortcuts) *string { return &s.SwitchLeftPanel },
+		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyE}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyE},
 	},
 }
 
@@ -426,6 +435,8 @@ func (a *App) shortcuts(c *ui.Context) {
 		a.setFullScreen(!a.fullScreen.on)
 	case a.commandBarOn() && pressed(scFocusBar):
 		a.toggleBarFocus()
+	case pressed(scLeftPanel):
+		a.switchLeftPanel()
 	case a.fullScreen.on && !a.terminalLive() && c.Shortcut(0, ui.KeyEscape):
 		// Esc is the shell's while it runs, as vi's; it leaves full screen
 		// where no shell takes it.
