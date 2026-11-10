@@ -20,6 +20,9 @@ resumes with its context intact.
    agents merged an hour ago.
 3. The issue: title, body and acceptance criteria, copied in full, plus
    any decisions the owner made since the issue was written.
+   For a UI change with an approved mockup, its local path (to open with
+   Read) and its link on the `chore/mockups` branch: "match it; say in
+   the PR where you didn't and why".
 4. Design points to decide and explain, where you have an opinion, and
    the traps you already know of (a function that must stay the only
    path, a rule like "no plain Ctrl+letter shortcuts on Windows/Linux").

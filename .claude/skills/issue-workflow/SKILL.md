@@ -42,6 +42,27 @@ options are:
 When the owner asks "how would we do this?", answer with the plan first
 and offer to open the issue; when they say to go ahead, write it.
 
+### Show a mockup first, for changes people will see
+
+For a new screen, panel, dialog, menu or layout, show the owner a picture
+of the finished feature before writing the issue: it settles design
+questions while they are cheap, and gives whoever builds it, and the
+review, something to compare with. `references/mockups.md` has the steps,
+the style notes and the render script; in short:
+
+- An HTML page styled after the app (copy the look from
+  `docs/screenshots/`), rendered to PNG with the sandbox's Playwright,
+  numbered callouts with a legend, and a before/after or the options side
+  by side when there is a choice. In the owner's language.
+- Look at it yourself, fix what overlaps or is cut off, then send it to
+  the owner as a file and iterate.
+- Once they approve it, put it on the `chore/mockups` branch as
+  `<issue>/<name>.png` and embed it in the issue (or a comment on it).
+  The issue still says in words what the mockup shows.
+
+Skip it for changes with nothing new to look at (a fix, a setting in an
+existing list) unless the owner asks.
+
 ## 2. Write the issue
 
 One issue per independent piece of work. Use
@@ -55,6 +76,9 @@ Conventional Commit line, as the PR's will be: `fix(app): ...`,
 
 ## Proposal           (the chosen solution; the options considered and why
                        this one; libraries or APIs to use)
+
+## Mockup             (UI changes: the approved image, embedded from the
+                       chore/mockups branch, and what it shows in words)
 
 ## Details            (edge cases, data model, UI text, platforms)
 
@@ -102,7 +126,9 @@ Tell the owner the plan in a short table before dispatching.
   `App.post`. Run the live SSH tests when a test sshd is available
   (`FINALLYSHELL_TEST_SSH`).
 - For UI changes, take tester screenshots in English and Simplified
-  Chinese and look at them yourself before calling it done.
+  Chinese and look at them yourself before calling it done. With a
+  mockup, compare them with it and say in the PR where they differ and
+  why.
 
 To run several issues at once, dispatch one subagent per issue in an
 isolated worktree, in the background, all in one message. Write their
@@ -138,7 +164,9 @@ subagents:
   origin/main origin/<branch>`). Run the checks on the merged result in a
   scratch worktree, not just on the branch, since main moves while
   others merge.
-- Look at the screenshots. For a bug fix, confirm the new test fails
+- Look at the screenshots, next to the approved mockup when there is
+  one; a difference the PR doesn't explain is a finding. For a bug fix,
+  confirm the new test fails
   without the fix (revert the fixed file in the scratch worktree and run
   the test).
 - Look for what tests don't catch: work on the UI thread that could block,
