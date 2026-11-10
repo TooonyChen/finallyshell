@@ -119,9 +119,10 @@ go run ./tools/screenshots
 每次推送到 main，只改了 `*.md` 文件、`docs/` 或 `.claude/` 的除外，都会用那个提交编译并发布一个预览版（`.github/workflows/preview.yml`），合并之后马上就能试用。更新的推送会取消还在编译的预览版；也可以在 main 上手动运行这个 workflow（Actions › preview › Run workflow）。
 
 1. 版本号是上一个发布的版本号把修订号加一，再加上 `-preview.<N>`，N 是那个发布的 tag 之后的提交数（`go run ./tools/release preview-version`）：v0.4.0 之后是 `0.4.1-preview.1`、`0.4.1-preview.2`……下一个发布不管是修订版还是次版本，都比它们新。第一次发布之前会是 `0.0.1-preview.<N>`，N 数的是所有提交。提交本身就是一个发布，或者已经有预览版时，不编译。预览版的 tag 永远不算上一个发布：`tools/release` 只认 `vMAJOR.MINOR.PATCH` 形式的 tag，所以发布、`version` 和 `draft` 都不看它们。
-2. 和发布一样用 `.github/workflows/build.yml` 编译五个平台，但没有私钥：`mygo build` 不写更新文件（它会提示 "Not signing an update"），也不需要 `CHANGELOG.md` 里有这个版本的一节，任务也不检查清单。私钥不进每次合并都运行的 workflow。
-3. 在这个提交上打 tag `v<版本>`，发布标题为 `<版本>` 的 GitHub 预发布（prerelease），附上安装包、`SHA256SUMS` 和许可证。说明先用中英文写明是哪个提交、不是正式发布，再列出上一个发布之后的提交（`go run ./tools/release draft`），最后接上 `.github/release-install.md`。
-4. 按版本号保留最新的 5 个预览版，删掉更早的和它们的 tag（`.github/scripts/prune-previews.sh`），也删掉被取消的运行留下的预览版草稿。它从不动正式发布和其他预发布；`.github/scripts/prune-previews-test.sh` 用一个假的 `gh` 测试它，`--dry-run` 只列出会删什么。
+2. 跑和 PR 一样的检查（`.github/workflows/ci.yml`），没通过的提交没有预览版。
+3. 和发布一样用 `.github/workflows/build.yml` 编译五个平台，但没有私钥：`mygo build` 不写更新文件（它会提示 "Not signing an update"），也不需要 `CHANGELOG.md` 里有这个版本的一节，任务也不检查清单。私钥不进每次合并都运行的 workflow。
+4. 在这个提交上打 tag `v<版本>`，发布标题为 `<版本>` 的 GitHub 预发布（prerelease），附上安装包、`SHA256SUMS` 和许可证。Debian 安装包的文件名里有 `~`（`finallyshell_0.4.1~preview.3_amd64.deb`，即 Debian 的版本号），GitHub 会把附件名里的 `~` 换成点；任务先这样改好文件名，`SHA256SUMS` 里的文件名就和发布的一样。说明先用中英文写明是哪个提交、不是正式发布，再列出上一个发布之后的提交（`go run ./tools/release draft`），最后接上 `.github/release-install.md`。
+5. 按版本号保留最新的 5 个预览版，删掉更早的和它们的 tag（`.github/scripts/prune-previews.sh`），也删掉被取消的运行留下的预览版草稿。它从不动正式发布和其他预发布；`.github/scripts/prune-previews-test.sh` 用一个假的 `gh` 测试它，`--dry-run` 只列出会删什么。
 
 预发布永远不是已安装的应用检查的最新发布，应用也不接收预发布（`Updater.SetPrereleases`），所以已安装的副本不会更新到预览版：预览版要手动下载。从预览版安装的应用会收到下一个正式发布的更新。
 

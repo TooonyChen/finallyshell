@@ -239,17 +239,23 @@ workflow).
    Preview tags are never the last release: `tools/release` takes only
    `vMAJOR.MINOR.PATCH` tags, so releases, `version` and `draft` ignore
    them.
-2. It builds the five platforms with `.github/workflows/build.yml`, as a
+2. It runs the same checks as pull requests (`.github/workflows/ci.yml`),
+   so a commit that fails them has no preview.
+3. It builds the five platforms with `.github/workflows/build.yml`, as a
    release does, but without the secret key: `mygo build` makes no update
    files (it says "Not signing an update") and needs no section in
    `CHANGELOG.md`, and the job checks no manifests. The key stays out of
    a workflow that runs on every merge.
-3. It tags `v<version>` on the commit and publishes a GitHub prerelease
+4. It tags `v<version>` on the commit and publishes a GitHub prerelease
    titled `<version>` with the installers, `SHA256SUMS` and the licenses.
+   The Debian packages' names have a `~`
+   (`finallyshell_0.4.1~preview.3_amd64.deb`, the Debian version), which
+   GitHub turns into a dot in an asset's name; the job renames them so
+   first, and `SHA256SUMS` names the files as published.
    Its notes say, in English and Chinese, which commit it is and that it
    is not a release, then list the commits since the last release
    (`go run ./tools/release draft`), then `.github/release-install.md`.
-4. It keeps the 5 newest previews, by version, and deletes the older ones
+5. It keeps the 5 newest previews, by version, and deletes the older ones
    with their tags (`.github/scripts/prune-previews.sh`), and drafts of
    previews that a cancelled run left. It never touches releases or other
    prereleases; `.github/scripts/prune-previews-test.sh` tests it against

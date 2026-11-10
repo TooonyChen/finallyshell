@@ -1,7 +1,7 @@
 name: preview
 
-# Every push to main publishes a preview: a GitHub prerelease of the app
-# built from that commit, tagged v<last release's version, patch+1>-preview.<N>,
+# Every push to main whose commit passes the checks of ci.yml publishes a
+# preview: a GitHub prerelease of the app built from that commit, tagged v<last release's version, patch+1>-preview.<N>,
 # N the commits since the last release tag (go run ./tools/release
 # preview-version). A prerelease is never the latest release, so installed
 # apps don't update to it; people download it by hand. The 5 newest
@@ -52,9 +52,15 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-  build:
+  # The same checks as pull requests: no preview of a commit that fails
+  # them.
+  gate:
     needs: version
     if: needs.version.outputs.version != ''
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: [version, gate]
     uses: ./.github/workflows/build.yml
     with:
       version: ${{ needs.version.outputs.version }}
@@ -79,6 +85,18 @@ jobs:
         with:
           path: upload
           merge-multiple: true
+      - name: Name the files as GitHub publishes them
+        # The Debian package of 0.4.1-preview.3 is
+        # finallyshell_0.4.1~preview.3_amd64.deb (mygo build's Debian
+        # version), and GitHub turns the ~ of an asset's name into a dot:
+        # rename it here, so SHA256SUMS names the files as published.
+        run: |
+          for f in upload/*~*; do
+            [ -e "$f" ] || continue
+            name=${f##*/}
+            mv "$f" "upload/${name//\~/.}"
+          done
+          ls -l upload
       - name: Licenses and checksums
         run: |
           cp LICENSE upload/LICENSE.txt
