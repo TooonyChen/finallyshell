@@ -526,8 +526,19 @@ children; the view (`paneview.go`) lays them out with nested
   order they opened in (`paneTree.order`), which is the order of their
   start times on the server.
 - `paneTree.remove` and `paneTree.insert` take a pane out and put it
-  beside another, before or after it; moving a pane by dragging (a later
-  change) is the one, then the other.
+  beside another, before or after it. `paneTree.move`, which dropping a
+  dragged pane calls, is the one, then the other, keeping
+  `paneTree.order` as it was: a moved pane's follower still reads its own
+  shell, which is where it is in the order the shells opened in, not
+  where the pane is. `paneTree.swap` (the Move pane keys) trades two
+  leaves' panes.
+- The drag uses MyGo's in-window drag and drop: a pane's grip is the
+  source (`Element.Drag` with a `paneDrag`), each pane's box takes it
+  (`ui.DragOver`, `ui.Drop`) and picks the side with `dropSide`. The box
+  reads the pointer with `PointerPosition`, which takes no input, to show
+  the grip over the strip at the top; only the grip itself takes presses
+  there. While the grip is pressed (`App.moving`) it stays built, since a
+  press ends with its element and MyGo's drag with the press.
 - Nothing about panes is saved.
 
 ## Closing and quitting

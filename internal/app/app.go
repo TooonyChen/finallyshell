@@ -148,6 +148,11 @@ type App struct {
 	// notices are toasts asked for between frames, as by a goroutine,
 	// which the next frame shows (paneview.go).
 	notices []string
+	// moving is the pane whose grip is pressed, to drag it, and the last
+	// line of its screen, which the copy following the pointer shows
+	// (paneview.go): nil while none is.
+	moving     *pane
+	movingLine string
 
 	sideWidth   float32
 	monitorPct  float32

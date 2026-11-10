@@ -1090,6 +1090,21 @@ connection, a new channel on it: no new login. A pane of a
   60 high a pane, and a double click on a divider shares its room
   equally. Equalize panes in the row's menu gives every pane the same
   room.
+- **Moving**: with two panes or more, hovering near the middle of a
+  pane's top edge shows a small grip. Drag it onto another pane: that
+  pane shows four drop zones (left, right, top, bottom), the side nearest
+  the pointer lit up, and dropping splits it on that side with the pane
+  dragged, whose sibling takes the room it leaves. The shell, its output
+  and the folder the file panel follows stay with the pane: only the
+  layout changes. A card of the pane (its number, title and last line)
+  follows the pointer; Esc gives the drag up, and a drop on the pane
+  itself, or on the side of its neighbor it is already on, changes
+  nothing. Only the grip takes the press: a drag anywhere else in a pane
+  selects text, and a program that takes the mouse gets clicks beside the
+  grip. There is no grip while a pane is zoomed or its find bar is open.
+  The row's menu has Move pane, whose items swap the focused pane with
+  the one on the left, right, above or below; the Shortcuts page has the
+  same four actions, with no keys by default.
 - **Zoom**: Zoom this pane (Cmd+Shift+Enter, Ctrl+Shift+X elsewhere)
   shows the focused pane alone in the terminal area; the key again, or
   moving the focus, shows them all.
@@ -2169,7 +2184,7 @@ Keys the shell needs cannot be used, and the dialog says why in red:
 Exceptions: "Switch to tab 1–9" may use Alt with the digits (readline's
 numeric arguments are rarely used, and GNOME Terminal does the same),
 "Terminal: reconnect" may use any key (it only acts while the session is
-disconnected and there is no shell), and the panes' actions (split, focus)
+disconnected and there is no shell), and the panes' actions (split, focus, move)
 may use Alt with any key, as Windows Terminal's do, with a warning in
 yellow that the shell no longer gets the key while the action takes it.
 
@@ -2194,7 +2209,8 @@ are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
 `nextTab`, `closeTab`, `connectionManager`, `newTab`, `switchTab` (whose
 value looks like `"Alt+1-9"`), `focusCommandBar`, `switchLeftPanel`,
 `toggleBottomPanel`, `splitRight`, `splitDown`, `zoomPane`,
-`focusPaneLeft`, `focusPaneRight`, `focusPaneUp` and `focusPaneDown`. `Super` is Cmd on macOS, and `none` means no
+`focusPaneLeft`, `focusPaneRight`, `focusPaneUp`, `focusPaneDown`,
+`movePaneLeft`, `movePaneRight`, `movePaneUp` and `movePaneDown`. `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
 

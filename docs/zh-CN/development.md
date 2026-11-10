@@ -296,7 +296,8 @@ var xshellReader = &Reader{
 - `connect` 在同一个连接上按树的顺序依次给树里每个分屏打开 shell：第一次是只有一个分屏的树，重新连接时是会话原来的树。`connectLocal` 对本地程序也一样。分屏（`splitPane`）在会话的客户端上再开一个 shell，不在 UI 线程上，shell 开好后才加上分屏。
 - 分屏的终端结束时（`paneExited`）：还有别的分屏且客户端还活着（在连接上发一个 keepalive 请求就知道），只关闭这个分屏；否则会话断开，和只有一个终端时一样，并保留分屏树给重新连接用。
 - 跟随分屏 shell 的读取用 `monitor.ShellPick` 从 `/proc` 读它：按打开的顺序（`paneTree.order`）它在连接的 shell 里排第几，也就是它们在服务器上启动时间的顺序。
-- `paneTree.remove` 和 `paneTree.insert` 把一个分屏拿出来、放到另一个分屏的前面或后面；以后拖动分屏换位置，就是先拿出来再放进去。
+- `paneTree.remove` 和 `paneTree.insert` 把一个分屏拿出来、放到另一个分屏的前面或后面。拖动分屏松手时调用的 `paneTree.move` 就是先拿出来再放进去，并保持 `paneTree.order` 不变：挪过的分屏仍然读自己的 shell，因为它看的是 shell 打开的顺序，不是分屏的位置。`paneTree.swap`（“交换分屏”快捷键）交换两个叶子的分屏。
+- 拖动用 MyGo 窗口内的拖放：分屏的把手是拖动源（`Element.Drag`，值是 `paneDrag`），每个分屏的框接收它（`ui.DragOver`、`ui.Drop`），用 `dropSide` 选择放到哪一边。框用不接收输入的 `PointerPosition` 读鼠标位置，在顶部的那一条区域里显示把手；那里只有把手本身接收按下。把手被按住时（`App.moving`）一直保留：元素没了按下就结束，MyGo 的拖动也随按下结束。
 - 分屏的东西都不保存。
 
 ## 关闭和退出

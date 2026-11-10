@@ -462,6 +462,7 @@ Ctrl+Shift+Enter（macOS 是 Cmd+Enter）隐藏左边栏和下面的文件面板
 - **分屏**：向右分屏（macOS 是 Cmd+D，其他系统是 Alt+Shift+=）在获得焦点的分屏右边开一个分屏，向下分屏（Cmd+Shift+D，Alt+Shift+-）在它下面开一个，新分屏获得焦点。新 shell 的终端类型、按键和编码和第一个一样。分屏可以接着分，横竖都行。会话行的右键菜单里有同样的项，还有“放大此分屏”“平均分配”“关闭此分屏”。在终端里右键打开的是终端自己的菜单（复制、粘贴、全选、清屏）：这个菜单由 MyGo 的终端生成，应用加不了项。
 - **焦点**：获得焦点的分屏有蓝色边框，其他分屏稍微变暗。点一下分屏就让它获得焦点（这次点击也会交给它的终端，所以选择文字、用鼠标的程序照常可用）。Cmd+Option+方向键（其他系统是 Alt+方向键）把焦点移到那一边的分屏。
 - **调整大小**：分屏之间的分隔条可以拖动，每个分屏最窄 120 DIP、最矮 60 DIP；双击分隔条两边平分。行菜单里的“平均分配”让所有分屏一样大。
+- **移动**：有两个以上分屏时，鼠标停在分屏顶部中间会出现一个小把手。把它拖到另一个分屏上：那个分屏显示左、右、上、下四块落点，离鼠标最近的一边变亮，松手后就在那一边分出来放下拖动的分屏，它原来的位置让给旁边的分屏。shell、输出和文件面板跟随的目录都跟着分屏走，只是换了位置。拖动时一张分屏的小卡片（编号、标题和最后一行）跟着鼠标；按 Esc 取消，放回自己身上，或者放到相邻分屏它本来就在的那一边，什么都不变。只有把手接收按下：在分屏别的地方拖动是选择文字，用鼠标的程序在把手旁边照常收到点击。放大分屏或者打开查找栏时没有把手。行菜单里的“移动分屏”可以把获得焦点的分屏和左、右、上、下的分屏交换；快捷键页面也有这四个操作，默认没有快捷键。
 - **放大**：“放大此分屏”（Cmd+Shift+Enter，其他系统是 Ctrl+Shift+X）让获得焦点的分屏占满终端区域；再按一次，或者移动焦点，显示全部分屏。
 - **关闭**：会话有多个分屏时，关闭标签（Cmd+W，Ctrl+Shift+W）关闭获得焦点的分屏，只剩一个时关闭会话，和 Ghostty 一样。shell 退出（`exit`、Ctrl+D）的分屏会关闭，旁边的分屏占用它的位置并获得焦点。
 - **连接断开**：连接断开时所有分屏都结束，会话和只有一个终端时一样显示“连接已断开”。重新连接在每个分屏里重新打开 shell，布局不变。
@@ -867,7 +868,7 @@ shell 需要的键不让用，框里用红字说明原因：
 - Windows 上 Ctrl+Alt 加字母（就是 AltGr，很多键盘布局用它输入字符）；
 - 系统占用的键（macOS 的 Cmd+Q、Cmd+H、Cmd+M、Cmd+Tab、Cmd+空格等，Windows 和 Linux 的 Alt+Tab、Alt+F4，Windows 上的 Win 键组合）。
 
-例外：“切换到第 1–9 个标签”可以用 Alt 加数字（readline 的数字参数很少用，GNOME Terminal 也这样），“终端：重新连接”可以用任何键（它只在会话断开、没有 shell 的时候起作用），分屏的操作（分屏、移动焦点）可以用 Alt 加任何键，和 Windows Terminal 一样，但会用黄色提示：这个操作占用这个键时，shell 就收不到它。
+例外：“切换到第 1–9 个标签”可以用 Alt 加数字（readline 的数字参数很少用，GNOME Terminal 也这样），“终端：重新连接”可以用任何键（它只在会话断开、没有 shell 的时候起作用），分屏的操作（分屏、移动焦点、交换分屏）可以用 Alt 加任何键，和 Windows Terminal 一样，但会用黄色提示：这个操作占用这个键时，shell 就收不到它。
 
 和别的操作冲突时用黄字提示，“确定”后那个操作变成没有快捷键（显示“无”）。和终端自己的键（Ctrl+Shift+A 全选、Ctrl+= 缩放、Shift+PageUp 滚动、Ctrl+Insert / Shift+Insert 复制粘贴）冲突时也提示，“确定”后归这个快捷键。
 
@@ -875,7 +876,7 @@ shell 需要的键不让用，框里用红字说明原因：
 
 macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，插件的 `OptionAsAlt`）：开了之后 Option+B 发送 Esc b，而不是输入 ∫。同样对之后连接的会话生效。
 
-在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar`、`switchLeftPanel`、`toggleBottomPanel`、`splitRight`、`splitDown`、`zoomPane`、`focusPaneLeft`、`focusPaneRight`、`focusPaneUp` 和 `focusPaneDown`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar`、`switchLeftPanel`、`toggleBottomPanel`、`splitRight`、`splitDown`、`zoomPane`、`focusPaneLeft`、`focusPaneRight`、`focusPaneUp`、`focusPaneDown`、`movePaneLeft`、`movePaneRight`、`movePaneUp` 和 `movePaneDown`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
 
 ### 终端 › 命令输入框
 

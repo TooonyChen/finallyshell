@@ -31,7 +31,8 @@ type Shortcuts struct {
 	// SplitRight and SplitDown open a pane beside the focused one of a
 	// session, or under it; ZoomPane shows the focused pane alone, and
 	// all again; the FocusPane keys move the focus to the pane on that
-	// side.
+	// side, and the MovePane keys trade the focused pane's place with
+	// that pane's.
 	SplitRight     string `json:"splitRight,omitempty"`
 	SplitDown      string `json:"splitDown,omitempty"`
 	ZoomPane       string `json:"zoomPane,omitempty"`
@@ -39,4 +40,8 @@ type Shortcuts struct {
 	FocusPaneRight string `json:"focusPaneRight,omitempty"`
 	FocusPaneUp    string `json:"focusPaneUp,omitempty"`
 	FocusPaneDown  string `json:"focusPaneDown,omitempty"`
+	MovePaneLeft   string `json:"movePaneLeft,omitempty"`
+	MovePaneRight  string `json:"movePaneRight,omitempty"`
+	MovePaneUp     string `json:"movePaneUp,omitempty"`
+	MovePaneDown   string `json:"movePaneDown,omitempty"`
 }

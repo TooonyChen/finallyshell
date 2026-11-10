@@ -18,14 +18,15 @@ import (
 
 // The defaults are FinalShell's on each platform, and the panes' are
 // Ghostty's on macOS and Windows Terminal's elsewhere, each one a key
-// the checks let through, and no two alike.
+// the checks let through, and no two alike; trading a pane's place has
+// no key.
 func TestShortcutDefaults(t *testing.T) {
 	want := map[string][]string{
 		"darwin": {"⌘C", "⌘V", "⌘F", "⌘↩", "↩", "⌘[", "⌘]", "⌘W", "⌘O", "⌘T", "⌘1…9", "⇧⌘L", "⇧⌘E", "⌘J",
-			"⌘D", "⇧⌘D", "⇧⌘↩", "⌥⌘←", "⌥⌘→", "⌥⌘↑", "⌥⌘↓"},
+			"⌘D", "⇧⌘D", "⇧⌘↩", "⌥⌘←", "⌥⌘→", "⌥⌘↑", "⌥⌘↓", "—", "—", "—", "—"},
 		"linux": {"Ctrl+Shift+C", "Ctrl+Shift+V", "Ctrl+Shift+F", "Ctrl+Shift+Enter", "Enter", "Ctrl+Shift+Tab", "Ctrl+Tab",
 			"Ctrl+Shift+W", "Ctrl+Shift+O", "Ctrl+Shift+T", "Alt+1…9", "Ctrl+Shift+L", "Ctrl+Shift+E", "Ctrl+Shift+J",
-			"Alt+Shift+=", "Alt+Shift+-", "Ctrl+Shift+X", "Alt+Left", "Alt+Right", "Alt+Up", "Alt+Down"},
+			"Alt+Shift+=", "Alt+Shift+-", "Ctrl+Shift+X", "Alt+Left", "Alt+Right", "Alt+Up", "Alt+Down", "—", "—", "—", "—"},
 	}
 	want["windows"] = want["linux"]
 	for goos, labels := range want {
@@ -37,6 +38,9 @@ func TestShortcutDefaults(t *testing.T) {
 			}
 			k := act.defaultKey(goos)
 			got = append(got, k.label(goos, act.digits))
+			if k.none() {
+				continue
+			}
 			if p := checkShortcut(goos, act.id, k); p != keyOK {
 				t.Errorf("%s: the default of %s is refused: %s", goos, act.title(), p.message(goos))
 			}

@@ -9515,3 +9515,183 @@ func ShortcutShellAltWarn() string { return In(i18n.Locale()).ShortcutShellAltWa
 func (msgs Messages) ShortcutShellAltWarn() string {
 	return Catalog.Format(msgs.locale, "shortcutShellAltWarn", nil)
 }
+
+// MovePane says "Move pane"
+// in the language the app shows.
+func MovePane() string { return In(i18n.Locale()).MovePane() }
+
+// MovePane says "Move pane"
+// in the language of msgs.
+func (msgs Messages) MovePane() string {
+	return Catalog.Format(msgs.locale, "movePane", nil)
+}
+
+// MovePaneLeft says "Swap with the pane on the left"
+// in the language the app shows.
+func MovePaneLeft() string { return In(i18n.Locale()).MovePaneLeft() }
+
+// MovePaneLeft says "Swap with the pane on the left"
+// in the language of msgs.
+func (msgs Messages) MovePaneLeft() string {
+	return Catalog.Format(msgs.locale, "movePaneLeft", nil)
+}
+
+// MovePaneRight says "Swap with the pane on the right"
+// in the language the app shows.
+func MovePaneRight() string { return In(i18n.Locale()).MovePaneRight() }
+
+// MovePaneRight says "Swap with the pane on the right"
+// in the language of msgs.
+func (msgs Messages) MovePaneRight() string {
+	return Catalog.Format(msgs.locale, "movePaneRight", nil)
+}
+
+// MovePaneUp says "Swap with the pane above"
+// in the language the app shows.
+func MovePaneUp() string { return In(i18n.Locale()).MovePaneUp() }
+
+// MovePaneUp says "Swap with the pane above"
+// in the language of msgs.
+func (msgs Messages) MovePaneUp() string {
+	return Catalog.Format(msgs.locale, "movePaneUp", nil)
+}
+
+// MovePaneDown says "Swap with the pane below"
+// in the language the app shows.
+func MovePaneDown() string { return In(i18n.Locale()).MovePaneDown() }
+
+// MovePaneDown says "Swap with the pane below"
+// in the language of msgs.
+func (msgs Messages) MovePaneDown() string {
+	return Catalog.Format(msgs.locale, "movePaneDown", nil)
+}
+
+// ScMovePaneLeft says "Swap the pane with the one on the left"
+// in the language the app shows.
+func ScMovePaneLeft() string { return In(i18n.Locale()).ScMovePaneLeft() }
+
+// ScMovePaneLeft says "Swap the pane with the one on the left"
+// in the language of msgs.
+func (msgs Messages) ScMovePaneLeft() string {
+	return Catalog.Format(msgs.locale, "scMovePaneLeft", nil)
+}
+
+// ScMovePaneRight says "Swap the pane with the one on the right"
+// in the language the app shows.
+func ScMovePaneRight() string { return In(i18n.Locale()).ScMovePaneRight() }
+
+// ScMovePaneRight says "Swap the pane with the one on the right"
+// in the language of msgs.
+func (msgs Messages) ScMovePaneRight() string {
+	return Catalog.Format(msgs.locale, "scMovePaneRight", nil)
+}
+
+// ScMovePaneUp says "Swap the pane with the one above"
+// in the language the app shows.
+func ScMovePaneUp() string { return In(i18n.Locale()).ScMovePaneUp() }
+
+// ScMovePaneUp says "Swap the pane with the one above"
+// in the language of msgs.
+func (msgs Messages) ScMovePaneUp() string {
+	return Catalog.Format(msgs.locale, "scMovePaneUp", nil)
+}
+
+// ScMovePaneDown says "Swap the pane with the one below"
+// in the language the app shows.
+func ScMovePaneDown() string { return In(i18n.Locale()).ScMovePaneDown() }
+
+// ScMovePaneDown says "Swap the pane with the one below"
+// in the language of msgs.
+func (msgs Messages) ScMovePaneDown() string {
+	return Catalog.Format(msgs.locale, "scMovePaneDown", nil)
+}
+
+// PaneGrip says "Drag to move this pane"
+// in the language the app shows.
+func PaneGrip() string { return In(i18n.Locale()).PaneGrip() }
+
+// PaneGrip says "Drag to move this pane"
+// in the language of msgs.
+func (msgs Messages) PaneGrip() string {
+	return Catalog.Format(msgs.locale, "paneGrip", nil)
+}
+
+// DropZoneLeft says "Left"
+// in the language the app shows.
+func DropZoneLeft() string { return In(i18n.Locale()).DropZoneLeft() }
+
+// DropZoneLeft says "Left"
+// in the language of msgs.
+func (msgs Messages) DropZoneLeft() string {
+	return Catalog.Format(msgs.locale, "dropZoneLeft", nil)
+}
+
+// DropZoneRight says "Right"
+// in the language the app shows.
+func DropZoneRight() string { return In(i18n.Locale()).DropZoneRight() }
+
+// DropZoneRight says "Right"
+// in the language of msgs.
+func (msgs Messages) DropZoneRight() string {
+	return Catalog.Format(msgs.locale, "dropZoneRight", nil)
+}
+
+// DropZoneUp says "Top"
+// in the language the app shows.
+func DropZoneUp() string { return In(i18n.Locale()).DropZoneUp() }
+
+// DropZoneUp says "Top"
+// in the language of msgs.
+func (msgs Messages) DropZoneUp() string {
+	return Catalog.Format(msgs.locale, "dropZoneUp", nil)
+}
+
+// DropZoneDown says "Bottom"
+// in the language the app shows.
+func DropZoneDown() string { return In(i18n.Locale()).DropZoneDown() }
+
+// DropZoneDown says "Bottom"
+// in the language of msgs.
+func (msgs Messages) DropZoneDown() string {
+	return Catalog.Format(msgs.locale, "dropZoneDown", nil)
+}
+
+// DropOnLeft says "Drop on the left"
+// in the language the app shows.
+func DropOnLeft() string { return In(i18n.Locale()).DropOnLeft() }
+
+// DropOnLeft says "Drop on the left"
+// in the language of msgs.
+func (msgs Messages) DropOnLeft() string {
+	return Catalog.Format(msgs.locale, "dropOnLeft", nil)
+}
+
+// DropOnRight says "Drop on the right"
+// in the language the app shows.
+func DropOnRight() string { return In(i18n.Locale()).DropOnRight() }
+
+// DropOnRight says "Drop on the right"
+// in the language of msgs.
+func (msgs Messages) DropOnRight() string {
+	return Catalog.Format(msgs.locale, "dropOnRight", nil)
+}
+
+// DropOnUp says "Drop above"
+// in the language the app shows.
+func DropOnUp() string { return In(i18n.Locale()).DropOnUp() }
+
+// DropOnUp says "Drop above"
+// in the language of msgs.
+func (msgs Messages) DropOnUp() string {
+	return Catalog.Format(msgs.locale, "dropOnUp", nil)
+}
+
+// DropOnDown says "Drop below"
+// in the language the app shows.
+func DropOnDown() string { return In(i18n.Locale()).DropOnDown() }
+
+// DropOnDown says "Drop below"
+// in the language of msgs.
+func (msgs Messages) DropOnDown() string {
+	return Catalog.Format(msgs.locale, "dropOnDown", nil)
+}

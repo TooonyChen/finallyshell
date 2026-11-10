@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"slices"
 	"sync/atomic"
 
 	"finallyshell/internal/monitor"
@@ -26,8 +27,11 @@ import (
 //
 // The tree is kept as panes close and come back: a pane can be taken
 // out (paneTree.remove) and put back beside another (paneTree.insert),
-// which is how dragging a pane will move it. Nothing of it is saved
-// across runs.
+// which is how dragging a pane moves it (paneTree.move), or trade places
+// with its neighbor (paneTree.swap). Neither touches its terminal, nor
+// which of the server's shells its follower reads (pane.pick), which go
+// by the order the shells opened in, not by where the panes are. Nothing
+// of it is saved across runs.
 
 // splitDir is how an inner node of the tree splits its room.
 type splitDir uint8
@@ -216,6 +220,75 @@ func (t *paneTree) remove(p *pane) *pane {
 		t.zoomed = false
 	}
 	return t.focus
+}
+
+// sideSplit is how putting a pane on side d of another splits that
+// one's room: side by side or one above the other, the pane first or
+// second.
+func sideSplit(d paneDir) (dir splitDir, before bool) {
+	switch d {
+	case paneLeft:
+		return splitRight, true
+	case paneRight:
+		return splitRight, false
+	case paneUp:
+		return splitDown, true
+	}
+	return splitDown, false
+}
+
+// stays tells whether putting p on side d of at leaves the tree as it
+// is: at is p, or at is p's sibling and p already on that side of it.
+func (t *paneTree) stays(p, at *pane, d paneDir) bool {
+	if p == at {
+		return true
+	}
+	n := t.leaf(p)
+	if n == nil || n.parent == nil {
+		return false
+	}
+	parent := n.parent
+	sibling := parent.first
+	if sibling == n {
+		sibling = parent.second
+	}
+	dir, before := sideSplit(d)
+	return sibling.pane == at && parent.dir == dir && (parent.first == n) == before
+}
+
+// move takes p out of the tree and puts it on side d of at, splitting
+// at's room in two, as dropping a dragged pane does; p takes the focus.
+// p keeps its terminal and its place among the connection's shells
+// (order), which its follower reads its shell by. It reports false,
+// changing nothing, when either is not in the tree or the tree would
+// stay as it is (stays).
+func (t *paneTree) move(p, at *pane, d paneDir) bool {
+	if !t.has(p) || !t.has(at) || t.stays(p, at, d) {
+		return false
+	}
+	order := slices.Clone(t.order) // remove takes p out of it
+	t.remove(p)
+	dir, before := sideSplit(d)
+	t.insert(at, p, dir, before)
+	t.order = order
+	t.focus, t.zoomed, t.refocus = p, false, true
+	return true
+}
+
+// swap trades the places of p and the pane next to it in direction d
+// (neighbor), each keeping its terminal and its shell, as the Move pane
+// keys do; p takes the focus. It reports false, changing nothing, at the
+// edge.
+func (t *paneTree) swap(p *pane, d paneDir) bool {
+	q := t.neighbor(p, d)
+	if q == nil {
+		return false
+	}
+	a, b := t.leaf(p), t.leaf(q)
+	a.pane, b.pane = q, p
+	a.id, b.id = b.id, a.id
+	t.focus, t.zoomed, t.refocus = p, false, true
+	return true
 }
 
 // deletePane is ps without p.

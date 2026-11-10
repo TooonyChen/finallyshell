@@ -57,6 +57,10 @@ const (
 	scFocusPaneRight
 	scFocusPaneUp
 	scFocusPaneDown
+	scMovePaneLeft
+	scMovePaneRight
+	scMovePaneUp
+	scMovePaneDown
 )
 
 // shortcutAction is an action of the shortcuts page.
@@ -203,6 +207,26 @@ var shortcutActions = []shortcutAction{
 		id: scFocusPaneDown, title: locales.ScFocusPaneDown, alt: true,
 		field: func(s *config.Shortcuts) *string { return &s.FocusPaneDown },
 		mac:   keyCombo{ui.Super | ui.Alt, ui.KeyDown}, other: keyCombo{ui.Alt, ui.KeyDown},
+	},
+	// Trading places with the pane on a side has no key by default:
+	// Ghostty and Windows Terminal have none either, and the keys they
+	// leave free near the focus keys (Alt+Shift+arrows, Cmd+Ctrl+arrows)
+	// are their resizing keys, or select text in shells and editors.
+	{
+		id: scMovePaneLeft, title: locales.ScMovePaneLeft, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.MovePaneLeft },
+	},
+	{
+		id: scMovePaneRight, title: locales.ScMovePaneRight, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.MovePaneRight },
+	},
+	{
+		id: scMovePaneUp, title: locales.ScMovePaneUp, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.MovePaneUp },
+	},
+	{
+		id: scMovePaneDown, title: locales.ScMovePaneDown, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.MovePaneDown },
 	},
 }
 
@@ -528,6 +552,14 @@ func (a *App) shortcuts(c *ui.Context) {
 		a.movePaneFocus(cur, paneUp)
 	case split && pressed(scFocusPaneDown):
 		a.movePaneFocus(cur, paneDown)
+	case split && pressed(scMovePaneLeft):
+		a.swapPane(cur, paneLeft)
+	case split && pressed(scMovePaneRight):
+		a.swapPane(cur, paneRight)
+	case split && pressed(scMovePaneUp):
+		a.swapPane(cur, paneUp)
+	case split && pressed(scMovePaneDown):
+		a.swapPane(cur, paneDown)
 	case a.fullScreen.on && !a.terminalLive() && c.Shortcut(0, ui.KeyEscape):
 		// Esc is the shell's while it runs, as vi's; it leaves full screen
 		// where no shell takes it.
