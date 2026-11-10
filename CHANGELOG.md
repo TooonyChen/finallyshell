@@ -2,6 +2,32 @@
 
 Each version's notes, newest first, in English and Simplified Chinese. A release's notes on GitHub and in the app's update window are its section here; see [Releasing](docs/en/development.md#releasing).
 
+## 0.4.0
+
+### English
+
+- Split a session's terminal into panes, each another shell on the same server over the same connection, with no new login. Use the new Split button at the right end of the command bar, the session's context menu, or the keys: Cmd+D / Cmd+Shift+D on macOS, Alt+Shift+= / Alt+Shift+- on Windows and Linux. Panes split again in any direction; drag the dividers to resize them. The focused pane has a blue border and the others are dimmed; click a pane or use Cmd+Option+arrows (Alt+arrows) to move between them, and "Zoom this pane" (Cmd+Shift+Enter, Ctrl+Shift+X) to fill the terminal with one for a while. Cmd+W (Ctrl+Shift+W) closes the focused pane first. Reconnecting reopens every pane in the same layout.
+- Drag a pane by the grip at its top middle onto another pane to move it there: drop it on that pane's top, bottom, left or right side. "Move pane" in the pane menu swaps it with a neighbor.
+- Local terminal: the terminal button next to "+" in the session list, or "Local terminal" on the start page, opens a shell on this computer, to try something without leaving the app. The command bar, the Commands tab and the command editor work there. Choose the program in Options › Terminal › "Local terminal program", such as `wsl.exe`, `cmd.exe` or `fish -l`; empty runs your login shell, or PowerShell on Windows.
+- Command editor in the Commands tab, as in FinalShell: write a few lines and send them without saving them as a command. Send (Cmd+Enter, Ctrl+Enter) sends the lines you selected, whole, or everything; "Save as command" keeps them as a button. The text is kept after a restart.
+- Send commands to several sessions: "Send to" in the Commands tab and in the command editor chooses the current session, all sessions or the sessions you check, and asks once before the first send. The command bar always sends to the current session only.
+- "Connect all" in a folder's context menu, in the connection manager and on the Connections page, opens every connection in the folder and its subfolders; more than 10 ask first.
+- Arrange the window: hide the bottom panel down to its tabs with the button at the end of its tabs or Cmd+J (Ctrl+Shift+J), and move it to the right of the terminal from its tabs' context menu. Right-click the server monitor to move it to the right side too, and to choose which of its parts show.
+- Connections that sit quiet no longer get dropped by routers, firewalls or proxies: each connection sends a keepalive every 30 seconds, and a server that stops answering shows "Connection lost" instead of a tab that looks connected. Change the interval, or turn it off with 0, in Options › General.
+- Linux on ARM64: there are now arm64 builds, a `.deb` for Debian and Ubuntu and a `.tar.gz` with `install.sh` for other distributions.
+
+### 简体中文
+
+- 会话的终端可以分屏，每个分屏是同一台服务器上的另一个 shell，走同一个连接，不用重新登录。用命令栏最右边新增的“分屏”按钮、会话的右键菜单，或者快捷键：macOS 上 Cmd+D / Cmd+Shift+D，Windows 和 Linux 上 Alt+Shift+= / Alt+Shift+-。分屏可以横竖混着继续切，拖动分隔条调整大小。获得焦点的分屏有蓝色边框，其他分屏稍微变暗；点一下分屏，或用 Cmd+Option+方向键（Alt+方向键）切换焦点；“放大此分屏”（Cmd+Shift+Enter、Ctrl+Shift+X）让一个分屏暂时占满终端。Cmd+W（Ctrl+Shift+W）先关闭获得焦点的分屏。重新连接时每个分屏都会重开，布局不变。
+- 按住分屏顶部中间的把手，把它拖到另一个分屏的上、下、左、右边，就挪到了那里。分屏菜单里的“移动分屏”可以和相邻的分屏交换位置。
+- 本地终端：会话列表里“+”旁边的终端按钮，或起始页上的“本地终端”，在本机打开一个 shell，不用离开应用就能试点东西。命令栏、“命令”页和命令编辑器在里面都能用。在“选项 › 终端 › 本地终端程序”里可以换程序，比如 `wsl.exe`、`cmd.exe` 或 `fish -l`；留空运行你的登录 shell，Windows 上运行 PowerShell。
+- “命令”页新增命令编辑器，和 FinalShell 一样：写几行命令，不用存成快捷命令就能直接发送。“发送”（Cmd+Enter、Ctrl+Enter）发送选中的那几行（按整行），没有选中就发送全部；“存为命令”把它们存成按钮。重启后内容还在。
+- 命令可以发给多个会话：“命令”页和命令编辑器里的“发送到”可以选当前会话、全部会话或勾选的会话，第一次发送前会确认。命令栏永远只发给当前会话。
+- 连接管理器和“连接”页里文件夹的右键菜单新增“全部连接”，打开文件夹及其子文件夹里的每个连接；超过 10 个会先确认。
+- 窗口布局可以调整：底部面板可以收起到只剩标签栏（标签栏末尾的按钮，或 Cmd+J / Ctrl+Shift+J），标签栏的右键菜单可以把它移到终端右侧。右键服务器监控面板，可以把它也移到右侧，还可以选择显示哪些部分。
+- 空闲的连接不再被路由器、防火墙或代理断开：每个连接每 30 秒发送一次保活消息，服务器不再回应时显示“连接已断开”，而不是看起来还连着。间隔可以在“选项 › 常规”里修改，设为 0 关闭。
+- Linux ARM64：新增 arm64 版本，Debian 和 Ubuntu 用 `.deb`，其他发行版用 `.tar.gz` 和 `install.sh`。
+
 ## 0.3.0
 
 ### English
