@@ -20,10 +20,11 @@ import (
 //
 // It is a Session with local set and no Host, so it is neither a new tab
 // nor a session of a server: its row, terminal, find bar, command bar and
-// the Commands tab work as a session's, sending to the program; what
-// reads a server (the monitor, the Files, Transfers, Tunnels, Processes
-// and Network pages, the coding agent's icon, Tab completion, the
-// server's history) says it is not there or does nothing. Its command
+// the Commands tab work as a session's, sending to the program, and the
+// Transfers tab shows the queue of every session as on any tab; what
+// reads the tab's server (the monitor, the Files, Tunnels, Processes and
+// Network pages, the coding agent's icon, Tab completion, the server's
+// history) says it is not there or does nothing. Its command
 // bar keeps a history of its own, under localHistoryID. It has no panel
 // row, it is not in "All sessions" of the send target (sendtarget.go),
 // and nothing of it is saved: local terminals do not come back after a

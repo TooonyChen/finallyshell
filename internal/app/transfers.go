@@ -390,13 +390,10 @@ func (a *App) clearFinished() {
 	a.transfers.jobs = slices.DeleteFunc(a.transfers.jobs, (*transferJob).finished)
 }
 
-// transferPanel is the Transfers tab: the transfers of every session, or
-// for a local terminal, which has no files, that it has none.
+// transferPanel is the Transfers tab: the transfers of every session,
+// whichever tab is shown, a local terminal's too. Each row acts on its
+// own transfer's session (transferRow), never on the tab shown.
 func (a *App) transferPanel(c *ui.Context) {
-	if a.connSession().isLocal() {
-		localUnavailable(c)
-		return
-	}
 	q := &a.transfers
 	ui.Column(c).Grow(1).Children(func() {
 		ui.Row(c).Padding(4, 8).Gap(8).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {

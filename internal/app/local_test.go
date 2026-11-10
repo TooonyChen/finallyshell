@@ -192,11 +192,22 @@ func TestLocalTerminalSends(t *testing.T) {
 }
 
 // Every tab of the bottom panel, under the terminal or on the right, the
-// monitor on either side, and the panel hidden: the five pages that read
-// a server say they are not available, Commands works, and nothing
-// panics or polls.
+// monitor on either side, and the panel hidden: Files, Tunnels,
+// Processes and Network, which read the tab's server, say they are not
+// available; Transfers shows the queue of every session, as on any tab;
+// Commands works; and nothing panics or polls.
 func TestLocalTerminalPanels(t *testing.T) {
 	a, p, tt := localApp(t, testShell)
+	// A server's transfers, which the queue shows whatever tab is shown.
+	web := demoSession(a, "web-1", "203.0.113.10")
+	for _, j := range []*transferJob{
+		{dir: download, src: "/var/log/syslog", dstDir: "/home/me/Downloads", state: transferDone, done: 61_000, total: 61_000, local: "/home/me/Downloads/syslog"},
+		{dir: download, src: "/srv/backup.tar.gz", dstDir: "/home/me/Downloads", state: transferFailed, total: -1, err: errors.New("connection lost")},
+	} {
+		a.transfers.nextID++
+		j.id, j.sess = a.transfers.nextID, web
+		a.transfers.jobs = append(a.transfers.jobs, j)
+	}
 	a.openLocal(nil)
 	s := a.current()
 	untilScreen(t, p, s, "ready")
@@ -221,11 +232,16 @@ func TestLocalTerminalPanels(t *testing.T) {
 				continue
 			}
 			na := tt.HasText(locales.LocalNotAvailable())
-			if na != (tab != tabCommands) {
+			if na != (tab != tabCommands && tab != tabTransfers) {
 				t.Errorf("%s, tab %d: not available %v; texts %q", l.name, tab, na, tt.Texts())
 			}
 			if tab == tabCommands && !tt.HasText(locales.SendTo()) {
 				t.Errorf("%s: Commands: texts %q", l.name, tt.Texts())
+			}
+			if tab == tabTransfers {
+				if !tt.HasText("syslog") || !tt.HasText("backup.tar.gz") || !tt.HasText(locales.ClearFinished()) {
+					t.Errorf("%s: Transfers: texts %q", l.name, tt.Texts())
+				}
 			}
 		}
 		if !tt.HasText(locales.LocalTerminal()) || tt.HasText("IP ") {
@@ -235,6 +251,22 @@ func TestLocalTerminalPanels(t *testing.T) {
 			t.Errorf("%s: %d polls", l.name, len(a.polls))
 		}
 	}
+	// The queue's actions are its transfers' own: Retry asks web-1, which
+	// has no SFTP, not the local terminal shown, so it stays off.
+	a.bottomSide, a.monitorSide, a.bottomHidden = "", "", false
+	a.bottomTab = tabTransfers
+	tt.Frame()
+	if b, ok := tt.AccessByRole(ui.RoleButton, locales.Retry()); !ok || !b.Disabled {
+		t.Errorf("Retry %+v, shown %v", b, ok)
+	}
+	if err := tt.Click(locales.Retry()); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if len(a.transfers.jobs) != 2 || a.transfers.jobs[1].state != transferFailed {
+		t.Errorf("Retry from a local tab: %d jobs", len(a.transfers.jobs))
+	}
+
 	// Full screen shows the terminal alone.
 	a.bottomSide, a.monitorSide, a.bottomHidden = "", "", false
 	a.setFullScreen(true)
@@ -543,15 +575,15 @@ func TestLocalTerminalOption(t *testing.T) {
 }
 
 // The local terminal's scenes, in both languages: its tab on the
-// Commands and Files tabs beside sessions of servers, and the start page
-// with its entry.
+// Commands, Files and Transfers tabs beside sessions of servers, and the
+// start page with its entry.
 func TestLocalTerminalShots(t *testing.T) {
 	for _, lang := range []string{"en", "zh-Hans"} {
 		t.Run(lang, func(t *testing.T) {
 			a, p, tt := localApp(t, `env PS1='you@laptop ~ % ' sh -i`)
 			p.SetLocale(lang)
 			demoQuick(a, lang == "zh-Hans")
-			demoSession(a, "web-1", "45.56.78.90")
+			demoArchiveTransfers(a, demoSession(a, "web-1", "45.56.78.90"))
 			demoSession(a, "db-1", "10.0.0.12").status = statusConnecting
 			a.openLocal(nil)
 			s := a.current()
@@ -564,6 +596,12 @@ func TestLocalTerminalShots(t *testing.T) {
 			a.bottomTab = tabFiles
 			tt.Frame()
 			saveShot(t, tt, "local-files-"+lang+".png")
+			a.bottomTab = tabTransfers
+			tt.Frame()
+			if tt.HasText(locales.LocalNotAvailable()) || !tt.HasText("node_modules") {
+				t.Errorf("Transfers: texts %q", tt.Texts())
+			}
+			saveShot(t, tt, "local-transfers-"+lang+".png")
 			a.active = 0 // the new tab
 			tt.Frame()
 			saveShot(t, tt, "local-start-"+lang+".png")

@@ -392,18 +392,21 @@ opens one in that tab. There is no default shortcut.
   [configuration.md](configuration.md)); Tab completes nothing, as paths
   and command names are read from a server, and the history picker lists
   no server history.
-- The Commands tab and its command editor send to it. The Files,
-  Transfers, Tunnels, Processes and Network tabs stay, so the layout
-  doesn't move when switching tabs, and each says "Not available in a
-  local terminal". The bottom panel has no "Open in its own tab" button
-  for it.
+- The Commands tab and its command editor send to it. The Transfers tab
+  shows the transfers of every session, as on any tab: the queue is the
+  app's, and each transfer's Retry and Open act on its own session. The
+  Files, Tunnels, Processes and Network tabs stay, so the layout doesn't
+  move when switching tabs, and each says "Not available in a local
+  terminal". The bottom panel has no "Open in its own tab" button for it.
 - The server monitor, on either side, shows a line "Local terminal" in
   place of the server's stats, and nothing is polled. The coding agent's
   icon on the tab is not shown.
 - Send to: a local terminal is not in "All sessions", so a command meant
-  for every server does not also run on this computer. "Choose sessions…"
-  lists it with its computer icon, to check it like any session.
-  "Current session" sends to it while it is the tab shown.
+  for every server does not also run on this computer, even when sent
+  from the local terminal's own command bar or Commands tab: then it goes
+  to the servers only. "Choose sessions…" lists it with its computer
+  icon, to check it like any session. "Current session" sends to it
+  while it is the tab shown.
 - When the program exits the tab says "Exited", and Reconnect, a
   double click on its row or Enter in the terminal area (the Reconnect
   shortcut) starts it again in the same tab. A program that cannot be
