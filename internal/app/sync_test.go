@@ -238,6 +238,21 @@ func TestSyncLocalChangeDuringSync(t *testing.T) {
 	}
 }
 
+// storeSettled reports, for fakePlatform.until, whether a's secret queue
+// is idle with what its jobs posted run: a job posts what it learned (as
+// applySyncedSecrets' rememberSynced) before it ends, so once the queue
+// is idle its posts are queued, and until would check its condition
+// again before running them. Running them may queue another job.
+func storeSettled(a *App, p *fakePlatform) func() bool {
+	return func() bool {
+		if !a.secrets.queue.idle() {
+			return false
+		}
+		p.drain()
+		return a.secrets.queue.idle()
+	}
+}
+
 func TestSyncPasswords(t *testing.T) {
 	r := &memRemote{}
 	one := newDevice(t, r)
@@ -261,7 +276,7 @@ func TestSyncPasswords(t *testing.T) {
 	two := newDevice(t, r)
 	two.a.settings.Sync.Passwords = true
 	two.sync(t)
-	two.p.until(t, "the store", func() bool { return two.a.secrets.queue.idle() })
+	two.p.until(t, "the store", storeSettled(two.a, two.p))
 	if got := two.p.stored[hostSecretKey("h1", secretPassword)]; got != "s3cret" {
 		t.Fatalf("password %q; store %v", got, two.p.stored)
 	}
@@ -278,7 +293,7 @@ func TestSyncPasswords(t *testing.T) {
 	delete(two.p.stored, hostSecretKey("h1", secretPassword))
 	two.sync(t)
 	one.sync(t)
-	one.p.until(t, "the store", func() bool { return one.a.secrets.queue.idle() })
+	one.p.until(t, "the store", storeSettled(one.a, one.p))
 	if _, ok := one.p.stored[hostSecretKey("h1", secretPassword)]; ok {
 		t.Error("the forgotten password is still stored")
 	}
@@ -325,7 +340,7 @@ func TestSyncPage(t *testing.T) {
 	}
 	a.setSyncCredential("ghp_x")
 	a.setSyncPassword("pw")
-	p.until(t, "the store", func() bool { return a.secrets.queue.idle() })
+	p.until(t, "the store", storeSettled(a, p))
 	if p.stored[syncCredentialKey(config.SyncGist)] != "ghp_x" || p.stored[syncPasswordKey] != "pw" {
 		t.Fatalf("store %v", p.stored)
 	}
@@ -365,12 +380,12 @@ func TestSyncPasswordsTurnedOnLater(t *testing.T) {
 	two.sync(t)
 	two.a.settings.Sync.Passwords = true
 	two.sync(t)
-	two.p.until(t, "the store", func() bool { return two.a.secrets.queue.idle() })
+	two.p.until(t, "the store", storeSettled(two.a, two.p))
 	if got := two.p.stored[hostSecretKey("h1", secretPassword)]; got != "s3cret" {
 		t.Fatalf("password %q", got)
 	}
 	one.sync(t)
-	one.p.until(t, "the store", func() bool { return one.a.secrets.queue.idle() })
+	one.p.until(t, "the store", storeSettled(one.a, one.p))
 	if got := one.p.stored[hostSecretKey("h1", secretPassword)]; got != "s3cret" {
 		t.Fatalf("the first device lost its password: %q", got)
 	}
@@ -407,7 +422,7 @@ func TestSyncPasswordSavedDuringSync(t *testing.T) {
 	two := newDevice(t, r)
 	two.a.settings.Sync.Passwords = true
 	two.sync(t)
-	two.p.until(t, "the store", func() bool { return two.a.secrets.queue.idle() })
+	two.p.until(t, "the store", storeSettled(two.a, two.p))
 
 	one.p.stored[key] = "new"
 	one.sync(t)
@@ -415,7 +430,7 @@ func TestSyncPasswordSavedDuringSync(t *testing.T) {
 	two.a.startSync(false, time.Now())
 	two.a.setSecret(key, "mine") // after the sync read the passwords
 	two.p.until(t, "the sync", func() bool { return !two.a.sync.running && two.a.secrets.queue.idle() })
-	two.p.until(t, "the store", func() bool { two.p.drain(); return two.a.secrets.queue.idle() })
+	two.p.until(t, "the store", storeSettled(two.a, two.p))
 	if got := two.p.stored[key]; got != "mine" {
 		t.Fatalf("the password saved meanwhile became %q", got)
 	}
@@ -424,7 +439,7 @@ func TestSyncPasswordSavedDuringSync(t *testing.T) {
 	}
 	two.sync(t)
 	one.sync(t)
-	one.p.until(t, "the store", func() bool { return one.a.secrets.queue.idle() })
+	one.p.until(t, "the store", storeSettled(one.a, one.p))
 	if got := one.p.stored[key]; got != "mine" {
 		t.Fatalf("the other device has %q", got)
 	}
