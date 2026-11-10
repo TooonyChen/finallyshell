@@ -13,13 +13,18 @@ import (
 
 // monitorPanel shows the active session's server, as FinalShell's left
 // column does: the skeleton for a new tab. Its context menu chooses the
-// parts that show (monitorparts.go).
+// parts that show (monitorparts.go). A local terminal has no server: a
+// line says what it is.
 func (a *App) monitorPanel(c *ui.Context) {
 	s := a.connSession()
 	if s != nil && s.isNewTab() {
 		s = nil
 	}
 	ui.Scroll(c).Fill().ContextMenu(a.monitorMenu).Children(func() {
+		if s.isLocal() {
+			localMonitor(c)
+			return
+		}
 		a.serverView(c, s)
 	})
 }
@@ -237,8 +242,8 @@ func (a *App) sessionPanel(c *ui.Context) {
 	})
 }
 
-// sessionCount is the number of sessions, new tabs and panel rows left
-// out: neither has a Host.
+// sessionCount is the number of sessions, local terminals included, new
+// tabs and panel rows left out.
 func (a *App) sessionCount() int {
 	n := 0
 	for _, s := range a.sessions {
@@ -276,7 +281,12 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 			a.reconnect(s)
 		}
 		if m.Item(locales.DuplicateSession()).Chosen() {
-			a.openSessionIn(nil, s.Host) // in a tab of its own, though a new tab is selected
+			// In a tab of its own, though a new tab is selected.
+			if s.isLocal() {
+				a.openLocal(nil)
+			} else {
+				a.openSessionIn(nil, s.Host)
+			}
 		}
 		if m.Item(locales.Disconnect()).Disabled(s.status != statusConnected && s.status != statusConnecting).Chosen() {
 			a.transfers.cancelSession(s)
@@ -301,10 +311,13 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		row.Tooltip(renamedTooltip(s))
 	}
 	row.Children(func() {
-		widgets.StatusDot(c, s.statusColor(theme))
-		sub := s.Host.Target()
-		if s.status != statusConnected {
+		sessionMark(c, s, active)
+		sub := s.target()
+		switch {
+		case s.status != statusConnected:
 			sub = s.statusText()
+		case s.isLocal() && s.title != "":
+			sub = s.title // the program's own, as a terminal app's tab
 		}
 		name := func() { a.sessionName(c, s, active) }
 		if renaming {

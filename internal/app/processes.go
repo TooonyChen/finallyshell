@@ -234,6 +234,10 @@ func (a *App) processPanel(c *ui.Context) {
 	if s == nil || s.isNewTab() {
 		return
 	}
+	if s.isLocal() {
+		localUnavailable(c)
+		return
+	}
 	ps := &s.procs
 	a.pollProcesses(s)
 	ui.Column(c.Key(s.ID)).Grow(1).MinHeight(0).Children(func() {

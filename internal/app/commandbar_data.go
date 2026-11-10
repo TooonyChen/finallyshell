@@ -150,7 +150,7 @@ func (a *App) addHistory(id, cmd string) {
 // history goes, and the server's is not shown again for this
 // connection.
 func (a *App) clearHostHistory(s *Session) {
-	id := s.Host.ID
+	id := s.historyID()
 	if a.history.hosts == nil {
 		a.history.hosts = map[string]*hostHistory{}
 	}
@@ -193,7 +193,7 @@ func (a *App) deleteHostHistory(id string) {
 // app's history of the host, then the server's commands it lacks; and
 // whether either is still being read.
 func (a *App) historyFor(s *Session) (cmds []string, loading bool) {
-	h := a.hostHistory(s.Host.ID)
+	h := a.hostHistory(s.historyID())
 	seen := map[string]bool{}
 	for i := len(h.cmds) - 1; i >= 0; i-- {
 		if c := h.cmds[i]; !seen[c] {
@@ -202,7 +202,7 @@ func (a *App) historyFor(s *Session) (cmds []string, loading bool) {
 		}
 	}
 	loading = h.loading
-	if a.settings.NoServerHistory {
+	if a.settings.NoServerHistory || s.isLocal() { // a local terminal has no server
 		return cmds, loading
 	}
 	sh := a.serverHistory(s)

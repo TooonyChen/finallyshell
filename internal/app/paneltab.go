@@ -67,6 +67,9 @@ func (a *App) panelRowOf(s *Session) *Session {
 // openPanelTab selects s's panel row, adding it right below s first,
 // showing tab, when s has none.
 func (a *App) openPanelTab(s *Session, tab int) {
+	if s.isLocal() {
+		return // no panel row: see panelCornerButton
+	}
 	p := a.panelRowOf(s)
 	if p == nil {
 		i := slices.Index(a.sessions, s)
@@ -93,7 +96,8 @@ func (a *App) panelArea(c *ui.Context, p *Session) { a.bottomPanel(c, &p.panelTa
 
 // panelCornerButton is the button at the right end of the bottom panel's
 // tabs: on a session's row it opens the panel row, on tab, and on a
-// panel row it goes back to the session's terminal. A new tab has none.
+// panel row it goes back to the session's terminal. A new tab has none,
+// nor has a local terminal, whose pages but Commands have nothing to show.
 func (a *App) panelCornerButton(c *ui.Context, tab int) {
 	s := a.current()
 	switch {
@@ -101,7 +105,7 @@ func (a *App) panelCornerButton(c *ui.Context, tab int) {
 		if widgets.IconButton(c, "minimize-2", locales.BackToTerminal()).Clicked() {
 			a.backToTerminal(s)
 		}
-	case s == nil || s.isNewTab():
+	case s == nil || s.isNewTab() || s.isLocal():
 	default:
 		if widgets.IconButton(c, "maximize-2", locales.OpenPanelTab()).Clicked() {
 			a.openPanelTab(s, tab)

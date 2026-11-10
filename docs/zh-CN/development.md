@@ -145,7 +145,7 @@ tools/natives/       CI 跑测试前先下载 libghostty-vt，最多重试五分
 tools/release/       发布用的工具：从 CHANGELOG.md 读出下一个版本号和更新说明，按提交列出草稿，收集第三方许可证（notices/ 是以二进制打包的库的许可证）
 tools/screenshots/   从 internal/app 的测试重新生成 docs/screenshots/ 里的 README 截图
 internal/
-  config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置；keys.go 是退格键和删除键发送什么；sync.go 是“同步”页的设置、哪些设置要同步、sync-state.json 和同步前 hosts.json 的副本；history.go 是命令输入框的历史文件，以及读取 bash 和 zsh 的历史文件；quickcommands.go 是“命令”页的 quickcommands.json；cmdeditor.go 是命令编辑器的 commandeditor.txt
+  config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置；keys.go 是退格键和删除键发送什么；sync.go 是“同步”页的设置、哪些设置要同步、sync-state.json 和同步前 hosts.json 的副本；history.go 是命令输入框的历史文件，以及读取 bash 和 zsh 的历史文件；quickcommands.go 是“命令”页的 quickcommands.json；cmdeditor.go 是命令编辑器的 commandeditor.txt；localshell.go 把本地终端程序（localShell）分成参数
   cloudsync/         通过用户自己的存储同步：crypto.go 加密文件（Argon2id、AES-256-GCM），merge.go 做三方合并，sync.go 读取、合并、写回（冲突时重试）；gist.go、webdav.go、s3.go 是各个服务（s3.go 手写 SigV4 签名），remotehttp.go 是它们共用的 HTTP 代码
   importer/          读其他客户端的连接：importer.go 是来源列表（readers）、读出的连接和问题、文本解码（UTF-8、UTF-16、GB18030）、判重、按文件夹导入；finalshell.go 找 FinalShell 的目录、读 conn 里的连接和文件夹；xshell.go 找 Xshell 的 Sessions 文件夹、读 .xsh 会话文件和 .xts 导出文件；securecrt.go 找 SecureCRT 的配置目录、读它 Sessions 文件夹里的 .ini 文件；mobaxterm.go 找 MobaXterm.ini、读里面的书签段，以及 .mxtsessions 和 .moba 导出文件；sshconfig.go 读 OpenSSH 的 ~/.ssh/config（Host 块和通配模式、Include、ProxyJump）；table.go 读 CSV 文件或 .xlsx 第一个工作表里的服务器列表，.xlsx 由自己写的 xlsx.go 读（archive/zip 和 encoding/xml，有防 zip 炸弹的限制）；testdata 是编造的样例
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
@@ -163,6 +163,7 @@ internal/
     sidebar.go       左侧：监控面板、竖向会话列表
     conntree.go      左侧面板的“连接”页：两页之间的切换、连接管理器的树（只有一列）、记住展开的文件夹
     paneltab.go      面板行：会话的底部面板单独成列表里的一行，共用会话的连接（connSession）
+    local.go         本地终端：在本机运行程序的标签（没有 Host），打开和启动它，监控和面板各页对它显示什么，它的选项
     agenticon.go     会话行上显示 shell 里运行的编程智能体的图标：shell 跟随（shelldir.go）为它做的读取，“会话标签”选项
     netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制

@@ -156,6 +156,10 @@ func (a *App) tunnelPanel(c *ui.Context) {
 	if s == nil || s.isNewTab() {
 		return
 	}
+	if s.isLocal() {
+		localUnavailable(c)
+		return
+	}
 	ts := &s.tunnels
 	connected := s.status == statusConnected && s.client != nil
 	ui.Column(c.Key(s.ID)).Grow(1).Children(func() {

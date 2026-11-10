@@ -1562,5 +1562,23 @@
       }
     }
   },
-  "sendToConfirmNote": "Each of them runs what is sent. Later sends to the same sessions don't ask again."
+  "sendToConfirmNote": "Each of them runs what is sent. Later sends to the same sessions don't ask again.",
+  "localTerminal": "Local terminal",
+  "localTerminalTip": "Open a terminal on this computer",
+  "localThisComputer": "This computer",
+  "statusExited": "Exited",
+  "localNotAvailable": "Not available in a local terminal",
+  "errLocalStart": "Could not start {program}: {error}",
+  "errLocalShellQuote": "The local terminal program has a quote that is not closed: {program}",
+  "optionLocalShell": "Local terminal program",
+  "optionLocalShellDefault": "Default shell",
+  "optionLocalShellNote": "The program a local terminal runs, with its arguments, split into words as a shell does: quotes keep words together. Empty runs your login shell, or PowerShell on Windows. For example: pwsh -NoLogo, wsl.exe, /opt/homebrew/bin/fish -l. Local terminals opened after a change use it.",
+  "confirmQuitLocal": "{count, plural, one {# local terminal is open. Quitting ends its program.} other {# local terminals are open. Quitting ends their programs.}}",
+  "@confirmQuitLocal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

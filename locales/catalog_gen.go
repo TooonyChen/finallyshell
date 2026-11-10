@@ -9243,3 +9243,115 @@ func SendToConfirmNote() string { return In(i18n.Locale()).SendToConfirmNote() }
 func (msgs Messages) SendToConfirmNote() string {
 	return Catalog.Format(msgs.locale, "sendToConfirmNote", nil)
 }
+
+// LocalTerminal says "Local terminal"
+// in the language the app shows.
+func LocalTerminal() string { return In(i18n.Locale()).LocalTerminal() }
+
+// LocalTerminal says "Local terminal"
+// in the language of msgs.
+func (msgs Messages) LocalTerminal() string {
+	return Catalog.Format(msgs.locale, "localTerminal", nil)
+}
+
+// LocalTerminalTip says "Open a terminal on this computer"
+// in the language the app shows.
+func LocalTerminalTip() string { return In(i18n.Locale()).LocalTerminalTip() }
+
+// LocalTerminalTip says "Open a terminal on this computer"
+// in the language of msgs.
+func (msgs Messages) LocalTerminalTip() string {
+	return Catalog.Format(msgs.locale, "localTerminalTip", nil)
+}
+
+// LocalThisComputer says "This computer"
+// in the language the app shows.
+func LocalThisComputer() string { return In(i18n.Locale()).LocalThisComputer() }
+
+// LocalThisComputer says "This computer"
+// in the language of msgs.
+func (msgs Messages) LocalThisComputer() string {
+	return Catalog.Format(msgs.locale, "localThisComputer", nil)
+}
+
+// StatusExited says "Exited"
+// in the language the app shows.
+func StatusExited() string { return In(i18n.Locale()).StatusExited() }
+
+// StatusExited says "Exited"
+// in the language of msgs.
+func (msgs Messages) StatusExited() string {
+	return Catalog.Format(msgs.locale, "statusExited", nil)
+}
+
+// LocalNotAvailable says "Not available in a local terminal"
+// in the language the app shows.
+func LocalNotAvailable() string { return In(i18n.Locale()).LocalNotAvailable() }
+
+// LocalNotAvailable says "Not available in a local terminal"
+// in the language of msgs.
+func (msgs Messages) LocalNotAvailable() string {
+	return Catalog.Format(msgs.locale, "localNotAvailable", nil)
+}
+
+// ErrLocalStart says "Could not start {program}: {error}"
+// in the language the app shows.
+func ErrLocalStart(program string, error string) string {
+	return In(i18n.Locale()).ErrLocalStart(program, error)
+}
+
+// ErrLocalStart says "Could not start {program}: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrLocalStart(program string, error string) string {
+	return Catalog.Format(msgs.locale, "errLocalStart", map[string]any{"program": program, "error": error})
+}
+
+// ErrLocalShellQuote says "The local terminal program has a quote that is not closed: {program}"
+// in the language the app shows.
+func ErrLocalShellQuote(program string) string { return In(i18n.Locale()).ErrLocalShellQuote(program) }
+
+// ErrLocalShellQuote says "The local terminal program has a quote that is not closed: {program}"
+// in the language of msgs.
+func (msgs Messages) ErrLocalShellQuote(program string) string {
+	return Catalog.Format(msgs.locale, "errLocalShellQuote", map[string]any{"program": program})
+}
+
+// OptionLocalShell says "Local terminal program"
+// in the language the app shows.
+func OptionLocalShell() string { return In(i18n.Locale()).OptionLocalShell() }
+
+// OptionLocalShell says "Local terminal program"
+// in the language of msgs.
+func (msgs Messages) OptionLocalShell() string {
+	return Catalog.Format(msgs.locale, "optionLocalShell", nil)
+}
+
+// OptionLocalShellDefault says "Default shell"
+// in the language the app shows.
+func OptionLocalShellDefault() string { return In(i18n.Locale()).OptionLocalShellDefault() }
+
+// OptionLocalShellDefault says "Default shell"
+// in the language of msgs.
+func (msgs Messages) OptionLocalShellDefault() string {
+	return Catalog.Format(msgs.locale, "optionLocalShellDefault", nil)
+}
+
+// OptionLocalShellNote says "The program a local terminal runs, with its arguments, split into words as a shell does: quotes keep words together. …"
+// in the language the app shows.
+func OptionLocalShellNote() string { return In(i18n.Locale()).OptionLocalShellNote() }
+
+// OptionLocalShellNote says "The program a local terminal runs, with its arguments, split into words as a shell does: quotes keep words together. …"
+// in the language of msgs.
+func (msgs Messages) OptionLocalShellNote() string {
+	return Catalog.Format(msgs.locale, "optionLocalShellNote", nil)
+}
+
+// ConfirmQuitLocal says "{count, plural, one {# local terminal is open. Quitting ends its program.} other {# local terminals are open. Quittin…"
+// in the language the app shows.
+func ConfirmQuitLocal(count int) string { return In(i18n.Locale()).ConfirmQuitLocal(count) }
+
+// ConfirmQuitLocal says "{count, plural, one {# local terminal is open. Quitting ends its program.} other {# local terminals are open. Quittin…"
+// in the language of msgs.
+func (msgs Messages) ConfirmQuitLocal(count int) string {
+	return Catalog.Format(msgs.locale, "confirmQuitLocal", map[string]any{"count": count})
+}

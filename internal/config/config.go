@@ -145,6 +145,12 @@ type Settings struct {
 	// UTF-8, else one of Encodings. Read it with TermEncodingName or
 	// HostEncoding.
 	TermEncoding Encoding `json:"termEncoding,omitempty"`
+	// LocalShell is the program a local terminal runs, with its
+	// arguments, as a command line split into words as a shell would
+	// (LocalShellCommand): "" for the terminal's default, the login
+	// shell, or PowerShell on Windows. It is this device's own, as paths
+	// differ between computers.
+	LocalShell string `json:"localShell,omitempty"`
 
 	// The terminal's look: the Font, Color scheme and Background image
 	// pages of the options. Zero is the default of each.

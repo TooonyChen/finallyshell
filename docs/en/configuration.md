@@ -41,7 +41,7 @@ instead.
 | `icon-themes/` | File icon themes installed from VSIX files, as `<publisher>.<name>.vsix`. |
 | `sync-state.json` | What the last sync synced (see [Sync](#sync)). |
 | `hosts.before-sync.json` | `hosts.json` as it was before the last sync that changed it. |
-| `history/<host ID>.txt` | The command bar's history of each host (see [Command history](#command-history)). |
+| `history/<host ID>.txt` | The command bar's history of each host, and `history/local.txt` of local terminals (see [Command history](#command-history)). |
 | `quickcommands.json` | The Commands tab's quick commands (see [quickcommands.json](#quickcommandsjson)). |
 | `quickcommands.json.broken-<date-time>` | A copy of a `quickcommands.json` that could not be read. |
 | `commandeditor.txt` | The text of the Commands tab's command editor (see [commandeditor.txt](#commandeditortxt)). |
@@ -170,6 +170,7 @@ default.
 | `termEncoding` | The server's character encoding for hosts set to "Default": `gbk`, `gb18030`, `big5`, `shift_jis`, `euc-jp`, `euc-kr`, `iso-8859-1` or `windows-1252`. | `utf-8`, no conversion (also for unknown values). |
 | `termBackspace` | `ctrl-h`: Backspace sends `^H`, for hosts set to "Default". | `^?` |
 | `termDelete` | `del` or `ctrl-h`: what Delete sends, for hosts set to "Default". | `ESC [3~` |
+| `localShell` | The program a local terminal runs, with its arguments, as a command line split into words as a shell would (quotes allowed), such as `pwsh -NoLogo` or `/opt/homebrew/bin/fish -l`. This computer's own: not synced. | The login shell; PowerShell on Windows. |
 | `optionAsAlt` | `true` makes Option the Alt (Meta) key on macOS. | Off. |
 | `termFontFamily` | Terminal font, a comma-separated list. | JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace |
 | `termFontSize` | Font size, 6 to 48. | 13.5 |
@@ -247,7 +248,7 @@ local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `monitorHidden`, `bottomPanelHidden`, `bottomPanelSide`, `rightPanelWidth`,
 `monitorSide`, `rightMonitorPercent`, `commandEditorShown`,
 `commandEditorWidth`, `commandEditorPercent`, `commandEditorNoEnter`,
-`commandEditorClear`, `termBackground`, `downloadDir`,
+`commandEditorClear`, `termBackground`, `localShell`, `downloadDir`,
 `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are
@@ -289,7 +290,8 @@ A host's file is deleted with the host (when it is deleted for good, not when it
 "Show deleted"), and Options › Terminal › Command bar › "Clear history of
 all hosts…" deletes the folder. You can edit or delete the files while
 the app is closed; one is read the first time the history picker needs
-it in a run.
+it in a run. [Local terminals](features.md#local-terminal) share one
+history, `history/local.txt`, which no host's ID can name.
 
 Sync does not carry the history yet; the format is kept this simple so
 that it could.

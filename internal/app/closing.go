@@ -60,8 +60,13 @@ func (a *App) QuitRequested() bool {
 	if !a.askingQuit {
 		a.askingQuit = true
 		var detail []string
-		if n > 0 && !a.settings.NoConfirmClose {
-			detail = append(detail, locales.ConfirmQuitBody(n))
+		if remote, local := a.localQuitCounts(); n > 0 && !a.settings.NoConfirmClose {
+			if remote > 0 {
+				detail = append(detail, locales.ConfirmQuitBody(remote))
+			}
+			if local > 0 {
+				detail = append(detail, locales.ConfirmQuitLocal(local))
+			}
 		}
 		if unsaved > 0 {
 			detail = append(detail, locales.ConfirmQuitUnsaved(unsaved))
@@ -88,7 +93,7 @@ func (a *App) QuitRequested() bool {
 }
 
 // liveSessions counts the sessions that are connected or connecting,
-// which quitting ends.
+// which quitting ends: local terminals whose program runs too.
 func (a *App) liveSessions() int {
 	n := 0
 	for _, s := range a.sessions {

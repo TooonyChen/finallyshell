@@ -13,6 +13,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
   - [Coding agents in tabs](#coding-agents-in-tabs)
 - [Connections page](#connections-page)
 - [New tab and quick connect](#new-tab-and-quick-connect)
+- [Local terminal](#local-terminal)
 - [Connection manager](#connection-manager)
 - [Import connections](#import-connections)
   - [From FinalShell](#from-finalshell)
@@ -145,7 +146,8 @@ Reconnect, and goes when the tab closes. "Duplicate session" opens a tab
 with the host's name. New tabs, which have no host yet, cannot be
 renamed. In the terminal, F2 goes to the program running there.
 
-The "+" button opens a new tab (see below). New tabs can be selected,
+The "+" button opens a new tab (see below), and the terminal button to
+its left a [local terminal](#local-terminal). New tabs can be selected,
 dragged and closed like sessions, but the count in the title does not
 include them. When every tab is closed, the right side still shows quick
 connect, and connecting there opens a new tab.
@@ -358,6 +360,64 @@ away, without having to be connected once first.
   button and, under it, a "Connection manager" button, so a new user can
   import their connections from another client (see below) before adding
   any.
+- The "Local terminal" button, on both pages, opens a
+  [local terminal](#local-terminal) in this tab.
+
+## Local terminal
+
+A local terminal is a tab whose terminal runs a shell on this computer
+instead of connecting to a server, to try something without leaving the
+app. The terminal button in the session list's header, left of "+", opens
+one at the end of the list and selects it (unless Options › General says
+not to select new tabs); the "Local terminal" button of a new tab's page
+opens one in that tab. There is no default shortcut.
+
+- It runs the Local terminal program of [Options › Terminal](#terminal-defaults)
+  in the home folder, in a pseudo-terminal of MyGo's terminal plugin (a
+  Unix pseudo-terminal on macOS and Linux, ConPTY on Windows). Without
+  one, it runs the user's login shell (`$SHELL`, else `/bin/zsh` on macOS
+  and `/bin/sh` elsewhere), or PowerShell on Windows (`pwsh.exe`, else
+  `powershell.exe`, else `%COMSPEC%` or `cmd.exe`). Text is UTF-8: a host's encoding
+  and Backspace and Delete settings are for servers.
+- Its row looks like a session's, with a computer in place of the status
+  dot, in the dot's color: green while the program runs, gray once it
+  ended, red when it could not start. Its name is "Local terminal", and
+  the line under it "This computer", or the title the program sets (OSC 0
+  and 2), as a terminal app shows it. Rename, Duplicate session (another
+  local terminal), Disconnect (ends the program), Reconnect and Close
+  work as for a session. It is counted in "Sessions (N)".
+- The terminal, its font, colors, mouse, keys, find bar and full screen
+  are a session's. The command bar sends to it, and keeps its commands in
+  a history of its own (`history/local.txt`, see
+  [configuration.md](configuration.md)); Tab completes nothing, as paths
+  and command names are read from a server, and the history picker lists
+  no server history.
+- The Commands tab and its command editor send to it. The Files,
+  Transfers, Tunnels, Processes and Network tabs stay, so the layout
+  doesn't move when switching tabs, and each says "Not available in a
+  local terminal". The bottom panel has no "Open in its own tab" button
+  for it.
+- The server monitor, on either side, shows a line "Local terminal" in
+  place of the server's stats, and nothing is polled. The coding agent's
+  icon on the tab is not shown.
+- Send to: a local terminal is not in "All sessions", so a command meant
+  for every server does not also run on this computer. "Choose sessions…"
+  lists it with its computer icon, to check it like any session.
+  "Current session" sends to it while it is the tab shown.
+- When the program exits the tab says "Exited", and Reconnect, a
+  double click on its row or Enter in the terminal area (the Reconnect
+  shortcut) starts it again in the same tab. A program that cannot be
+  found shows "Could not start …" with the error; one that is found but
+  cannot run writes its error in the terminal and exits.
+- Quitting asks first while a local terminal's program runs, as with
+  connected sessions, in a line of its own ("1 local terminal is open.
+  Quitting ends its program.").
+- Nothing of a local terminal is saved or synced: local terminals do not
+  come back after a restart.
+
+There are no split panes in the terminal area, so there is nothing to
+split for a local terminal either. Monitoring this computer, a local file
+browser and saving local terminals across restarts are not done.
 
 ## Connection manager
 
@@ -1965,6 +2025,21 @@ them.
   defaults". In `settings.json` these are `termBackspace` (`ctrl-h`;
   missing means `^?`) and `termDelete` (`del`, `ctrl-h`; missing means
   `ESC [3~`). Unknown values mean the default.
+
+Under "Local terminal", the "Local terminal program" field is the program
+a [local terminal](#local-terminal) runs, with its arguments, for example
+`wsl.exe`, `cmd.exe`, `pwsh -NoLogo` or `/opt/homebrew/bin/fish -l`.
+Empty, the placeholder "Default shell", runs the user's login shell, or
+PowerShell on Windows. The line is split into words as a shell would,
+without expanding variables or wildcards: blanks separate words, single
+and double quotes keep them together (`sh -c 'echo hi; exec bash'`), and
+a backslash escapes the next character, except on Windows, where it
+stays itself so that paths need no doubling
+(`"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo`). A quote that is not
+closed shows an error in the tab. The program is looked up on `PATH`.
+It applies to local terminals opened, or reconnected, after the change.
+In `settings.json` it is `localShell`; it is this computer's own and not
+synced, as programs and their paths differ between computers.
 
 ### Terminal › Mouse
 

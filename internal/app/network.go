@@ -271,6 +271,10 @@ func (a *App) networkPanel(c *ui.Context) {
 	if s == nil || s.isNewTab() {
 		return
 	}
+	if s.isLocal() {
+		localUnavailable(c)
+		return
+	}
 	a.pollNetwork(s)
 	a.geoTick()
 	ns := &s.net

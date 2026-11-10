@@ -43,7 +43,7 @@ func (a *App) terminalArea(c *ui.Context) {
 		msg.Children(func() {
 			if s.status == statusConnecting {
 				ui.Spinner(c).TextColor(termText).FontSize(22)
-				ui.Text(c, locales.ConnectingTo(s.Host.Target())).TextColor(termText)
+				ui.Text(c, locales.ConnectingTo(s.target())).TextColor(termText)
 			} else {
 				ui.Text(c, s.statusText()).TextColor(termText).FontSize(15)
 			}

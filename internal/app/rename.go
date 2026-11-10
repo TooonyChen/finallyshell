@@ -58,7 +58,8 @@ func (a *App) renaming(s *Session) bool {
 }
 
 // setName names s's tab name for this run, trimmed and on one line: an
-// empty name, or the host's title, gives it back the host's.
+// empty name, or the host's title ("Local terminal" for a local
+// terminal), gives it back the one it had.
 func (s *Session) setName(name string) {
 	name = strings.TrimSpace(strings.Map(func(r rune) rune {
 		if unicode.IsControl(r) {
@@ -66,7 +67,7 @@ func (s *Session) setName(name string) {
 		}
 		return r
 	}, name))
-	if s.Host != nil && name == s.Host.Title() {
+	if s.Host != nil && name == s.Host.Title() || s.isLocal() && name == locales.LocalTerminal() {
 		name = ""
 	}
 	s.name = name
@@ -97,8 +98,11 @@ func (a *App) renameKey(c *ui.Context) {
 }
 
 // renamedTooltip is the tooltip of the row of a session with a name of its
-// own: the host it is a session of.
+// own: the host it is a session of, or that it is a local terminal.
 func renamedTooltip(s *Session) string {
+	if s.isLocal() {
+		return locales.LocalTerminal()
+	}
 	return s.Host.Title() + "\n" + s.Host.Target()
 }
 

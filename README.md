@@ -140,6 +140,7 @@ Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, B
 
 ### And also
 
+- Need a shell on your own computer? The terminal button next to "+" opens a local terminal tab, with the same terminal, command bar and quick commands; Options › Terminal chooses its program (WSL, PowerShell, fish...).
 - Running Claude Code, Codex, Gemini CLI or another coding agent? Its logo shows on the session tab while it runs, so tabs to the same server are easy to tell apart.
 - English and Simplified Chinese, following the system language or chosen in Options.
 - Light and dark appearance, following the system or chosen in Options.

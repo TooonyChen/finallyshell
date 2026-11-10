@@ -74,7 +74,8 @@ func choiceSelect[K ~string](c *ui.Context, name string, value *K, choices []cho
 
 // terminalDefaultsPage is the Terminal page of the options: the encoding
 // of the hosts whose own choice is "Default", and what Backspace and
-// Delete send to them.
+// Delete send to them; the coding agents' icons on session tabs, and the
+// program of local terminals.
 func (a *App) terminalDefaultsPage(c *ui.Context) {
 	ui.Form(c, func() {
 		ui.Field(c, locales.FieldEncoding(), func() {
@@ -111,6 +112,7 @@ func (a *App) terminalDefaultsPage(c *ui.Context) {
 		a.settings.TermEncoding, a.settings.TermBackspace, a.settings.TermDelete = "", "", ""
 	}, defaults)
 	a.agentIconsOption(c)
+	a.localShellOption(c)
 }
 
 // eraseChar is the character Backspace sends with bs, which the server's

@@ -36,8 +36,9 @@ type startState struct {
 // connected to before them are among the other hosts.
 const recentLimit = 30
 
-// isNewTab tells whether s is a new tab, with no host yet.
-func (s *Session) isNewTab() bool { return s.Host == nil }
+// isNewTab tells whether s is a new tab, with no host yet: a local
+// terminal has none either, and is no new tab.
+func (s *Session) isNewTab() bool { return s.Host == nil && !s.local }
 
 // NewTab adds a new tab at the end of the session list and selects it,
 // as the "+" button does; the app starts with one.
@@ -166,7 +167,7 @@ func (a *App) startPage(c *ui.Context, tab *Session) {
 	}
 	ui.Column(c.Key(key)).Fill().Background(theme.Background).Children(func() {
 		if len(a.hosts.Live()) == 0 {
-			a.startEmpty(c)
+			a.startEmpty(c, tab)
 			return
 		}
 		ui.Column(c).Fill().MaxWidth(820).AlignSelf(ui.Center).Padding(24, 28, 16, 28).Gap(12).Children(func() {
@@ -177,8 +178,8 @@ func (a *App) startPage(c *ui.Context, tab *Session) {
 
 // startEmpty is the page while there are no hosts at all. The connection
 // manager's button is there too, as it is where a new user imports the
-// hosts of another client.
-func (a *App) startEmpty(c *ui.Context) {
+// hosts of another client. A local terminal opens from it too, in tab.
+func (a *App) startEmpty(c *ui.Context, tab *Session) {
 	ui.Column(c).Fill().Center().Gap(12).Children(func() {
 		ui.Icon(c, icons.Get("server")).FontSize(40).TextColor(theme.TextMuted)
 		ui.Text(c, locales.NoHostsTitle()).FontSize(16)
@@ -190,12 +191,25 @@ func (a *App) startEmpty(c *ui.Context) {
 			if ui.Button(c, locales.ConnectionManager()).Clicked() {
 				a.showManager(false)
 			}
+			if localButton(c).Clicked() {
+				a.openLocal(tab)
+			}
 		})
 	})
 }
 
+// localButton is the start page's button that opens a local terminal.
+func localButton(c *ui.Context) ui.Element {
+	b := ui.Button(c, "").Label(locales.LocalTerminal()).Tooltip(locales.LocalTerminalTip()).Gap(6).Shrink(0)
+	b.Children(func() {
+		ui.Icon(c, icons.Get("square-terminal")).FontSize(14)
+		ui.Text(c, locales.LocalTerminal()).SingleLine()
+	})
+	return b
+}
+
 // quickConnect is the list of hosts to connect to from tab, with its
-// search, and the buttons under it.
+// search, and the buttons under it: a local terminal opens from it too.
 func (a *App) quickConnect(c *ui.Context, tab *Session, st *startState) {
 	rows := quickRows(quickHosts(a.hosts, st.query))
 	hostAt := hostRows(rows)
@@ -209,6 +223,7 @@ func (a *App) quickConnect(c *ui.Context, tab *Session, st *startState) {
 		st.row++ // a header: the host under it
 	}
 	var connect *config.Host
+	var local bool // Local terminal clicked
 	ui.Row(c).Gap(12).AlignItems(ui.Center).Children(func() {
 		ui.Text(c, locales.QuickConnect()).FontSize(16).Bold().Grow(1)
 		search := ui.SearchField(c, &st.query).Placeholder(locales.SearchHosts()).Label(locales.SearchHosts()).Width(300).AutoFocus()
@@ -296,12 +311,16 @@ func (a *App) quickConnect(c *ui.Context, tab *Session, st *startState) {
 			a.clearRecents()
 		}
 		widgets.Muted(c, locales.WelcomeHint(a.shortcutLabel(scManager))).FontSize(12).Grow(1).TextAlign(ui.End)
+		local = localButton(c).Clicked()
 		if ui.Button(c, locales.ConnectionManager()).Clicked() {
 			a.openManager()
 		}
 	})
-	if connect != nil {
+	switch {
+	case connect != nil:
 		a.openSessionIn(tab, connect)
+	case local:
+		a.openLocal(tab)
 	}
 }
 

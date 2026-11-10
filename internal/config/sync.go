@@ -107,6 +107,7 @@ var (
 		"commandEditorShown", "commandEditorWidth", "commandEditorPercent",
 		"commandEditorNoEnter", "commandEditorClear",
 		"termBackground", // a file in this device's config folder
+		"localShell",     // a program of this device's, whose path differs on others
 		"downloadDir", "askDownloadDir",
 		"sync",
 		// Agreeing to download the location data, or to send the

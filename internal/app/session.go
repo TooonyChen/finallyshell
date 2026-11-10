@@ -34,10 +34,13 @@ var nextSessionID atomic.Int64
 
 // Session is one open tab: a connection to a host, its shell, the
 // server's stats and its files. A new tab has no Host yet: it shows the
-// start page (see start.go).
+// start page (see start.go). A local terminal has none either: it runs a
+// program on this computer (local.go).
 type Session struct {
 	ID     int64
-	Host   *config.Host // nil for a new tab
+	Host   *config.Host // nil for a new tab and a local terminal
+	local  bool         // a local terminal (local.go)
+	title  string       // the title a local terminal's program set
 	status sessionStatus
 	err    error // why it failed or closed; nil when the user disconnected
 	ip     string
@@ -94,6 +97,9 @@ func (s *Session) label() string {
 	}
 	if s.name != "" {
 		return s.name
+	}
+	if s.isLocal() {
+		return locales.LocalTerminal()
 	}
 	return s.Host.Title()
 }
@@ -324,6 +330,9 @@ func (s *Session) statusText() string {
 		if errors.Is(s.err, errConnectionLost) {
 			return locales.ConnectionLost()
 		}
+		if errors.Is(s.err, errShellExited) {
+			return locales.StatusExited()
+		}
 		return locales.StatusDisconnected()
 	}
 	return locales.StatusConnected()
@@ -334,6 +343,7 @@ func describeError(err error) string {
 	var changed *sshx.HostKeyChangedError
 	var keyFile *sshx.KeyFileError
 	var step *stepError
+	var local *localStartError
 	if msg, ok := describeRoute(err); ok { // a proxy or jump host on the way
 		return msg
 	}
@@ -342,6 +352,13 @@ func describeError(err error) string {
 		return ""
 	case errors.Is(err, errConnectionLost):
 		return locales.ConnectionLost()
+	case errors.Is(err, errShellExited):
+		return locales.StatusExited()
+	case errors.As(err, &local):
+		if errors.Is(local.err, config.ErrUnclosedQuote) {
+			return locales.ErrLocalShellQuote(local.program)
+		}
+		return locales.ErrLocalStart(local.program, local.err.Error())
 	case errors.As(err, &changed):
 		return locales.ErrHostKeyChanged(changed.Fingerprint, changed.File)
 	case errors.Is(err, sshx.ErrHostKeyRejected):

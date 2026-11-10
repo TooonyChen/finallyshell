@@ -911,5 +911,16 @@
   "sendToSessions": "{count, plural, other {# 个会话}}",
   "sendToNoSessions": "没有打开的会话。",
   "sendToConfirm": "{count, plural, other {发送到 # 个会话？}}",
-  "sendToConfirmNote": "这些会话都会执行发送的内容。之后发送到同样的会话不会再询问。"
+  "sendToConfirmNote": "这些会话都会执行发送的内容。之后发送到同样的会话不会再询问。",
+  "localTerminal": "本地终端",
+  "localTerminalTip": "在本机打开终端",
+  "localThisComputer": "本机",
+  "statusExited": "已退出",
+  "localNotAvailable": "本地终端不支持此功能",
+  "errLocalStart": "无法启动 {program}：{error}",
+  "errLocalShellQuote": "本地终端程序的引号没有闭合：{program}",
+  "optionLocalShell": "本地终端程序",
+  "optionLocalShellDefault": "默认 shell",
+  "optionLocalShellNote": "本地终端运行的程序和参数，像 shell 一样按空格分成多个参数，引号里的空格不分开。留空运行你的登录 shell，Windows 上运行 PowerShell。例如：pwsh -NoLogo、wsl.exe、/opt/homebrew/bin/fish -l。修改后新打开的本地终端才会使用。",
+  "confirmQuitLocal": "{count, plural, other {还有 # 个本地终端打开，退出会结束其中的程序。}}"
 }

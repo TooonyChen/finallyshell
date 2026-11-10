@@ -417,13 +417,13 @@ func TestNewTabRows(t *testing.T) {
 	a, _, tt, _ := startApp(t)
 	s := demoSession(a, "web-1", "203.0.113.10") // a session after the new tab
 
-	// The "+" button, after the options button, adds another new tab
-	// and selects it.
+	// The "+" button, after the options and local terminal buttons, adds
+	// another new tab and selects it.
 	set, ok := tt.Find(locales.Options())
 	if !ok {
 		t.Fatal("no options button")
 	}
-	tt.ClickAt(set.X+set.W+2+set.W/2, set.Y+set.H/2)
+	tt.ClickAt(set.X+2*(set.W+2)+set.W/2, set.Y+set.H/2)
 	if len(a.sessions) != 3 || !a.sessions[2].isNewTab() || a.active != 2 {
 		t.Fatalf("+ made %d rows, active %d", len(a.sessions), a.active)
 	}

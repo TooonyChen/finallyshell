@@ -205,6 +205,10 @@ func (a *App) filePanel(c *ui.Context) {
 	if s == nil || s.isNewTab() {
 		return
 	}
+	if s.isLocal() {
+		localUnavailable(c)
+		return
+	}
 	f := &s.files
 	ui.Column(c.Key(s.ID)).Grow(1).Children(func() {
 		ui.Row(c).Padding(4, 8).Gap(4).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {

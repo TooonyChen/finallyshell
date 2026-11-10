@@ -255,13 +255,17 @@ func (a *App) sendLine(s *Session, line string, enter bool) {
 	s.term.Send([]byte(line + "\r"))
 	s.shellCommandSent()
 	if cmd := strings.TrimSpace(line); a.historyOn() && config.Keepable(cmd) {
-		a.addHistory(s.Host.ID, cmd)
+		a.addHistory(s.historyID(), cmd)
 	}
 }
 
 // complete is Tab: it opens the path picker or command completion for
-// the word at the caret.
+// the word at the caret. A local terminal has neither: it reads the
+// server's folders and commands.
 func (a *App) complete(s *Session, e barEdit, caret int) {
+	if s.isLocal() {
+		return
+	}
 	b := &s.bar
 	r := []rune(e.text)
 	start, _ := wordBounds(r, caret)

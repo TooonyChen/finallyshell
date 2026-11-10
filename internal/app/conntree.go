@@ -132,7 +132,8 @@ func (a *App) switchLeftPanel() {
 }
 
 // leftPanelHeader is the switch between the pages, and the buttons: the
-// options, and a new tab, or a new connection on the Connections page.
+// options, then a local terminal and a new tab, or a new connection on
+// the Connections page.
 func (a *App) leftPanelHeader(c *ui.Context) {
 	ui.Row(c).Padding(6, 6, 6, 8).Gap(2).AlignItems(ui.Center).Children(func() {
 		page := a.left.page
@@ -140,20 +141,30 @@ func (a *App) leftPanelHeader(c *ui.Context) {
 			a.setLeftPage(page)
 		}
 		ui.Spacer(c)
-		if widgets.IconButton(c, "settings", locales.Options()).Clicked() {
+		if headerButton(c, "settings", locales.Options()).Clicked() {
 			a.openOptions()
 		}
 		if a.left.page == leftConnections {
-			if widgets.IconButton(c, "plus", locales.NewConnection()).Clicked() {
+			if headerButton(c, "plus", locales.NewConnection()).Clicked() {
 				m := &a.connTree
 				a.newConnectionIn(m, a.treeTarget(m))
 			}
 			return
 		}
-		if widgets.IconButton(c, "plus", locales.NewTab()).Clicked() {
+		if headerButton(c, "square-terminal", locales.LocalTerminal()).Clicked() {
+			a.openLocal(nil)
+		}
+		if headerButton(c, "plus", locales.NewTab()).Clicked() {
 			a.NewTab()
 		}
 	})
+}
+
+// headerButton is a button of the left panel's header: an icon button a
+// little narrower than the others, so that the page switch keeps its
+// labels beside three of them in a sidebar of the default width.
+func headerButton(c *ui.Context, icon, label string) ui.Element {
+	return widgets.IconButton(c, icon, label).Width(20)
 }
 
 // leftPageSwitch is the switch between the pages, a segmented control
@@ -166,7 +177,7 @@ func leftPageSwitch(c *ui.Context, page *int, labels ...string) ui.Element {
 		Radius(theme.Radius).Background(theme.Surface).Border(1, theme.Border)
 	track.Children(func() {
 		for i, label := range labels {
-			s := parts.Segment(i).MinWidth(0).Shrink(1).Padding(theme.Space(1), theme.Space(2.5)).
+			s := parts.Segment(i).MinWidth(0).Shrink(1).Padding(theme.Space(1), theme.Space(2)).
 				Radius(max(theme.Radius-theme.Space(0.5), 0)).TextColor(theme.Text)
 			switch {
 			case i == *page && theme.Dark:
@@ -320,7 +331,7 @@ func hostTooltip(h *config.Host) string {
 // connecting. ok is false when none is.
 func (a *App) sessionDot(h *config.Host) (color ui.Color, ok bool) {
 	for _, s := range a.sessions {
-		if s.isNewTab() || s.Host.ID != h.ID {
+		if s.Host == nil || s.Host.ID != h.ID { // a new tab, a local terminal
 			continue
 		}
 		switch s.status {

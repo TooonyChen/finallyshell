@@ -34,7 +34,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `icon-themes/` | 从 VSIX 文件安装的文件图标主题，存成 `<发布者>.<名称>.vsix`。 |
 | `sync-state.json` | 上次同步的状态（见[同步](#同步)）。 |
 | `hosts.before-sync.json` | 上次改动了它的同步之前的 `hosts.json`。 |
-| `history/<主机 ID>.txt` | 命令输入框按主机保存的历史（见[命令历史](#命令历史)）。 |
+| `history/<主机 ID>.txt` | 命令输入框按主机保存的历史，本地终端的历史是 `history/local.txt`（见[命令历史](#命令历史)）。 |
 | `quickcommands.json` | 命令页的快捷命令（见 [quickcommands.json](#quickcommandsjson)）。 |
 | `quickcommands.json.broken-<日期-时间>` | 读不出来的 `quickcommands.json` 的副本。 |
 | `commandeditor.txt` | 命令页里命令编辑器的文本（见 [commandeditor.txt](#commandeditortxt)）。 |
@@ -140,6 +140,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `termEncoding` | 选“默认”的主机用的服务器字符编码：`gbk`、`gb18030`、`big5`、`shift_jis`、`euc-jp`、`euc-kr`、`iso-8859-1` 或 `windows-1252`。 | `utf-8`，不转码（不认识的值也是）。 |
 | `termBackspace` | `ctrl-h`：选“默认”的主机退格键发送 `^H`。 | `^?` |
 | `termDelete` | `del` 或 `ctrl-h`：选“默认”的主机删除键发送什么。 | `ESC [3~` |
+| `localShell` | 本地终端运行的程序和参数，一行命令，像 shell 那样分成多个参数（可以用引号），比如 `pwsh -NoLogo` 或 `/opt/homebrew/bin/fish -l`。这台电脑自己的，不同步。 | 登录 shell；Windows 上是 PowerShell。 |
 | `optionAsAlt` | `true` 时在 macOS 上把 Option 用作 Alt（Meta）键。 | 关。 |
 | `termFontFamily` | 终端字体，逗号隔开的列表。 | JetBrains Mono, Cascadia Mono, Consolas, Menlo, DejaVu Sans Mono, monospace |
 | `termFontSize` | 字号，6 到 48。 | 13.5 |
@@ -197,7 +198,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 
@@ -208,7 +209,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 ## 命令历史
 
-[命令输入框](features.md#命令输入框)把从它发送的命令存在 `history/<主机 ID>.txt`，每台主机一个文件，文件名是主机在 `hosts.json` 里的 `id`：UTF-8 纯文本，一行一条命令，最旧的在前，每条只留一次（再次发送的移到最后）。条数不限；文件超过 10 MB 时删掉最旧的。空命令和含有控制字符（制表符除外，比如第二行、转义序列）的命令不保存，文件里有也不读取。彻底删除主机时一起删除它的文件（删到“显示已删除”时不删），“选项 › 终端 › 命令输入框 › 清空所有主机的历史…”删除整个文件夹。程序关闭时可以编辑或删除这些文件；每次运行中，历史列表第一次用到时才读取。
+[命令输入框](features.md#命令输入框)把从它发送的命令存在 `history/<主机 ID>.txt`，每台主机一个文件，文件名是主机在 `hosts.json` 里的 `id`：UTF-8 纯文本，一行一条命令，最旧的在前，每条只留一次（再次发送的移到最后）。条数不限；文件超过 10 MB 时删掉最旧的。空命令和含有控制字符（制表符除外，比如第二行、转义序列）的命令不保存，文件里有也不读取。彻底删除主机时一起删除它的文件（删到“显示已删除”时不删），“选项 › 终端 › 命令输入框 › 清空所有主机的历史…”删除整个文件夹。程序关闭时可以编辑或删除这些文件；每次运行中，历史列表第一次用到时才读取。[本地终端](features.md#本地终端)共用一份历史 `history/local.txt`，不会和任何主机的 ID 重名。
 
 同步暂时不包括历史；文件格式保持简单，以便以后同步。
 

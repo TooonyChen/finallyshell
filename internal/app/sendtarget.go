@@ -21,7 +21,10 @@ import (
 // does: its encoding, its folder follower and its host's history. A
 // panel row is a view of its session, not a session, and a new tab has
 // none: neither is sent to, and a session is sent to once. Sessions not
-// connected are skipped, the others still get the line.
+// connected are skipped, the others still get the line. A local
+// terminal (local.go) is not in All sessions, so that a command meant
+// for every server does not also run on this computer; Choose sessions
+// lists it, to check it like any session.
 //
 // The first send after the target changes to anything but the current
 // session asks first, naming the sessions; later sends to the same
@@ -66,12 +69,25 @@ func (a *App) setTarget(m targetMode) {
 	}
 }
 
-// targetSessions are the sessions a send target could hold: each row
-// that is a session of its own, not a new tab nor a panel row.
+// targetSessions are the sessions a send target could hold, which Choose
+// sessions lists: each row that is a session of its own, not a new tab
+// nor a panel row, local terminals included.
 func (a *App) targetSessions() []*Session {
 	var out []*Session
 	for _, s := range a.sessions {
 		if !s.isNewTab() {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// allSessions are the sessions of All sessions: those of servers, the
+// target sessions without the local terminals.
+func (a *App) allSessions() []*Session {
+	var out []*Session
+	for _, s := range a.targetSessions() {
+		if !s.isLocal() {
 			out = append(out, s)
 		}
 	}
@@ -107,7 +123,7 @@ func (a *App) sendTargets(cur *Session) []*Session {
 	var from []*Session
 	switch a.sendTo.mode {
 	case targetAll:
-		from = a.targetSessions()
+		from = a.allSessions()
 	case targetChosen:
 		from = a.chosenSessions()
 	default:
@@ -164,7 +180,7 @@ func (a *App) targetLabel(short bool) string {
 	switch a.sendTo.mode {
 	case targetAll:
 		n := 0
-		for _, s := range a.targetSessions() {
+		for _, s := range a.allSessions() {
 			if barLive(s) {
 				n++
 			}
@@ -276,7 +292,7 @@ func (a *App) pickerRow(c *ui.Context, s *Session) {
 	}
 	row.Children(func() {
 		ui.Checkbox(c, &on, "").Label(locales.SendToTip(s.label())).Shrink(0)
-		widgets.StatusDot(c, s.statusColor(theme))
+		sessionMark(c, s, false)
 		ui.Text(c, s.label()).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 	})
 	if row.Clicked() {
@@ -313,9 +329,9 @@ func (a *App) sendAskDialog(c *ui.Context) {
 			ui.Scroll(c).MaxHeight(240).Gap(4).Padding(8).Radius(6).Background(colors.note).Children(func() {
 				for _, s := range q.sessions {
 					ui.Row(c).Gap(8).AlignItems(ui.Center).Children(func() {
-						widgets.StatusDot(c, s.statusColor(theme))
+						sessionMark(c, s, false)
 						ui.Text(c, s.label()).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
-						widgets.Muted(c, s.Host.Target()).FontSize(12).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
+						widgets.Muted(c, s.target()).FontSize(12).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
 					})
 				}
 			})

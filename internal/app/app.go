@@ -487,6 +487,10 @@ func (a *App) reconnect(s *Session) {
 	if s.isNewTab() || !slices.Contains(a.sessions, s) {
 		return
 	}
+	if s.isLocal() { // its program again, in the same tab
+		a.connectLocal(s)
+		return
+	}
 	// A jump host or a proxy with a password not known yet, as the host
 	// was edited to go through it, or one forgotten as it did not work.
 	if a.readChainSecrets(s.Host, func() { a.reconnect(s) }) {
