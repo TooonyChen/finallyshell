@@ -385,13 +385,17 @@ func TestShellDirScriptPanes(t *testing.T) {
 		}
 		os.Remove(out)
 		// The second starts a while after the first, as a pane opened
-		// later; the script runs once both are there.
+		// later; the script runs once both are there. Both are waited for
+		// once killed, so that the next case finds the ptys free: a sleep
+		// still holding one as its terminal would keep the next one's
+		// setsid -c from taking it.
 		cmd := exec.Command(sshd, "-c", `(cd "$5" && exec "$1" -c sleep 30 <"$3" >"$3" 2>&1) & a=$!
 sleep 0.2
 (cd "$6" && exec "$1" -c sleep 30 <"$4" >"$4" 2>&1) & b=$!
 sleep 0.2
 (cd / && exec "$1" sh -s <"$2" >"$7")
-kill $a $b`, "sshd", setsid, script, pts1.Name(), pts2.Name(), dirs[0], dirs[1], out)
+kill $a $b
+wait $a $b 2>/dev/null`, "sshd", setsid, script, pts1.Name(), pts2.Name(), dirs[0], dirs[1], out)
 		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 		if err := cmd.Start(); err != nil {
 			t.Fatal(err)
