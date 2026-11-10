@@ -260,8 +260,8 @@ func TestBackgroundUnderFindBarAndFullScreen(t *testing.T) {
 	tt.Frame()
 	tt.Type("deploy")
 	tt.Frame()
-	if !s.find.open || s.term.SearchStatus().Total == 0 {
-		t.Errorf("find bar open %v, matches %+v", s.find.open, s.term.SearchStatus())
+	if !s.pane().find.open || s.term().SearchStatus().Total == 0 {
+		t.Errorf("find bar open %v, matches %+v", s.pane().find.open, s.term().SearchStatus())
 	}
 	saveShot(t, tt, "terminal-background-find-en.png")
 

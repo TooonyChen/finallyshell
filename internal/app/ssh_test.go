@@ -25,8 +25,8 @@ import (
 //	FINALLYSHELL_TEST_SSH=tester:secret@127.0.0.1:2222 go test ./internal/app -run SSH
 func TestSSH(t *testing.T) {
 	a, p, s := connectTestServer(t)
-	s.term.Send([]byte("echo hello-$((40+2))\r"))
-	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term.Text(), "hello-42") })
+	s.term().Send([]byte("echo hello-$((40+2))\r"))
+	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term().Text(), "hello-42") })
 	p.until(t, "the server's stats", func() bool { return s.stats.OK && s.stats.MemTotal > 0 && len(s.stats.LatHist) >= 2 })
 	// Every network interface, each with a history of its own, lo last
 	// and never the busiest.
@@ -72,8 +72,8 @@ func TestSSH(t *testing.T) {
 	testArchiveTransfers(t, a, p, s, home)
 
 	// The shell's TERM is the host's terminal type.
-	s.term.Send([]byte("echo term-$TERM\r"))
-	p.until(t, "the default TERM", func() bool { return strings.Contains(s.term.Text(), "term-xterm-256color") })
+	s.term().Send([]byte("echo term-$TERM\r"))
+	p.until(t, "the default TERM", func() bool { return strings.Contains(s.term().Text(), "term-xterm-256color") })
 
 	// Reconnecting asks nothing: the key is known now. It takes the
 	// host's changes.
@@ -83,10 +83,10 @@ func TestSSH(t *testing.T) {
 	if s.status != statusConnected {
 		t.Fatalf("reconnect: status %d err %v question %v", s.status, s.err, s.hostKeyQ != nil)
 	}
-	s.term.Send([]byte("echo term-$TERM\r"))
-	p.until(t, "the host's TERM", func() bool { return strings.Contains(s.term.Text(), "term-vt220") })
-	s.term.Send([]byte("stty -a | tr ';' '\\n' | grep -w erase | tr -d ' ' | sed 's/^/stty-/'\r"))
-	p.until(t, "the erase character", func() bool { return strings.Contains(s.term.Text(), "stty-erase=^H") })
+	s.term().Send([]byte("echo term-$TERM\r"))
+	p.until(t, "the host's TERM", func() bool { return strings.Contains(s.term().Text(), "term-vt220") })
+	s.term().Send([]byte("stty -a | tr ';' '\\n' | grep -w erase | tr -d ' ' | sed 's/^/stty-/'\r"))
+	p.until(t, "the erase character", func() bool { return strings.Contains(s.term().Text(), "stty-erase=^H") })
 	s.Host.TermType, s.Host.Backspace = "", config.BackspaceDEL
 
 	// A wrong password fails with a message in the app's words.
@@ -157,7 +157,7 @@ func TestSSHProcesses(t *testing.T) {
 	defer a.CloseAll()
 	args := "sleep " + strconv.Itoa(100000+rand.IntN(800000))
 	other := "sleep " + strconv.Itoa(900000+rand.IntN(90000))
-	s.term.Send([]byte("FS_PROCS_TEST=from-finallyshell " + args + " &\r" + other + " &\r"))
+	s.term().Send([]byte("FS_PROCS_TEST=from-finallyshell " + args + " &\r" + other + " &\r"))
 	a.bottomTab = tabProcesses
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
@@ -229,9 +229,9 @@ func TestSSHFollowShell(t *testing.T) {
 	defer a.CloseAll()
 	p.until(t, "the home directory", func() bool { return s.files.cwd != "" && !s.files.loading })
 	home := s.files.cwd
-	p.until(t, "the shell's folder as it starts", func() bool { return s.shell.dir == home })
+	p.until(t, "the shell's folder as it starts", func() bool { return s.pane().shell.dir == home })
 	run := func(cmd string) {
-		s.term.Send([]byte(cmd + "\r"))
+		s.term().Send([]byte(cmd + "\r"))
 		s.shellCommandSent() // as Enter does
 	}
 	stays := func(dir string) {
@@ -272,18 +272,18 @@ func TestSSHAgentIcon(t *testing.T) {
 		t.Fatal(err, stderr)
 	}
 	defer monitor.RunScript(context.Background(), s.client, "rm -rf ~/"+dir+"\n")
-	p.until(t, "the shell's folder as it starts", func() bool { return s.shell.dir != "" })
+	p.until(t, "the shell's folder as it starts", func() bool { return s.pane().shell.dir != "" })
 	if a.shownAgent(s) != nil {
 		t.Fatalf("an agent at the prompt: %v", a.shownAgent(s))
 	}
-	s.term.Send([]byte("~/" + dir + "/claude --resume\r"))
-	s.shellKey(0, ui.KeyEnter) // as Enter does
+	s.term().Send([]byte("~/" + dir + "/claude --resume\r"))
+	s.pane().shellKey(0, ui.KeyEnter) // as Enter does
 	p.until(t, "Claude Code", func() bool { return a.shownAgent(s) != nil })
 	if ag := a.shownAgent(s); ag.Name != "Claude Code" {
 		t.Fatalf("agent %s", ag.Name)
 	}
-	s.term.Send([]byte{3})
-	s.shellKey(ui.Ctrl, ui.KeyC) // as Ctrl+C does
+	s.term().Send([]byte{3})
+	s.pane().shellKey(ui.Ctrl, ui.KeyC) // as Ctrl+C does
 	p.until(t, "no agent", func() bool { return a.shownAgent(s) == nil })
 }
 
@@ -295,7 +295,7 @@ func TestSSHNetwork(t *testing.T) {
 	defer a.CloseAll()
 	port := strconv.Itoa(40000 + rand.IntN(20000))
 	py := `import socket, time; l = socket.socket(); l.bind(("127.0.0.1", ` + port + `)); l.listen(); c = socket.create_connection(("127.0.0.1", ` + port + `)); s, _ = l.accept(); time.sleep(60)`
-	s.term.Send([]byte("python3 -c '" + py + "' &\r"))
+	s.term().Send([]byte("python3 -c '" + py + "' &\r"))
 	a.bottomTab = tabNetwork
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt

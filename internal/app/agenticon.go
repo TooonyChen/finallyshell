@@ -22,8 +22,8 @@ import (
 // logo to go when the agent ends by itself; tests shorten it.
 var agentPoll = 10 * time.Second
 
-// agentWatch is what a session's follower shares with the UI thread of
-// the program in the shell's foreground.
+// agentWatch is what a pane's follower shares with the UI thread of the
+// program in the shell's foreground.
 type agentWatch struct {
 	// on is whether the tabs show agents (the setting): the follower
 	// reads the program only then.
@@ -37,15 +37,15 @@ type agentWatch struct {
 	wake chan struct{}
 }
 
-// shellKey tells s's follower of a key typed in the terminal: Enter
+// shellKey tells p's follower of a key typed in its terminal: Enter
 // sends a command, which may change the directory and start a program;
 // Ctrl+C, Ctrl+D and Ctrl+Z end or stop one.
-func (s *Session) shellKey(mods ui.Modifiers, key ui.Key) {
+func (p *pane) shellKey(mods ui.Modifiers, key ui.Key) {
 	switch {
 	case key == ui.KeyEnter:
-		s.shellCommandSent()
+		p.shellCommandSent()
 	case mods == ui.Ctrl && (key == ui.KeyC || key == ui.KeyD || key == ui.KeyZ):
-		if w := s.shell.agents; w != nil && w.on.Load() {
+		if w := p.shell.agents; w != nil && w.on.Load() {
 			w.poke()
 		}
 	}
@@ -60,20 +60,22 @@ func (w *agentWatch) poke() {
 	}
 }
 
-// shellAgentRead takes a read of the agent in s's shell, nil for none.
-func (a *App) shellAgentRead(s *Session, ag *monitor.Agent) {
+// shellAgentRead takes a read of the agent in p's shell, nil for none.
+func (a *App) shellAgentRead(p *pane, ag *monitor.Agent) {
 	if a.settings.NoAgentIcons {
 		ag = nil // turned off since the read
 	}
-	s.shell.agent = ag
+	p.shell.agent = ag
 }
 
-// shownAgent is the agent s's tab shows: nil while it shows none.
+// shownAgent is the agent s's tab shows, the one in its focused pane's
+// shell: nil while it shows none.
 func (a *App) shownAgent(s *Session) *monitor.Agent {
-	if a.settings.NoAgentIcons || s.status != statusConnected {
+	p := s.pane()
+	if a.settings.NoAgentIcons || s.status != statusConnected || p == nil {
 		return nil
 	}
-	return s.shell.agent
+	return p.shell.agent
 }
 
 // applyAgentIcons tells every session's follower whether the tabs show
@@ -82,16 +84,18 @@ func (a *App) shownAgent(s *Session) *monitor.Agent {
 func (a *App) applyAgentIcons() {
 	on := !a.settings.NoAgentIcons
 	for _, s := range a.sessions {
-		w := s.shell.agents
-		if w == nil || w.on.Load() == on {
-			continue
+		for _, p := range s.panes.panes() {
+			w := p.shell.agents
+			if w == nil || w.on.Load() == on {
+				continue
+			}
+			w.turns.Add(1) // before on, which the follower reads after it
+			w.on.Store(on)
+			if !on {
+				p.shell.agent = nil
+			}
+			w.poke()
 		}
-		w.turns.Add(1) // before on, which the follower reads after it
-		w.on.Store(on)
-		if !on {
-			s.shell.agent = nil
-		}
-		w.poke()
 	}
 }
 
@@ -104,16 +108,20 @@ func agentIcon(ag *monitor.Agent) *ui.SVG {
 }
 
 // sessionName is the name line of s's row: its name, and after it the
-// logo of the agent running in its shell, which the name is cut before.
+// logo of the agent running in its focused pane's shell, and how many
+// panes it has, which the name is cut before.
 func (a *App) sessionName(c *ui.Context, s *Session, active bool) {
 	ag := a.shownAgent(s)
-	if ag == nil {
+	if ag == nil && !s.split() {
 		rowName(c, s.label(), active)
 		return
 	}
 	ui.Row(c).Gap(5).AlignItems(ui.Center).MinWidth(0).Children(func() {
 		rowName(c, s.label(), active).MinWidth(0).Shrink(1)
-		ui.Icon(c, agentIcon(ag)).FontSize(14).Shrink(0).Label(ag.Name).Tooltip(ag.Name)
+		if ag != nil {
+			ui.Icon(c, agentIcon(ag)).FontSize(14).Shrink(0).Label(ag.Name).Tooltip(ag.Name)
+		}
+		paneBadge(c, s, active)
 	})
 }
 

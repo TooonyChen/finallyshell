@@ -185,11 +185,11 @@ func TestCmdEditorSend(t *testing.T) {
 	if got := cmdText(a); got != "cd /srv/app\ngit pull\ndocker compose ps" {
 		t.Fatalf("typed %q", got)
 	}
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Fatalf("typing sent %q", got)
 	}
 	clickSend(t, tt, locales.QuickSend())
-	if got := conn.sent(t, s.term); got != "cd /srv/app\rgit pull\rdocker compose ps\r" {
+	if got := conn.sent(t, s.term()); got != "cd /srv/app\rgit pull\rdocker compose ps\r" {
 		t.Errorf("Send sent %q", got)
 	}
 	if got := cmdText(a); got == "" {
@@ -202,7 +202,7 @@ func TestCmdEditorSend(t *testing.T) {
 		t.Fatalf("no Send selection; texts %q", tt.Texts())
 	}
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "git pull\r" {
+	if got := conn.sent(t, s.term()); got != "git pull\r" {
 		t.Errorf("Send selection sent %q", got)
 	}
 
@@ -210,7 +210,7 @@ func TestCmdEditorSend(t *testing.T) {
 	a.quickUI.box.focus = true
 	setCmdText(a, tt, "uptime\nwhoami")
 	tt.Key(ui.Cmd, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "uptime\rwhoami\r" {
+	if got := conn.sent(t, s.term()); got != "uptime\rwhoami\r" {
 		t.Errorf("%s sent %q", cmdSendKey.label("linux", false), got)
 	}
 	if got := cmdText(a); got != "uptime\nwhoami" {
@@ -234,7 +234,7 @@ func TestCmdEditorSend(t *testing.T) {
 	tt.Key(0, ui.KeyEscape)
 	tt.Frame()
 	tt.Key(0, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "\r" {
+	if got := conn.sent(t, s.term()); got != "\r" {
 		t.Errorf("Enter after Escape sent %q", got)
 	}
 }
@@ -258,12 +258,12 @@ func TestCmdEditorOptions(t *testing.T) {
 		t.Fatal("Enter off not saved")
 	}
 	clickSend(t, tt, locales.QuickSend())
-	if got := conn.sent(t, s.term); got != "cd /srv\rgit pull " {
+	if got := conn.sent(t, s.term()); got != "cd /srv\rgit pull " {
 		t.Errorf("Enter off sent %q", got)
 	}
 	tt.Frame()
 	tt.Key(0, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "\r" {
+	if got := conn.sent(t, s.term()); got != "\r" {
 		t.Errorf("Enter after the send sent %q, not in the terminal", got)
 	}
 
@@ -283,14 +283,14 @@ func TestCmdEditorOptions(t *testing.T) {
 	setCmdText(a, tt, "one\ntwo\nthree")
 	selectLines(a, tt, 1, 1)
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "two\r" {
+	if got := conn.sent(t, s.term()); got != "two\r" {
 		t.Errorf("sent %q", got)
 	}
 	if got := cmdText(a); got != "one\nthree" {
 		t.Errorf("left %q", got)
 	}
 	clickSend(t, tt, locales.QuickSend())
-	if got := conn.sent(t, s.term); got != "one\rthree\r" {
+	if got := conn.sent(t, s.term()); got != "one\rthree\r" {
 		t.Errorf("sent %q", got)
 	}
 	if got := cmdText(a); got != "" {
@@ -329,19 +329,19 @@ func TestCmdEditorWholeLines(t *testing.T) {
 	// From "/srv" to "git p": both lines, whole.
 	selectText(a, tt, strings.Index(text, "/srv"), strings.Index(text, "ull"))
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "cd /srv/app\rgit pull\r" {
+	if got := conn.sent(t, s.term()); got != "cd /srv/app\rgit pull\r" {
 		t.Errorf("a partial selection sent %q", got)
 	}
 	// Dragged backwards, within a line.
 	selectText(a, tt, strings.Index(text, "ps"), strings.Index(text, "compose"))
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "docker compose ps\r" {
+	if got := conn.sent(t, s.term()); got != "docker compose ps\r" {
 		t.Errorf("a selection in a line sent %q", got)
 	}
 	// From the start of line 2 to the start of line 3: line 2 alone.
 	selectText(a, tt, strings.Index(text, "git"), strings.Index(text, "docker"))
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "git pull\r" {
+	if got := conn.sent(t, s.term()); got != "git pull\r" {
 		t.Errorf("a selection ending at a line's start sent %q", got)
 	}
 	// Clear after sending takes the whole lines out, and Cmd+Z puts them
@@ -349,7 +349,7 @@ func TestCmdEditorWholeLines(t *testing.T) {
 	a.settings.CommandEditorClear = true
 	selectText(a, tt, strings.Index(text, "pull"), strings.Index(text, "compose"))
 	clickSend(t, tt, locales.CmdEditorSendSelection())
-	if got := conn.sent(t, s.term); got != "git pull\rdocker compose ps\r" {
+	if got := conn.sent(t, s.term()); got != "git pull\rdocker compose ps\r" {
 		t.Errorf("sent %q", got)
 	}
 	if got := cmdText(a); got != "cd /srv/app" {
@@ -524,7 +524,7 @@ func TestCmdEditorDisabled(t *testing.T) {
 	a.quickUI.box.focus = true
 	tt.Frame()
 	tt.Key(ui.Cmd, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Errorf("the key sent %q while not connected", got)
 	}
 	s.status = statusConnected

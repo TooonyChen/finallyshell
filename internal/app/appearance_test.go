@@ -117,7 +117,7 @@ func lookTerminal(t *testing.T, a *App, s *Session) *lookConn {
 	}
 	t.Cleanup(func() { term.Close(); close(done) })
 	term.Feed([]byte("[root@web-1 ~]# ls\r\n\x1b[1;34mlogs\x1b[0m  \x1b[1;32mdeploy.sh\x1b[0m  中文文件名.txt\r\n[root@web-1 ~]# "))
-	s.term = term
+	s.setTerm(term)
 	return conn
 }
 
@@ -193,7 +193,7 @@ func TestLookAppliesToOpenTerminals(t *testing.T) {
 		bg, h := conn.told()
 		return bg == dracula && h > cellH
 	})
-	if text := s.term.Text(); !strings.Contains(text, "deploy.sh") {
+	if text := s.term().Text(); !strings.Contains(text, "deploy.sh") {
 		t.Errorf("the terminal lost its text: %q", text)
 	}
 
@@ -207,7 +207,7 @@ func TestLookAppliesToOpenTerminals(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer term.Close()
-	connecting.term = term
+	connecting.setTerm(term)
 	a.updateTerminal(term, made)
 	a.active = 1
 	until(t, tt, "the late terminal's look", func() bool {

@@ -133,7 +133,7 @@ func TestTerminalKeysReachShell(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer term.Close()
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte("[root@web-1 ~]# copy me"))
 
 	tt := ui.NewTester(a.View, 1280, 820)
@@ -202,10 +202,10 @@ func TestTerminalKeysReachShell(t *testing.T) {
 
 	// The find bar takes the keyboard, and Escape gives it back to the
 	// terminal.
-	window("Ctrl+Shift+F", ui.Ctrl|ui.Shift, ui.KeyF, func() bool { return s.find.open })
+	window("Ctrl+Shift+F", ui.Ctrl|ui.Shift, ui.KeyF, func() bool { return s.pane().find.open })
 	tt.Key(0, ui.KeyEscape)
-	if got := conn.sent(t, term); got != "" || s.find.open {
-		t.Errorf("Escape in the find bar: sent %q, open %v", got, s.find.open)
+	if got := conn.sent(t, term); got != "" || s.pane().find.open {
+		t.Errorf("Escape in the find bar: sent %q, open %v", got, s.pane().find.open)
 	}
 	tt.Frame()
 	press(keyCase{"Ctrl+C after the find bar", ui.Ctrl, ui.KeyC, "\x03"})
@@ -263,7 +263,7 @@ func TestReboundKeys(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer term.Close()
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte("[root@web-1 ~]# copy me"))
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
@@ -291,8 +291,8 @@ func TestReboundKeys(t *testing.T) {
 		t.Errorf("Alt+2: sent %q, active %d", got, a.active)
 	}
 	tt.Key(ui.Ctrl|ui.Shift, ui.KeyF) // find has no key
-	if got := conn.sent(t, term); s.find.open {
-		t.Errorf("Ctrl+Shift+F: sent %q, find open %v", got, s.find.open)
+	if got := conn.sent(t, term); s.pane().find.open {
+		t.Errorf("Ctrl+Shift+F: sent %q, find open %v", got, s.pane().find.open)
 	}
 
 	tt.SetClipboard("")
@@ -331,7 +331,7 @@ func TestSSHControlKeys(t *testing.T) {
 		t.Helper()
 		p.until(t, strconv.Quote(line), func() bool {
 			count := 0
-			for l := range strings.SplitSeq(s.term.Text(), "\n") {
+			for l := range strings.SplitSeq(s.term().Text(), "\n") {
 				if strings.TrimRight(l, " ") == line {
 					count++
 				}
@@ -370,7 +370,7 @@ func TestSSHControlKeys(t *testing.T) {
 	tt.Key(ui.Ctrl, ui.KeyZ)
 	enter("jobs -s; echo jobs-$((4+5))")
 	shows("jobs-9", 1)
-	if text := s.term.Text(); !strings.Contains(text, "Stopped") || !strings.Contains(text, "sleep 31") {
+	if text := s.term().Text(); !strings.Contains(text, "Stopped") || !strings.Contains(text, "sleep 31") {
 		t.Errorf("no stopped job:\n%s", text)
 	}
 	enter("kill -9 %1")

@@ -60,14 +60,14 @@ func followServer(t *testing.T, home string, monitor bool) (*App, *fakePlatform,
 		t.Fatal(describeError(s.err))
 	}
 	t.Cleanup(a.CloseAll)
-	s.term.Feed([]byte("tester@web-1:~$ "))
+	s.term().Feed([]byte("tester@web-1:~$ "))
 	tt.ClickAt(760, 200) // in the terminal
 	return a, p, s, tt
 }
 
 // reportDir has the shell report dir as shells do with OSC 7.
 func reportDir(s *Session, dir string) {
-	s.term.Feed([]byte("\x1b]7;file://web-1" + dir + "\x07"))
+	s.term().Feed([]byte("\x1b]7;file://web-1" + dir + "\x07"))
 }
 
 // settle runs what the app posts for d, longer than the directory reads
@@ -157,6 +157,20 @@ type fakeShellDir struct {
 	fg    []string // the foreground program's arguments
 	err   error    // what the reads fail with, if they do
 	reads int
+	// paneDirs are the folders of the shells of a split session, by
+	// their pick's index, over dir; picks are the picks read.
+	paneDirs map[int]string
+	picks    []monitor.ShellPick
+}
+
+// setPane sets the folder of the shell of pick index i.
+func (fd *fakeShellDir) setPane(i int, dir string) {
+	fd.mu.Lock()
+	defer fd.mu.Unlock()
+	if fd.paneDirs == nil {
+		fd.paneDirs = map[int]string{}
+	}
+	fd.paneDirs[i] = dir
 }
 
 // failWith has the reads fail with err; nil reads again.
@@ -185,14 +199,18 @@ func (fd *fakeShellDir) count() int {
 	return fd.reads
 }
 
-func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client) (monitor.Shell, error) {
+func (fd *fakeShellDir) read(ctx context.Context, client *ssh.Client, pick monitor.ShellPick) (monitor.Shell, error) {
 	fd.mu.Lock()
 	defer fd.mu.Unlock()
 	fd.reads++
+	fd.picks = append(fd.picks, pick)
 	if fd.err != nil {
 		return monitor.Shell{}, fd.err
 	}
 	sh := monitor.Shell{Dir: fd.dir, Comm: "bash", Args: []string{"-bash"}}
+	if d, ok := fd.paneDirs[pick.Index]; ok {
+		sh.Dir = d
+	}
 	if len(fd.fg) > 0 {
 		sh.Comm, sh.Args = path.Base(fd.fg[0]), fd.fg
 	}

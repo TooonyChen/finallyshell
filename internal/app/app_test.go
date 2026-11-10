@@ -97,6 +97,7 @@ func demoSession(a *App, name, addr string) *Session {
 	h := &config.Host{ID: config.NewHostID(), Name: name, Addr: addr, User: "root", Auth: config.AuthPassword}
 	a.hosts.Add(h)
 	s := newSession(h)
+	s.panes.reset(newPane()) // its terminal, without one until a test gives it (setTerm)
 	s.status, s.ip = statusConnected, addr
 	hist := func(base float64) []float64 {
 		var h []float64
@@ -163,7 +164,7 @@ func TestLayoutInBothLanguages(t *testing.T) {
 	defer close(done)
 	if term, err := terminal.New(terminal.Options{Conn: idleConn{done}, Font: a.termFont, Theme: a.termTheme, DarkTheme: a.termTheme}); err == nil {
 		defer term.Close()
-		s.term = term
+		s.setTerm(term)
 		term.Feed([]byte("[root@web-1 ~]# ls\r\n\x1b[1;34mlogs\x1b[0m  \x1b[1;32mdeploy.sh\x1b[0m  中文文件名.txt\r\n[root@web-1 ~]# "))
 	}
 

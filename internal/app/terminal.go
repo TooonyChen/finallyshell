@@ -3,12 +3,11 @@ package app
 import (
 	"finallyshell/locales"
 
-	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"
 )
 
-// terminalArea shows the active session's terminal, or what keeps it
-// from showing.
+// terminalArea shows the active session's terminal, its panes, or what
+// keeps it from showing.
 func (a *App) terminalArea(c *ui.Context) {
 	s := a.current()
 	if s == nil || s.isNewTab() {
@@ -23,12 +22,8 @@ func (a *App) terminalArea(c *ui.Context) {
 		if s.status != statusConnected {
 			a.statusBanner(c, s)
 		}
-		if s.term != nil {
-			a.terminalBackdrop(c, 0).Grow(1).Padding(4, 0, 0, 6).Children(func() {
-				view := terminal.View(c, s.term).Fill().AutoFocus()
-				a.findBar(c, s, view)
-				a.barFocus(s, view)
-			})
+		if s.term() != nil {
+			a.paneArea(c, s)
 			if a.commandBarOn() {
 				a.commandBar(c, s)
 			}
@@ -57,7 +52,7 @@ func (a *App) terminalArea(c *ui.Context) {
 // statusBanner is the bar over the terminal of a session that is not
 // connected, with what went wrong and a button to connect again.
 func (a *App) statusBanner(c *ui.Context, s *Session) {
-	if s.status == statusConnecting && s.term == nil {
+	if s.status == statusConnecting && s.term() == nil {
 		return
 	}
 	bg := ui.Hex("#7f1d1d")

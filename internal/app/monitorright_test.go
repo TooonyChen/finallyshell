@@ -46,7 +46,7 @@ func find(t *testing.T, tt *ui.Tester, text string) ui.Rect {
 // kept.
 func TestMonitorOnRight(t *testing.T) {
 	a, p, tt, web, _ := panelApp(t)
-	cols0, rows0 := web.term.Size()
+	cols0, rows0 := web.term().Size()
 	if r := find(t, tt, webIP); r.X > a.sideWidth {
 		t.Fatalf("monitor at %+v at the start", r)
 	}
@@ -72,7 +72,7 @@ func TestMonitorOnRight(t *testing.T) {
 	if r := find(t, tt, locales.TabFiles()); r.X > left || r.Y < 300 {
 		t.Errorf("Files tab at %+v", r)
 	}
-	if cols, rows := web.term.Size(); cols >= cols0 || rows != rows0 {
+	if cols, rows := web.term().Size(); cols >= cols0 || rows != rows0 {
 		t.Errorf("terminal %dx%d, %dx%d before", cols, rows, cols0, rows0)
 	}
 	saveShot(t, tt, "monitor-right-panel-bottom-en.png")
@@ -122,7 +122,7 @@ func TestMonitorOnRight(t *testing.T) {
 	if r := find(t, tt, "db-1"); r.Y != listY {
 		t.Errorf("db-1 back at %+v, was at y %v", r, listY)
 	}
-	if cols, rows := web.term.Size(); cols != cols0 || rows != rows0 {
+	if cols, rows := web.term().Size(); cols != cols0 || rows != rows0 {
 		t.Errorf("terminal %dx%d back, %dx%d before", cols, rows, cols0, rows0)
 	}
 }
@@ -135,7 +135,7 @@ func TestMonitorAndPanelOnRight(t *testing.T) {
 	a.setMonitorOnRight(true)
 	a.setPanelOnRight(true)
 	tt.Frame()
-	cols0, rows0 := web.term.Size()
+	cols0, rows0 := web.term().Size()
 	left := winW - a.rightWidth
 	ip, files := find(t, tt, webIP), find(t, tt, locales.TabFiles())
 	if ip.X < left || ip.Y > 40 {
@@ -211,7 +211,7 @@ func TestMonitorAndPanelOnRight(t *testing.T) {
 	if r := find(t, tt, webIP); r.X < left || r.Y > 40 {
 		t.Errorf("monitor at %+v", r)
 	}
-	if cols, rows := web.term.Size(); cols != cols0 || rows != rows0 {
+	if cols, rows := web.term().Size(); cols != cols0 || rows != rows0 {
 		t.Errorf("terminal %dx%d, %dx%d with the panel shown", cols, rows, cols0, rows0)
 	}
 	saveShot(t, tt, "monitor-right-panel-hidden-en.png")

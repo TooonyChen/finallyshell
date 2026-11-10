@@ -4,8 +4,8 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// findState is a session's find bar: whether it shows, what it looks
-// for, and the match chosen, which the terminal's search keeps.
+// findState is a pane's find bar: whether it shows, what it looks for,
+// and the match chosen, which the terminal's search keeps.
 type findState struct {
 	open  bool
 	query string
@@ -15,16 +15,17 @@ type findState struct {
 	opened int
 }
 
-// openFind shows the find bar of the selected session, over its
-// terminal, its field focused with the last text selected.
+// openFind shows the find bar of the selected session's focused pane,
+// over its terminal, its field focused with the last text selected.
 func (a *App) openFind() {
-	if s := a.current(); s != nil && s.term != nil {
-		s.find.open = true
-		s.find.opened++
+	if s := a.current(); s != nil && s.term() != nil {
+		p := s.pane()
+		p.find.open = true
+		p.find.opened++
 	}
 }
 
-// findBar shows s's find bar over its terminal at the top right, as
+// findBar shows p's find bar over its terminal at the top right, as
 // Ghostty's: MyGo's find bar, driving the terminal's search, which
 // highlights the matches and counts them. Enter goes to the next match,
 // up into the scrollback, Shift+Enter back down, as do F3 and Shift+F3
@@ -32,12 +33,12 @@ func (a *App) openFind() {
 // keyboard back to the terminal, view. It comes after the terminal's view
 // in the frame, which drives the search, so that the count it shows is
 // the frame's.
-func (a *App) findBar(c *ui.Context, s *Session, view ui.Element) {
-	f := &s.find
+func (a *App) findBar(c *ui.Context, p *pane, view ui.Element) {
+	f := &p.find
 	if !f.open {
 		return
 	}
-	term := s.term
+	term := p.term
 	st := term.SearchStatus()
 	f.match = max(st.Selected-1, 0)
 	before := f.match

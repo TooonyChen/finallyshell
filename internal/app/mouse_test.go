@@ -26,7 +26,7 @@ func mouseTerm(t *testing.T, a *App, conn *keyConn) (*Session, *terminal.Termina
 		t.Skip("no terminal:", err)
 	}
 	t.Cleanup(func() { term.Close() })
-	s.term = term
+	s.setTerm(term)
 	tt := ui.NewTester(func(c *ui.Context) { terminal.View(c, term).Fill().AutoFocus() }, 400, 200)
 	tt.Frame()
 	return s, term, tt

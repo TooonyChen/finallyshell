@@ -95,14 +95,14 @@ func TestQuickCommandsSend(t *testing.T) {
 		if err := tt.Click(tc.button); err != nil {
 			t.Fatal(err)
 		}
-		if got := conn.sent(t, s.term); got != tc.want {
+		if got := conn.sent(t, s.term()); got != tc.want {
 			t.Errorf("%s sent %q, want %q", tc.button, got, tc.want)
 		}
 	}
 	// The keyboard is the terminal's again, to press Enter there.
 	tt.Frame()
 	tt.Key(0, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "\r" {
+	if got := conn.sent(t, s.term()); got != "\r" {
 		t.Errorf("Enter after the button sent %q", got)
 	}
 	a.history.pending.Wait()
@@ -118,7 +118,7 @@ func TestQuickCommandsSend(t *testing.T) {
 	if err := tt.Click("Disk"); err != nil {
 		t.Fatal(err)
 	}
-	if got := conn.sent(t, s.term); got != "cd /srv\rgit pull " {
+	if got := conn.sent(t, s.term()); got != "cd /srv\rgit pull " {
 		t.Errorf("Enter off sent %q", got)
 	}
 
@@ -131,7 +131,7 @@ func TestQuickCommandsSend(t *testing.T) {
 	if err := tt.Click("Memory"); err != nil {
 		t.Fatal(err)
 	}
-	if got := conn.sent(t, s.term); got != "free -m\r" {
+	if got := conn.sent(t, s.term()); got != "free -m\r" {
 		t.Errorf("from the panel row %q", got)
 	}
 	p.SetLocale("zh-Hans")
@@ -160,7 +160,7 @@ func TestQuickCommandsDisabled(t *testing.T) {
 		t.Errorf("no reason shown: %q", tt.Texts())
 	}
 	tt.Click("Disk")
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Errorf("a disconnected session's button sent %q", got)
 	}
 	if err := tt.RightClick("Disk"); err != nil {
@@ -462,12 +462,12 @@ func TestQuickCommandsMenu(t *testing.T) {
 	if s.bar.text != "df -h" || !s.bar.focused {
 		t.Errorf("bar %q, focused %v", s.bar.text, s.bar.focused)
 	}
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Errorf("putting it in the bar sent %q", got)
 	}
 	tt.Type(" /")
 	tt.Key(0, ui.KeyEnter)
-	if got := conn.sent(t, s.term); got != "df -h /\r" {
+	if got := conn.sent(t, s.term()); got != "df -h /\r" {
 		t.Errorf("the bar sent %q", got)
 	}
 	// Not for several lines, which the bar cannot hold.
@@ -614,7 +614,7 @@ func TestSSHQuickCommands(t *testing.T) {
 	a, p, s := connectTestServer(t)
 	defer a.CloseAll()
 	p.until(t, "the home directory", func() bool { return s.files.cwd != "" && !s.files.loading })
-	p.until(t, "the shell's folder", func() bool { return s.shell.dir != "" })
+	p.until(t, "the shell's folder", func() bool { return s.pane().shell.dir != "" })
 	out := fmt.Sprintf("/tmp/finallyshell-quick-%d", time.Now().UnixNano())
 	t.Cleanup(func() {
 		if sc, err := sftpTo(); err == nil {

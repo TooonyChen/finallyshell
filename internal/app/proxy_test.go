@@ -363,8 +363,8 @@ func TestSSHJumpHost(t *testing.T) {
 	if asked := answerHostKeys(t, p, s); s.status != statusConnected || len(asked) != 1 {
 		t.Fatalf("status %d (%s), asked %v", s.status, describeError(s.err), asked)
 	}
-	s.term.Send([]byte("echo jumped-$((40+2))\r"))
-	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term.Text(), "jumped-42") })
+	s.term().Send([]byte("echo jumped-$((40+2))\r"))
+	p.until(t, "the shell's output", func() bool { return strings.Contains(s.term().Text(), "jumped-42") })
 	if s.ip != hostname {
 		t.Errorf("ip %q", s.ip)
 	}

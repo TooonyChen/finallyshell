@@ -34,7 +34,7 @@ func moveRight(t *testing.T, tt *ui.Tester) {
 // terminal, full height, and back under it; the side is saved.
 func TestPanelOnRight(t *testing.T) {
 	a, p, tt, web, _ := panelApp(t)
-	cols0, rows0 := web.term.Size()
+	cols0, rows0 := web.term().Size()
 	p.until(t, "the processes", func() bool { return a.current().procs.loaded })
 	moveRight(t, tt)
 	if !a.panelOnRight() || config.LoadSettings().BottomPanelSide != config.PanelRight {
@@ -49,7 +49,7 @@ func TestPanelOnRight(t *testing.T) {
 		t.Errorf("no process page; texts %q", tt.Texts())
 	}
 	// The terminal takes the height, and gives the column its width.
-	if cols, rows := web.term.Size(); cols >= cols0 || rows <= rows0 {
+	if cols, rows := web.term().Size(); cols >= cols0 || rows <= rows0 {
 		t.Errorf("terminal %dx%d on the right, %dx%d under it", cols, rows, cols0, rows0)
 	}
 	saveShot(t, tt, "panel-right-processes-en.png")
@@ -165,7 +165,7 @@ func TestPanelHiddenOnRight(t *testing.T) {
 	a, p, tt, web, _ := panelApp(t)
 	a.setPanelOnRight(true)
 	tt.Frame()
-	cols0, rows0 := web.term.Size()
+	cols0, rows0 := web.term().Size()
 	if err := tt.Click(locales.HidePanel()); err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +177,7 @@ func TestPanelHiddenOnRight(t *testing.T) {
 		t.Errorf("the panel shows while hidden; texts %q", tt.Texts())
 	}
 	// The terminal takes the width, up to the strip.
-	if cols, rows := web.term.Size(); cols <= cols0 || rows != rows0 {
+	if cols, rows := web.term().Size(); cols <= cols0 || rows != rows0 {
 		t.Errorf("terminal %dx%d hidden, %dx%d shown", cols, rows, cols0, rows0)
 	}
 	r, ok := tt.Find(locales.ShowPanel())

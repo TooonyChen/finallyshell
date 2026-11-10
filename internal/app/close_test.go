@@ -51,7 +51,7 @@ func coloredSession(t *testing.T, a *App, name string, color int) *Session {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { term.Close(); close(done) })
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte("\x1b[4" + string(rune('1'+color)) + "m\x1b[2J"))
 	return s
 }

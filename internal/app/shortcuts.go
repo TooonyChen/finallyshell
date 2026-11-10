@@ -27,6 +27,10 @@ import (
 // Each must be a key no shell needs (shortcutProblem): never Ctrl or Alt
 // with a letter alone, which readline and editors take, so on Linux and
 // Windows the defaults are Ctrl+Shift ones, and on macOS Command ones.
+// The panes' keys are the exception: on Linux and Windows they are
+// Windows Terminal's, Alt with Shift and = or -, and Alt with the arrows,
+// keys a shell can read too (Alt+Left moves by a word in some), which
+// the page lets through with a warning (shortcutAction.alt).
 
 // shortcutID names an action that has a shortcut.
 type shortcutID int
@@ -46,6 +50,13 @@ const (
 	scFocusBar
 	scLeftPanel
 	scBottomPanel
+	scSplitRight
+	scSplitDown
+	scZoomPane
+	scFocusPaneLeft
+	scFocusPaneRight
+	scFocusPaneUp
+	scFocusPaneDown
 )
 
 // shortcutAction is an action of the shortcuts page.
@@ -65,6 +76,9 @@ type shortcutAction struct {
 	// key only on a session that is not connected, where the shell is
 	// gone.
 	plain bool
+	// alt may be Alt with a key the shell reads, as the panes' keys of
+	// Windows Terminal are: the page warns rather than refuses.
+	alt bool
 }
 
 // shortcutActions are the shortcuts page's rows, in its order.
@@ -149,6 +163,46 @@ var shortcutActions = []shortcutAction{
 		id: scBottomPanel, title: locales.ScToggleBottomPanel,
 		field: func(s *config.Shortcuts) *string { return &s.ToggleBottomPanel },
 		mac:   keyCombo{ui.Super, ui.KeyJ}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyJ},
+	},
+	// The panes' keys (panes.go): Ghostty's on macOS, Windows Terminal's
+	// elsewhere, whose Alt+Shift+= is Alt+Shift+Plus on a US keyboard.
+	{
+		id: scSplitRight, title: locales.ScSplitRight, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.SplitRight },
+		mac:   keyCombo{ui.Super, ui.KeyD}, other: keyCombo{ui.Alt | ui.Shift, ui.KeyEqual},
+	},
+	{
+		id: scSplitDown, title: locales.ScSplitDown, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.SplitDown },
+		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyD}, other: keyCombo{ui.Alt | ui.Shift, ui.KeyMinus},
+	},
+	{
+		// Windows Terminal has no default for its zoom; Ctrl+Shift+X is
+		// Terminator's, and no terminal's or text field's key, as
+		// Ctrl+Shift+Z is the fields' Redo.
+		id: scZoomPane, title: locales.ScZoomPane,
+		field: func(s *config.Shortcuts) *string { return &s.ZoomPane },
+		mac:   keyCombo{ui.Super | ui.Shift, ui.KeyEnter}, other: keyCombo{ui.Ctrl | ui.Shift, ui.KeyX},
+	},
+	{
+		id: scFocusPaneLeft, title: locales.ScFocusPaneLeft, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.FocusPaneLeft },
+		mac:   keyCombo{ui.Super | ui.Alt, ui.KeyLeft}, other: keyCombo{ui.Alt, ui.KeyLeft},
+	},
+	{
+		id: scFocusPaneRight, title: locales.ScFocusPaneRight, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.FocusPaneRight },
+		mac:   keyCombo{ui.Super | ui.Alt, ui.KeyRight}, other: keyCombo{ui.Alt, ui.KeyRight},
+	},
+	{
+		id: scFocusPaneUp, title: locales.ScFocusPaneUp, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.FocusPaneUp },
+		mac:   keyCombo{ui.Super | ui.Alt, ui.KeyUp}, other: keyCombo{ui.Alt, ui.KeyUp},
+	},
+	{
+		id: scFocusPaneDown, title: locales.ScFocusPaneDown, alt: true,
+		field: func(s *config.Shortcuts) *string { return &s.FocusPaneDown },
+		mac:   keyCombo{ui.Super | ui.Alt, ui.KeyDown}, other: keyCombo{ui.Alt, ui.KeyDown},
 	},
 }
 
@@ -349,12 +403,22 @@ func checkShortcut(goos string, id shortcutID, k keyCombo) shortcutProblem {
 			return keyOption
 		}
 		// Alt with a digit is readline's numeric argument, which few
-		// type; it switches tabs, as in GNOME Terminal.
-		if shellKey && !(act.digits && isDigit(key)) {
+		// type; it switches tabs, as in GNOME Terminal. The panes' keys
+		// are warned of instead (altShellKey).
+		if shellKey && !(act.digits && isDigit(key)) && !act.alt {
 			return keyShellAlt
 		}
 	}
 	return keyOK
+}
+
+// altShellKey tells whether k, the key of id on goos, is Alt with a key
+// a shell reads, which an action with alt takes: the page warns that the
+// shell no longer gets it.
+func altShellKey(goos string, id shortcutID, k keyCombo) bool {
+	m := k.Mods
+	return actionOf(id).alt && goos != "darwin" && m&ui.Alt != 0 && m&(ui.Ctrl|ui.Super) == 0 &&
+		(typesText(k.Key) || editsLine(k.Key))
 }
 
 // terminalKeyClash tells whether k is a key the terminal binds itself
@@ -422,6 +486,8 @@ func (a *App) shortcuts(c *ui.Context) {
 		k := a.shortcut(id)
 		return !k.none() && c.Shortcut(k.Mods, k.Key)
 	}
+	cur := a.current()
+	split := cur != nil && cur.split() && !cur.isPanelTab()
 	switch {
 	case pressed(scManager):
 		a.openManager()
@@ -432,9 +498,7 @@ func (a *App) shortcuts(c *ui.Context) {
 	case pressed(scPreviousTab):
 		a.cycle(-1)
 	case pressed(scCloseTab):
-		if s := a.current(); s != nil {
-			a.closeSession(s)
-		}
+		a.closeCurrent() // its focused pane first, while it has several
 	case pressed(scFind):
 		a.openFind()
 	case pressed(scFullScreen) && (a.fullScreen.on || !a.current().isPanelTab()):
@@ -447,6 +511,23 @@ func (a *App) shortcuts(c *ui.Context) {
 	case pressed(scBottomPanel) && !a.fullScreen.on && !a.current().isPanelTab():
 		// Only where the panel under the terminal shows.
 		a.toggleBottomPanel()
+	// The panes' keys take their keys only where they act, so that the
+	// shell keeps them elsewhere: Alt and the arrows on Linux and Windows
+	// reach the shell of a session that is not split.
+	case canSplit(cur) && pressed(scSplitRight):
+		a.splitPane(cur, splitRight)
+	case canSplit(cur) && pressed(scSplitDown):
+		a.splitPane(cur, splitDown)
+	case split && pressed(scZoomPane):
+		a.toggleZoom(cur)
+	case split && pressed(scFocusPaneLeft):
+		a.movePaneFocus(cur, paneLeft)
+	case split && pressed(scFocusPaneRight):
+		a.movePaneFocus(cur, paneRight)
+	case split && pressed(scFocusPaneUp):
+		a.movePaneFocus(cur, paneUp)
+	case split && pressed(scFocusPaneDown):
+		a.movePaneFocus(cur, paneDown)
 	case a.fullScreen.on && !a.terminalLive() && c.Shortcut(0, ui.KeyEscape):
 		// Esc is the shell's while it runs, as vi's; it leaves full screen
 		// where no shell takes it.
@@ -465,7 +546,7 @@ func (a *App) shortcuts(c *ui.Context) {
 // area of s: only while the focus is in it, so that a field elsewhere
 // keeps Enter, and while s is not connected.
 func (a *App) reconnectShortcut(el ui.Element, s *Session) {
-	if s.isNewTab() || s.status == statusConnected || s.status == statusConnecting || s.find.open {
+	if s.isNewTab() || s.status == statusConnected || s.status == statusConnecting || s.findOpen() {
 		return
 	}
 	if k := a.shortcut(scReconnect); !k.none() && el.Shortcut(k.Mods, k.Key) {

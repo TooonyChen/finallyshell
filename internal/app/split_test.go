@@ -248,7 +248,7 @@ func TestDraggingDividersResizesTerminal(t *testing.T) {
 		t.Skip("no terminal:", err)
 	}
 	defer term.Close()
-	s.term = term
+	s.setTerm(term)
 	tt.Frame()
 
 	// told checks that the terminal and the other end have the same size,
@@ -590,9 +590,9 @@ func TestSSHResize(t *testing.T) {
 		t.Helper()
 		n++
 		mark := fmt.Sprintf("size-%d:", n)
-		s.term.Send([]byte("echo " + mark + "$(stty size)\r"))
+		s.term().Send([]byte("echo " + mark + "$(stty size)\r"))
 		p.until(t, what, func() bool {
-			for line := range strings.SplitSeq(s.term.Text(), "\n") {
+			for line := range strings.SplitSeq(s.term().Text(), "\n") {
 				// The output, not the command echoed with it.
 				if rest, ok := strings.CutPrefix(strings.TrimSpace(line), mark); ok {
 					if _, err := fmt.Sscan(rest, &rows, &cols); err == nil {
@@ -608,13 +608,13 @@ func TestSSHResize(t *testing.T) {
 	checkSize := func(what string) (rows, cols int) {
 		t.Helper()
 		for range 50 {
-			wc, wr := s.term.Size()
+			wc, wr := s.term().Size()
 			if rows, cols = sttySize(what); rows == wr && cols == wc {
 				return rows, cols
 			}
 			tt.Advance(50 * time.Millisecond)
 		}
-		wc, wr := s.term.Size()
+		wc, wr := s.term().Size()
 		t.Fatalf("%s: the server says %dx%d, the terminal is %dx%d", what, cols, rows, wc, wr)
 		return
 	}

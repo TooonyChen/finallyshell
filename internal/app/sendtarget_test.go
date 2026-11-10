@@ -28,7 +28,7 @@ func addTerm(t *testing.T, a *App, name, addr string, closed bool) (*Session, *k
 		t.Skip("no terminal:", err)
 	}
 	t.Cleanup(func() { term.Close() })
-	s.term = term
+	s.setTerm(term)
 	return s, conn
 }
 
@@ -62,7 +62,7 @@ func newSendFarm(t *testing.T) *sendFarm {
 // web-2, db-1.
 func (f *sendFarm) sent(t *testing.T) []string {
 	t.Helper()
-	return []string{f.c1.sent(t, f.web1.term), f.c2.sent(t, f.web2.term), f.c3.sent(t, f.db1.term)}
+	return []string{f.c1.sent(t, f.web1.term()), f.c2.sent(t, f.web2.term()), f.c3.sent(t, f.db1.term())}
 }
 
 func (f *sendFarm) want(t *testing.T, what string, want ...string) {

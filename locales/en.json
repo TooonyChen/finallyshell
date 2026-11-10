@@ -1580,5 +1580,28 @@
         "type": "int"
       }
     }
-  }
+  },
+  "splitRight": "Split right",
+  "splitDown": "Split down",
+  "zoomPane": "Zoom this pane",
+  "equalizePanes": "Equalize panes",
+  "closePane": "Close this pane",
+  "paneCount": "{count, plural, one {# pane} other {# panes}}",
+  "@paneCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errPaneRefused": "The server refused another shell on this connection: it may allow no more sessions (MaxSessions).",
+  "cmdBarFocusedPane": "Sends to the focused pane",
+  "scSplitRight": "Split the pane right",
+  "scSplitDown": "Split the pane down",
+  "scZoomPane": "Zoom the focused pane, or show all panes",
+  "scFocusPaneLeft": "Focus the pane on the left",
+  "scFocusPaneRight": "Focus the pane on the right",
+  "scFocusPaneUp": "Focus the pane above",
+  "scFocusPaneDown": "Focus the pane below",
+  "shortcutShellAltWarn": "Shells read Alt with this key too (as Meta): it no longer reaches them while it does this."
 }

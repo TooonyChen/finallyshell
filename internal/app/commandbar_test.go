@@ -35,7 +35,7 @@ func barTerm(t *testing.T) (*App, *fakePlatform, *Session, *keyConn, *ui.Tester)
 		t.Skip("no terminal:", err)
 	}
 	t.Cleanup(func() { term.Close() })
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte("[root@web-1 ~]# "))
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
@@ -61,7 +61,7 @@ func TestCommandBarSends(t *testing.T) {
 	saveShot(t, tt, "commandbar-empty-en.png")
 	focusBar(t, tt)
 	tt.Type("uname -a")
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Errorf("typing in the bar sent %q", got)
 	}
 	if s.bar.text != "uname -a" {
@@ -70,7 +70,7 @@ func TestCommandBarSends(t *testing.T) {
 	saveShot(t, tt, "commandbar-en.png")
 	tt.Key(0, ui.KeyEnter)
 	tt.Frame()
-	if got := conn.sent(t, s.term); got != "uname -a\r" {
+	if got := conn.sent(t, s.term()); got != "uname -a\r" {
 		t.Errorf("Enter sent %q", got)
 	}
 	if s.bar.text != "" {
@@ -85,7 +85,7 @@ func TestCommandBarSends(t *testing.T) {
 	tt.Type("uname -a")
 	tt.Key(0, ui.KeyEnter)
 	tt.Frame()
-	conn.sent(t, s.term)
+	conn.sent(t, s.term())
 	a.history.pending.Wait()
 	if got := a.hostHistory(s.Host.ID).cmds; !slices.Equal(got, []string{"df -h", "uname -a"}) {
 		t.Errorf("history %q", got)
@@ -95,7 +95,7 @@ func TestCommandBarSends(t *testing.T) {
 	tt.Key(0, ui.KeyEscape)
 	tt.Frame()
 	tt.Key(ui.Ctrl, ui.KeyC)
-	if got := conn.sent(t, s.term); got != "\x03" {
+	if got := conn.sent(t, s.term()); got != "\x03" {
 		t.Errorf("Ctrl+C after Escape sent %q", got)
 	}
 	// The shortcut moves the keys to the bar, and back.
@@ -106,7 +106,7 @@ func TestCommandBarSends(t *testing.T) {
 		t.Fatal("the shortcut did not focus the bar")
 	}
 	tt.Type("ls")
-	if got := conn.sent(t, s.term); got != "" {
+	if got := conn.sent(t, s.term()); got != "" {
 		t.Errorf("typing after the shortcut sent %q", got)
 	}
 	tt.Key(k.Mods, k.Key)
@@ -115,7 +115,7 @@ func TestCommandBarSends(t *testing.T) {
 		t.Error("the shortcut again kept the bar focused")
 	}
 	tt.Key(ui.Ctrl, ui.KeyC)
-	if got := conn.sent(t, s.term); got != "\x03" {
+	if got := conn.sent(t, s.term()); got != "\x03" {
 		t.Errorf("Ctrl+C after the shortcut sent %q", got)
 	}
 
@@ -178,7 +178,7 @@ func barServer(t *testing.T) (*App, *fakePlatform, *Session, *ui.Tester, string)
 		t.Fatal(describeError(s.err))
 	}
 	t.Cleanup(a.CloseAll)
-	s.term.Feed([]byte("tester@web-1:~$ "))
+	s.term().Feed([]byte("tester@web-1:~$ "))
 	focusBar(t, tt)
 	return a, p, s, tt, home
 }
@@ -479,7 +479,7 @@ func TestCommandBarSwitches(t *testing.T) {
 	}
 	tt.Key(0, ui.KeyEnter)
 	tt.Frame()
-	if got := conn.sent(t, s.term); got != "cd /\r" {
+	if got := conn.sent(t, s.term()); got != "cd /\r" {
 		t.Errorf("Enter sent %q", got)
 	}
 	a.history.pending.Wait()
@@ -517,7 +517,7 @@ func TestCommandBarSwitches(t *testing.T) {
 		t.Error("the shortcut focused a hidden bar")
 	}
 	tt.Key(ui.Ctrl, ui.KeyC)
-	if got := conn.sent(t, s.term); !strings.HasSuffix(got, "\x03") {
+	if got := conn.sent(t, s.term()); !strings.HasSuffix(got, "\x03") {
 		t.Errorf("the terminal lost the keys: %q", got)
 	}
 	if a.history.hosts != nil || s.bar.data.cmds != nil || s.bar.data.server != nil || s.bar.data.dirs != nil {
@@ -806,7 +806,7 @@ func TestSSHCommandBar(t *testing.T) {
 	t.Cleanup(a.history.pending.Wait)
 	t.Cleanup(a.CloseAll)
 	// The shell writes no history of the test's commands as it ends.
-	s.term.Send([]byte("unset HISTFILE\r"))
+	s.term().Send([]byte("unset HISTFILE\r"))
 	p.until(t, "SFTP", func() bool { return s.sftp != nil && s.files.cwd != "" && !s.files.loading })
 	home := s.files.cwd
 
@@ -876,7 +876,7 @@ func TestSSHCommandBar(t *testing.T) {
 
 	// Enter sends the line to the shell.
 	a.sendBar(s, barEdit{text: "echo bar-$((6*7))", set: func(string) {}})
-	p.until(t, "the output", func() bool { return strings.Contains(s.term.Text(), "bar-42") })
+	p.until(t, "the output", func() bool { return strings.Contains(s.term().Text(), "bar-42") })
 }
 
 // readRemote reads the file p of s's server.

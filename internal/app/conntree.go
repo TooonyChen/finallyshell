@@ -119,7 +119,7 @@ func (a *App) setLeftPage(page int) {
 func (a *App) switchLeftPanel() {
 	if a.left.page == leftConnections {
 		a.setLeftPage(leftSessions)
-		if s := a.current(); s != nil && s.term != nil {
+		if s := a.current(); s != nil && s.term() != nil {
 			s.bar.toTerm = true
 		}
 		return

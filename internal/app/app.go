@@ -145,6 +145,9 @@ type App struct {
 	start     startState // the start page shown while no row is selected
 
 	rename renameState // the session row being renamed (rename.go)
+	// notices are toasts asked for between frames, as by a goroutine,
+	// which the next frame shows (paneview.go).
+	notices []string
 
 	sideWidth   float32
 	monitorPct  float32
@@ -315,6 +318,7 @@ func (a *App) current() *Session {
 func (a *App) View(c *ui.Context) {
 	defer a.stopUnseenPolls()
 	useTheme(c)
+	a.showNotices(c)
 	a.shortcuts(c)
 	a.saveLayoutAtRest(c)
 	a.saveCmdTextAtRest(c)

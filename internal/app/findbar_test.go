@@ -36,7 +36,7 @@ func findTerm(t *testing.T) (*App, *fakePlatform, *Session, *keyConn, *ui.Tester
 		t.Skip("no terminal:", err)
 	}
 	t.Cleanup(func() { term.Close() })
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte("[root@web-1 ~]# grep -n needle notes.txt\r\n" +
 		"3:a needle in a haystack\r\n" +
 		"9:no hay here\r\n" +
@@ -54,9 +54,9 @@ func findTerm(t *testing.T) (*App, *fakePlatform, *Session, *keyConn, *ui.Tester
 // terminal the keyboard again.
 func TestFindBar(t *testing.T) {
 	a, p, s, conn, tt := findTerm(t)
-	term := s.term
+	term := s.term()
 	tt.Key(ui.Ctrl|ui.Shift, ui.KeyF)
-	if !s.find.open || conn.sent(t, term) != "" {
+	if !s.pane().find.open || conn.sent(t, term) != "" {
 		t.Fatal("Ctrl+Shift+F opened no find bar")
 	}
 	tt.Type("needle")
@@ -112,8 +112,8 @@ func TestFindBar(t *testing.T) {
 
 	tt.Key(0, ui.KeyEscape)
 	tt.Frame()
-	if s.find.open || term.SearchStatus().Text != "" {
-		t.Errorf("Escape: open %v, search %+v", s.find.open, term.SearchStatus())
+	if s.pane().find.open || term.SearchStatus().Text != "" {
+		t.Errorf("Escape: open %v, search %+v", s.pane().find.open, term.SearchStatus())
 	}
 	tt.Key(ui.Ctrl, ui.KeyC)
 	if got := conn.sent(t, term); got != "\x03" {
@@ -130,8 +130,8 @@ func TestFindBar(t *testing.T) {
 	tt.Type("zzz")
 	p.until(t, "no matches", func() bool { return term.SearchStatus().Text == "zzz" && !term.SearchStatus().Searching })
 	tt.Frame()
-	if !tt.HasText("No matches") || strings.Contains(s.find.query, "needle") {
-		t.Errorf("typed over: query %q; texts %q", s.find.query, tt.Texts())
+	if !tt.HasText("No matches") || strings.Contains(s.pane().find.query, "needle") {
+		t.Errorf("typed over: query %q; texts %q", s.pane().find.query, tt.Texts())
 	}
 	if a.current() != s {
 		t.Error("the tab changed")
@@ -158,9 +158,9 @@ func TestFullScreen(t *testing.T) {
 		}
 	}
 	tt.ClickAt(640, 300)
-	conn.sent(t, s.term)
+	conn.sent(t, s.term())
 	tt.Key(0, ui.KeyEscape)
-	if got := conn.sent(t, s.term); got != "\x1b" || !a.fullScreen.on {
+	if got := conn.sent(t, s.term()); got != "\x1b" || !a.fullScreen.on {
 		t.Errorf("Escape over the shell: sent %q, full screen %v", got, a.fullScreen.on)
 	}
 	saveShot(t, tt, "fullscreen-en.png")

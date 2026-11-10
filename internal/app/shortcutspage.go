@@ -156,6 +156,9 @@ func (a *App) captureDialog(c *ui.Context) {
 				if terminalKeyClash(cp.key, act.digits) {
 					ui.Text(c, locales.ShortcutTerminalKey()).TextColor(colors.warningText)
 				}
+				if altShellKey(goos, cp.id, cp.key) {
+					ui.Text(c, locales.ShortcutShellAltWarn()).TextColor(colors.warningText)
+				}
 			}
 			ui.Row(c).Gap(8).Padding(6, 0, 0, 0).Children(func() {
 				if ui.Button(c, locales.ShortcutUseDefault()).Clicked() {

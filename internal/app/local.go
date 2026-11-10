@@ -32,7 +32,9 @@ import (
 //
 // Its states are a session's: connected while the program runs, closed
 // with errShellExited once it exits, failed when it could not start.
-// Reconnecting starts the program again in the same tab.
+// Reconnecting starts the program again in the same tab. Splitting it
+// runs the program once more in the new pane (panes.go); a pane whose
+// program exits closes, the last one closing the tab's as above.
 
 // localHistoryID is the command bar's history of local terminals, kept
 // with the hosts' (whose IDs are "h" and digits) in history/local.txt.
@@ -83,49 +85,60 @@ func (a *App) openLocal(tab *Session) {
 	a.connectLocal(s)
 }
 
-// connectLocal starts s's program, in a terminal of its own. Making the
-// terminal finds the program on the PATH and returns at once; the
-// program starts as a view first shows it. A program that is not found
-// fails the tab with the error; one that cannot start once found writes
-// its error in the terminal and exits.
+// connectLocal starts s's program, in a terminal of its own, in each of
+// its panes: one for a tab starting, every pane of its layout when it
+// starts again. Making the terminal finds the program on the PATH and
+// returns at once; the program starts as a view first shows it. A
+// program that is not found fails the tab with the error; one that
+// cannot start once found writes its error in the terminal and exits.
 func (a *App) connectLocal(s *Session) {
 	s.disconnect()
-	s.title = ""
+	if s.panes.root == nil {
+		s.panes.reset(newPane())
+	}
+	for _, p := range s.panes.panes() {
+		p.title = ""
+		term, err := a.openLocalPane(s, p)
+		if err != nil {
+			s.status, s.err = statusFailed, err
+			return
+		}
+		p.term = term
+		s.panes.opened(p)
+	}
+	s.panes.refocus = true
+	s.status, s.err = statusConnected, nil
+}
+
+// openLocalPane starts s's program for p, one of its panes, in a
+// terminal of its own.
+func (a *App) openLocalPane(s *Session, p *pane) (*terminal.Terminal, error) {
 	cmd, err := a.settings.LocalShellCommand()
 	if err != nil {
-		s.status, s.err = statusFailed, &localStartError{program: a.settings.LocalShell, err: err}
-		return
+		return nil, &localStartError{program: a.settings.LocalShell, err: err}
 	}
 	opts := a.terminalOptions(nil)
 	opts.Command = cmd
 	var term *terminal.Terminal
 	opts.OnTitle = func(title string) {
 		a.post(func() {
-			if s.term == term {
-				s.title = title
+			if p.term == term {
+				p.title = title
 			}
 		})
 	}
-	opts.OnExit = func(int) {
-		a.post(func() {
-			// Not when the tab ended it itself, as it disconnects, closes
-			// or starts again: that terminal is gone from it already.
-			if s.term == term && s.status == statusConnected {
-				s.status, s.err = statusClosed, errShellExited
-			}
-		})
-	}
+	// Not when the tab ended it itself, as it disconnects, closes or
+	// starts again: that terminal is gone from the pane already.
+	opts.OnExit = func(int) { a.post(func() { a.paneExited(s, p) }) }
 	term, err = terminal.New(opts)
 	if err != nil {
 		program := "shell"
 		if len(cmd) > 0 {
 			program = cmd[0]
 		}
-		s.status, s.err = statusFailed, &localStartError{program: program, err: err}
-		return
+		return nil, &localStartError{program: program, err: err}
 	}
-	s.term = term
-	s.status, s.err = statusConnected, nil
+	return term, nil
 }
 
 // target is where s's shell runs, as lists of sessions say it under or

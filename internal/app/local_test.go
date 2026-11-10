@@ -40,7 +40,7 @@ func localApp(t *testing.T, shell string) (*App, *fakePlatform, *ui.Tester) {
 func untilScreen(t *testing.T, p *fakePlatform, s *Session, want string) {
 	t.Helper()
 	p.until(t, "the terminal to show "+want, func() bool {
-		return s.term != nil && strings.Contains(s.term.Text(), want)
+		return s.term() != nil && strings.Contains(s.term().Text(), want)
 	})
 }
 
@@ -75,7 +75,7 @@ func TestLocalTerminalFromHeader(t *testing.T) {
 		t.Fatalf("%d rows, active %d", len(a.sessions), a.active)
 	}
 	s := a.sessions[2]
-	if !s.isLocal() || s.isNewTab() || s.Host != nil || s.status != statusConnected || s.term == nil {
+	if !s.isLocal() || s.isNewTab() || s.Host != nil || s.status != statusConnected || s.term() == nil {
 		t.Fatalf("local %v, new tab %v, status %v, err %v", s.isLocal(), s.isNewTab(), s.status, s.err)
 	}
 	untilScreen(t, p, s, "ready")
@@ -161,7 +161,7 @@ func TestLocalTerminalSends(t *testing.T) {
 	}
 	tt.Key(0, ui.KeyEnter)
 	// The pseudo-terminal echoes the line, and cat writes it again.
-	p.until(t, "the line twice", func() bool { return strings.Count(s.term.Text(), "hello-bar") >= 2 })
+	p.until(t, "the line twice", func() bool { return strings.Count(s.term().Text(), "hello-bar") >= 2 })
 	a.history.pending.Wait()
 	if got := a.hostHistory(localHistoryID).cmds; !slices.Equal(got, []string{"hello-bar"}) {
 		t.Errorf("history %q", got)
@@ -185,7 +185,7 @@ func TestLocalTerminalSends(t *testing.T) {
 		t.Fatalf("%v; texts %q", err, tt.Texts())
 	}
 	// cat writes back what it read; sh does not run it.
-	p.until(t, "the quick command", func() bool { return strings.Count(s.term.Text(), "echo quick-$((40+2))") >= 2 })
+	p.until(t, "the quick command", func() bool { return strings.Count(s.term().Text(), "echo quick-$((40+2))") >= 2 })
 	if tt.HasText(locales.LocalNotAvailable()) {
 		t.Error("the Commands tab is not available")
 	}
@@ -328,7 +328,7 @@ func TestLocalTerminalMenu(t *testing.T) {
 	}
 	dup := a.sessions[2]
 	untilScreen(t, p, dup, "ready")
-	if dup.term == s.term || dup.label() != locales.LocalTerminal() {
+	if dup.term() == s.term() || dup.label() != locales.LocalTerminal() {
 		t.Errorf("duplicate %q", dup.label())
 	}
 	a.active = 1
@@ -340,27 +340,27 @@ func TestLocalTerminalMenu(t *testing.T) {
 		t.Fatal(err)
 	}
 	tt.Frame()
-	if s.status != statusClosed || s.term != nil || !tt.HasText(locales.StatusDisconnected()) {
+	if s.status != statusClosed || s.term() != nil || !tt.HasText(locales.StatusDisconnected()) {
 		t.Fatalf("disconnect: status %v; texts %q", s.status, tt.Texts())
 	}
 	tt.RightClickAt(row())
 	if err := tt.ChooseMenuItem(locales.Reconnect()); err != nil {
 		t.Fatal(err)
 	}
-	if s.status != statusConnected || s.term == nil {
+	if s.status != statusConnected || s.term() == nil {
 		t.Fatalf("reconnect: status %v, err %v", s.status, s.err)
 	}
 	untilScreen(t, p, s, "ready")
 
 	// Close: the program ends with the tab.
-	term := s.term
+	term := s.term()
 	tt.Frame()
 	tt.RightClickAt(row())
 	if err := tt.ChooseMenuItem(locales.Close()); err != nil {
 		t.Fatal(err)
 	}
 	tt.Frame()
-	if slices.Contains(a.sessions, s) || s.term != nil {
+	if slices.Contains(a.sessions, s) || s.term() != nil {
 		t.Fatalf("close: %d rows", len(a.sessions))
 	}
 	p.until(t, "the program to end", func() bool {
@@ -384,7 +384,7 @@ func TestLocalTerminalExit(t *testing.T) {
 	a.openLocal(nil)
 	s := a.current()
 	untilScreen(t, p, s, "ready")
-	s.term.Send([]byte("bye\r"))
+	s.term().Send([]byte("bye\r"))
 	p.until(t, "the program to exit", func() bool { return s.status == statusClosed })
 	tt.Frame()
 	if !errors.Is(s.err, errShellExited) || !tt.HasText(locales.StatusExited()) || !tt.HasText(locales.Reconnect()) {
@@ -400,7 +400,7 @@ func TestLocalTerminalExit(t *testing.T) {
 		t.Fatalf("status %v, rows %d", s.status, len(a.sessions))
 	}
 	untilScreen(t, p, s, "ready")
-	s.term.Send([]byte("bye\r"))
+	s.term().Send([]byte("bye\r"))
 	p.until(t, "the program to exit again", func() bool { return s.status == statusClosed })
 	tt.Frame()
 	tt.ClickAt(760, 200) // the terminal area, which takes Enter
@@ -504,8 +504,8 @@ func TestLocalTerminalSendTarget(t *testing.T) {
 	if err := tt.Click(locales.QuickSend()); err != nil {
 		t.Fatal(err)
 	}
-	p.until(t, "the chosen line", func() bool { return strings.Count(s.term.Text(), "chosen-line") >= 2 })
-	if got := conn.sent(t, web.term); got != "" {
+	p.until(t, "the chosen line", func() bool { return strings.Count(s.term().Text(), "chosen-line") >= 2 })
+	if got := conn.sent(t, web.term()); got != "" {
 		t.Errorf("web-1 got %q", got)
 	}
 
@@ -588,7 +588,7 @@ func TestLocalTerminalShots(t *testing.T) {
 			a.openLocal(nil)
 			s := a.current()
 			untilScreen(t, p, s, "you@laptop")
-			s.term.Send([]byte("echo \"$((6*7)) on this computer\"\r"))
+			s.term().Send([]byte("echo \"$((6*7)) on this computer\"\r"))
 			untilScreen(t, p, s, "42 on this computer")
 			a.bottomTab = tabCommands
 			tt.Frame()

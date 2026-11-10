@@ -97,7 +97,7 @@ func (a *App) popupOn(p barPopup) bool {
 }
 
 // barLive tells whether s's bar takes input: its shell is there.
-func barLive(s *Session) bool { return s.status == statusConnected && s.term != nil }
+func barLive(s *Session) bool { return s.status == statusConnected && s.term() != nil }
 
 // toggleBarFocus is the Focus command bar shortcut: the keyboard goes to
 // the bar of the session shown, or back to its terminal.
@@ -125,9 +125,15 @@ func (a *App) commandBar(c *ui.Context, s *Session) {
 	var input ui.Element
 	var button bool // History clicked
 	row.Children(func() {
-		// The icon says what the bar is for: it has no placeholder.
+		// The icon says what the bar is for: it has no placeholder, but
+		// for which pane it sends to while the session has several.
 		ui.Icon(c, icons.Get("terminal")).FontSize(13).TextColor(theme.TextMuted)
 		input = ui.TextInput(c, &b.text).Grow(1).MinWidth(0).Label(locales.CmdBarLabel()).Disabled(!live)
+		placeholder := ""
+		if s.split() {
+			placeholder = locales.CmdBarFocusedPane()
+		}
+		input.Placeholder(placeholder)
 		// Where Enter sends (sendtarget.go).
 		a.barTarget(c, s, live)
 		if a.historyOn() {
@@ -243,16 +249,17 @@ func (a *App) sendBar(s *Session, e barEdit) {
 }
 
 // sendLine sends line to s's shell as typed in the terminal, through the
-// session's encoding. With enter it is followed by a carriage return, as
+// session's encoding: to the shell of its focused pane. With enter it is followed by a carriage return, as
 // Enter: the line runs, the folder follower looks again, and the line is
 // kept in the host's history. Without, it is only typed, for the user to
 // finish; the bar and the quick commands (quickcmds.go) send through it.
 func (a *App) sendLine(s *Session, line string, enter bool) {
+	term := s.term()
 	if !enter {
-		s.term.Send([]byte(line))
+		term.Send([]byte(line))
 		return
 	}
-	s.term.Send([]byte(line + "\r"))
+	term.Send([]byte(line + "\r"))
 	s.shellCommandSent()
 	if cmd := strings.TrimSpace(line); a.historyOn() && config.Keepable(cmd) {
 		a.addHistory(s.historyID(), cmd)

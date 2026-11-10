@@ -348,3 +348,79 @@ func TestShellDirScriptNoSSHD(t *testing.T) {
 		t.Fatalf("output %q, exit %d", out, code)
 	}
 }
+
+// With two shells on the connection, as two panes of a split session,
+// the script reads the one the pick names, by the order they started
+// in, and nothing when the number of shells is not the pick's. The
+// tree is TestShellDirScript's, the connection's process with two
+// children each leading a terminal of its own (setsid -c), in folders
+// of their own, and the script without one.
+func TestShellDirScriptPanes(t *testing.T) {
+	sh, err := exec.LookPath("sh")
+	if err != nil {
+		t.Skip("no sh")
+	}
+	setsid, err := exec.LookPath("setsid")
+	if err != nil {
+		t.Skip("no setsid")
+	}
+	tmp := t.TempDir()
+	sshd := filepath.Join(tmp, "sshd")
+	if err := os.Symlink(sh, sshd); err != nil {
+		t.Fatal(err)
+	}
+	dirs := []string{filepath.Join(tmp, "first"), filepath.Join(tmp, "second")}
+	for _, d := range dirs {
+		if err := os.Mkdir(d, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, pts1 := openPTY(t)
+	_, pts2 := openPTY(t)
+	run := func(pick ShellPick) Shell {
+		t.Helper()
+		script, out := filepath.Join(tmp, "script.sh"), filepath.Join(tmp, "out")
+		if err := os.WriteFile(script, []byte(pick.script()), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		os.Remove(out)
+		// The second starts a while after the first, as a pane opened
+		// later; the script runs once both are there.
+		cmd := exec.Command(sshd, "-c", `(cd "$5" && exec "$1" -c sleep 30 <"$3" >"$3" 2>&1) & a=$!
+sleep 0.2
+(cd "$6" && exec "$1" -c sleep 30 <"$4" >"$4" 2>&1) & b=$!
+sleep 0.2
+(cd / && exec "$1" sh -s <"$2" >"$7")
+kill $a $b`, "sshd", setsid, script, pts1.Name(), pts2.Name(), dirs[0], dirs[1], out)
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+		if err := cmd.Start(); err != nil {
+			t.Fatal(err)
+		}
+		done := make(chan error, 1)
+		go func() { done <- cmd.Wait() }()
+		select {
+		case <-done:
+		case <-time.After(20 * time.Second):
+			cmd.Process.Kill()
+			t.Fatal("the script did not end")
+		}
+		data, err := os.ReadFile(out)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return parseShell(string(data))
+	}
+	for _, tc := range []struct {
+		pick ShellPick
+		dir  string
+	}{
+		{ShellPick{1, 2}, dirs[0]},
+		{ShellPick{2, 2}, dirs[1]},
+		{ShellPick{}, ""},     // one shell asked for: two there
+		{ShellPick{1, 3}, ""}, // a pane still opening, or one ending
+	} {
+		if got := run(tc.pick); got.Dir != tc.dir {
+			t.Errorf("%+v: read %+v, want the folder %q", tc.pick, got, tc.dir)
+		}
+	}
+}

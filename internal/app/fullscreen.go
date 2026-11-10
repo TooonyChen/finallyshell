@@ -53,5 +53,5 @@ func (a *App) WindowLeftFullScreen() {
 // take keys.
 func (a *App) terminalLive() bool {
 	s := a.current()
-	return s != nil && !s.isNewTab() && s.status == statusConnected && s.term != nil
+	return s != nil && !s.isNewTab() && s.status == statusConnected && s.term() != nil
 }

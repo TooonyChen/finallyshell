@@ -922,5 +922,21 @@
   "optionLocalShell": "本地终端程序",
   "optionLocalShellDefault": "默认 shell",
   "optionLocalShellNote": "本地终端运行的程序和参数，像 shell 一样按空格分成多个参数，引号里的空格不分开。留空运行你的登录 shell，Windows 上运行 PowerShell。例如：pwsh -NoLogo、wsl.exe、/opt/homebrew/bin/fish -l。修改后新打开的本地终端才会使用。",
-  "confirmQuitLocal": "{count, plural, other {还有 # 个本地终端打开，退出会结束其中的程序。}}"
+  "confirmQuitLocal": "{count, plural, other {还有 # 个本地终端打开，退出会结束其中的程序。}}",
+  "splitRight": "向右分屏",
+  "splitDown": "向下分屏",
+  "zoomPane": "放大此分屏",
+  "equalizePanes": "平均分配",
+  "closePane": "关闭此分屏",
+  "paneCount": "{count} 个分屏",
+  "errPaneRefused": "服务器拒绝在这个连接上再开一个 shell：可能已到它允许的会话数上限（MaxSessions）。",
+  "cmdBarFocusedPane": "发到获得焦点的分屏",
+  "scSplitRight": "向右分屏",
+  "scSplitDown": "向下分屏",
+  "scZoomPane": "放大获得焦点的分屏，或还原",
+  "scFocusPaneLeft": "焦点移到左边的分屏",
+  "scFocusPaneRight": "焦点移到右边的分屏",
+  "scFocusPaneUp": "焦点移到上面的分屏",
+  "scFocusPaneDown": "焦点移到下面的分屏",
+  "shortcutShellAltWarn": "Alt 加这个键在 shell 里也有用（Meta 键）：用作这个快捷键时，shell 就收不到它了。"
 }

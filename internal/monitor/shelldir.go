@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -18,11 +19,15 @@ import (
 // OpenSSH 9.8, or dropbear) is the parent of both: the script walks up
 // from its own process to the first such ancestor, then takes the one
 // child of it with a controlling terminal, which is the shell (exec
-// channels have none). The directory is that of the terminal's
+// channels have none). A connection with several shells, as the panes of
+// a split session (ShellPick), has as many such children: the script
+// takes the pane-th of the panes by the time they started, the order the
+// panes opened them in, and prints nothing when their number is not
+// panes, as while one is ending. The directory is that of the terminal's
 // foreground process group, as a subshell or su to the same user moves
 // it, else the shell's own. Root's processes can't be read by the user,
 // and print nothing. It prints nothing either when there is no such
-// child, or more than one.
+// child.
 //
 // The foreground program is the group's leader: its name (comm), then
 // its arguments, one a line, at most 4 KiB of them. At the prompt it is
@@ -31,8 +36,10 @@ import (
 //
 // The fields of /proc/<pid>/stat after the name, which is in brackets
 // and may hold spaces, are the state, the parent, the process group, the
-// session, the terminal and the terminal's foreground process group.
+// session, the terminal and the terminal's foreground process group;
+// the 20th is the time the process started, in clock ticks since boot.
 const shellScript = `export LC_ALL=C
+: "${pane:=1}" "${panes:=1}"
 p=$$
 while :; do
 	read -r comm 2>/dev/null </proc/$p/comm || exit 0
@@ -55,6 +62,7 @@ if [ -z "$kids" ]; then
 	done
 fi
 n=0
+list=
 for c in $kids; do
 	read -r s 2>/dev/null </proc/$c/stat || continue
 	s=${s##*) }
@@ -63,8 +71,22 @@ for c in $kids; do
 	n=$((n+1))
 	shell=$c
 	fg=$6
+	list="$list${20} $c $6
+"
 done
-[ "$n" = 1 ] || exit 0
+[ "$n" = "$panes" ] || exit 0
+if [ "$n" -gt 1 ]; then
+	set -- $(printf '%s' "$list" | sort -k1,1n -k2,2n | {
+		i=0
+		while read -r t c f; do
+			i=$((i+1))
+			[ "$i" = "$pane" ] && echo "$c $f"
+		done
+	})
+	[ $# = 2 ] || exit 0
+	shell=$1
+	fg=$2
+fi
 d=$(readlink /proc/$fg/cwd 2>/dev/null)
 [ -n "$d" ] || d=$(readlink /proc/$shell/cwd 2>/dev/null)
 echo "` + procMark + `dir---"
@@ -96,11 +118,27 @@ type Shell struct {
 // nil.
 func (sh Shell) Agent() *Agent { return FindAgent(sh.Comm, sh.Args) }
 
-// ShellState reads the interactive shell on client's connection, on a
-// Linux server: its directory and its foreground program. It is the zero
-// Shell when the server can't tell, as one without /proc.
-func ShellState(ctx context.Context, client *ssh.Client) (Shell, error) {
-	out, _, err := RunScript(ctx, client, shellScript)
+// ShellPick says which of the interactive shells on a connection to read:
+// the Index-th, from 1, of Count, by the order they started in. Its zero
+// value is the one shell of a connection that has one.
+type ShellPick struct {
+	Index, Count int
+}
+
+// script is the shell script that reads the shell pick names.
+func (pick ShellPick) script() string {
+	if pick.Count < 1 || pick.Index < 1 || pick.Index > pick.Count {
+		pick = ShellPick{1, 1}
+	}
+	return fmt.Sprintf("pane=%d panes=%d\n", pick.Index, pick.Count) + shellScript
+}
+
+// ShellState reads the interactive shell pick names on client's
+// connection, on a Linux server: its directory and its foreground
+// program. It is the zero Shell when the server can't tell, as one
+// without /proc.
+func ShellState(ctx context.Context, client *ssh.Client, pick ShellPick) (Shell, error) {
+	out, _, err := RunScript(ctx, client, pick.script())
 	if err != nil {
 		return Shell{}, err
 	}

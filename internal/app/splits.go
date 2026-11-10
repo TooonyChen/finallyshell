@@ -98,8 +98,18 @@ func (a *App) restoreLayout() {
 // clamped: a window too small for the size the user chose leaves it to
 // MyGo, which gives the size back when there is room again.
 func (a *App) splitMoved(c *ui.Context, split ui.Element, size *float32, l splitLimits) {
-	if !split.Changed() {
+	if !clampSplit(split, size, l) {
 		return
+	}
+	a.layoutDirty, a.layoutAt = true, c.Now()
+	c.After(layoutSaveDelay)
+}
+
+// clampSplit keeps the panes of split at least l's sizes when the user
+// moved its divider, and reports the move.
+func clampSplit(split ui.Element, size *float32, l splitLimits) bool {
+	if !split.Changed() {
+		return false
 	}
 	b := split.Bounds()
 	room := b.W - 1 // less the divider's line
@@ -121,8 +131,7 @@ func (a *App) splitMoved(c *ui.Context, split ui.Element, size *float32, l split
 			*size = clamped
 		}
 	}
-	a.layoutDirty, a.layoutAt = true, c.Now()
-	c.After(layoutSaveDelay)
+	return true
 }
 
 // endSplit lays out start and end side by side, end at the end, with a

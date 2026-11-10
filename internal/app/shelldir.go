@@ -14,10 +14,10 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// shellDirState follows the working directory of a session's shell, for
-// the file panel to go where the shell goes (see followShell), and the
-// program in its foreground, for the tab to show the coding agent that
-// runs there (agenticon.go).
+// shellDirState follows the working directory of a pane's shell, for
+// the file panel to go where the focused pane's shell goes (see
+// followShellDir), and the program in its foreground, for the tab to
+// show the coding agent that runs there (agenticon.go).
 type shellDirState struct {
 	// dir is the shell's directory as last read, first as the shell
 	// starts: "" before that. The panel moves when a command changes it,
@@ -43,26 +43,27 @@ var shellDirReads = []time.Duration{250 * time.Millisecond, 1250 * time.Millisec
 // shellDirTimeout is how long a read of the server waits for its answer.
 const shellDirTimeout = 10 * time.Second
 
-// readShellState reads the shell's directory and foreground program on
-// the server; tests stand in for it.
+// readShellState reads the directory and foreground program of a shell
+// on the server; tests stand in for it.
 var readShellState = monitor.ShellState
 
 // startShellDir starts following the directory of the shell term shows on
-// client, and the program in its foreground, until ctx ends. A shell that
-// reports its directory (OSC 7) tells it; else, when probe allows exec
-// channels, the server's /proc does (monitor.ShellState), which also
-// tells the program, while the tabs show agents. Runs on the UI thread.
+// client, p's of s's panes, and the program in its foreground, until ctx
+// ends. A shell that reports its directory (OSC 7) tells it; else, when
+// probe allows exec channels, the server's /proc does (monitor.ShellState,
+// for the shell p.pick says), which also tells the program, while the tabs
+// show agents. Runs on the UI thread.
 //
 // One goroutine reads, one read at a time, so a tab never has more than
 // one in flight: after a command (wake), and after a key that can end or
 // stop a program (agentWatch.wake), it reads as shellDirReads says, and,
 // while the tab shows an agent, every agentPoll, so that the agent goes
 // when it ends by itself.
-func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client, term *terminal.Terminal, probe bool) {
+func (a *App) startShellDir(ctx context.Context, s *Session, p *pane, client *ssh.Client, term *terminal.Terminal, probe bool) {
 	wake := make(chan struct{}, 1)
 	w := &agentWatch{wake: make(chan struct{}, 1)}
 	w.on.Store(!a.settings.NoAgentIcons)
-	s.shell = shellDirState{wake: wake, agents: w}
+	p.shell = shellDirState{wake: wake, agents: w}
 	delays, readServer, poll := shellDirReads, readShellState, agentPoll // as tests set them now
 	// sent is the agent the follower last sent the UI thread, which the
 	// tab shows once it has taken it, and sentTurn the setting's turn
@@ -86,7 +87,7 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 		var err error
 		if serverDir || agents {
 			rctx, cancel := context.WithTimeout(ctx, shellDirTimeout)
-			sh, err = readServer(rctx, client)
+			sh, err = readServer(rctx, client, p.shellPick())
 			cancel()
 		}
 		if serverDir {
@@ -107,14 +108,14 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 			sent, sentTurn = ag, turn
 		}
 		a.post(func() {
-			if ctx.Err() != nil || s.shell.wake != wake {
+			if ctx.Err() != nil || p.shell.wake != wake {
 				return
 			}
 			if newDir {
-				a.shellDirRead(s, d, baseline)
+				a.shellDirRead(s, p, d, baseline)
 			}
 			if newAgent {
-				a.shellAgentRead(s, ag)
+				a.shellAgentRead(p, ag)
 			}
 		})
 		return agents && ag != nil
@@ -182,50 +183,68 @@ func (a *App) startShellDir(ctx context.Context, s *Session, client *ssh.Client,
 // that they end with their connection.
 var shellFollowers atomic.Int64
 
-// shellCommandSent tells s's follower that a command may have changed the
-// shell's directory: Enter was pressed in the terminal, or the command
-// bar sent a line.
+// shellCommandSent tells the follower of the shell of s's focused pane
+// that a command may have changed its directory: the command bar sent a
+// line.
 func (s *Session) shellCommandSent() {
-	if s.shell.wake != nil {
+	if p := s.pane(); p != nil {
+		p.shellCommandSent()
+	}
+}
+
+// shellCommandSent tells p's follower that a command may have changed
+// the shell's directory: Enter was pressed in its terminal, or the
+// command bar sent it a line.
+func (p *pane) shellCommandSent() {
+	if p.shell.wake != nil {
 		select {
-		case s.shell.wake <- struct{}{}:
+		case p.shell.wake <- struct{}{}:
 		default:
 		}
 	}
 }
 
-// shellDirRead takes a read of s's shell directory, moving the file panel
-// there when it changed and the panel follows the terminal; a baseline
-// read, as the shell starts, only keeps it.
-func (a *App) shellDirRead(s *Session, dir string, baseline bool) {
-	if dir == s.shell.dir {
+// shellDirRead takes a read of the directory of the shell of p, one of
+// s's panes, moving the file panel there when it changed, p has the
+// focus and the panel follows the terminal; a baseline read, as the
+// shell starts, only keeps it.
+func (a *App) shellDirRead(s *Session, p *pane, dir string, baseline bool) {
+	if dir == p.shell.dir {
 		return
 	}
-	s.shell.dir = dir
-	if !baseline {
+	p.shell.dir = dir
+	if !baseline && p == s.pane() {
 		a.followShellDir(s)
 	}
 }
 
-// followShellDir moves s's file panel to the shell's directory, if the
-// panel follows it and is elsewhere.
+// followShellDir moves s's file panel to the directory of the shell of
+// its focused pane, if the panel follows it and is elsewhere.
 func (a *App) followShellDir(s *Session) {
-	d := s.shell.dir
+	p := s.pane()
+	if p == nil {
+		return
+	}
+	d := p.shell.dir
 	if a.settings.NoFollowTerminalDir || d == "" || s.sftp == nil || d == s.files.cwd {
 		return
 	}
 	a.listDir(s, d, true)
 }
 
-// shellDir is the shell's working directory, as it reports it (OSC 7) or
-// as last read from the server, or "".
+// shellDir is the working directory of the shell of s's focused pane, as
+// it reports it (OSC 7) or as last read from the server, or "".
 func (s *Session) shellDir() string {
-	if s.term != nil {
-		if d := s.term.Dir(); d != "" {
+	p := s.pane()
+	if p == nil {
+		return ""
+	}
+	if p.term != nil {
+		if d := p.term.Dir(); d != "" {
 			return d
 		}
 	}
-	return s.shell.dir
+	return p.shell.dir
 }
 
 // followButton is the file panel's toggle for following the terminal's

@@ -1,11 +1,12 @@
 // Package sshtest is an SSH server for tests, in the test's process: it
 // logs in with a password, opens shells that read and print nothing,
-// forwards ports as OpenSSH does with AllowTcpForwarding on and
+// keeping what they read, forwards ports as OpenSSH does with AllowTcpForwarding on and
 // GatewayPorts off, answers keepalives, and, started with StartSFTP,
 // serves the local file system over SFTP.
 package sshtest
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
 	"errors"
@@ -43,8 +44,13 @@ type Server struct {
 	wg       sync.WaitGroup
 
 	keepAlives atomic.Int64 // keepalive@openssh.com requests received
-	silent     atomic.Bool  // keepalives go unanswered
-	hangExec   atomic.Bool  // exec requests are accepted and never run
+	logins     atomic.Int64 // passwords taken
+	// maxSessions refuses session channels past that many open on a
+	// connection, as OpenSSH's MaxSessions does: 0 for no limit.
+	maxSessions atomic.Int64
+	shells      []*shell    // the shells opened, in order, under mu
+	silent      atomic.Bool // keepalives go unanswered
+	hangExec    atomic.Bool // exec requests are accepted and never run
 }
 
 // Start starts a server, which stops as the test ends, with every
@@ -72,10 +78,12 @@ func start(t testing.TB, sftpDir string) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
+	s := &Server{sftpDir: sftpDir, conns: map[*ssh.ServerConn]bool{}, forwards: map[*ssh.ServerConn]map[string]net.Listener{}}
 	cfg := &ssh.ServerConfig{PasswordCallback: func(_ ssh.ConnMetadata, pw []byte) (*ssh.Permissions, error) {
 		if string(pw) != Password {
 			return nil, errors.New("wrong password")
 		}
+		s.logins.Add(1)
 		return nil, nil
 	}}
 	cfg.AddHostKey(signer)
@@ -83,7 +91,7 @@ func start(t testing.TB, sftpDir string) *Server {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := &Server{ln: ln, cfg: cfg, sftpDir: sftpDir, conns: map[*ssh.ServerConn]bool{}, forwards: map[*ssh.ServerConn]map[string]net.Listener{}}
+	s.ln, s.cfg = ln, cfg
 	addr := ln.Addr().(*net.TCPAddr)
 	s.Host, s.Port = addr.IP.String(), addr.Port
 	s.wg.Add(1)
@@ -145,6 +153,64 @@ func (s *Server) StopAnswering() { s.silent.Store(true) }
 // a stale mount. By default exec is refused.
 func (s *Server) HangExec() { s.hangExec.Store(true) }
 
+// Logins is how many times a client logged in, on every connection.
+func (s *Server) Logins() int { return int(s.logins.Load()) }
+
+// LimitSessions refuses the session channels (shells, exec, SFTP) a
+// connection opens from now on past n open at once, as OpenSSH's
+// MaxSessions; 0 lifts the limit.
+func (s *Server) LimitSessions(n int) { s.maxSessions.Store(int64(n)) }
+
+// shell is a shell the server opened: what it read, and its channel.
+type shell struct {
+	ch ssh.Channel
+	mu sync.Mutex
+	in bytes.Buffer
+}
+
+func (sh *shell) Write(p []byte) (int, error) {
+	sh.mu.Lock()
+	defer sh.mu.Unlock()
+	return sh.in.Write(p)
+}
+
+// Shells is how many shells the server opened, on every connection.
+func (s *Server) Shells() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return len(s.shells)
+}
+
+// shell is the i-th shell opened, from 0.
+func (s *Server) shell(i int) *shell {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if i < 0 || i >= len(s.shells) {
+		return nil
+	}
+	return s.shells[i]
+}
+
+// ShellInput is what the i-th shell opened, from 0, has read so far.
+func (s *Server) ShellInput(i int) string {
+	sh := s.shell(i)
+	if sh == nil {
+		return ""
+	}
+	sh.mu.Lock()
+	defer sh.mu.Unlock()
+	return sh.in.String()
+}
+
+// EndShell ends the i-th shell opened, from 0, as a shell that exits:
+// exit status 0, then the channel's close. The connection stays.
+func (s *Server) EndShell(i int) {
+	if sh := s.shell(i); sh != nil {
+		sh.ch.SendRequest("exit-status", false, ssh.Marshal(struct{ Status uint32 }{0}))
+		sh.ch.Close()
+	}
+}
+
 // Forwards is how many ports the server listens on for clients now.
 func (s *Server) Forwards() int {
 	s.mu.Lock()
@@ -190,10 +256,16 @@ func (s *Server) serve(conn net.Conn) {
 			s.global(sconn, r)
 		}
 	}()
+	var open atomic.Int64 // session channels open on the connection
 	for nc := range chans {
 		switch nc.ChannelType() {
 		case "session":
-			s.session(nc)
+			if max := s.maxSessions.Load(); max > 0 && open.Load() >= max {
+				nc.Reject(ssh.Prohibited, "open failed") // as OpenSSH words it
+				continue
+			}
+			open.Add(1)
+			s.session(nc, func() { open.Add(-1) })
 		case "direct-tcpip":
 			s.wg.Add(1)
 			go func() {
@@ -207,15 +279,17 @@ func (s *Server) serve(conn net.Conn) {
 }
 
 // session opens a shell that reads what comes and prints nothing, or
-// the SFTP subsystem.
-func (s *Server) session(nc ssh.NewChannel) {
+// the SFTP subsystem; closed runs once the channel closes.
+func (s *Server) session(nc ssh.NewChannel, closed func()) {
 	ch, reqs, err := nc.Accept()
 	if err != nil {
+		closed()
 		return
 	}
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
+		defer closed()
 		started := false
 		start := func(serve func()) {
 			started = true
@@ -232,7 +306,11 @@ func (s *Server) session(nc ssh.NewChannel) {
 			case "shell":
 				r.Reply(!started, nil)
 				if !started {
-					start(func() { io.Copy(io.Discard, ch) })
+					sh := &shell{ch: ch}
+					s.mu.Lock()
+					s.shells = append(s.shells, sh)
+					s.mu.Unlock()
+					start(func() { io.Copy(sh, ch) })
 				}
 			case "subsystem":
 				var name struct{ Name string }

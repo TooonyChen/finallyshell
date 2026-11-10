@@ -54,7 +54,7 @@ func readmeApp(t *testing.T, lang string) (*App, *fakePlatform, *ui.Tester, *Ses
 		t.Skip("no terminal:", err)
 	}
 	t.Cleanup(func() { term.Close() })
-	s.term = term
+	s.setTerm(term)
 	term.Feed([]byte(readmeTerminal))
 
 	tt := ui.NewTester(a.View, 1280, 820)

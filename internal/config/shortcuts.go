@@ -28,4 +28,15 @@ type Shortcuts struct {
 	// ToggleBottomPanel collapses the bottom panel under the terminal to
 	// its row of tabs, and opens it again.
 	ToggleBottomPanel string `json:"toggleBottomPanel,omitempty"`
+	// SplitRight and SplitDown open a pane beside the focused one of a
+	// session, or under it; ZoomPane shows the focused pane alone, and
+	// all again; the FocusPane keys move the focus to the pane on that
+	// side.
+	SplitRight     string `json:"splitRight,omitempty"`
+	SplitDown      string `json:"splitDown,omitempty"`
+	ZoomPane       string `json:"zoomPane,omitempty"`
+	FocusPaneLeft  string `json:"focusPaneLeft,omitempty"`
+	FocusPaneRight string `json:"focusPaneRight,omitempty"`
+	FocusPaneUp    string `json:"focusPaneUp,omitempty"`
+	FocusPaneDown  string `json:"focusPaneDown,omitempty"`
 }

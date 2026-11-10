@@ -131,7 +131,7 @@ func TestPanelRow(t *testing.T) {
 	}
 	a.openFind()
 	a.toggleBarFocus()
-	if web.find.open || web.bar.focus || panel.find.open {
+	if web.findOpen() || web.bar.focus || panel.findOpen() {
 		t.Error("find or command bar on the panel row")
 	}
 	if a.selectedNewTab() != nil {

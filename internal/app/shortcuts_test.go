@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"testing"
@@ -15,13 +16,16 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
-// The defaults are FinalShell's on each platform, each one a key the
-// checks let through, and no two alike.
+// The defaults are FinalShell's on each platform, and the panes' are
+// Ghostty's on macOS and Windows Terminal's elsewhere, each one a key
+// the checks let through, and no two alike.
 func TestShortcutDefaults(t *testing.T) {
 	want := map[string][]string{
-		"darwin": {"⌘C", "⌘V", "⌘F", "⌘↩", "↩", "⌘[", "⌘]", "⌘W", "⌘O", "⌘T", "⌘1…9", "⇧⌘L", "⇧⌘E", "⌘J"},
+		"darwin": {"⌘C", "⌘V", "⌘F", "⌘↩", "↩", "⌘[", "⌘]", "⌘W", "⌘O", "⌘T", "⌘1…9", "⇧⌘L", "⇧⌘E", "⌘J",
+			"⌘D", "⇧⌘D", "⇧⌘↩", "⌥⌘←", "⌥⌘→", "⌥⌘↑", "⌥⌘↓"},
 		"linux": {"Ctrl+Shift+C", "Ctrl+Shift+V", "Ctrl+Shift+F", "Ctrl+Shift+Enter", "Enter", "Ctrl+Shift+Tab", "Ctrl+Tab",
-			"Ctrl+Shift+W", "Ctrl+Shift+O", "Ctrl+Shift+T", "Alt+1…9", "Ctrl+Shift+L", "Ctrl+Shift+E", "Ctrl+Shift+J"},
+			"Ctrl+Shift+W", "Ctrl+Shift+O", "Ctrl+Shift+T", "Alt+1…9", "Ctrl+Shift+L", "Ctrl+Shift+E", "Ctrl+Shift+J",
+			"Alt+Shift+=", "Alt+Shift+-", "Ctrl+Shift+X", "Alt+Left", "Alt+Right", "Alt+Up", "Alt+Down"},
 	}
 	want["windows"] = want["linux"]
 	for goos, labels := range want {
@@ -38,6 +42,10 @@ func TestShortcutDefaults(t *testing.T) {
 			}
 			if c := shortcutConflicts(&config.Shortcuts{}, goos, act.id, k); len(c) > 0 {
 				t.Errorf("%s: the default of %s clashes with %v", goos, act.title(), c)
+			}
+			// Nor a key the terminal binds, which it would lose.
+			if goos == runtime.GOOS && terminalKeyClash(k, act.digits) {
+				t.Errorf("%s: the default of %s is the terminal's", goos, act.title())
 			}
 		}
 		if !slices.Equal(got, labels) {
@@ -86,9 +94,37 @@ func TestShortcutChecks(t *testing.T) {
 		{"darwin", scFind, keyCombo{ui.Ctrl | ui.Shift, ui.KeyF}, keyOK},
 		{"windows", scSwitchTab, keyCombo{ui.Alt, ui.Key3}, keyOK},
 		{"linux", scReconnect, keyCombo{0, ui.KeyR}, keyOK}, // where no shell runs
+		// The panes' keys may be Alt with a key the shell reads, as Windows
+		// Terminal's, with a warning; Ctrl alone and Option still not.
+		{"windows", scSplitRight, keyCombo{ui.Alt | ui.Shift, ui.KeyEqual}, keyOK},
+		{"linux", scFocusPaneLeft, keyCombo{ui.Alt, ui.KeyLeft}, keyOK},
+		{"linux", scFocusPaneLeft, keyCombo{ui.Ctrl, ui.KeyLeft}, keyShellCtrl},
+		{"darwin", scFocusPaneLeft, keyCombo{ui.Alt, ui.KeyLeft}, keyOption},
+		{"linux", scZoomPane, keyCombo{ui.Alt, ui.KeyZ}, keyShellAlt},
 	} {
 		if got := checkShortcut(tc.goos, tc.id, tc.k); got != tc.want {
 			t.Errorf("%s %s on %s: %d (%s), want %d", tc.goos, tc.k.label(tc.goos, false), actionOf(tc.id).title(), got, got.message(tc.goos), tc.want)
+		}
+	}
+}
+
+// The page warns of the panes' Alt keys a shell reads, and only those.
+func TestShortcutAltWarning(t *testing.T) {
+	for _, tc := range []struct {
+		goos string
+		id   shortcutID
+		k    keyCombo
+		want bool
+	}{
+		{"linux", scFocusPaneLeft, keyCombo{ui.Alt, ui.KeyLeft}, true},
+		{"windows", scSplitDown, keyCombo{ui.Alt | ui.Shift, ui.KeyMinus}, true},
+		{"linux", scFocusPaneLeft, keyCombo{ui.Ctrl | ui.Alt, ui.KeyLeft}, false},
+		{"linux", scSplitRight, keyCombo{ui.Ctrl | ui.Shift, ui.KeyD}, false},
+		{"darwin", scFocusPaneLeft, keyCombo{ui.Super | ui.Alt, ui.KeyLeft}, false},
+		{"linux", scSwitchTab, keyCombo{ui.Alt, ui.Key1}, false},
+	} {
+		if got := altShellKey(tc.goos, tc.id, tc.k); got != tc.want {
+			t.Errorf("%s %s for %s: warned %v", tc.goos, tc.k.label(tc.goos, false), actionOf(tc.id).title(), got)
 		}
 	}
 }

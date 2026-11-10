@@ -318,7 +318,8 @@ func TestRenameSessionScreenshots(t *testing.T) {
 		tt.Key(0, ui.KeyEnter)
 		tt.Frame()
 		logs := demoSession(a, "web-1", "web-1.example") // in a.sessions
-		logs.Host, logs.term, logs.name = web.Host, web.term, "web-1 logs"
+		logs.Host, logs.name = web.Host, "web-1 logs"
+		logs.setTerm(web.term())
 		a.active = 2
 		tt.Frame()
 		tt.Move(rowCenter(t, tt, "web-1 build"))

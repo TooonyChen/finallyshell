@@ -294,6 +294,8 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 			s.status, s.err = statusClosed, nil
 		}
 		m.Separator()
+		a.paneMenu(m, s)
+		m.Separator()
 		a.renameMenu(m, s)
 		m.Separator()
 		if m.Item(locales.Close()).Danger().Chosen() {
@@ -316,8 +318,8 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		switch {
 		case s.status != statusConnected:
 			sub = s.statusText()
-		case s.isLocal() && s.title != "":
-			sub = s.title // the program's own, as a terminal app's tab
+		case s.isLocal() && s.programTitle() != "":
+			sub = s.programTitle() // the program's own, as a terminal app's tab
 		}
 		name := func() { a.sessionName(c, s, active) }
 		if renaming {

@@ -243,7 +243,7 @@ func TestAgentFollowerEnds(t *testing.T) {
 func TestAgentIconRows(t *testing.T) {
 	a, p := testApp(t)
 	s := demoSession(a, "web-1", "10.0.0.7")
-	s.shell.agent = &monitor.Agents[0]
+	s.pane().shell.agent = &monitor.Agents[0]
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
 	a.openPanelTab(s, tabFiles)
@@ -289,7 +289,7 @@ func TestAgentIconScreenshots(t *testing.T) {
 				}
 				for j := range monitor.Agents {
 					if monitor.Agents[j].Name == name {
-						s.shell.agent = &monitor.Agents[j]
+						s.pane().shell.agent = &monitor.Agents[j]
 					}
 				}
 			}

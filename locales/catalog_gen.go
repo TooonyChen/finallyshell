@@ -9355,3 +9355,163 @@ func ConfirmQuitLocal(count int) string { return In(i18n.Locale()).ConfirmQuitLo
 func (msgs Messages) ConfirmQuitLocal(count int) string {
 	return Catalog.Format(msgs.locale, "confirmQuitLocal", map[string]any{"count": count})
 }
+
+// SplitRight says "Split right"
+// in the language the app shows.
+func SplitRight() string { return In(i18n.Locale()).SplitRight() }
+
+// SplitRight says "Split right"
+// in the language of msgs.
+func (msgs Messages) SplitRight() string {
+	return Catalog.Format(msgs.locale, "splitRight", nil)
+}
+
+// SplitDown says "Split down"
+// in the language the app shows.
+func SplitDown() string { return In(i18n.Locale()).SplitDown() }
+
+// SplitDown says "Split down"
+// in the language of msgs.
+func (msgs Messages) SplitDown() string {
+	return Catalog.Format(msgs.locale, "splitDown", nil)
+}
+
+// ZoomPane says "Zoom this pane"
+// in the language the app shows.
+func ZoomPane() string { return In(i18n.Locale()).ZoomPane() }
+
+// ZoomPane says "Zoom this pane"
+// in the language of msgs.
+func (msgs Messages) ZoomPane() string {
+	return Catalog.Format(msgs.locale, "zoomPane", nil)
+}
+
+// EqualizePanes says "Equalize panes"
+// in the language the app shows.
+func EqualizePanes() string { return In(i18n.Locale()).EqualizePanes() }
+
+// EqualizePanes says "Equalize panes"
+// in the language of msgs.
+func (msgs Messages) EqualizePanes() string {
+	return Catalog.Format(msgs.locale, "equalizePanes", nil)
+}
+
+// ClosePane says "Close this pane"
+// in the language the app shows.
+func ClosePane() string { return In(i18n.Locale()).ClosePane() }
+
+// ClosePane says "Close this pane"
+// in the language of msgs.
+func (msgs Messages) ClosePane() string {
+	return Catalog.Format(msgs.locale, "closePane", nil)
+}
+
+// PaneCount says "{count, plural, one {# pane} other {# panes}}"
+// in the language the app shows.
+func PaneCount(count int) string { return In(i18n.Locale()).PaneCount(count) }
+
+// PaneCount says "{count, plural, one {# pane} other {# panes}}"
+// in the language of msgs.
+func (msgs Messages) PaneCount(count int) string {
+	return Catalog.Format(msgs.locale, "paneCount", map[string]any{"count": count})
+}
+
+// ErrPaneRefused says "The server refused another shell on this connection: it may allow no more sessions (MaxSessions)."
+// in the language the app shows.
+func ErrPaneRefused() string { return In(i18n.Locale()).ErrPaneRefused() }
+
+// ErrPaneRefused says "The server refused another shell on this connection: it may allow no more sessions (MaxSessions)."
+// in the language of msgs.
+func (msgs Messages) ErrPaneRefused() string {
+	return Catalog.Format(msgs.locale, "errPaneRefused", nil)
+}
+
+// CmdBarFocusedPane says "Sends to the focused pane"
+// in the language the app shows.
+func CmdBarFocusedPane() string { return In(i18n.Locale()).CmdBarFocusedPane() }
+
+// CmdBarFocusedPane says "Sends to the focused pane"
+// in the language of msgs.
+func (msgs Messages) CmdBarFocusedPane() string {
+	return Catalog.Format(msgs.locale, "cmdBarFocusedPane", nil)
+}
+
+// ScSplitRight says "Split the pane right"
+// in the language the app shows.
+func ScSplitRight() string { return In(i18n.Locale()).ScSplitRight() }
+
+// ScSplitRight says "Split the pane right"
+// in the language of msgs.
+func (msgs Messages) ScSplitRight() string {
+	return Catalog.Format(msgs.locale, "scSplitRight", nil)
+}
+
+// ScSplitDown says "Split the pane down"
+// in the language the app shows.
+func ScSplitDown() string { return In(i18n.Locale()).ScSplitDown() }
+
+// ScSplitDown says "Split the pane down"
+// in the language of msgs.
+func (msgs Messages) ScSplitDown() string {
+	return Catalog.Format(msgs.locale, "scSplitDown", nil)
+}
+
+// ScZoomPane says "Zoom the focused pane, or show all panes"
+// in the language the app shows.
+func ScZoomPane() string { return In(i18n.Locale()).ScZoomPane() }
+
+// ScZoomPane says "Zoom the focused pane, or show all panes"
+// in the language of msgs.
+func (msgs Messages) ScZoomPane() string {
+	return Catalog.Format(msgs.locale, "scZoomPane", nil)
+}
+
+// ScFocusPaneLeft says "Focus the pane on the left"
+// in the language the app shows.
+func ScFocusPaneLeft() string { return In(i18n.Locale()).ScFocusPaneLeft() }
+
+// ScFocusPaneLeft says "Focus the pane on the left"
+// in the language of msgs.
+func (msgs Messages) ScFocusPaneLeft() string {
+	return Catalog.Format(msgs.locale, "scFocusPaneLeft", nil)
+}
+
+// ScFocusPaneRight says "Focus the pane on the right"
+// in the language the app shows.
+func ScFocusPaneRight() string { return In(i18n.Locale()).ScFocusPaneRight() }
+
+// ScFocusPaneRight says "Focus the pane on the right"
+// in the language of msgs.
+func (msgs Messages) ScFocusPaneRight() string {
+	return Catalog.Format(msgs.locale, "scFocusPaneRight", nil)
+}
+
+// ScFocusPaneUp says "Focus the pane above"
+// in the language the app shows.
+func ScFocusPaneUp() string { return In(i18n.Locale()).ScFocusPaneUp() }
+
+// ScFocusPaneUp says "Focus the pane above"
+// in the language of msgs.
+func (msgs Messages) ScFocusPaneUp() string {
+	return Catalog.Format(msgs.locale, "scFocusPaneUp", nil)
+}
+
+// ScFocusPaneDown says "Focus the pane below"
+// in the language the app shows.
+func ScFocusPaneDown() string { return In(i18n.Locale()).ScFocusPaneDown() }
+
+// ScFocusPaneDown says "Focus the pane below"
+// in the language of msgs.
+func (msgs Messages) ScFocusPaneDown() string {
+	return Catalog.Format(msgs.locale, "scFocusPaneDown", nil)
+}
+
+// ShortcutShellAltWarn says "Shells read Alt with this key too (as Meta): it no longer reaches them while it does this."
+// in the language the app shows.
+func ShortcutShellAltWarn() string { return In(i18n.Locale()).ShortcutShellAltWarn() }
+
+// ShortcutShellAltWarn says "Shells read Alt with this key too (as Meta): it no longer reaches them while it does this."
+// in the language of msgs.
+func (msgs Messages) ShortcutShellAltWarn() string {
+	return Catalog.Format(msgs.locale, "shortcutShellAltWarn", nil)
+}

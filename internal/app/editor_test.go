@@ -766,9 +766,9 @@ func TestEncodingReachesServer(t *testing.T) {
 	h := &config.Host{ID: "gbk", Addr: srv.host, Port: srv.port, User: "u", Auth: config.AuthPassword, NoMonitor: true}
 	a.hosts.Add(h)
 	s := connectFake(t, a, p, h)
-	p.until(t, "the greeting", func() bool { return strings.Contains(s.term.Text(), "你好，世界") })
+	p.until(t, "the greeting", func() bool { return strings.Contains(s.term().Text(), "你好，世界") })
 
-	s.term.Send([]byte("中文"))
+	s.term().Send([]byte("中文"))
 	want := []byte{0xd6, 0xd0, 0xce, 0xc4}
 	p.until(t, "the input", func() bool { return bytes.Contains(srv.typed(), want) })
 
@@ -776,5 +776,5 @@ func TestEncodingReachesServer(t *testing.T) {
 	srv.greet([]byte("é\r\n"))
 	h.Encoding = config.EncodingUTF8
 	s = connectFake(t, a, p, h)
-	p.until(t, "the UTF-8 greeting", func() bool { return strings.Contains(s.term.Text(), "é") })
+	p.until(t, "the UTF-8 greeting", func() bool { return strings.Contains(s.term().Text(), "é") })
 }
