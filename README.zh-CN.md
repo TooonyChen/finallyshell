@@ -121,6 +121,8 @@ macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>
 
 可以选字体、字号、行高、粗细，开关连字，从 Ghostty 自带的几百个配色里挑一个，还可以加背景图片，改了立刻应用到所有打开的终端。另外还有查找（<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>）、全屏、选中即复制、自定义右键行为，<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+单击打开链接。
 
+会话的终端可以分屏，和 Ghostty、Windows Terminal 一样：<kbd>Cmd</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd>）在获得焦点的分屏旁边再开一个同一台服务器上的 shell，<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd>）在它下面开一个，用的是同一个连接，不用重新登录。点一下分屏，或用 <kbd>Cmd</kbd>+<kbd>Option</kbd>+方向键（<kbd>Alt</kbd>+方向键）在分屏之间移动，拖动分隔条调整大小，放大一个分屏占满终端，用 <kbd>Cmd</kbd>+<kbd>W</kbd>（<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>）关闭它。命令输入框和“命令”页发给获得焦点的分屏，文件面板跟随它的目录。
+
 终端下面是 FinalShell 的命令输入框：输入命令，回车发给 shell。<kbd>Tab</kbd> 分多列列出正在输入的路径所在的服务器文件夹，在第一个词上则列出服务器 PATH 里的命令；<kbd>↑</kbd>、<kbd>Alt</kbd>+<kbd>H</kbd> 或“历史”按钮列出以前发给这台主机的命令，以及它的 shell 历史里的命令，<kbd>←</kbd> <kbd>→</kbd> 可以从一条命令里只取一个词。用不上的话，在“选项 › 终端 › 命令输入框”里关掉它，或者只关掉其中一部分。
 
 常用的命令可以存成“命令”页里的按钮，按你自己的分组放好：点一下就发给会话，多行命令逐行执行，不带回车保存的命令会停在提示符后面等你检查。按钮可以拖动排序，这一页也可以在单独的标签中打开，放下几十个命令。不值得保存的几行命令，可以写在按钮旁边的命令编辑器里，用 <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd> 发送全部或只发送选中的几行，文本重启后仍在。
@@ -155,7 +157,7 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 
 ## 快捷键
 
-默认和 FinalShell 一样，可以在“选项 › 终端 › 快捷键”里修改。
+默认和 FinalShell 一样，分屏的在 macOS 上和 Ghostty 一样、其他系统上和 Windows Terminal 一样，可以在“选项 › 终端 › 快捷键”里修改。
 
 | 操作 | macOS | Windows / Linux |
 |---|---|---|
@@ -166,13 +168,17 @@ locale 不是 UTF-8 的服务器也能用：终端可以转换 GBK、GB18030、B
 | 重新连接断开的会话 | <kbd>Enter</kbd> | <kbd>Enter</kbd> |
 | 上一个标签 | <kbd>Cmd</kbd>+<kbd>[</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Tab</kbd> |
 | 下一个标签 | <kbd>Cmd</kbd>+<kbd>]</kbd> | <kbd>Ctrl</kbd>+<kbd>Tab</kbd> |
-| 关闭标签 | <kbd>Cmd</kbd>+<kbd>W</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> |
+| 关闭获得焦点的分屏，只有一个分屏时关闭标签 | <kbd>Cmd</kbd>+<kbd>W</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> |
 | 连接管理器 | <kbd>Cmd</kbd>+<kbd>O</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> |
 | 新标签页 | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | 切换到第 1 到 9 个标签 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
 | 命令输入框，再按回到终端 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
 | 左侧面板切换会话/连接 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> |
 | 显示或隐藏底部面板 | <kbd>Cmd</kbd>+<kbd>J</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> |
+| 向右分屏 | <kbd>Cmd</kbd>+<kbd>D</kbd> | <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd> |
+| 向下分屏 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> | <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd> |
+| 放大获得焦点的分屏，或还原 | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> |
+| 焦点移到那一边的分屏 | <kbd>Cmd</kbd>+<kbd>Option</kbd>+方向键 | <kbd>Alt</kbd>+方向键 |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-zh-CN.png" width="720" alt="选项里的快捷键页">

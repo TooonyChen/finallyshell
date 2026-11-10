@@ -14,6 +14,7 @@
 - [子窗口](#子窗口)
 - [选项窗口加一页](#选项窗口加一页)
 - [加一个导入来源](#加一个导入来源)
+- [会话的分屏](#会话的分屏)
 - [关闭和退出](#关闭和退出)
 - [单实例](#单实例)
 - [加一条文案](#加一条文案)
@@ -150,8 +151,8 @@ internal/
   importer/          读其他客户端的连接：importer.go 是来源列表（readers）、读出的连接和问题、文本解码（UTF-8、UTF-16、GB18030）、判重、按文件夹导入；finalshell.go 找 FinalShell 的目录、读 conn 里的连接和文件夹；xshell.go 找 Xshell 的 Sessions 文件夹、读 .xsh 会话文件和 .xts 导出文件；securecrt.go 找 SecureCRT 的配置目录、读它 Sessions 文件夹里的 .ini 文件；mobaxterm.go 找 MobaXterm.ini、读里面的书签段，以及 .mxtsessions 和 .moba 导出文件；sshconfig.go 读 OpenSSH 的 ~/.ssh/config（Host 块和通配模式、Include、ProxyJump）；table.go 读 CSV 文件或 .xlsx 第一个工作表里的服务器列表，.xlsx 由自己写的 xlsx.go 读（archive/zip 和 encoding/xml，有防 zip 炸弹的限制）；testdata 是编造的样例
   sshx/              SSH 连接、认证、known_hosts、给终端用的 Conn；proxy.go 是经过 SOCKS5、HTTP CONNECT 和跳板机连接；forward.go 是端口转发（-L/-R/-D）和 SOCKS5 服务端
   termenc/           终端的连接在服务器的编码（GBK、Big5……）和终端读的 UTF-8 之间转换
-  sshtest/           测试用的进程内 SSH 服务器：密码登录、空的 shell、端口转发，StartSFTP 还提供 SFTP（本机文件系统）
-  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计；netstat.go 是网络页的 socket（ss，或 /proc/net 和 /proc/<pid>/fd）、速度和行；trace.go 是通过 exec 通道的路由追踪（NextTrace 的 RAW 输出、traceroute、tracepath）；shelldir.go 从 /proc 读连接上的 shell：它的目录和前台程序；agents.go 判断程序是哪个编程智能体
+  sshtest/           测试用的进程内 SSH 服务器：密码登录、记下读到内容的空 shell、端口转发、MaxSessions 限制，StartSFTP 还提供 SFTP（本机文件系统）
+  monitor/           服务器状态采集和解析；net.go 是每个网卡的网速和历史，以及选中网卡的合计；netstat.go 是网络页的 socket（ss，或 /proc/net 和 /proc/<pid>/fd）、速度和行；trace.go 是通过 exec 通道的路由追踪（NextTrace 的 RAW 输出、traceroute、tracepath）；shelldir.go 从 /proc 读连接上的一个 shell（连接上有几个时，读哪个由 ShellPick 指定）：它的目录和前台程序；agents.go 判断程序是哪个编程智能体
   geo/               IP 归属地：通过官方 Go 绑定读取 ip2region 数据（xdb.go），从 GitHub 或 jsDelivr 按校验和下载数据（download.go），ip-api.com 和 ip.sb 的在线查询（online.go）及其缓存（cache.go）；geotest/ 为测试生成小的 .xdb 文件
   remotefs/          SFTP 列目录、上传、下载（带进度和取消），重命名、新建、删除（ops.go）；textfile.go 是编辑器的读取（认出二进制文件）和安全保存；archive.go 是打包传输：打包和安全解包 tar.gz 数据流，在 exec 通道上运行 tar
   icons/             内嵌的 SVG 图标（Lucide，ISC 协议）；agents/ 是编程智能体的图标（LobeHub Icons，MIT 协议）
@@ -168,6 +169,8 @@ internal/
     netifaces.go     网速曲线的网卡菜单：标签、选择网卡、按主机保存选择
     sysinfo.go       “系统信息”弹出框：读取、加载和错误状态、复制
     terminal.go      终端区域
+    panes.go         会话的分屏：分屏（每个终端自己的东西）和分屏树，插入、移除、平均分配、某个方向上相邻的分屏；会话获得焦点的分屏和它的终端
+    paneview.go      分屏的显示和操作：分屏、关闭、焦点、放大、shell 结束的分屏、分屏的视图、会话行菜单里的项和分屏数标记
     findbar.go       终端上的查找栏，驱动插件的 Search
     commandbar.go    终端下方的命令输入框：按键，路径、命令和历史弹出列表，词和字段
     commandbar_data.go 弹出列表读取的内容：通过 SFTP 读文件夹，通过 exec 通道（或 SFTP）读命令名，主机的历史，服务器的 shell 历史
@@ -283,6 +286,18 @@ var xshellReader = &Reader{
 3. 在 `internal/app/import_sources.go` 的 `importTexts` 里加一项：列表里的名字、选择对话框的标题、文件类型的名字（有扩展名的文件来源）、找不到时说什么、表格上面的提示（加密密码的客户端用 `locales.ImportPasswordsNote(name)`）。新的 `Reason` 或 `Note` 在同一个文件的 `importProblemText` 或 `importNoteText` 里加文案。可选的 `errorText` 用应用自己的话说来源特有的错误（否则窗口显示“无法读取”和错误本身）；`template` 是“保存模板…”要写的文件，给用户自己写的来源用，比如服务器列表（`import_table.go`）。文案两种语言都要加（见[加一条文案](#加一条文案)）。
 
 来源没有文案时 `TestImportSourcesListed` 会失败。加来源不用改 `import.go` 的其他地方。
+
+## 会话的分屏
+
+会话的终端可以分成几个分屏（`panes.go`）。分屏是一棵二叉树 `paneTree` 的叶子：内部节点 `paneNode` 有方向（`splitRight`、`splitDown`）、第一个子节点占的百分比和两个子节点；视图（`paneview.go`）用嵌套的 `ui.SplitPercent` 和 `ui.SplitVerticalPercent` 排布它们。
+
+- 每个终端自己的东西在 `pane` 上：终端、查找栏（`findState`）、跟随 shell 目录和前台程序的读取（`shellDirState`）、本地程序的标题。每个连接的东西留在 `Session` 上：客户端、SFTP、监控、隧道、命令输入框。
+- `Session.term()` 是获得焦点的分屏的终端，`Session.pane()` 是获得焦点的分屏：会话没有别的终端需要同步。命令输入框的 `sendLine`、命令页、命令编辑器和发送目标都通过它到达会话，所以都发给获得焦点的分屏，每个会话一次。
+- `connect` 在同一个连接上按树的顺序依次给树里每个分屏打开 shell：第一次是只有一个分屏的树，重新连接时是会话原来的树。`connectLocal` 对本地程序也一样。分屏（`splitPane`）在会话的客户端上再开一个 shell，不在 UI 线程上，shell 开好后才加上分屏。
+- 分屏的终端结束时（`paneExited`）：还有别的分屏且客户端还活着（在连接上发一个 keepalive 请求就知道），只关闭这个分屏；否则会话断开，和只有一个终端时一样，并保留分屏树给重新连接用。
+- 跟随分屏 shell 的读取用 `monitor.ShellPick` 从 `/proc` 读它：按打开的顺序（`paneTree.order`）它在连接的 shell 里排第几，也就是它们在服务器上启动时间的顺序。
+- `paneTree.remove` 和 `paneTree.insert` 把一个分屏拿出来、放到另一个分屏的前面或后面；以后拖动分屏换位置，就是先拿出来再放进去。
+- 分屏的东西都不保存。
 
 ## 关闭和退出
 

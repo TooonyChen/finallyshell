@@ -29,6 +29,7 @@
 - [终端](#terminal-section)
   - [查找](#查找)
   - [全屏](#全屏)
+  - [分屏](#分屏)
   - [命令输入框](#命令输入框)
   - [外观：字体、配色、背景图片](#外观字体配色背景图片)
 - [文件面板](#文件面板)
@@ -441,7 +442,7 @@ Ctrl+Shift+F（macOS 是 Cmd+F）在终端右上角打开查找栏（MyGo 的 `u
 - 回车到下一个（往上，更早的输出），Shift+回车到上一个。F3 / Shift+F3（macOS 是 Cmd+G / Shift+Cmd+G）也行。
 - Esc 或“完成”关闭查找栏，结束搜索，键盘回到终端。
 - 再按一次快捷键时全选查找框里的文字。
-- 每个会话的查找栏分开。
+- 每个会话的查找栏分开，[分屏](#分屏)的会话里每个分屏的也分开；快捷键打开获得焦点的分屏的查找栏。
 - 不区分 ASCII 字母大小写（插件就是这样）。
 
 ### 全屏
@@ -452,6 +453,22 @@ Ctrl+Shift+Enter（macOS 是 Cmd+Enter）隐藏左边栏和下面的文件面板
 - 窗口本来就是系统全屏的，退出程序的全屏时保持系统全屏。
 - 用系统的办法（macOS 的绿色按钮）退出系统全屏，也一起退出程序的全屏。
 - [面板行](#底部面板单独成标签)没有终端，在那里按这个键不起作用。全屏时切到面板行，只显示它的面板。
+- [分屏](#分屏)的会话全屏时显示它所有的分屏。
+
+### 分屏
+
+会话的终端可以分成几个分屏，像 Ghostty、iTerm、Windows Terminal 的标签那样，把部署、日志和 `htop` 并排放在同一台服务器上。每个分屏是会话的 SSH 连接上的一个独立 shell（这个连接上新开的一个通道），不用重新登录。[本地终端](#本地终端)的分屏再运行一次本地终端程序。
+
+- **分屏**：向右分屏（macOS 是 Cmd+D，其他系统是 Alt+Shift+=）在获得焦点的分屏右边开一个分屏，向下分屏（Cmd+Shift+D，Alt+Shift+-）在它下面开一个，新分屏获得焦点。新 shell 的终端类型、按键和编码和第一个一样。分屏可以接着分，横竖都行。会话行的右键菜单里有同样的项，还有“放大此分屏”“平均分配”“关闭此分屏”。在终端里右键打开的是终端自己的菜单（复制、粘贴、全选、清屏）：这个菜单由 MyGo 的终端生成，应用加不了项。
+- **焦点**：获得焦点的分屏有蓝色边框，其他分屏稍微变暗。点一下分屏就让它获得焦点（这次点击也会交给它的终端，所以选择文字、用鼠标的程序照常可用）。Cmd+Option+方向键（其他系统是 Alt+方向键）把焦点移到那一边的分屏。
+- **调整大小**：分屏之间的分隔条可以拖动，每个分屏最窄 120 DIP、最矮 60 DIP；双击分隔条两边平分。行菜单里的“平均分配”让所有分屏一样大。
+- **放大**：“放大此分屏”（Cmd+Shift+Enter，其他系统是 Ctrl+Shift+X）让获得焦点的分屏占满终端区域；再按一次，或者移动焦点，显示全部分屏。
+- **关闭**：会话有多个分屏时，关闭标签（Cmd+W，Ctrl+Shift+W）关闭获得焦点的分屏，只剩一个时关闭会话，和 Ghostty 一样。shell 退出（`exit`、Ctrl+D）的分屏会关闭，旁边的分屏占用它的位置并获得焦点。
+- **连接断开**：连接断开时所有分屏都结束，会话和只有一个终端时一样显示“连接已断开”。重新连接在每个分屏里重新打开 shell，布局不变。
+- **服务器拒绝**：服务器限制一个连接上的会话数（OpenSSH 的 `MaxSessions`，默认 10；服务器监控和 SFTP 各占一个）。被拒绝的分屏不会加上，并弹出提示说明原因。
+- **跟随获得焦点的分屏的**：命令输入框（占位文字是“发到获得焦点的分屏”）、[命令页](#命令页)和[命令编辑器](#命令编辑器)发给获得焦点的分屏的 shell；“全部会话”给每个会话发一次，发给它获得焦点的分屏。文件面板跟随获得焦点的分屏的目录，焦点移动时也转过去（见[跟随终端目录](#跟随终端目录)）；会话行显示获得焦点的分屏里运行的编程助手；查找栏作用于获得焦点的分屏。
+- **会话行**在名字后面显示分屏的会话有几个分屏（▦ 3）。
+- 分屏不保存：会话打开时只有一个分屏。
 
 ### 命令输入框
 
@@ -517,6 +534,7 @@ shell 的工作目录变了，比如执行 `cd /var/log` 之后，文件面板�
 - shell 会报告目录（OSC 7：fish，以及配置过的 zsh、bash）时直接用它。否则在 Linux 服务器上，应用会在同一个连接上另开一个通道，从 `/proc` 读出 shell 终端前台程序的工作目录，读不到时用 shell 自己的。这需要该主机打开了服务器监控（用的是同样的 exec 通道），不需要 root，除了 shell 也不需要别的工具。
 - 会话连上时读一次 shell 的起始目录，但不移动面板；之后在终端里按回车，或命令输入栏发送一行之后：约四分之一秒后读一次，一秒半后再读一次。没有输入时不再读。登录脚本里 `cd` 到别处的 shell，面板会留在主目录，直到下一次 `cd`。
 - 跟随不了的情况：没有 `/proc` 且 shell 不报告 OSC 7 的服务器（如 macOS）、`sudo -i` 或 `su` 进入的 root shell（普通用户读不到 root 的进程）、tmux 或 screen 里的 shell。面板打不开的文件夹，比如 shell 通过 ssh 去了另一台主机上的路径，面板会留在原处。
+- [分屏](#分屏)的会话，面板跟随获得焦点的分屏。每个分屏的 shell 分开读：服务器按连接上各个 shell 启动的先后区分它们，也就是分屏打开它们的顺序。有分屏正在打开或关闭时数目对不上，对上之前读不到。
 
 ### 文件图标主题
 
@@ -849,7 +867,7 @@ shell 需要的键不让用，框里用红字说明原因：
 - Windows 上 Ctrl+Alt 加字母（就是 AltGr，很多键盘布局用它输入字符）；
 - 系统占用的键（macOS 的 Cmd+Q、Cmd+H、Cmd+M、Cmd+Tab、Cmd+空格等，Windows 和 Linux 的 Alt+Tab、Alt+F4，Windows 上的 Win 键组合）。
 
-例外：“切换到第 1–9 个标签”可以用 Alt 加数字（readline 的数字参数很少用，GNOME Terminal 也这样），“终端：重新连接”可以用任何键（它只在会话断开、没有 shell 的时候起作用）。
+例外：“切换到第 1–9 个标签”可以用 Alt 加数字（readline 的数字参数很少用，GNOME Terminal 也这样），“终端：重新连接”可以用任何键（它只在会话断开、没有 shell 的时候起作用），分屏的操作（分屏、移动焦点）可以用 Alt 加任何键，和 Windows Terminal 一样，但会用黄色提示：这个操作占用这个键时，shell 就收不到它。
 
 和别的操作冲突时用黄字提示，“确定”后那个操作变成没有快捷键（显示“无”）。和终端自己的键（Ctrl+Shift+A 全选、Ctrl+= 缩放、Shift+PageUp 滚动、Ctrl+Insert / Shift+Insert 复制粘贴）冲突时也提示，“确定”后归这个快捷键。
 
@@ -857,7 +875,7 @@ shell 需要的键不让用，框里用红字说明原因：
 
 macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，插件的 `OptionAsAlt`）：开了之后 Option+B 发送 Esc b，而不是输入 ∫。同样对之后连接的会话生效。
 
-在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar`、`switchLeftPanel` 和 `toggleBottomPanel`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
+在 `settings.json` 里只存改过的键：`"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`。键名是 `copy`、`paste`、`find`、`fullScreen`、`reconnect`、`previousTab`、`nextTab`、`closeTab`、`connectionManager`、`newTab`、`switchTab`（值像 `"Alt+1-9"`）、`focusCommandBar`、`switchLeftPanel`、`toggleBottomPanel`、`splitRight`、`splitDown`、`zoomPane`、`focusPaneLeft`、`focusPaneRight`、`focusPaneUp` 和 `focusPaneDown`。`Super` 在 macOS 上是 Cmd，`none` 是没有快捷键。没有或读不出来的就是默认。Option 用作 Alt 是 `optionAsAlt`。
 
 ### 终端 › 命令输入框
 
@@ -935,6 +953,12 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 | 聚焦命令输入框（再按回到终端） | Cmd+Shift+L | Ctrl+Shift+L |
 | 切换会话/连接（左下面板的两页） | Cmd+Shift+E | Ctrl+Shift+E |
 | 显示或隐藏底部面板 | Cmd+J | Ctrl+Shift+J |
+| 向右分屏 | Cmd+D | Alt+Shift+= |
+| 向下分屏 | Cmd+Shift+D | Alt+Shift+- |
+| 放大获得焦点的分屏，或还原 | Cmd+Shift+Enter | Ctrl+Shift+X |
+| 焦点移到左边 / 右边 / 上面 / 下面的分屏 | Cmd+Option+方向键 | Alt+方向键 |
+
+[分屏](#分屏)的会话里，关闭标签先关闭获得焦点的分屏。
 
 说明：
 
@@ -945,6 +969,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 - 聚焦命令输入框不用 Ctrl+Shift+K：Windows 上那是终端的清屏（和 Windows Terminal 一样）。FinalShell 单按 Ctrl 切换，会和 shell 用的每个 Ctrl 键冲突，所以没有照搬。关掉命令输入框后，这个键交给终端。
 - 切换会话/连接用 E，和 VS Code 打开侧栏文件树的“资源管理器”一样；没有终端绑定 Ctrl+Shift+E。macOS 上也加 Shift，因为 Cmd+E 在 Mac 应用里是“用所选内容查找”。Linux 上旧版 IBus 用 Ctrl+Shift+E 输入表情，会先于本程序拿走这个键；按了没反应的话，在“快捷键”页换一个键，或在 IBus 的首选项里改掉。
 - 显示或隐藏底部面板用 J，和 VS Code 一样。只按 Ctrl+J 在 shell 里是换行，所以 Windows 和 Linux 上也加 Shift。全屏时和在单独标签中打开的面板上，这个键不起作用。
+- 分屏的快捷键在 macOS 上和 Ghostty 一样，在 Windows 和 Linux 上和 Windows Terminal 一样（Alt+Shift+= 就是它在美式键盘上的 Alt+Shift+Plus）。Windows Terminal 没有放大的快捷键；Ctrl+Shift+X 是 Terminator 的，也不是哪个终端或文本框的键（Ctrl+Shift+Z 在文本框里是重做）。Alt+方向键也是一些 shell 和编辑器会读的键（fish 和一些 readline 配置里 Alt+← 按词移动），Alt+Shift+- 是 bash 的 Alt+_（插入上一条命令的最后一个参数，和 Alt+. 一样）：移动焦点和放大的键只在显示的会话分了屏时才占用，只有一个分屏的会话照常收到它们；分屏的键只在能分屏时占用。“快捷键”页允许分屏的操作用这些 Alt 键，会给出提示，都可以在那里改。
 - 只带 Ctrl 的字母键（Ctrl+A……Ctrl+Z 等）都是 shell 的，在 Windows 和 Linux 上不当快捷键用。MyGo 的 legacy 键盘模式下 Ctrl+[、Ctrl+I、Ctrl+M 什么也不发送，是上游的问题（#21），这里没有绕开。
 
 ## 布局和分隔条

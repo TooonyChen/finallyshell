@@ -121,6 +121,8 @@ Files and folders get icons from VS Code icon themes. Material Icon Theme and Se
 
 Pick a font, size, line height and weight, with or without ligatures, any of the hundreds of color schemes Ghostty ships, and an optional background image. Changes apply to open terminals at once. The terminal also has find (<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>), full screen, copy on select, a choice of what right-click does, and links you can open with <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+click.
 
+Split a session's terminal into panes, as in Ghostty or Windows Terminal: <kbd>Cmd</kbd>+<kbd>D</kbd> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd>) opens another shell on the same server beside the focused one, <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd>) one under it, on the same connection, with no new login. Click a pane or use <kbd>Cmd</kbd>+<kbd>Option</kbd>+arrows (<kbd>Alt</kbd>+arrows) to move between them, drag the dividers, zoom one pane to fill the terminal, and close it with <kbd>Cmd</kbd>+<kbd>W</kbd> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>). The command bar and the Commands tab send to the focused pane, and the file panel follows its folder.
+
 Under the terminal is FinalShell's command bar: type a command and Enter sends it to the shell. <kbd>Tab</kbd> lists the server's folder for the path you are typing, in columns, or the commands on its PATH for the first word; <kbd>↑</kbd>, <kbd>Alt</kbd>+<kbd>H</kbd> or its History button lists the commands you sent to that host before, and those in its shell history, and <kbd>←</kbd> <kbd>→</kbd> pick one word out of a command. Don't need it? Turn it, or any part of it, off in Options › Terminal › Command bar.
 
 Commands you run often can be kept as buttons in the Commands tab, in groups of your own: a click sends one to the session, a command of several lines runs line by line, and one saved without Enter waits at the prompt for you to check it. Drag the buttons to arrange them, or open the tab in a tab of its own for a board of dozens. For lines not worth keeping, the command editor beside the buttons sends what you write, or just the lines you select, with <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd>, and keeps the text across restarts.
@@ -155,7 +157,7 @@ Servers whose locale isn't UTF-8 work too: the terminal converts GBK, GB18030, B
 
 ## Keyboard shortcuts
 
-The defaults follow FinalShell. Change them in Options › Terminal › Shortcuts.
+The defaults follow FinalShell; the panes' follow Ghostty on macOS and Windows Terminal elsewhere. Change them in Options › Terminal › Shortcuts.
 
 | Action | macOS | Windows / Linux |
 |---|---|---|
@@ -166,13 +168,17 @@ The defaults follow FinalShell. Change them in Options › Terminal › Shortcut
 | Reconnect a disconnected session | <kbd>Enter</kbd> | <kbd>Enter</kbd> |
 | Previous tab | <kbd>Cmd</kbd>+<kbd>[</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Tab</kbd> |
 | Next tab | <kbd>Cmd</kbd>+<kbd>]</kbd> | <kbd>Ctrl</kbd>+<kbd>Tab</kbd> |
-| Close tab | <kbd>Cmd</kbd>+<kbd>W</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> |
+| Close the focused pane, or the tab with one pane | <kbd>Cmd</kbd>+<kbd>W</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> |
 | Connection manager | <kbd>Cmd</kbd>+<kbd>O</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd> |
 | New tab | <kbd>Cmd</kbd>+<kbd>T</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> |
 | Go to tab 1 to 9 | <kbd>Cmd</kbd>+<kbd>1</kbd>…<kbd>9</kbd> | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> |
 | Command bar, and back to the terminal | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> |
 | Sessions or connections in the left panel | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> |
 | Show or hide the bottom panel | <kbd>Cmd</kbd>+<kbd>J</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> |
+| Split the pane right | <kbd>Cmd</kbd>+<kbd>D</kbd> | <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd> |
+| Split the pane down | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> | <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd> |
+| Zoom the focused pane, and back | <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd> |
+| Focus the pane on that side | <kbd>Cmd</kbd>+<kbd>Option</kbd>+arrows | <kbd>Alt</kbd>+arrows |
 
 <p align="center">
   <img src="docs/screenshots/shortcuts-en.png" width="720" alt="The shortcuts page in Options">

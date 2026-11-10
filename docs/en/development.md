@@ -17,6 +17,7 @@ pull requests) are in [CONTRIBUTING.md](../../CONTRIBUTING.md) and
 - [Child windows](#child-windows)
 - [Adding an options page](#adding-an-options-page)
 - [Adding an import source](#adding-an-import-source)
+- [Panes of a session](#panes-of-a-session)
 - [Closing and quitting](#closing-and-quitting)
 - [Single instance](#single-instance)
 - [Adding a UI string](#adding-a-ui-string)
@@ -282,8 +283,8 @@ internal/
   importer/          reads other clients' connections: importer.go is the list of sources (readers), the entries and problems they read, the text decoder (UTF-8, UTF-16, GB18030), finding duplicates and importing by folder; finalshell.go finds FinalShell's folder and reads the connections and folders in conn; xshell.go finds Xshell's Sessions folder and reads its .xsh files and .xts exports; securecrt.go finds SecureCRT's config folder and reads the .ini files of its Sessions folder; mobaxterm.go finds MobaXterm.ini and reads its bookmark sections, and .mxtsessions and .moba exports; sshconfig.go reads OpenSSH's ~/.ssh/config (Host blocks and patterns, Include, ProxyJump); table.go reads a server list in a CSV file, or the first sheet of an .xlsx with xlsx.go, a reader of its own (archive/zip and encoding/xml, with limits against zip bombs); testdata has made-up samples
   sshx/              SSH connection, authentication, known_hosts, the Conn the terminal uses; proxy.go connects through SOCKS5, HTTP CONNECT and jump hosts; forward.go is port forwarding (-L/-R/-D) and the SOCKS5 server
   termenc/           converting a terminal's connection between the server's encoding (GBK, Big5, ...) and the UTF-8 the terminal reads
-  sshtest/           in-process SSH server for tests: password login, an empty shell, port forwarding; StartSFTP also serves SFTP (the local file system)
-  monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen; netstat.go is the Network tab's sockets (ss, or /proc/net and /proc/<pid>/fd), their rates and rows; trace.go is trace route over an exec channel (NextTrace's RAW output, traceroute, tracepath); shelldir.go reads the shell of a connection from /proc: its folder and the program in its foreground; agents.go tells the coding agent a program is
+  sshtest/           in-process SSH server for tests: password login, an empty shell that keeps what it reads, port forwarding, a MaxSessions limit; StartSFTP also serves SFTP (the local file system)
+  monitor/           collecting and parsing server status; net.go is every network interface's speeds and history, and the sum of those chosen; netstat.go is the Network tab's sockets (ss, or /proc/net and /proc/<pid>/fd), their rates and rows; trace.go is trace route over an exec channel (NextTrace's RAW output, traceroute, tracepath); shelldir.go reads a shell of a connection from /proc (which one, of a connection with several, its ShellPick says): its folder and the program in its foreground; agents.go tells the coding agent a program is
   geo/               where IP addresses are: ip2region's data through its Go binding (xdb.go), downloading it from GitHub or jsDelivr against its checksum (download.go), the online lookups on ip-api.com and ip.sb (online.go) and their cache (cache.go); geotest/ makes small .xdb files for tests
   remotefs/          SFTP listing, upload, download (with progress and cancel), rename, mkdir, create and delete (ops.go); textfile.go is the editor's reading (detecting binary files) and safe saving; archive.go is archive transfers: packing and safely unpacking tar.gz streams, and running tar over an exec channel
   icons/             embedded SVG icons (Lucide, ISC license); agents/ has the coding agents' logos (LobeHub Icons, MIT license)
@@ -300,6 +301,8 @@ internal/
     netifaces.go     the network graph's interface menu: its label, choosing interfaces and keeping the choice per host
     sysinfo.go       the "System info" popover: reading, loading and error states, copying
     terminal.go      terminal area
+    panes.go         a session's panes: the pane (what is per terminal) and the tree of splits, inserting, removing, equalizing, the neighbor in a direction; the session's focused pane and its terminal
+    paneview.go      the panes on screen and their actions: splitting, closing, focus, zoom, a pane whose shell ended, the splits' views, the row's menu items and badge
     findbar.go       the find bar on the terminal, driving the plugin's Search
     commandbar.go    the command bar under the terminal: its keys, the path, command and history popups, words and fields
     commandbar_data.go what the popups read: folders over SFTP, command names over an exec channel (or SFTP), the hosts' history, the server's shell history
@@ -490,6 +493,42 @@ To add one:
 
 `TestImportSourcesListed` fails for a source without texts. Nothing else
 in `import.go` changes for a source.
+
+## Panes of a session
+
+A session's terminal splits into panes (`panes.go`). The panes are the
+leaves of a binary tree, `paneTree`: an inner `paneNode` has a direction
+(`splitRight`, `splitDown`), the first child's share in percent, and two
+children; the view (`paneview.go`) lays them out with nested
+`ui.SplitPercent` and `ui.SplitVerticalPercent`.
+
+- What is per terminal is the `pane`'s: the terminal, the find bar
+  (`findState`), the follower of the shell's folder and foreground program
+  (`shellDirState`), a local program's title. What is per connection stays
+  on `Session`: the client, SFTP, the monitor, tunnels, the command bar.
+- `Session.term()` is the focused pane's terminal, and `Session.pane()`
+  the focused pane: there is no other terminal of the session to keep in
+  step. The command bar's `sendLine`, the Commands tab, the command editor
+  and the send target reach a session through it, so they send to its
+  focused pane, once per session.
+- `connect` opens a shell for every pane of the tree on one connection,
+  one after the other, in the tree's order: the first time a tree of one
+  pane, after Reconnect the tree the session had. `connectLocal` does the
+  same with the local program. A split opens one more shell on the
+  session's client (`splitPane`), off the UI thread, and adds the pane
+  only once it is there.
+- A pane's terminal ends (`paneExited`): with other panes and the client
+  alive, which a keepalive request on the connection tells, the pane
+  closes; otherwise the session is lost, as with one terminal, and keeps
+  the tree for Reconnect.
+- The follower of a pane's shell reads it from `/proc` with
+  `monitor.ShellPick`: its place among the connection's shells by the
+  order they opened in (`paneTree.order`), which is the order of their
+  start times on the server.
+- `paneTree.remove` and `paneTree.insert` take a pane out and put it
+  beside another, before or after it; moving a pane by dragging (a later
+  change) is the one, then the other.
+- Nothing about panes is saved.
 
 ## Closing and quitting
 

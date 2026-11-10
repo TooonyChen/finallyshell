@@ -32,6 +32,7 @@ supported. [configuration.md](configuration.md) covers the files on disk;
 - [Terminal](#terminal-section)
   - [Find](#find)
   - [Full screen](#full-screen)
+  - [Splits](#splits)
   - [Command bar](#command-bar)
   - [Appearance: font, color scheme, background image](#appearance-font-color-scheme-background-image)
 - [File panel](#file-panel)
@@ -1040,7 +1041,8 @@ terminal (MyGo's `ui.FindBar`).
 - Esc or "Done" closes the bar, ends the search and returns the keyboard to
   the terminal.
 - Pressing the shortcut again selects all the text in the find box.
-- Each session has its own find bar.
+- Each session has its own find bar, and each [pane](#splits) of a split
+  session its own; the key opens the focused pane's.
 - Matching ignores the case of ASCII letters (that is how the plugin
   works).
 
@@ -1060,6 +1062,59 @@ system's full screen. Pressing it again leaves full screen.
 - On a [panel row](#bottom-panel-in-a-tab-of-its-own), which has no
   terminal, the key does nothing. Going to a panel row while in full
   screen shows its panel alone.
+- A [split](#splits) session shows all its panes in full screen.
+
+### Splits
+
+A session's terminal splits into panes, as a tab of Ghostty, iTerm or
+Windows Terminal does, to have a deploy, a log and `htop` side by side on
+the same server. Each pane is a shell of its own on the session's SSH
+connection, a new channel on it: no new login. A pane of a
+[local terminal](#local-terminal) runs the local terminal program again.
+
+- **Splitting**: Split right (Cmd+D on macOS, Alt+Shift+= elsewhere)
+  opens a pane right of the focused one, Split down (Cmd+Shift+D,
+  Alt+Shift+-) one under it, and the new pane takes the focus. The new
+  shell has the same terminal type, keys and encoding as the first. Panes
+  split again, in either direction. The session row's context menu has
+  the same items, with Zoom this pane, Equalize panes and Close this
+  pane. A right-click in the terminal opens the terminal's own menu (Copy,
+  Paste, Select All, Clear): MyGo's terminal builds it, and the app
+  cannot add to it.
+- **Focus**: the focused pane has a blue border, the others are dimmed a
+  little. A click in a pane focuses it (the click also goes to its
+  terminal, so selecting and programs that take the mouse work as
+  usual). Cmd+Option+arrows (Alt+arrows elsewhere) move the focus to the
+  pane on that side.
+- **Resizing**: the dividers between panes drag, down to 120 DIPs wide or
+  60 high a pane, and a double click on a divider shares its room
+  equally. Equalize panes in the row's menu gives every pane the same
+  room.
+- **Zoom**: Zoom this pane (Cmd+Shift+Enter, Ctrl+Shift+X elsewhere)
+  shows the focused pane alone in the terminal area; the key again, or
+  moving the focus, shows them all.
+- **Closing**: Close tab (Cmd+W, Ctrl+Shift+W) closes the focused pane
+  while the session has several, and the session with the last one, as
+  in Ghostty. A pane whose shell exits (`exit`, Ctrl+D) closes; its
+  neighbor takes its room, and the focus.
+- **Connection lost**: when the connection drops, every pane ends, and
+  the session shows "Connection lost" as with one terminal. Reconnect
+  opens a shell in every pane again, in the same layout.
+- **A server that refuses**: a server allows a number of sessions on a
+  connection (OpenSSH's `MaxSessions`, 10 by default; the monitor and
+  SFTP take one each). A split it refuses adds no pane, and a toast says
+  why.
+- **What follows the focused pane**: the command bar (its placeholder says
+  "Sends to the focused pane"), the [Commands tab](#commands-tab) and the
+  [command editor](#command-editor) send to the focused pane's shell;
+  "All sessions" sends once to each session, to its focused pane. The file
+  panel follows the focused pane's folder, and goes to it as the focus
+  moves (see [Following the terminal's folder](#following-the-terminals-folder));
+  the row shows the coding agent of the focused pane's shell; the find bar
+  works on the focused pane.
+- **The session row** shows how many panes a split session has after its
+  name (▦ 3).
+- Nothing about panes is saved: a session opens with one pane.
 
 ### Command bar
 
@@ -1247,6 +1302,11 @@ the panel goes to the shell's folder at once. It is on by default.
   read root's processes), and shells inside tmux or screen. A folder the
   panel can't open, such as one on another host the shell went to with
   ssh, leaves the panel where it was.
+- A [split](#splits) session's panel follows its focused pane. Each pane's
+  shell is read on its own: of the shells of the connection, the server
+  tells them apart by the order they started in, which is the order the
+  panes opened them in. While a pane opens or closes their numbers do not
+  match, and the read tells nothing until they do.
 
 ### File icon themes
 
@@ -2107,9 +2167,11 @@ Keys the shell needs cannot be used, and the dialog says why in red:
   on Windows).
 
 Exceptions: "Switch to tab 1–9" may use Alt with the digits (readline's
-numeric arguments are rarely used, and GNOME Terminal does the same), and
+numeric arguments are rarely used, and GNOME Terminal does the same),
 "Terminal: reconnect" may use any key (it only acts while the session is
-disconnected and there is no shell).
+disconnected and there is no shell), and the panes' actions (split, focus)
+may use Alt with any key, as Windows Terminal's do, with a warning in
+yellow that the shell no longer gets the key while the action takes it.
 
 A key that another action already uses is shown with a warning in yellow;
 after OK, that other action has no key (shown as "None"). A key the
@@ -2130,8 +2192,9 @@ In `settings.json`, only changed keys are stored:
 `"shortcuts": {"find": "Ctrl+Alt+F", "closeTab": "none"}`. The key names
 are `copy`, `paste`, `find`, `fullScreen`, `reconnect`, `previousTab`,
 `nextTab`, `closeTab`, `connectionManager`, `newTab`, `switchTab` (whose
-value looks like `"Alt+1-9"`), `focusCommandBar`, `switchLeftPanel` and
-`toggleBottomPanel`. `Super` is Cmd on macOS, and `none` means no
+value looks like `"Alt+1-9"`), `focusCommandBar`, `switchLeftPanel`,
+`toggleBottomPanel`, `splitRight`, `splitDown`, `zoomPane`,
+`focusPaneLeft`, `focusPaneRight`, `focusPaneUp` and `focusPaneDown`. `Super` is Cmd on macOS, and `none` means no
 key. A key that is missing or cannot be read has its default. Option as Alt
 is `optionAsAlt`.
 
@@ -2275,6 +2338,12 @@ Terminal › Shortcuts page.
 | Focus command bar (and back to the terminal) | Cmd+Shift+L | Ctrl+Shift+L |
 | Switch sessions / connections (the bottom-left panel's pages) | Cmd+Shift+E | Ctrl+Shift+E |
 | Show or hide the bottom panel | Cmd+J | Ctrl+Shift+J |
+| Split the pane right | Cmd+D | Alt+Shift+= |
+| Split the pane down | Cmd+Shift+D | Alt+Shift+- |
+| Zoom the focused pane, or show all panes | Cmd+Shift+Enter | Ctrl+Shift+X |
+| Focus the pane on the left / right / above / below | Cmd+Option+arrows | Alt+arrows |
+
+Close tab closes the focused pane of a [split](#splits) session first.
 
 Notes:
 
@@ -2313,6 +2382,17 @@ Notes:
 - Show or hide the bottom panel is J as in VS Code. Ctrl+J alone is a
   newline in the shell, so on Windows and Linux it takes Shift too. It
   does nothing in full screen and on a panel opened in a tab of its own.
+- The panes' keys are Ghostty's on macOS and Windows Terminal's on
+  Windows and Linux (Alt+Shift+= is its Alt+Shift+Plus on a US keyboard).
+  Windows Terminal has no key for zoom; Ctrl+Shift+X is Terminator's, and
+  no terminal's or text field's (Ctrl+Shift+Z is Redo in text fields).
+  Alt with the arrows is also what some shells and editors read (Alt+Left
+  moves by a word in fish and in some readline setups), and
+  Alt+Shift+- is bash's Alt+_ (insert the last argument, as Alt+. does):
+  the focus keys and Zoom are taken only while the session shown is split,
+  so a session with one pane keeps them, and the split keys only where a
+  pane can split. The Shortcuts page accepts these Alt keys for the
+  panes' actions, with a warning, and any of them can be changed there.
 - Letters with only Ctrl (Ctrl+A to Ctrl+Z and so on) all belong to the
   shell and are not used as shortcuts on Windows and Linux. In MyGo's
   legacy keyboard mode, Ctrl+[, Ctrl+I and Ctrl+M send nothing; that is an
