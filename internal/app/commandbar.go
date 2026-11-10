@@ -134,8 +134,6 @@ func (a *App) commandBar(c *ui.Context, s *Session) {
 			placeholder = locales.CmdBarFocusedPane()
 		}
 		input.Placeholder(placeholder)
-		// Where Enter sends (sendtarget.go).
-		a.barTarget(c, s, live)
 		if a.historyOn() {
 			// FinalShell's History button, at the bar's end.
 			button = ui.Button(c, locales.CmdBarHistory()).Shrink(0).Disabled(!live).Clicked()
@@ -227,32 +225,28 @@ func (a *App) barKey(s *Session, k ui.TextKey) bool {
 	return false
 }
 
-// sendBar sends the bar's line to the shell, with a carriage return, as
-// Enter typed in the terminal, and keeps it in the host's history,
-// without the blanks around it: to s's shell, or to each session of the
-// send target (sendtarget.go). The bar is emptied once it is sent; while
-// the target's question shows, it keeps the line.
+// sendBar sends the bar's line to s's shell, the shell of its focused
+// pane, with a carriage return, as Enter typed in the terminal, and keeps
+// it in the host's history, without the blanks around it; the bar is
+// emptied. It sends to s only, whatever the window's send target is: the
+// target (sendtarget.go) is the Commands tab's and its command editor's,
+// so that a target of All sessions set there never makes Enter here run
+// on every server.
 func (a *App) sendBar(s *Session, e barEdit) {
 	if !barLive(s) {
 		return
 	}
 	s.bar.popup = popupNone
-	line := e.text
-	send := func(t *Session) { a.sendLine(t, line, true) }
-	asked := func() {
-		b := &s.bar
-		b.text, b.newCaret, b.caretSet, b.focus = "", 0, true, true
-	}
-	if a.sendToTargets(s, send, asked) {
-		s.bar.setBar(e, "", 0)
-	}
+	a.sendLine(s, e.text, true)
+	s.bar.setBar(e, "", 0)
 }
 
 // sendLine sends line to s's shell as typed in the terminal, through the
-// session's encoding: to the shell of its focused pane. With enter it is followed by a carriage return, as
-// Enter: the line runs, the folder follower looks again, and the line is
-// kept in the host's history. Without, it is only typed, for the user to
-// finish; the bar and the quick commands (quickcmds.go) send through it.
+// session's encoding: to the shell of its focused pane. With enter it is
+// followed by a carriage return, as Enter: the line runs, the folder
+// follower looks again, and the line is kept in the host's history.
+// Without, it is only typed, for the user to finish; the bar and the
+// quick commands (quickcmds.go) send through it.
 func (a *App) sendLine(s *Session, line string, enter bool) {
 	term := s.term()
 	if !enter {

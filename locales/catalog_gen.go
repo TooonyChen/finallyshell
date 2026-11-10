@@ -9184,16 +9184,6 @@ func (msgs Messages) SendToChoose() string {
 	return Catalog.Format(msgs.locale, "sendToChoose", nil)
 }
 
-// SendToAllCount says "All ({count})"
-// in the language the app shows.
-func SendToAllCount(count int) string { return In(i18n.Locale()).SendToAllCount(count) }
-
-// SendToAllCount says "All ({count})"
-// in the language of msgs.
-func (msgs Messages) SendToAllCount(count int) string {
-	return Catalog.Format(msgs.locale, "sendToAllCount", map[string]any{"count": count})
-}
-
 // SendToAllSessionsCount says "All sessions ({count})"
 // in the language the app shows.
 func SendToAllSessionsCount(count int) string { return In(i18n.Locale()).SendToAllSessionsCount(count) }

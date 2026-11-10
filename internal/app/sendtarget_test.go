@@ -2,7 +2,7 @@ package app
 
 import (
 	"slices"
-	"strconv"
+	"strings"
 	"testing"
 
 	"finallyshell/locales"
@@ -72,11 +72,12 @@ func (f *sendFarm) want(t *testing.T, what string, want ...string) {
 	}
 }
 
-// With All sessions, a quick command and a line of the bar reach every
-// connected session once, the panel row not doubling its session, and
-// skip the new tab and the session not connected. The first send asks;
-// Cancel sends nothing, and the sends after Send don't ask again. Each
-// host's history gets the lines.
+// With All sessions, a quick command reaches every connected session
+// once, the panel row not doubling its session, and skips the new tab
+// and the session not connected. The first send asks; Cancel sends
+// nothing, and the sends after Send don't ask again. The command bar has
+// no target control and ignores the target: its line reaches its own
+// session alone, without asking. Each host's history gets its lines.
 func TestSendTargetAll(t *testing.T) {
 	f := newSendFarm(t)
 	a, tt := f.a, f.tt
@@ -90,8 +91,11 @@ func TestSendTargetAll(t *testing.T) {
 		t.Fatalf("%v; menu %q", err, tt.Menu())
 	}
 	tt.Frame()
-	if a.sendTo.mode != targetAll || !tt.HasText(locales.SendToAllSessionsCount(2)) || !tt.HasText(locales.SendToAllCount(2)) {
+	if a.sendTo.mode != targetAll || !tt.HasText(locales.SendToAllSessionsCount(2)) {
 		t.Fatalf("target %d; texts %q", a.sendTo.mode, tt.Texts())
+	}
+	if n := strings.Count(strings.Join(tt.Texts(), "\n"), locales.SendToAllSessionsCount(2)); n != 1 {
+		t.Errorf("%d target controls", n)
 	}
 	saveShot(t, tt, "send-to-all-en.png")
 
@@ -141,7 +145,7 @@ func TestSendTargetAll(t *testing.T) {
 	}
 	f.want(t, "from the panel row", "ss -tlnp\r", "ss -tlnp\r", "")
 
-	// The bar: each session gets the line, the bar is emptied.
+	// The bar: its own session alone, and the bar is emptied.
 	a.active = 0
 	tt.Frame()
 	focusBar(t, tt)
@@ -150,17 +154,31 @@ func TestSendTargetAll(t *testing.T) {
 	if a.sendTo.ask != nil {
 		t.Fatal("the bar asked")
 	}
-	f.want(t, "the bar", "uptime\r", "uptime\r", "")
+	f.want(t, "the bar", "uptime\r", "", "")
 	tt.Frame()
 	if f.web1.bar.text != "" {
 		t.Errorf("bar holds %q", f.web1.bar.text)
 	}
+	// Not confirmed afresh: a new target still asks before the bar's
+	// sends, which are not the target's.
+	a.sendTo.confirmed = false
+	tt.Key(0, ui.KeyEscape) // back to the terminal
+	tt.Frame()
+	focusBar(t, tt)
+	tt.Type("w")
+	tt.Key(0, ui.KeyEnter)
+	if a.sendTo.ask != nil {
+		t.Fatal("the bar asked for an unconfirmed target")
+	}
+	f.want(t, "the bar again", "w\r", "", "")
+	a.sendTo.confirmed = true
 
 	a.history.pending.Wait()
-	for _, s := range []*Session{f.web1, f.web2} {
-		if got := a.hostHistory(s.Host.ID).cmds; !slices.Equal(got, []string{"df -h", "free -m", "ss -tlnp", "uptime"}) {
-			t.Errorf("%s's history %q", s.label(), got)
-		}
+	if got := a.hostHistory(f.web1.Host.ID).cmds; !slices.Equal(got, []string{"df -h", "free -m", "ss -tlnp", "uptime", "w"}) {
+		t.Errorf("web-1's history %q", got)
+	}
+	if got := a.hostHistory(f.web2.Host.ID).cmds; !slices.Equal(got, []string{"df -h", "free -m", "ss -tlnp"}) {
+		t.Errorf("web-2's history %q", got)
 	}
 	if got := a.hostHistory(f.db1.Host.ID).cmds; len(got) != 0 {
 		t.Errorf("db-1's history %q", got)
@@ -206,15 +224,18 @@ func askNames(a *App) []string {
 	return out
 }
 
-// Choose sessions…, from the bar's button: the sessions checked get the
-// line, after the question; a session closed drops out of the set, and
-// with none left the target is the current session again.
+// Choose sessions…, from the Commands tab's Send to: the sessions
+// checked get a quick command, after the question, and the command bar
+// still sends to its own session; a session closed drops out of the set,
+// and with none left the target is the current session again.
 func TestSendTargetChosen(t *testing.T) {
 	f := newSendFarm(t)
 	a, tt := f.a, f.tt
-	tip := locales.SendToTip(locales.SendToCurrent())
-	if err := tt.Click(tip); err != nil {
-		t.Fatalf("no target button: %v; texts %q", err, tt.Texts())
+	demoQuick(a, false)
+	a.bottomTab = tabCommands
+	tt.Frame()
+	if err := tt.Click(locales.SendToCurrent()); err != nil {
+		t.Fatalf("no Send to: %v; texts %q", err, tt.Texts())
 	}
 	if got := tt.Menu(); !slices.Equal(got, []string{locales.SendToCurrent(), locales.SendToAll(), locales.SendToChoose()}) {
 		t.Errorf("menu %q", got)
@@ -223,8 +244,8 @@ func TestSendTargetChosen(t *testing.T) {
 		t.Fatal(err)
 	}
 	tt.Frame()
-	if a.sendTo.picking == "" {
-		t.Fatal("no popover")
+	if a.sendTo.picking != "quick" {
+		t.Fatalf("popover %q", a.sendTo.picking)
 	}
 	// Every session is listed, with the one not connected; not the new
 	// tab nor the panel row.
@@ -253,9 +274,9 @@ func TestSendTargetChosen(t *testing.T) {
 		t.Fatal("Escape kept the popover")
 	}
 
-	focusBar(t, tt)
-	tt.Type("hostname")
-	tt.Key(0, ui.KeyEnter)
+	if err := tt.Click("Disk"); err != nil {
+		t.Fatal(err)
+	}
 	tt.Frame()
 	if a.sendTo.ask == nil {
 		t.Fatal("no question")
@@ -263,24 +284,27 @@ func TestSendTargetChosen(t *testing.T) {
 	if names := askNames(a); !slices.Equal(names, []string{"web-2"}) {
 		t.Errorf("asked for %q, db-1 not connected", names)
 	}
-	if f.web1.bar.text != "hostname" {
-		t.Errorf("the bar lost its line while asking: %q", f.web1.bar.text)
-	}
-	saveShot(t, tt, "send-to-chosen-bar-en.png")
+	saveShot(t, tt, "send-to-chosen-en.png")
 	tt.Click(locales.QuickSend())
 	tt.Frame()
-	f.want(t, "chosen", "", "hostname\r", "")
-	if f.web1.bar.text != "" {
-		t.Errorf("bar holds %q", f.web1.bar.text)
-	}
-	tt.Type("id")
+	f.want(t, "chosen", "", "df -h\r", "")
+	tt.Click("Memory")
+	f.want(t, "chosen again", "", "free -m\r", "")
+
+	// The bar: web-1, which is not chosen, alone.
+	focusBar(t, tt)
+	tt.Type("hostname")
 	tt.Key(0, ui.KeyEnter)
-	f.want(t, "chosen again", "", "id\r", "")
+	tt.Frame()
+	if a.sendTo.ask != nil {
+		t.Fatal("the bar asked")
+	}
+	f.want(t, "the bar", "hostname\r", "", "")
 
 	f.p.SetLocale("zh-Hans")
 	tt.Frame()
-	saveShot(t, tt, "send-to-chosen-bar-zh.png")
-	a.sendTo.picking = "bar-" + strconv.FormatInt(f.web1.ID, 10)
+	saveShot(t, tt, "send-to-chosen-zh.png")
+	a.sendTo.picking = "quick"
 	tt.Frame()
 	saveShot(t, tt, "send-to-choose-zh.png")
 	a.sendTo.picking = ""

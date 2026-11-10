@@ -1529,14 +1529,6 @@
   "sendToCurrent": "Current session",
   "sendToAll": "All sessions",
   "sendToChoose": "Choose sessions…",
-  "sendToAllCount": "All ({count})",
-  "@sendToAllCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "sendToAllSessionsCount": "All sessions ({count})",
   "@sendToAllSessionsCount": {
     "placeholders": {

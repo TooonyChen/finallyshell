@@ -4,18 +4,18 @@ import (
 	"slices"
 	"strconv"
 
-	"finallyshell/internal/icons"
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
 )
 
-// The send target is where the command bar and the Commands tab send:
-// the current session, every session, or the sessions chosen, as
-// FinalShell's 发送到. It is one for the window, shared by both, and never
-// saved: every start sends to the current session, so that nobody runs
-// a command on every server by mistake after a restart.
+// The send target is where the Commands tab sends: the current session,
+// every session, or the sessions chosen, as FinalShell's 发送到. It is one
+// for the window, shared by the tab's toolbar and its command editor, and
+// never saved: every start sends to the current session, so that nobody
+// runs a command on every server by mistake after a restart. The command
+// bar does not read it: it always sends to its own session (sendBar).
 //
 // Every session sent to goes through sendLine (commandbar.go), as one
 // does: its encoding, its folder follower and its host's history. A
@@ -50,7 +50,7 @@ type sendTarget struct {
 	confirmed bool
 	// picking is the control whose Choose sessions popover is open, ""
 	// for none: "quick" for the Commands tab's, "editor" for its command
-	// editor's, "bar-<ID>" for a bar's.
+	// editor's.
 	picking string
 	ask     *sendAsk // the question shown before the first send
 }
@@ -117,8 +117,8 @@ func (a *App) chosenSessions() []*Session {
 	return out
 }
 
-// sendTargets are the sessions a send from cur, the session the bar or
-// the Commands tab belongs to, goes to: those connected, each once.
+// sendTargets are the sessions a send from cur, the session the Commands
+// tab belongs to, goes to: those connected, each once.
 func (a *App) sendTargets(cur *Session) []*Session {
 	var from []*Session
 	switch a.sendTo.mode {
@@ -175,8 +175,8 @@ func (a *App) sendToTargets(cur *Session, send func(*Session), done func()) bool
 	return true
 }
 
-// targetLabel says what the target is: short for the bar's button.
-func (a *App) targetLabel(short bool) string {
+// targetLabel says what the target is.
+func (a *App) targetLabel() string {
 	switch a.sendTo.mode {
 	case targetAll:
 		n := 0
@@ -184,9 +184,6 @@ func (a *App) targetLabel(short bool) string {
 			if barLive(s) {
 				n++
 			}
-		}
-		if short {
-			return locales.SendToAllCount(n)
 		}
 		return locales.SendToAllSessionsCount(n)
 	case targetChosen:
@@ -219,29 +216,11 @@ func (a *App) warnTarget(e ui.Element) {
 	}
 }
 
-// barTarget is the bar's target button, between its input and History:
-// an icon for the current session, else what the target is.
-func (a *App) barTarget(c *ui.Context, s *Session, live bool) {
-	anchor := "bar-" + strconv.FormatInt(s.ID, 10)
-	label := a.targetLabel(true)
-	b := ui.Button(c, "").Label(locales.SendToTip(label)).Tooltip(locales.SendToTip(label)).
-		Shrink(0).Disabled(!live).Gap(4)
-	a.warnTarget(b)
-	b.Children(func() {
-		ui.Icon(c, icons.Get("send")).FontSize(13)
-		if a.sendTo.mode != targetCurrent {
-			ui.Text(c, label).SingleLine()
-		}
-	})
-	b.Menu(func(m *ui.Menu) { a.targetMenu(m, anchor) })
-	a.targetPicker(c, b, anchor)
-}
-
 // quickTarget is a Send to drop-down of the Commands tab: its toolbar's,
 // anchor "quick", or its command editor's, "editor".
 func (a *App) quickTarget(c *ui.Context, anchor string) {
 	widgets.Muted(c, locales.SendTo()).SingleLine().Shrink(0)
-	b := ui.MenuButton(c, a.targetLabel(false), func(m *ui.Menu) { a.targetMenu(m, anchor) }).Shrink(0)
+	b := ui.MenuButton(c, a.targetLabel(), func(m *ui.Menu) { a.targetMenu(m, anchor) }).Shrink(0)
 	a.warnTarget(b)
 	a.targetPicker(c, b, anchor)
 }

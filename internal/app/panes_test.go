@@ -411,8 +411,10 @@ func TestPanesReconnect(t *testing.T) {
 	}
 }
 
-// "All sessions" sends once to each session, to its focused pane, never
-// to its other panes.
+// With "All sessions" as the target, set in the Commands tab, Enter in
+// the command bar still reaches only the current session's focused pane
+// and asks nothing; a quick command asks, then sends once to each
+// session, to its focused pane, never to its other panes.
 func TestPanesSendToAll(t *testing.T) {
 	a, p, s, tt, srv := paneHost(t, followHome(t), false)
 	press(tt, a, scSplitRight)
@@ -423,14 +425,46 @@ func TestPanesSendToAll(t *testing.T) {
 	s2 := connectQuiet(t, a, p, h2)
 	a.active = slices.Index(a.sessions, s)
 	tt.Frame()
+	demoQuick(a, false)
+	quickTab(t, tt)
+	if err := tt.Click(locales.SendToCurrent()); err != nil {
+		t.Fatalf("no Send to: %v; texts %q", err, tt.Texts())
+	}
+	if err := tt.ChooseMenuItem(locales.SendToAll()); err != nil {
+		t.Fatalf("%v; menu %q", err, tt.Menu())
+	}
+	tt.Frame()
+	if a.sendTo.mode != targetAll {
+		t.Fatalf("target %d", a.sendTo.mode)
+	}
+
+	// The bar: the focused pane alone, no question.
 	tt.ClickAt(paneAt(t, a, tt, s, s.panes.panes()[0]))
-	a.setTarget(targetAll)
-	a.sendTo.confirmed = true
 	typeInBar(t, tt, "date")
+	if a.sendTo.ask != nil {
+		t.Fatal("the bar asked")
+	}
+	if s.bar.text != "" {
+		t.Errorf("bar holds %q", s.bar.text)
+	}
 	untilInput(t, p, srv, "date\r", "")
+
+	// A quick command asks, then reaches db-1 too; db-1's shell reads
+	// only it, so the bar's line never went there.
+	if err := tt.Click("Disk"); err != nil {
+		t.Fatal(err)
+	}
+	tt.Frame()
+	if a.sendTo.ask == nil {
+		t.Fatal("the quick command did not ask")
+	}
+	if err := tt.Click(locales.QuickSend()); err != nil {
+		t.Fatal(err)
+	}
+	untilInput(t, p, srv, "date\rdf -h\r", "")
 	deadline := time.Now().Add(5 * time.Second)
 	p.until(t, "db-1's shell", func() bool { return srv2.ShellInput(0) != "" || time.Now().After(deadline) })
-	if got := srv2.ShellInput(0); got != "date\r" || srv2.Shells() != 1 || s2.split() {
+	if got := srv2.ShellInput(0); got != "df -h\r" || srv2.Shells() != 1 || s2.split() {
 		t.Fatalf("db-1 read %q", got)
 	}
 }

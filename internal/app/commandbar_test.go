@@ -370,8 +370,9 @@ func TestCommandBarHistory(t *testing.T) {
 		t.Errorf("Up after the button: sel %d", s.bar.sel)
 	}
 	saveShot(t, tt, "commandbar-history-button-en.png")
-	box, _ := tt.Find(locales.SendToTip(locales.SendToCurrent()))
-	tt.ClickAt(box.X+box.W+30, box.Y+box.H/2) // the button, past the input and the target
+	if err := tt.Click(locales.CmdBarHistory()); err != nil {
+		t.Fatal(err)
+	}
 	tt.Frame()
 	if s.bar.popup != popupNone {
 		t.Errorf("History button again: popup %d", s.bar.popup)

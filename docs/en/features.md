@@ -404,8 +404,8 @@ opens one in that tab. There is no default shortcut.
   icon on the tab is not shown.
 - Send to: a local terminal is not in "All sessions", so a command meant
   for every server does not also run on this computer, even when sent
-  from the local terminal's own command bar or Commands tab: then it goes
-  to the servers only. "Choose sessions…" lists it with its computer
+  from the local terminal's own Commands tab: then it goes to the servers
+  only. "Choose sessions…" lists it with its computer
   icon, to check it like any session. "Current session" sends to it
   while it is the tab shown.
 - When the program exits the tab says "Exited", and Reconnect, a
@@ -1107,7 +1107,8 @@ connection, a new channel on it: no new login. A pane of a
 - **What follows the focused pane**: the command bar (its placeholder says
   "Sends to the focused pane"), the [Commands tab](#commands-tab) and the
   [command editor](#command-editor) send to the focused pane's shell;
-  "All sessions" sends once to each session, to its focused pane. The file
+  "All sessions", in the Commands tab, sends once to each session, to its
+  focused pane. The file
   panel follows the focused pane's folder, and goes to it as the focus
   moves (see [Following the terminal's folder](#following-the-terminals-folder));
   the row shows the coding agent of the focused pane's shell; the find bar
@@ -1174,13 +1175,10 @@ Command bar turns it off, or any of its popups, and lists its keys (see
   the commands of the server's `~/.bash_history` and `~/.zsh_history`,
   read over SFTP once per connection, so commands typed in the terminal
   show up too (bash writes its history file when the shell exits).
-- The button between the input and "History" chooses where Enter
-  sends: the current session (the button shows only its icon), all
-  sessions ("All (5)") or the sessions chosen ("3 sessions"). It is the
-  same send target as the Commands tab's "Send to" (see
-  [Commands tab](#commands-tab)), and the line goes to each session as
-  it would to one: its encoding, its folder following, its host's
-  history.
+- Enter sends to this session only, to its focused pane while it is
+  split, whatever the Commands tab's "Send to" is set to, and never asks
+  first. A command for several sessions is sent from the
+  [Commands tab](#commands-tab) or its [command editor](#command-editor).
 - Esc closes the popup; Esc again gives the keyboard back to the
   terminal. "Focus command bar" (Ctrl+Shift+L, Cmd+Shift+L on macOS)
   moves the keyboard to the bar and back.
@@ -1892,9 +1890,9 @@ and kept in `quickcommands.json` (see
   buttons send (while the [command editor](#command-editor) shows, the
   one beside its Send, which sets the same target, takes its place): "Current session" (the default), "All sessions", every
   session that is connected, or "Choose sessions…", a popover with a
-  check box for each session, with its status dot and name. The command
-  bar's target button sets the same target. While it is not the current
-  session, both are in the warning color.
+  check box for each session, with its status dot and name. While it is
+  not the current session, it is in the warning color. The command bar
+  does not follow it: it always sends to its own session.
   - Each session gets the command once (a panel row is its session, not
     another one). New tabs and sessions that are not connected are
     skipped; the others still get it.
@@ -1963,8 +1961,8 @@ lines in and send them, without saving them as a quick command first.
     host's history), each followed by a carriage return.
     Lines are sent as they are, control characters included, as a quick
     command's are. Empty lines at the end are left out.
-  - "Send to" is the same target as the toolbar's and the command bar's
-    (see above): its warning color, its question before the first send
+  - "Send to" is the same target as the toolbar's (see above): its
+    warning color, its question before the first send
     to a new target, and each connected session getting the text once.
   - "Options" has "Press Enter after each line" (on by default; off, the
     last line waits at the prompt, and the terminal takes the keyboard

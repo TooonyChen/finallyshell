@@ -471,8 +471,8 @@ func TestLocalTerminalSendTarget(t *testing.T) {
 	if got := a.sendTargets(s); !slices.Equal(got, []*Session{web}) {
 		t.Errorf("All from the local terminal: %v", got)
 	}
-	if a.targetLabel(true) != locales.SendToAllCount(1) {
-		t.Errorf("label %q", a.targetLabel(true))
+	if a.targetLabel() != locales.SendToAllSessionsCount(1) {
+		t.Errorf("label %q", a.targetLabel())
 	}
 
 	// Choose sessions lists it, with its mark and name.

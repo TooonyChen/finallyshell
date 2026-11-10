@@ -194,7 +194,7 @@ internal/
     quickcmds.go     “命令”页：分组、快捷命令按钮、通过命令输入框的 sendLine 发送、拖动、右键菜单
     quickcmds_editor.go 快捷命令编辑器窗口
     cmdeditor.go     “命令”页的命令编辑器：在按钮旁边或下面的窗格，发送文本或选中的部分，它的选项，保存文本
-    sendtarget.go    命令输入框和“命令”页的发送目标：当前、全部或选中的会话，它的控件，第一次发送前的询问
+    sendtarget.go    “命令”页和命令编辑器的发送目标：当前、全部或选中的会话，它的控件，第一次发送前的询问
     geo.go           IP 归属地：下载提示条、在后台加载数据、“归属地”列的文字、在线查询队列
     options_network.go 选项的“网络监控”页
     manager.go       连接管理器窗口：文件夹树、搜索、拖动、删除和恢复，a.deleteHostForever(h)；树的状态（managerState）和操作，“连接”页也用它们

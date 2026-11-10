@@ -906,7 +906,6 @@
   "sendToCurrent": "当前会话",
   "sendToAll": "全部会话",
   "sendToChoose": "选择会话…",
-  "sendToAllCount": "全部（{count}）",
   "sendToAllSessionsCount": "全部会话（{count}）",
   "sendToSessions": "{count, plural, other {# 个会话}}",
   "sendToNoSessions": "没有打开的会话。",
