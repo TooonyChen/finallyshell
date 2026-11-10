@@ -114,6 +114,12 @@ credential store (see [Where passwords are stored](#where-passwords-are-stored))
 
 ### Folders, deleted hosts and other fields
 
+- `auth` is how the host logs in: `password`, `key` (with the private key
+  file in `keyPath`) or `agent`, the keys of the SSH agent at `sshAgent`
+  in [settings.json](#settingsjson), with no password or passphrase
+  stored. Versions before SSH agent support read `agent` as `password`:
+  a host synced to such a version asks for a password there, and saving it
+  there makes it a password host.
 - `folder` is the ID of the folder the host is in; empty means the top
   level. Folders nest through `parent`.
 - A host with `deletedAt` (the time it was deleted) is deleted. It is
@@ -160,6 +166,7 @@ default.
 | `minimizeToTray` | `true` hides the main window to the tray when it is closed. | Closing quits. |
 | `noConfirmClose` | `true` closes and quits without asking while sessions are open. | Ask first. |
 | `keepAliveSeconds` | Seconds between the SSH keepalives of each connection, 1 to 3600 (higher reads as 3600); `-1` (any negative number) turns them off, which the options show as 0. Applies to new connections. | 30 (also for `0`) |
+| `sshAgent` | The SSH agent of the hosts with `"auth": "agent"`: a Unix socket's path (`~` for the home folder), such as `~/.bitwarden-ssh-agent.sock`, or on Windows a named pipe, `\\.\pipe\<name>`. This computer's own: not synced. Applies to new connections. | `SSH_AUTH_SOCK`; `\\.\pipe\openssh-ssh-agent` on Windows. |
 | `downloadDir` | Folder downloads go into. | The system's Downloads folder. |
 | `askDownloadDir` | `true` asks where to save each download. | Use `downloadDir`. |
 | `copyOnSelect` | `true` copies the mouse selection to the clipboard. | Off. |
@@ -248,7 +255,7 @@ local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `monitorHidden`, `bottomPanelHidden`, `bottomPanelSide`, `rightPanelWidth`,
 `monitorSide`, `rightMonitorPercent`, `commandEditorShown`,
 `commandEditorWidth`, `commandEditorPercent`, `commandEditorNoEnter`,
-`commandEditorClear`, `termBackground`, `localShell`, `downloadDir`,
+`commandEditorClear`, `termBackground`, `localShell`, `sshAgent`, `downloadDir`,
 `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are

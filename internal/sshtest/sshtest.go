@@ -1,5 +1,5 @@
 // Package sshtest is an SSH server for tests, in the test's process: it
-// logs in with a password, opens shells that read and print nothing,
+// logs in with a password, or with the public keys AcceptKey gives it, opens shells that read and print nothing,
 // keeping what they read, forwards ports as OpenSSH does with AllowTcpForwarding on and
 // GatewayPorts off, answers keepalives, and, started with StartSFTP,
 // serves the local file system over SFTP.
@@ -45,6 +45,11 @@ type Server struct {
 
 	keepAlives atomic.Int64 // keepalive@openssh.com requests received
 	logins     atomic.Int64 // passwords taken
+	// keys are the public keys it logs in with, by their wire form, and
+	// keyLogins the SHA256 fingerprints of those logged in with, in
+	// order, under mu.
+	keys      map[string]bool
+	keyLogins []string
 	// maxSessions refuses session channels past that many open on a
 	// connection, as OpenSSH's MaxSessions does: 0 for no limit.
 	maxSessions atomic.Int64
@@ -86,6 +91,16 @@ func start(t testing.TB, sftpDir string) *Server {
 		s.logins.Add(1)
 		return nil, nil
 	}}
+	// Asked once whether a key would do, and again with its signature.
+	cfg.PublicKeyCallback = func(_ ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
+		s.mu.Lock()
+		ok := s.keys[string(key.Marshal())]
+		s.mu.Unlock()
+		if !ok {
+			return nil, errors.New("unknown key")
+		}
+		return &ssh.Permissions{Extensions: map[string]string{"key": ssh.FingerprintSHA256(key)}}, nil
+	}
 	cfg.AddHostKey(signer)
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -153,7 +168,26 @@ func (s *Server) StopAnswering() { s.silent.Store(true) }
 // a stale mount. By default exec is refused.
 func (s *Server) HangExec() { s.hangExec.Store(true) }
 
-// Logins is how many times a client logged in, on every connection.
+// AcceptKey lets any user log in with the private key of key.
+func (s *Server) AcceptKey(key ssh.PublicKey) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.keys == nil {
+		s.keys = map[string]bool{}
+	}
+	s.keys[string(key.Marshal())] = true
+}
+
+// KeyLogins are the SHA256 fingerprints of the keys clients logged in
+// with, in order.
+func (s *Server) KeyLogins() []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]string(nil), s.keyLogins...)
+}
+
+// Logins is how many times a client logged in with the password, on
+// every connection.
 func (s *Server) Logins() int { return int(s.logins.Load()) }
 
 // LimitSessions refuses the session channels (shells, exec, SFTP) a
@@ -234,6 +268,12 @@ func (s *Server) serve(conn net.Conn) {
 	if err != nil {
 		conn.Close()
 		return
+	}
+	if p := sconn.Permissions; p != nil && p.Extensions["key"] != "" {
+		fp := p.Extensions["key"]
+		s.mu.Lock()
+		s.keyLogins = append(s.keyLogins, fp)
+		s.mu.Unlock()
 	}
 	s.mu.Lock()
 	s.conns[sconn] = true

@@ -225,6 +225,8 @@ type App struct {
 
 	// The options window's page.
 	optionsNav widgets.NavState
+	// The Check of the SSH agent's address on the General page (agent.go).
+	agentOptionCheck agentCheck
 	// Quitting: asking whether to, or told to go ahead.
 	askingQuit, quitApproved bool
 

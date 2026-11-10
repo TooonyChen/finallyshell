@@ -100,6 +100,9 @@ type connEditor struct {
 	// readingProxySecret is the same of its proxy's password.
 	readingProxySecret bool
 
+	// agentCheck is what the SSH agent's Check found (agent.go).
+	agentCheck agentCheck
+
 	// checked is set once OK was pressed: from then on the errors show,
 	// and follow the fields as they change.
 	checked bool
@@ -135,12 +138,12 @@ func (a *App) openEditor(h *config.Host, from WindowKind) {
 		ed.name, ed.addr, ed.notes = h.Name, h.Addr, h.Notes
 		ed.port = strconv.Itoa(h.PortOr22())
 		ed.auth, ed.user, ed.keyPath = h.Auth, h.User, h.KeyPath
-		if ed.auth != config.AuthKey {
-			ed.auth = config.AuthPassword
-		}
-		if ed.auth == config.AuthKey {
+		switch ed.auth {
+		case config.AuthAgent:
+		case config.AuthKey:
 			ed.passphrase = a.passwords[h.ID]
-		} else {
+		default:
+			ed.auth = config.AuthPassword
 			ed.password = a.passwords[h.ID]
 		}
 		ed.remember = h.RemembersPassword()
@@ -227,8 +230,11 @@ func (a *App) saveEditor() {
 	h.User, h.Auth = strings.TrimSpace(ed.user), ed.auth
 	secret := ed.password
 	h.KeyPath = ""
-	if ed.auth == config.AuthKey {
+	switch ed.auth {
+	case config.AuthKey:
 		h.KeyPath, secret = strings.TrimSpace(ed.keyPath), ed.passphrase
+	case config.AuthAgent:
+		secret = ""
 	}
 	a.keepLogin(h, secret, ed.remember, ed.readingSecret)
 	h.NoMonitor = !ed.monitor
@@ -350,22 +356,20 @@ func (a *App) sshPage(c *ui.Context, ed *connEditor, errs map[editorField]string
 		})
 		ui.Fieldset(c, locales.SectionAuth(), func() {
 			ui.Field(c, locales.FieldAuth(), func() {
-				byPassword, byKey := locales.AuthPassword(), locales.AuthKey()
-				chosen := byPassword
-				if ed.auth == config.AuthKey {
-					chosen = byKey
-				}
-				if ui.Select(c, &chosen, []string{byPassword, byKey}).Width(160).Changed() {
-					ed.auth = config.AuthPassword
-					if chosen == byKey {
-						ed.auth = config.AuthKey
-					}
+				kinds := []config.AuthKind{config.AuthPassword, config.AuthKey, config.AuthAgent}
+				names := []string{locales.AuthPassword(), locales.AuthKey(), locales.AuthAgent()}
+				chosen := names[max(slices.Index(kinds, ed.auth), 0)]
+				if ui.Select(c, &chosen, names).Width(160).Changed() {
+					ed.auth = kinds[slices.Index(names, chosen)]
 				}
 			})
 			ui.Field(c, locales.FieldUser(), func() {
 				input(ui.TextInput(c, &ed.user))
 			}).Error(errs[fieldUser])
-			if ed.auth == config.AuthKey {
+			switch ed.auth {
+			case config.AuthAgent:
+				a.agentField(c, ed)
+			case config.AuthKey:
 				ui.Field(c, locales.FieldKeyFile(), func() {
 					ui.Row(c).Gap(8).Children(func() {
 						input(ui.TextInput(c, &ed.keyPath).Placeholder("~/.ssh/id_ed25519").Grow(1).MinWidth(0))
@@ -377,12 +381,14 @@ func (a *App) sshPage(c *ui.Context, ed *connEditor, errs map[editorField]string
 				ui.Field(c, locales.FieldPassphrase(), func() {
 					input(ui.TextInput(c, &ed.passphrase).Password().Placeholder(locales.PassphrasePlaceholder()))
 				})
-			} else {
+			default:
 				ui.Field(c, locales.FieldPassword(), func() {
 					input(ui.TextInput(c, &ed.password).Password())
 				})
 			}
-			a.rememberField(c, &ed.remember, ed.auth == config.AuthKey)
+			if ed.auth != config.AuthAgent {
+				a.rememberField(c, &ed.remember, ed.auth == config.AuthKey)
+			}
 		})
 		ui.Fieldset(c, locales.SectionAdvanced(), func() {
 			ui.Field(c, "", func() {
@@ -390,6 +396,22 @@ func (a *App) sshPage(c *ui.Context, ed *connEditor, errs map[editorField]string
 			}).Description(locales.MonitorChannelHint())
 		})
 	})
+}
+
+// agentField is the SSH agent's line of the editor, for a host that logs
+// in with one: the address is the options', and Check lists its keys.
+func (a *App) agentField(c *ui.Context, ed *connEditor) {
+	ui.Field(c, locales.FieldAgent(), func() {
+		ui.Column(c).Gap(8).Children(func() {
+			ui.Row(c).Gap(10).AlignItems(ui.Center).Children(func() {
+				ui.Text(c, locales.AgentUsesOptions())
+				if ui.Button(c, locales.AgentCheck()).Label(locales.AgentCheckLabel()).Disabled(ed.agentCheck.running).Clicked() {
+					a.checkAgent(&ed.agentCheck)
+				}
+			})
+			agentCheckView(c, &ed.agentCheck)
+		})
+	}).Description(locales.AgentEditorNote())
 }
 
 // terminalPage is the editor's page of the terminal's options.

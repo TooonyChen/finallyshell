@@ -95,6 +95,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 ### 文件夹、已删除的主机和其他字段
 
+- `auth` 是主机的登录方式：`password`（密码）、`key`（私钥，私钥文件在 `keyPath`）或 `agent`：用 [settings.json](#settingsjson) 里 `sshAgent` 地址上的 SSH Agent 里的私钥登录，不保存密码或私钥密码。不支持 SSH Agent 的旧版本把 `agent` 当作 `password`：同步到旧版本的主机在那里会要求输入密码，在那里保存后就变成密码主机。
 - `folder` 是主机所在文件夹的 ID，空表示顶层。文件夹用 `parent` 嵌套。
 - 有 `deletedAt`（删除时间）的主机是已删除的，只在连接管理器勾选“显示已删除”时列出。
 - `createdAt` 是添加时间，快速连接按它排没连接过的主机。以前的版本保存的主机没有这个字段。
@@ -130,6 +131,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `minimizeToTray` | `true` 时关闭主窗口会把它隐藏到托盘。 | 关闭就退出。 |
 | `noConfirmClose` | `true` 时有会话打开也不问，直接关闭、退出。 | 先问。 |
 | `keepAliveSeconds` | 每个连接发送 SSH 保活消息的间隔秒数，1 到 3600（更大按 3600）；`-1`（任何负数）关闭保活，选项里显示为 0。对新建的连接生效。 | 30（`0` 也是） |
+| `sshAgent` | `"auth": "agent"` 的主机用的 SSH Agent：Unix socket 的路径（`~` 表示主目录），比如 `~/.bitwarden-ssh-agent.sock`，Windows 上也可以是命名管道 `\\.\pipe\<名字>`。这台电脑自己的，不同步。对新建的连接生效。 | `SSH_AUTH_SOCK`；Windows 上是 `\\.\pipe\openssh-ssh-agent`。 |
 | `downloadDir` | 下载存到的文件夹。 | 系统的下载文件夹。 |
 | `askDownloadDir` | `true` 时每次下载都问保存位置。 | 用 `downloadDir`。 |
 | `copyOnSelect` | `true` 时把鼠标选中的文字复制到剪贴板。 | 关。 |
@@ -198,7 +200,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 

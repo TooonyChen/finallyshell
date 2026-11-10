@@ -27,6 +27,10 @@ type AuthKind string
 const (
 	AuthPassword AuthKind = "password"
 	AuthKey      AuthKind = "key"
+	// AuthAgent logs in with the keys an SSH agent holds, at the address
+	// of Settings.SSHAgent: no key file, no secret. A version without it
+	// shows such a host as one with a password.
+	AuthAgent AuthKind = "agent"
 )
 
 // Host is a saved connection. Passwords are never saved here: the app

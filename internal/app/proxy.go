@@ -33,12 +33,17 @@ func usesProxyPassword(h *config.Host) bool {
 }
 
 // hopOptions are the options that log in to h with secret, its password
-// or its key's passphrase, through its proxy, without its jump host.
+// or its key's passphrase, or with the SSH agent of the settings, through
+// its proxy, without its jump host. It reads the settings, so it runs on
+// the UI thread.
 func (a *App) hopOptions(h *config.Host, secret string, ask func(*sshx.HostKeyQuestion)) sshx.Options {
 	opts := sshx.Options{AskHostKey: ask}
-	if h.Auth == config.AuthKey {
+	switch h.Auth {
+	case config.AuthAgent:
+		opts.Agent = a.settings.SSHAgent
+	case config.AuthKey:
 		opts.Passphrase = secret
-	} else {
+	default:
 		opts.Password = secret
 	}
 	if usesProxyPassword(h) {
@@ -122,8 +127,9 @@ func proxyNeed(x, h *config.Host) *secretNeed {
 
 // chainSecrets are the secrets connecting to h takes, in the order they
 // are on the way: h's password or its key's passphrase, its proxy's
-// password, then those of its jump hosts and their proxies. A jump host
-// that is missing or loops takes none: connecting says so.
+// password, then those of its jump hosts and their proxies. A host that
+// logs in with an SSH agent takes none of its own; a jump host that is
+// missing or loops takes none: connecting says so.
 func (a *App) chainSecrets(h *config.Host) []*secretNeed {
 	hosts := []*config.Host{h}
 	if jumps, err := a.hosts.JumpHosts(h); err == nil {
@@ -131,7 +137,9 @@ func (a *App) chainSecrets(h *config.Host) []*secretNeed {
 	}
 	var needs []*secretNeed
 	for _, x := range hosts {
-		needs = append(needs, loginNeed(x, h))
+		if x.Auth != config.AuthAgent {
+			needs = append(needs, loginNeed(x, h))
+		}
 		if usesProxyPassword(x) {
 			needs = append(needs, proxyNeed(x, h))
 		}

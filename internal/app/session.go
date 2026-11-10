@@ -416,6 +416,9 @@ func describeError(err error) string {
 	if msg, ok := describeRoute(err); ok { // a proxy or jump host on the way
 		return msg
 	}
+	if msg, ok := describeAgentError(err); ok {
+		return msg
+	}
 	switch {
 	case err == nil:
 		return ""

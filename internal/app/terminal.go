@@ -65,6 +65,9 @@ func (a *App) statusBanner(c *ui.Context, s *Session) {
 			msg = describeError(s.err)
 		}
 		ui.Text(c, msg).TextColor(ui.Hex("#fef2f2")).Grow(1).MinWidth(0)
+		if s.status != statusConnecting && isAgentError(s.err) && ui.Button(c, locales.AgentSettings()).Clicked() {
+			a.openAgentSettings()
+		}
 		if s.status != statusConnecting && ui.Button(c, locales.Reconnect()).Clicked() {
 			a.reconnect(s)
 		}

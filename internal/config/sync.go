@@ -108,6 +108,7 @@ var (
 		"commandEditorNoEnter", "commandEditorClear",
 		"termBackground", // a file in this device's config folder
 		"localShell",     // a program of this device's, whose path differs on others
+		"sshAgent",       // this device's agent, a socket or pipe of its own
 		"downloadDir", "askDownloadDir",
 		"sync",
 		// Agreeing to download the location data, or to send the

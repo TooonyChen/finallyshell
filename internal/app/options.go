@@ -176,6 +176,7 @@ func (a *App) generalPage(c *ui.Context) {
 			ui.Text(c, locales.OptionKeepAliveAfter())
 		})
 		widgets.Muted(c, locales.OptionKeepAliveNote()).FontSize(12)
+		a.agentOption(c)
 	})
 
 	a.updatesSection(c)

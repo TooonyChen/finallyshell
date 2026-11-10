@@ -1614,5 +1614,42 @@
   "dropOnRight": "Drop on the right",
   "dropOnUp": "Drop above",
   "dropOnDown": "Drop below",
-  "cmdBarSplit": "Split"
+  "cmdBarSplit": "Split",
+  "authAgent": "SSH agent",
+  "fieldAgent": "SSH agent",
+  "agentUsesOptions": "Uses the address in Options › General",
+  "agentCheck": "Check",
+  "agentCheckLabel": "Check the SSH agent",
+  "agentChecking": "Checking the agent…",
+  "agentConnectedNamed": "{count, plural, one {Connected to {agent}'s agent, which has # key:} other {Connected to {agent}'s agent, which has # keys:}}",
+  "@agentConnectedNamed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentConnectedAt": "{count, plural, one {Connected to the agent at {addr}, which has # key:} other {Connected to the agent at {addr}, which has # keys:}}",
+  "@agentConnectedAt": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "agentTriedInTurn": "Connecting tries them in turn until the server accepts one.",
+  "agentEditorNote": "With SSH agent, no key file, passphrase or “Remember password” is needed. Agents such as Bitwarden ask you to approve each signature; the connection waits for you.",
+  "optionSSHAgent": "SSH agent address",
+  "optionSSHAgentDefault": "Default: {addr}",
+  "optionSSHAgentNote": "Empty uses the default: the SSH_AUTH_SOCK environment variable on macOS and Linux, OpenSSH's agent on Windows. For Bitwarden or 1Password, enter their own address:",
+  "agentTableApp": "App",
+  "agentTableAddress": "Address",
+  "agentWindowsAddr": "{addr} (Bitwarden uses it too)",
+  "optionThisComputerOnly": "Only for this computer: not synced.",
+  "agentSettings": "SSH agent settings",
+  "errAgentNotFound": "No SSH agent at {addr}: {error}",
+  "errAgentNoAddress": "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General.",
+  "errAgentNoKeys": "The SSH agent at {addr} has no keys",
+  "errAgentRefused": "The server refused every key in the SSH agent",
+  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}"
 }

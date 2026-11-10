@@ -75,6 +75,10 @@ type Options struct {
 	// logging in to it takes, its own jump host included.
 	Jump *Hop
 
+	// Agent is the address of the SSH agent a host that logs in with one
+	// (config.AuthAgent) uses: "" for the default, DefaultAgentAddr.
+	Agent string
+
 	// KeepAlive is the keepalive Dial starts on the client it returns,
 	// and on the client of each jump host on the way, whose own is not
 	// used: each runs as long as its client is open (see KeepAlive).
@@ -134,23 +138,32 @@ func hostKeyCallback(opts Options) (ssh.HostKeyCallback, error) {
 	}, nil
 }
 
-func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, error) {
+// authMethods are the ways h logs in. With an agent, the agent's
+// connection is open until the caller closes the agentLogin's.
+func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, *agentLogin, error) {
+	if h.Auth == config.AuthAgent {
+		method, login, err := agentAuth(opts.Agent)
+		if err != nil {
+			return nil, nil, err
+		}
+		return []ssh.AuthMethod{method}, login, nil
+	}
 	var methods []ssh.AuthMethod
 	if h.Auth == config.AuthKey {
 		data, err := os.ReadFile(ExpandHome(h.KeyPath))
 		if err != nil {
-			return nil, &KeyFileError{Err: err}
+			return nil, nil, &KeyFileError{Err: err}
 		}
 		signer, err := ssh.ParsePrivateKey(data)
 		var missing *ssh.PassphraseMissingError
 		if errors.As(err, &missing) {
 			if opts.Passphrase == "" {
-				return nil, ErrNeedPassphrase
+				return nil, nil, ErrNeedPassphrase
 			}
 			signer, err = ssh.ParsePrivateKeyWithPassphrase(data, []byte(opts.Passphrase))
 		}
 		if err != nil {
-			return nil, &KeyFileError{Parse: true, Err: err}
+			return nil, nil, &KeyFileError{Parse: true, Err: err}
 		}
 		methods = append(methods, ssh.PublicKeys(signer))
 	}
@@ -167,24 +180,36 @@ func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, error) {
 			}))
 	}
 	if len(methods) == 0 {
-		return nil, ErrNoAuth
+		return nil, nil, ErrNoAuth
 	}
-	return methods, nil
+	return methods, nil, nil
 }
 
 // Dial connects and logs in to h, through its proxy or jump host if it
 // has one (see proxy.go), and starts opts.KeepAlive on the connection.
+//
+// A host that logs in with an SSH agent keeps the agent's connection open
+// until it is logged in, and no longer. Its errors are *AgentError: the
+// agent missing, without keys, not signing, or every key refused.
 func Dial(h *config.Host, opts Options) (*ssh.Client, error) {
-	auth, err := authMethods(h, opts)
+	auth, agentLogin, err := authMethods(h, opts)
 	if err != nil {
 		return nil, err
+	}
+	if agentLogin != nil {
+		defer agentLogin.conn.Close()
 	}
 	hk, err := hostKeyCallback(opts)
 	if err != nil {
 		return nil, err
 	}
+	// Timeout is the TCP connection's: logging in has none, as an agent
+	// may wait for the user to approve each signature.
 	cfg := &ssh.ClientConfig{User: h.User, Auth: auth, HostKeyCallback: hk, Timeout: 15 * time.Second}
 	client, err := dialRoute(h, opts, cfg)
+	if agentLogin != nil {
+		err = agentLogin.refused(err)
+	}
 	if err == nil && opts.KeepAlive.Interval > 0 {
 		go KeepAlive(context.Background(), client, opts.KeepAlive)
 	}

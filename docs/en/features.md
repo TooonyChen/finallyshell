@@ -866,13 +866,35 @@ on the left and OK and Cancel at the bottom.
 ### SSH connection
 
 - Name, Host, Port, Notes (several lines).
-- Method (Password or Private key), User, then either Password, or the
-  Private key file ("Browse…" chooses it) and its Passphrase.
+- Method (Password, Private key or SSH agent), User, then either
+  Password, or the Private key file ("Browse…" chooses it) and its
+  Passphrase.
 - "Remember password" ("Remember passphrase" for a private key), on by
   default.
 - "Enable exec channel (server monitor)".
 
 Errors are shown under the field they belong to.
+
+With **SSH agent**, the host logs in with the keys an SSH agent holds
+(Bitwarden, 1Password, KeePassXC, OpenSSH's `ssh-agent`, the Windows
+OpenSSH agent service), so no key file is needed. Only the user is asked:
+the key file, passphrase, password and "Remember" fields are hidden, and
+nothing is kept in the credential store. The line "SSH agent: Uses the
+address in Options › General" has a **Check** button, which lists the
+agent's keys (type, SHA256 fingerprint, comment) without logging in;
+listing asks the agent for no approval. Connecting tries the agent's keys
+one after the other, as OpenSSH does, until the server accepts one. An
+agent such as Bitwarden asks the user to approve each signature, and the
+connection waits for that answer however long it takes. The agent's
+connection stays open while logging in and is closed once logged in. A
+jump host can log in with the agent too; each hop logs in its own way.
+
+When it fails, the bar over the terminal says why, with an "SSH agent
+settings" button that opens Options › General: no agent at the address
+(naming it, or saying that `SSH_AUTH_SOCK` is not set), the agent has no
+keys, the server refused every key in the agent, or the agent did not
+sign (the user denied it). No password prompt opens. Agent forwarding
+(`ssh -A`) is not supported.
 
 <a id="terminal-page"></a>
 
@@ -2019,8 +2041,8 @@ The gear button next to the "Sessions" title at the bottom left opens the
 Options window. As in FinalShell, it has a tree of pages on the left and
 the page on the right. Every option is saved to `settings.json` as soon as
 it changes, and takes effect at once, except for the two Mouse options
-noted below and the keepalive interval, which applies to connections made
-after the change.
+noted below and the keepalive interval and SSH agent address, which
+apply to connections made after the change.
 
 The terminal appearance pages are described under
 [Appearance](#appearance-font-color-scheme-background-image), and the
@@ -2052,6 +2074,17 @@ file icon theme page under [File icon themes](#file-icon-themes).
 - Connections: "Send a keepalive every N seconds", 30 by default, 0 to
   turn keepalives off, up to 3600. See
   [Sessions and tabs](#sessions-and-tabs). Saved as `keepAliveSeconds`.
+- Connections: "SSH agent address", the agent that hosts logging in with
+  [SSH agent](#ssh-connection) use, with a **Check** button that lists its
+  keys. Empty uses the default: `SSH_AUTH_SOCK` on macOS and Linux,
+  `\\.\pipe\openssh-ssh-agent` on Windows. A table under it lists common
+  addresses: Bitwarden `~/.bitwarden-ssh-agent.sock`, 1Password
+  `~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock`,
+  Windows `\\.\pipe\openssh-ssh-agent` (Bitwarden's Windows agent uses it
+  too). A Unix socket's path may start with `~`. An app opened from the
+  macOS Dock does not get variables set in `.zshrc`, so an agent set up
+  there must be entered here. Saved as `sshAgent`, for this computer only
+  (not synced).
 - Updates: the version running, "Check for Updates…", "Check for updates
   automatically" (on by default) and the newer version a check found, or
   why this copy cannot update itself; see [Updates](#updates).

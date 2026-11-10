@@ -29,7 +29,7 @@ func generalPageUpdates(t *testing.T, a *App, p *fakePlatform) *ui.Tester {
 	t.Helper()
 	a.openOptions()
 	tt := p.show(t, WindowOptions)
-	tt.SetSize(optionsWindow.Width, 720)
+	tt.SetSize(optionsWindow.Width, 1060)
 	tt.Frame()
 	return tt
 }

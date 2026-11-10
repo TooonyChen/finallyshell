@@ -295,7 +295,7 @@ func (a *App) storedPassphrase(h *config.Host) func(ctx context.Context) string 
 // its proxy's password, with those saved, once they are read; for a new
 // host (nil) it only finds out whether there is a store.
 func (a *App) readEditorSecret(ed *connEditor, h *config.Host) {
-	if h != nil {
+	if h != nil && h.Auth != config.AuthAgent {
 		auth := h.Auth
 		ed.readingSecret = a.readSecret(loginNeed(h, h), func() {
 			if a.editor != ed || !ed.readingSecret {
@@ -328,9 +328,9 @@ func (a *App) readEditorSecret(ed *connEditor, h *config.Host) {
 // setLogin keeps secret as what h logs in with this run, its password or
 // the passphrase of its key. An empty password is forgotten, so that the
 // prompt asks for it as the host connects; an empty passphrase is a key
-// without one.
+// without one. A host that logs in with an SSH agent keeps none.
 func (a *App) setLogin(h *config.Host, secret string) {
-	if secret != "" || h.Auth == config.AuthKey {
+	if h.Auth != config.AuthAgent && (secret != "" || h.Auth == config.AuthKey) {
 		a.passwords[h.ID] = secret
 	} else {
 		delete(a.passwords, h.ID)
@@ -348,10 +348,19 @@ func setRemember(h *config.Host, remember bool) bool {
 // keepLogin keeps secret as what h logs in with, as the editor's OK saves
 // it: for this run, and in the store with remember at once, as the user
 // saved it, else out of it. With unread, the saved one not read yet, an
-// empty secret leaves what the store keeps. It returns whether h's
-// "Remember password" changed.
+// empty secret leaves what the store keeps. A host that logs in with an
+// SSH agent keeps none, and those it had are deleted. It returns whether
+// h's "Remember password" changed.
 func (a *App) keepLogin(h *config.Host, secret string, remember, unread bool) bool {
 	changed := setRemember(h, remember)
+	if h.Auth == config.AuthAgent {
+		// Nothing to keep: what it logged in with before goes.
+		delete(a.secrets.untried, h.ID)
+		a.setLogin(h, "")
+		a.deleteSecret(hostSecretKey(h.ID, secretPassword))
+		a.deleteSecret(hostSecretKey(h.ID, secretPassphrase))
+		return changed
+	}
 	key := loginSecretKey(h)
 	for _, name := range []string{secretPassword, secretPassphrase} {
 		if k := hostSecretKey(h.ID, name); k != key {
@@ -487,9 +496,13 @@ func (a *App) refusedSecret(h *config.Host, err error) *secretNeed {
 // loginRefused tells whether err is h's secret not working: for a
 // password host, the server refusing it (or there being none); for a key,
 // its passphrase missing or wrong. A server refusing the key itself is
-// not: no passphrase helps.
+// not: no passphrase helps. A host that logs in with an SSH agent has no
+// secret to refuse.
 func loginRefused(h *config.Host, err error) bool {
-	if h.Auth == config.AuthKey {
+	switch h.Auth {
+	case config.AuthAgent:
+		return false // no secret: the agent's keys
+	case config.AuthKey:
 		return errors.Is(err, sshx.ErrNeedPassphrase) || errors.Is(err, x509.IncorrectPasswordError)
 	}
 	return errors.Is(err, sshx.ErrNoAuth) || sshx.Classify(err) == "auth"

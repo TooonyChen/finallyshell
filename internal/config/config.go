@@ -106,6 +106,11 @@ type Settings struct {
 	// DefaultKeepAliveSeconds, and KeepAliveOff (any negative number)
 	// for none. Read it with KeepAliveInterval.
 	KeepAliveSeconds int `json:"keepAliveSeconds,omitempty"`
+	// SSHAgent is the address of the SSH agent hosts that log in with
+	// one use (AuthAgent): a Unix socket's path, ~ for the home folder,
+	// or on Windows a named pipe, \\.\pipe\<name>. "" for the default:
+	// SSH_AUTH_SOCK, or the Windows OpenSSH agent's pipe.
+	SSHAgent string `json:"sshAgent,omitempty"`
 
 	// The Mouse page of the terminal options, zero by default too.
 	//

@@ -9695,3 +9695,239 @@ func CmdBarSplit() string { return In(i18n.Locale()).CmdBarSplit() }
 func (msgs Messages) CmdBarSplit() string {
 	return Catalog.Format(msgs.locale, "cmdBarSplit", nil)
 }
+
+// AuthAgent says "SSH agent"
+// in the language the app shows.
+func AuthAgent() string { return In(i18n.Locale()).AuthAgent() }
+
+// AuthAgent says "SSH agent"
+// in the language of msgs.
+func (msgs Messages) AuthAgent() string {
+	return Catalog.Format(msgs.locale, "authAgent", nil)
+}
+
+// FieldAgent says "SSH agent"
+// in the language the app shows.
+func FieldAgent() string { return In(i18n.Locale()).FieldAgent() }
+
+// FieldAgent says "SSH agent"
+// in the language of msgs.
+func (msgs Messages) FieldAgent() string {
+	return Catalog.Format(msgs.locale, "fieldAgent", nil)
+}
+
+// AgentUsesOptions says "Uses the address in Options › General"
+// in the language the app shows.
+func AgentUsesOptions() string { return In(i18n.Locale()).AgentUsesOptions() }
+
+// AgentUsesOptions says "Uses the address in Options › General"
+// in the language of msgs.
+func (msgs Messages) AgentUsesOptions() string {
+	return Catalog.Format(msgs.locale, "agentUsesOptions", nil)
+}
+
+// AgentCheck says "Check"
+// in the language the app shows.
+func AgentCheck() string { return In(i18n.Locale()).AgentCheck() }
+
+// AgentCheck says "Check"
+// in the language of msgs.
+func (msgs Messages) AgentCheck() string {
+	return Catalog.Format(msgs.locale, "agentCheck", nil)
+}
+
+// AgentCheckLabel says "Check the SSH agent"
+// in the language the app shows.
+func AgentCheckLabel() string { return In(i18n.Locale()).AgentCheckLabel() }
+
+// AgentCheckLabel says "Check the SSH agent"
+// in the language of msgs.
+func (msgs Messages) AgentCheckLabel() string {
+	return Catalog.Format(msgs.locale, "agentCheckLabel", nil)
+}
+
+// AgentChecking says "Checking the agent…"
+// in the language the app shows.
+func AgentChecking() string { return In(i18n.Locale()).AgentChecking() }
+
+// AgentChecking says "Checking the agent…"
+// in the language of msgs.
+func (msgs Messages) AgentChecking() string {
+	return Catalog.Format(msgs.locale, "agentChecking", nil)
+}
+
+// AgentConnectedNamed says "{count, plural, one {Connected to {agent}'s agent, which has # key:} other {Connected to {agent}'s agent, which has #…"
+// in the language the app shows.
+func AgentConnectedNamed(count int, agent string) string {
+	return In(i18n.Locale()).AgentConnectedNamed(count, agent)
+}
+
+// AgentConnectedNamed says "{count, plural, one {Connected to {agent}'s agent, which has # key:} other {Connected to {agent}'s agent, which has #…"
+// in the language of msgs.
+func (msgs Messages) AgentConnectedNamed(count int, agent string) string {
+	return Catalog.Format(msgs.locale, "agentConnectedNamed", map[string]any{"count": count, "agent": agent})
+}
+
+// AgentConnectedAt says "{count, plural, one {Connected to the agent at {addr}, which has # key:} other {Connected to the agent at {addr}, whi…"
+// in the language the app shows.
+func AgentConnectedAt(count int, addr string) string {
+	return In(i18n.Locale()).AgentConnectedAt(count, addr)
+}
+
+// AgentConnectedAt says "{count, plural, one {Connected to the agent at {addr}, which has # key:} other {Connected to the agent at {addr}, whi…"
+// in the language of msgs.
+func (msgs Messages) AgentConnectedAt(count int, addr string) string {
+	return Catalog.Format(msgs.locale, "agentConnectedAt", map[string]any{"count": count, "addr": addr})
+}
+
+// AgentTriedInTurn says "Connecting tries them in turn until the server accepts one."
+// in the language the app shows.
+func AgentTriedInTurn() string { return In(i18n.Locale()).AgentTriedInTurn() }
+
+// AgentTriedInTurn says "Connecting tries them in turn until the server accepts one."
+// in the language of msgs.
+func (msgs Messages) AgentTriedInTurn() string {
+	return Catalog.Format(msgs.locale, "agentTriedInTurn", nil)
+}
+
+// AgentEditorNote says "With SSH agent, no key file, passphrase or “Remember password” is needed. Agents such as Bitwarden ask you to app…"
+// in the language the app shows.
+func AgentEditorNote() string { return In(i18n.Locale()).AgentEditorNote() }
+
+// AgentEditorNote says "With SSH agent, no key file, passphrase or “Remember password” is needed. Agents such as Bitwarden ask you to app…"
+// in the language of msgs.
+func (msgs Messages) AgentEditorNote() string {
+	return Catalog.Format(msgs.locale, "agentEditorNote", nil)
+}
+
+// OptionSSHAgent says "SSH agent address"
+// in the language the app shows.
+func OptionSSHAgent() string { return In(i18n.Locale()).OptionSSHAgent() }
+
+// OptionSSHAgent says "SSH agent address"
+// in the language of msgs.
+func (msgs Messages) OptionSSHAgent() string {
+	return Catalog.Format(msgs.locale, "optionSSHAgent", nil)
+}
+
+// OptionSSHAgentDefault says "Default: {addr}"
+// in the language the app shows.
+func OptionSSHAgentDefault(addr string) string { return In(i18n.Locale()).OptionSSHAgentDefault(addr) }
+
+// OptionSSHAgentDefault says "Default: {addr}"
+// in the language of msgs.
+func (msgs Messages) OptionSSHAgentDefault(addr string) string {
+	return Catalog.Format(msgs.locale, "optionSSHAgentDefault", map[string]any{"addr": addr})
+}
+
+// OptionSSHAgentNote says "Empty uses the default: the SSH_AUTH_SOCK environment variable on macOS and Linux, OpenSSH's agent on Windows. For Bi…"
+// in the language the app shows.
+func OptionSSHAgentNote() string { return In(i18n.Locale()).OptionSSHAgentNote() }
+
+// OptionSSHAgentNote says "Empty uses the default: the SSH_AUTH_SOCK environment variable on macOS and Linux, OpenSSH's agent on Windows. For Bi…"
+// in the language of msgs.
+func (msgs Messages) OptionSSHAgentNote() string {
+	return Catalog.Format(msgs.locale, "optionSSHAgentNote", nil)
+}
+
+// AgentTableApp says "App"
+// in the language the app shows.
+func AgentTableApp() string { return In(i18n.Locale()).AgentTableApp() }
+
+// AgentTableApp says "App"
+// in the language of msgs.
+func (msgs Messages) AgentTableApp() string {
+	return Catalog.Format(msgs.locale, "agentTableApp", nil)
+}
+
+// AgentTableAddress says "Address"
+// in the language the app shows.
+func AgentTableAddress() string { return In(i18n.Locale()).AgentTableAddress() }
+
+// AgentTableAddress says "Address"
+// in the language of msgs.
+func (msgs Messages) AgentTableAddress() string {
+	return Catalog.Format(msgs.locale, "agentTableAddress", nil)
+}
+
+// AgentWindowsAddr says "{addr} (Bitwarden uses it too)"
+// in the language the app shows.
+func AgentWindowsAddr(addr string) string { return In(i18n.Locale()).AgentWindowsAddr(addr) }
+
+// AgentWindowsAddr says "{addr} (Bitwarden uses it too)"
+// in the language of msgs.
+func (msgs Messages) AgentWindowsAddr(addr string) string {
+	return Catalog.Format(msgs.locale, "agentWindowsAddr", map[string]any{"addr": addr})
+}
+
+// OptionThisComputerOnly says "Only for this computer: not synced."
+// in the language the app shows.
+func OptionThisComputerOnly() string { return In(i18n.Locale()).OptionThisComputerOnly() }
+
+// OptionThisComputerOnly says "Only for this computer: not synced."
+// in the language of msgs.
+func (msgs Messages) OptionThisComputerOnly() string {
+	return Catalog.Format(msgs.locale, "optionThisComputerOnly", nil)
+}
+
+// AgentSettings says "SSH agent settings"
+// in the language the app shows.
+func AgentSettings() string { return In(i18n.Locale()).AgentSettings() }
+
+// AgentSettings says "SSH agent settings"
+// in the language of msgs.
+func (msgs Messages) AgentSettings() string {
+	return Catalog.Format(msgs.locale, "agentSettings", nil)
+}
+
+// ErrAgentNotFound says "No SSH agent at {addr}: {error}"
+// in the language the app shows.
+func ErrAgentNotFound(addr string, error string) string {
+	return In(i18n.Locale()).ErrAgentNotFound(addr, error)
+}
+
+// ErrAgentNotFound says "No SSH agent at {addr}: {error}"
+// in the language of msgs.
+func (msgs Messages) ErrAgentNotFound(addr string, error string) string {
+	return Catalog.Format(msgs.locale, "errAgentNotFound", map[string]any{"addr": addr, "error": error})
+}
+
+// ErrAgentNoAddress says "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General."
+// in the language the app shows.
+func ErrAgentNoAddress() string { return In(i18n.Locale()).ErrAgentNoAddress() }
+
+// ErrAgentNoAddress says "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General."
+// in the language of msgs.
+func (msgs Messages) ErrAgentNoAddress() string {
+	return Catalog.Format(msgs.locale, "errAgentNoAddress", nil)
+}
+
+// ErrAgentNoKeys says "The SSH agent at {addr} has no keys"
+// in the language the app shows.
+func ErrAgentNoKeys(addr string) string { return In(i18n.Locale()).ErrAgentNoKeys(addr) }
+
+// ErrAgentNoKeys says "The SSH agent at {addr} has no keys"
+// in the language of msgs.
+func (msgs Messages) ErrAgentNoKeys(addr string) string {
+	return Catalog.Format(msgs.locale, "errAgentNoKeys", map[string]any{"addr": addr})
+}
+
+// ErrAgentRefused says "The server refused every key in the SSH agent"
+// in the language the app shows.
+func ErrAgentRefused() string { return In(i18n.Locale()).ErrAgentRefused() }
+
+// ErrAgentRefused says "The server refused every key in the SSH agent"
+// in the language of msgs.
+func (msgs Messages) ErrAgentRefused() string {
+	return Catalog.Format(msgs.locale, "errAgentRefused", nil)
+}
+
+// ErrAgentSign says "The SSH agent did not sign the login (denied, or it failed): {error}"
+// in the language the app shows.
+func ErrAgentSign(error string) string { return In(i18n.Locale()).ErrAgentSign(error) }
+
+// ErrAgentSign says "The SSH agent did not sign the login (denied, or it failed): {error}"
+// in the language of msgs.
+func (msgs Messages) ErrAgentSign(error string) string {
+	return Catalog.Format(msgs.locale, "errAgentSign", map[string]any{"error": error})
+}
