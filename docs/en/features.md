@@ -1076,11 +1076,14 @@ connection, a new channel on it: no new login. A pane of a
   opens a pane right of the focused one, Split down (Cmd+Shift+D,
   Alt+Shift+-) one under it, and the new pane takes the focus. The new
   shell has the same terminal type, keys and encoding as the first. Panes
-  split again, in either direction. The session row's context menu has
-  the same items, with Zoom this pane, Equalize panes and Close this
-  pane. A right-click in the terminal opens the terminal's own menu (Copy,
-  Paste, Select All, Clear): MyGo's terminal builds it, and the app
-  cannot add to it.
+  split again, in either direction. The session row's context menu and
+  the Split button at the end of the [command bar](#command-bar) have
+  the same items, with Zoom this pane, Equalize panes, Move pane and
+  Close this pane, which act on the focused pane; with one pane, all but
+  the two splits are disabled. An item chosen from the button leaves the
+  keyboard in the focused pane's terminal. A right-click in the terminal
+  opens the terminal's own menu (Copy, Paste, Select All, Clear): MyGo's
+  terminal builds it, and the app cannot add to it.
 - **Focus**: the focused pane has a blue border, the others are dimmed a
   little. A click in a pane focuses it (the click also goes to its
   terminal, so selecting and programs that take the mouse work as
@@ -1135,10 +1138,10 @@ connection, a new channel on it: no new login. A pane of a
 ### Command bar
 
 Under the terminal is a one-line command bar, as FinalShell's command
-input box: a terminal icon, the input, without placeholder text, and a
-"History" button at its end. It is on by default; Options › Terminal ›
-Command bar turns it off, or any of its popups, and lists its keys (see
-[Terminal › Command bar](#terminal--command-bar)).
+input box: a terminal icon, the input, without placeholder text, a
+"History" button and a Split button at its end. It is on by default;
+Options › Terminal › Command bar turns it off, or any of its popups,
+and lists its keys (see [Terminal › Command bar](#terminal--command-bar)).
 
 - Enter sends what the bar holds to the shell, followed by a carriage
   return, as if it had been typed in the terminal (through the session's
@@ -1194,6 +1197,12 @@ Command bar turns it off, or any of its popups, and lists its keys (see
   split, whatever the Commands tab's "Send to" is set to, and never asks
   first. A command for several sessions is sent from the
   [Commands tab](#commands-tab) or its [command editor](#command-editor).
+- The Split button, after "History" (an icon of a square split in two),
+  opens the panes' menu above the bar: Split right, Split down, Zoom
+  this pane, Equalize panes, Move pane and Close this pane, with their
+  keys, the same items as the session row's menu (see [Splits](#splits)).
+  They act on the focused pane. It is disabled while the session is
+  connecting or disconnected.
 - Esc closes the popup; Esc again gives the keyboard back to the
   terminal. "Focus command bar" (Ctrl+Shift+L, Cmd+Shift+L on macOS)
   moves the keyboard to the bar and back.

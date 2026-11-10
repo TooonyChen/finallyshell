@@ -1613,5 +1613,6 @@
   "dropOnLeft": "Drop on the left",
   "dropOnRight": "Drop on the right",
   "dropOnUp": "Drop above",
-  "dropOnDown": "Drop below"
+  "dropOnDown": "Drop below",
+  "cmdBarSplit": "Split"
 }

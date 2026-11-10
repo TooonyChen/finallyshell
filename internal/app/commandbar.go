@@ -138,6 +138,7 @@ func (a *App) commandBar(c *ui.Context, s *Session) {
 			// FinalShell's History button, at the bar's end.
 			button = ui.Button(c, locales.CmdBarHistory()).Shrink(0).Disabled(!live).Clicked()
 		}
+		a.splitButton(c, s) // the panes' menu (paneview.go)
 	})
 	if !live {
 		b.popup, b.focused = popupNone, false

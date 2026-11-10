@@ -121,7 +121,7 @@ macOS 上按 <kbd>Cmd</kbd>+<kbd>O</kbd>，其他系统按 <kbd>Ctrl</kbd>+<kbd>
 
 可以选字体、字号、行高、粗细，开关连字，从 Ghostty 自带的几百个配色里挑一个，还可以加背景图片，改了立刻应用到所有打开的终端。另外还有查找（<kbd>Cmd</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>）、全屏、选中即复制、自定义右键行为，<kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+单击打开链接。
 
-会话的终端可以分屏，和 Ghostty、Windows Terminal 一样：<kbd>Cmd</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd>）在获得焦点的分屏旁边再开一个同一台服务器上的 shell，<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd>）在它下面开一个，用的是同一个连接，不用重新登录。点一下分屏，或用 <kbd>Cmd</kbd>+<kbd>Option</kbd>+方向键（<kbd>Alt</kbd>+方向键）在分屏之间移动，拖动分隔条调整大小，放大一个分屏占满终端，用 <kbd>Cmd</kbd>+<kbd>W</kbd>（<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>）关闭它。命令输入框和“命令”页发给获得焦点的分屏，文件面板跟随它的目录。
+会话的终端可以分屏，和 Ghostty、Windows Terminal 一样：<kbd>Cmd</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>=</kbd>）在获得焦点的分屏旁边再开一个同一台服务器上的 shell，<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>（<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>-</kbd>）在它下面开一个，用的是同一个连接，不用重新登录；命令输入框最右边的分屏按钮把这些放在一个菜单里，还有放大、平均分配和关闭。点一下分屏，或用 <kbd>Cmd</kbd>+<kbd>Option</kbd>+方向键（<kbd>Alt</kbd>+方向键）在分屏之间移动，拖动分隔条调整大小，放大一个分屏占满终端，用 <kbd>Cmd</kbd>+<kbd>W</kbd>（<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>）关闭它。命令输入框和“命令”页发给获得焦点的分屏，文件面板跟随它的目录。
 
 终端下面是 FinalShell 的命令输入框：输入命令，回车发给 shell。<kbd>Tab</kbd> 分多列列出正在输入的路径所在的服务器文件夹，在第一个词上则列出服务器 PATH 里的命令；<kbd>↑</kbd>、<kbd>Alt</kbd>+<kbd>H</kbd> 或“历史”按钮列出以前发给这台主机的命令，以及它的 shell 历史里的命令，<kbd>←</kbd> <kbd>→</kbd> 可以从一条命令里只取一个词。用不上的话，在“选项 › 终端 › 命令输入框”里关掉它，或者只关掉其中一部分。
 

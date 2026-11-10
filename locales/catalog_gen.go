@@ -9685,3 +9685,13 @@ func DropOnDown() string { return In(i18n.Locale()).DropOnDown() }
 func (msgs Messages) DropOnDown() string {
 	return Catalog.Format(msgs.locale, "dropOnDown", nil)
 }
+
+// CmdBarSplit says "Split"
+// in the language the app shows.
+func CmdBarSplit() string { return In(i18n.Locale()).CmdBarSplit() }
+
+// CmdBarSplit says "Split"
+// in the language of msgs.
+func (msgs Messages) CmdBarSplit() string {
+	return Catalog.Format(msgs.locale, "cmdBarSplit", nil)
+}

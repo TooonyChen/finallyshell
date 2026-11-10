@@ -606,14 +606,16 @@ func (a *App) paneTerminal(c *ui.Context, s *Session, p *pane) {
 	}
 }
 
-// paneMenu is the panes' part of the menu of s's row: splitting the
-// focused pane, zooming it, equalizing them, trading its place with a
-// neighbor's and closing it, with the keys that do the same.
+// paneMenu is the panes' part of the menu of s's row, and the menu of
+// the command bar's Split button: splitting the focused pane, zooming
+// it, equalizing them, trading its place with a neighbor's and closing
+// it, with the keys that do the same. Each gives the focused pane's
+// terminal the keyboard.
 //
 // MyGo's terminal view builds its own context menu (Copy, Paste, Select
 // All, Clear), which is the one a right-click in the terminal opens, the
 // innermost element's: an app cannot add to it, so these items are on
-// the session's row.
+// the session's row and the bar's button.
 func (a *App) paneMenu(m *ui.Menu, s *Session) {
 	item := func(label string, id shortcutID) *ui.MenuItem {
 		it := m.Item(label)
@@ -635,6 +637,7 @@ func (a *App) paneMenu(m *ui.Menu, s *Session) {
 	}
 	if m.Item(locales.EqualizePanes()).Disabled(!split).Chosen() {
 		s.panes.equalize()
+		s.panes.refocus = true
 	}
 	m.Submenu(locales.MovePane(), func(m *ui.Menu) {
 		for _, mv := range []struct {
@@ -658,6 +661,23 @@ func (a *App) paneMenu(m *ui.Menu, s *Session) {
 	}).Disabled(!split)
 	if item(locales.ClosePane(), scCloseTab).Disabled(!split).Chosen() {
 		a.closePane(s, s.pane())
+	}
+}
+
+// splitButton is the command bar's Split button, at its end: it opens
+// paneMenu, for s's focused pane, above the bar, lined up with the
+// button's end: drawn in the window, as the system's menu would open
+// below the button, over the panel under the bar. The menu takes the
+// keyboard as it opens; an item chosen gives it back to the pane's
+// terminal, in the next frame, as the panes are built before the bar.
+func (a *App) splitButton(c *ui.Context, s *Session) {
+	label := locales.CmdBarSplit()
+	b := ui.Button(c, "").Label(label).Tooltip(label).Shrink(0).Disabled(!canSplit(s))
+	b.Children(func() { ui.Icon(c, icons.Get("columns-2")).FontSize(13) })
+	b.PopoverMenuButton(func(m *ui.Menu) { a.paneMenu(m, s) },
+		ui.PopoverMenuButtonOptions{At: ui.AnchorTopEnd, Self: ui.AnchorBottomEnd})
+	if s.panes.refocus {
+		c.Invalidate()
 	}
 }
 

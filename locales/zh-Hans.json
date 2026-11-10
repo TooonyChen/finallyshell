@@ -955,5 +955,6 @@
   "dropOnLeft": "放到左边",
   "dropOnRight": "放到右边",
   "dropOnUp": "放到上边",
-  "dropOnDown": "放到下边"
+  "dropOnDown": "放到下边",
+  "cmdBarSplit": "分屏"
 }
