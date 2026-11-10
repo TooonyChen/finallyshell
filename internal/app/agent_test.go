@@ -217,6 +217,9 @@ func TestAgentLogin(t *testing.T) {
 	if answerHostKeys(t, p, s); s.status != statusConnected {
 		t.Fatal(describeError(s.err))
 	}
+	// The server records the login after its side of the handshake,
+	// which may end after the client's.
+	p.until(t, "the server's key login", func() bool { return len(srv.KeyLogins()) == 1 })
 	if got := srv.KeyLogins(); len(got) != 1 || got[0] != ssh.FingerprintSHA256(key) || srv.Logins() != 0 {
 		t.Errorf("logged in with %q, %d passwords", got, srv.Logins())
 	}
@@ -236,6 +239,7 @@ func TestAgentLogin(t *testing.T) {
 	if answerHostKeys(t, p, s); s.status != statusConnected {
 		t.Fatal(describeError(s.err))
 	}
+	p.until(t, "the servers' key logins", func() bool { return len(jump.KeyLogins()) == 1 && len(srv.KeyLogins()) == 2 })
 	if len(jump.KeyLogins()) != 1 || len(srv.KeyLogins()) != 2 {
 		t.Errorf("key logins: jump host %d, host %d", len(jump.KeyLogins()), len(srv.KeyLogins()))
 	}

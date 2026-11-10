@@ -37,6 +37,9 @@ func TestAgentLogin(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
+	// The server records the login after its side of the handshake,
+	// which may end after the client's.
+	waitFor(t, "the server's key login", func() bool { return len(srv.KeyLogins()) == 1 })
 	if n := len(srv.KeyLogins()); n != 1 || srv.Logins() != 0 {
 		t.Errorf("%d key logins, %d with a password", n, srv.Logins())
 	}
@@ -59,6 +62,7 @@ func TestAgentSecondKey(t *testing.T) {
 		t.Fatal(err)
 	}
 	client.Close()
+	waitFor(t, "the server's key login", func() bool { return len(srv.KeyLogins()) == 1 })
 	if got := srv.KeyLogins(); !slices.Equal(got, []string{ssh.FingerprintSHA256(second)}) {
 		t.Errorf("logged in with %q", got)
 	}
@@ -149,6 +153,7 @@ func TestAgentJumpHost(t *testing.T) {
 		t.Fatal(err)
 	}
 	client.Close()
+	waitFor(t, "the servers' key logins", func() bool { return len(j.KeyLogins()) == 1 && len(target.KeyLogins()) == 1 })
 	if len(j.KeyLogins()) != 1 || len(target.KeyLogins()) != 1 {
 		t.Errorf("key logins: jump host %d, host %d", len(j.KeyLogins()), len(target.KeyLogins()))
 	}

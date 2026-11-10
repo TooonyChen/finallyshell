@@ -1,6 +1,7 @@
 // Package sshtest is an SSH server for tests, in the test's process: it
-// logs in with a password, or with the public keys AcceptKey gives it, opens shells that read and print nothing,
-// keeping what they read, forwards ports as OpenSSH does with AllowTcpForwarding on and
+// logs in with a password, or with the public keys AcceptKey gives it,
+// opens shells that read and print nothing, keeping what they read,
+// forwards ports as OpenSSH does with AllowTcpForwarding on and
 // GatewayPorts off, answers keepalives, and, started with StartSFTP,
 // serves the local file system over SFTP.
 package sshtest
@@ -179,7 +180,9 @@ func (s *Server) AcceptKey(key ssh.PublicKey) {
 }
 
 // KeyLogins are the SHA256 fingerprints of the keys clients logged in
-// with, in order.
+// with, in order. A login is recorded once the server's side of the
+// handshake is done, which can be after the client's Dial returned: a
+// test waits for it.
 func (s *Server) KeyLogins() []string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
