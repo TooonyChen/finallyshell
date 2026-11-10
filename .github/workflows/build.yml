@@ -1,0 +1,183 @@
+name: build
+
+# Builds the app for the five platforms and uploads each platform's files
+# to publish as an artifact, build-<n>, for the calling workflow to
+# publish: release.yml (signed, with the updates) and preview.yml
+# (unsigned).
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The version to build, written into mygo.json on the runner.
+        required: true
+        type: string
+      sign:
+        # Releases sign: the build fails without the key, and the update
+        # manifests are checked and published. Previews don't: mygo build
+        # makes no update, and installed apps never update to them.
+        description: Sign the update and publish its manifests.
+        required: true
+        type: boolean
+    secrets:
+      MYGO_UPDATER_PRIVATE_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      # A platform that fails doesn't cancel the others: the publishing job
+      # needs all five, so nothing is published unless all are built.
+      fail-fast: false
+      matrix:
+        include:
+          - platform: darwin/arm64
+            # Signing (ad hoc) and the disk image need macOS.
+            os: macos-latest
+          - platform: darwin/amd64
+            # Intel Macs, which cannot run an arm64 app at all (Rosetta
+            # translates x86_64 to arm64, never the reverse). Go
+            # cross-compiles the runner's architecture to this one, and MyGo
+            # fetches libghostty-vt-darwin-amd64.dylib for it.
+            os: macos-latest
+          - platform: linux/amd64
+            os: ubuntu-latest
+          - platform: linux/arm64
+            # Cross-built like windows/amd64: MyGo builds with
+            # CGO_ENABLED=0, so no arm64 C toolchain or runner is needed,
+            # and it fetches libghostty-vt-linux-arm64.so for it.
+            os: ubuntu-latest
+          - platform: windows/amd64
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ inputs.version }}
+      SIGN: ${{ inputs.sign }}
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Install NSIS
+        if: matrix.platform == 'windows/amd64'
+        run: sudo apt-get update && sudo apt-get install -y nsis
+      - name: Set the version and add the licenses
+        # Only in this runner: main keeps its mygo.json, the tag is the
+        # version. MyGo ships the resources directory inside each app.
+        run: |
+          jq --arg v "$VERSION" '.version = $v' mygo.json > mygo.json.tmp
+          mv mygo.json.tmp mygo.json
+          mkdir -p resources
+          cp LICENSE resources/LICENSE.txt
+          go run ./tools/release licenses > resources/THIRD_PARTY_LICENSES.txt
+      # mygo build downloads the target's native libraries (libghostty-vt)
+      # from GitHub into <os.UserCacheDir()>/mygo/natives/<sha256>/ and
+      # reuses them from there. Keep that folder between runs, keyed by the
+      # runner's OS, the target and go.sum (the MyGo version decides the
+      # libraries).
+      - name: Natives cache folder
+        id: natives
+        # os.UserCacheDir: ~/Library/Caches on macOS; $XDG_CACHE_HOME, else
+        # ~/.cache, on Linux, where the Windows target is built too.
+        run: |
+          case "$RUNNER_OS" in
+          macOS) dir="$HOME/Library/Caches/mygo/natives" ;;
+          *) dir="${XDG_CACHE_HOME:-$HOME/.cache}/mygo/natives" ;;
+          esac
+          echo "dir=$dir" >> "$GITHUB_OUTPUT"
+          echo "key=mygo-natives-$RUNNER_OS-${PLATFORM/\//-}-${{ hashFiles('go.sum') }}" >> "$GITHUB_OUTPUT"
+      - name: Restore the native libraries
+        id: restore
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ steps.natives.outputs.dir }}
+          key: ${{ steps.natives.outputs.key }}
+      - name: Build
+        # With the secret key, mygo build also signs an update of the app
+        # for installed copies: an archive, deltas from the last releases
+        # and update-<platform>.json (updates in mygo.json), whose notes
+        # are the version's section of CHANGELOG.md. Without it, it builds
+        # apps that installed copies cannot update to: a release fails
+        # then, a preview is meant to be one.
+        env:
+          MYGO_UPDATER_PRIVATE_KEY: ${{ secrets.MYGO_UPDATER_PRIVATE_KEY }}
+          # Finds the earlier releases that deltas start from.
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$SIGN" = true ] && [ -z "$MYGO_UPDATER_PRIVATE_KEY" ]; then
+            echo "::error::The MYGO_UPDATER_PRIVATE_KEY secret is not set: installed apps could not update to this release"
+            exit 1
+          fi
+          # Tried again for up to ten minutes when a download fails, as
+          # GitHub's release downloads time out or answer 5xx at times;
+          # any other error fails at once.
+          .github/scripts/build-with-retries.sh go tool mygo build -platform "$PLATFORM" -o dist
+      # Only after a build, which downloaded them all; a failed one would
+      # keep an incomplete folder under the key for good.
+      - name: Save the native libraries
+        if: steps.restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ steps.natives.outputs.dir }}
+          key: ${{ steps.natives.outputs.key }}
+      - name: Collect the files to publish
+        run: |
+          dir="dist/${PLATFORM/\//-}"
+          mkdir upload
+          case "$PLATFORM" in
+          darwin/*)
+            cp "$dir"/*.dmg upload/
+            ;;
+          linux/*)
+            # Both Linux jobs upload install.sh, which the publishing job
+            # merges into one file: it is the same for every target, as
+            # it picks the archive by uname -m.
+            cp "$dir"/*.deb "$dir"/*.tar.gz "$dir"/install.sh upload/
+            ;;
+          windows/*)
+            cp "$dir"/*-setup-*.exe upload/
+            # A portable copy: the executable needs the DLL beside it.
+            (cd "$dir" && zip -9 "$OLDPWD/upload/finallyshell-$VERSION-windows-amd64.zip" \
+              Finallyshell.exe ghostty-vt.dll LICENSE.txt THIRD_PARTY_LICENSES.txt)
+            ;;
+          esac
+          if [ "$SIGN" != true ]; then
+            # Unsigned: no manifest, and on Linux the .tar.gz above is the
+            # app to install by hand.
+            ls -l upload
+            exit 0
+          fi
+          # The update: its manifest, and the archive and deltas it names.
+          manifest="$dir/update-${PLATFORM/\//-}.json"
+          if [ ! -f "$manifest" ]; then
+            echo "::error::mygo build wrote no $manifest: installed apps could not update to this release"
+            exit 1
+          fi
+          prefix="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/"
+          if ! jq -e --arg v "$VERSION" --arg p "$prefix" \
+            '.version == $v and (.url | startswith($p)) and all((.deltas // [])[]; .url | startswith($p))' \
+            "$manifest" > /dev/null; then
+            echo "::error::$manifest is not version $VERSION in $prefix:"
+            cat "$manifest"
+            exit 1
+          fi
+          # The update window shows the same notes as the release page.
+          notes=$(go run ./tools/release notes "$VERSION")
+          if [ "$(jq -r '.notes // ""' "$manifest")" != "$notes" ]; then
+            echo "::error::The notes in $manifest are not the $VERSION section of CHANGELOG.md:"
+            jq -r '.notes // ""' "$manifest"
+            exit 1
+          fi
+          cp "$manifest" upload/
+          jq -r '.url, (.deltas // [])[].url' "$manifest" | while read -r url; do
+            cp "$dir/${url##*/}" upload/
+          done
+          ls -l upload
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ format('build-{0}', strategy.job-index) }}
+          path: upload/
+          if-no-files-found: error

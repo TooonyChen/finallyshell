@@ -67,7 +67,7 @@ func TestParseVersion(t *testing.T) {
 			t.Errorf("ParseVersion(%q): %v", s, err)
 		}
 	}
-	for _, s := range []string{"", "1.2", "1.2.3.4", "1.2.3-rc.1", "01.2.3", "a.b.c", "-1.0.0"} {
+	for _, s := range []string{"", "1.2", "1.2.3.4", "1.2.3-rc.1", "v0.4.1-preview.3", "01.2.3", "a.b.c", "-1.0.0"} {
 		if v, err := ParseVersion(s); err == nil {
 			t.Errorf("ParseVersion(%q) = %v, want an error", s, v)
 		}
@@ -89,6 +89,36 @@ func TestCompare(t *testing.T) {
 		b, _ := ParseVersion(tc.b)
 		if got := a.Compare(b); got != tc.want {
 			t.Errorf("%s.Compare(%s) = %d, want %d", tc.a, tc.b, got, tc.want)
+		}
+	}
+}
+
+func TestPreviewVersion(t *testing.T) {
+	for _, tc := range []struct {
+		last string
+		n    int
+		want string
+	}{
+		{"v0.4.0", 1, "0.4.1-preview.1"},
+		{"v0.4.0", 12, "0.4.1-preview.12"},
+		{"v0.4.2", 3, "0.4.3-preview.3"},
+		{"v1.9.9", 1, "1.9.10-preview.1"},
+		{"", 42, "0.0.1-preview.42"},
+	} {
+		if got, err := PreviewVersion(tc.last, tc.n); err != nil || got != tc.want {
+			t.Errorf("PreviewVersion(%q, %d) = %q, %v, want %q", tc.last, tc.n, got, err, tc.want)
+		}
+	}
+	for _, tc := range []struct {
+		last string
+		n    int
+	}{
+		{"v0.4.0", 0},
+		{"v0.4.1-preview.3", 1},
+		{"main", 1},
+	} {
+		if got, err := PreviewVersion(tc.last, tc.n); err == nil {
+			t.Errorf("PreviewVersion(%q, %d) = %q, want an error", tc.last, tc.n, got)
 		}
 	}
 }
@@ -354,7 +384,36 @@ func TestGitHistory(t *testing.T) {
 	if last, _ := lastTag(); last != "v0.10.0" {
 		t.Fatalf("lastTag = %q, want v0.10.0", last)
 	}
+
+	// Previews of main: tagged, but never the last release.
+	preview := func(want string) {
+		t.Helper()
+		if v, err := previewVersion(); err != nil || v != want {
+			t.Fatalf("previewVersion = %q, %v, want %q", v, err, want)
+		}
+	}
+	preview("0.10.1-preview.2") // v0.10.0 is HEAD~2
+	run("tag", "v0.10.1-preview.2")
+	commit("feat: more")
+	preview("0.10.1-preview.3")
+	run("tag", "v0.10.1-preview.3")
+	run("tag", "v0.11.0-preview.9") // sorts above v0.10.0 too
+	if last, _ := lastTag(); last != "v0.10.0" {
+		t.Fatalf("lastTag with preview tags = %q, want v0.10.0", last)
+	}
+	if cs, err := commitsSince("v0.10.0"); err != nil || len(cs) != 3 {
+		t.Fatalf("commitsSince(v0.10.0) = %+v, %v, want 3 commits", cs, err)
+	}
+	section("0.11.0", "docs: changelog for 0.11.0")
+	if v, _ := next(); v != "0.11.0" {
+		t.Fatalf("after the 0.11.0 section = %q, want 0.11.0", v)
+	}
+	run("tag", "v0.11.0")
+	preview("") // the release's own commit
+	commit("fix: after")
+	preview("0.11.1-preview.1")
 }
+
 func TestThirdPartyLicenses(t *testing.T) {
 	if testing.Short() {
 		t.Skip("lists the app's modules")

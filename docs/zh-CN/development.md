@@ -105,7 +105,7 @@ go run ./tools/screenshots
 
    上一个 tag 之后的提交类型（Conventional Commits）只用来核对版本号：破坏性改动（`feat!:`、`BREAKING CHANGE:`）应该升主版本（1.0 之前升次版本），`feat` 升次版本，`fix` 和 `perf` 升修订号。版本号比这个低时在运行记录里给出警告，照样发布：0.2.0 之后有 `feat` 提交，0.2.1 就是这种情况。
 2. 跑和 PR 一样的检查（`.github/workflows/ci.yml`：gofmt、`go vet`、`go tool mygo vet`、`go test -race`）。
-3. 编译五个平台：macOS arm64 和 Intel x86_64 在 macOS runner 上（ad hoc 签名、dmg），Linux x86_64、Linux arm64 和 Windows x86_64 在 Linux runner 上交叉编译（Windows 安装程序用 apt 装的 NSIS）。两个 Linux 版本写出的 `install.sh` 相同，它按 `uname -m` 选压缩包，发布里只有一份。版本号只在 runner 里写进 `mygo.json`，main 上的不改。`LICENSE` 和第三方许可证（`go run ./tools/release licenses`）放进 `resources/`，随应用一起打包。
+3. 编译五个平台（`.github/workflows/build.yml`，[预览版](#预览版)也用它，只是不签名）：macOS arm64 和 Intel x86_64 在 macOS runner 上（ad hoc 签名、dmg），Linux x86_64、Linux arm64 和 Windows x86_64 在 Linux runner 上交叉编译（Windows 安装程序用 apt 装的 NSIS）。两个 Linux 版本写出的 `install.sh` 相同，它按 `uname -m` 选压缩包，发布里只有一份。版本号只在 runner 里写进 `mygo.json`，main 上的不改。`LICENSE` 和第三方许可证（`go run ./tools/release licenses`）放进 `resources/`，随应用一起打包。
 
    编译时有私钥 `MYGO_UPDATER_PRIVATE_KEY`（见[给更新签名](#给更新签名)），所以 `mygo build` 还会写出每个平台的更新：打成压缩包的应用（`finallyshell-<版本>-<平台>.tar.gz`）、从最近三个有更新的发布出发的增量更新（`…-<旧版本>-to-<版本>-….delta`），以及列出它们和签名的清单 `update-<平台>.json`。清单里的说明就是 `CHANGELOG.md` 里这个版本的一节，更新窗口显示的也是它；没有这一节 `mygo build` 会失败。没有这个 secret、没有清单、清单不是这个版本、这个发布的，或者清单里的说明和 `go run ./tools/release notes <版本>` 不一样，任务失败；否则把清单和它列出的文件跟安装包放在一起。
 
@@ -113,6 +113,17 @@ go run ./tools/screenshots
 4. 检查五个平台的清单都在，然后打 tag `v<版本>`，发布 GitHub Release，附上安装包、更新文件、`SHA256SUMS`、`LICENSE.txt`、`THIRD_PARTY_LICENSES.txt`。说明是这个版本的一节（`go run ./tools/release notes <版本>`），后面接上 `.github/release-install.md`，即中英文的安装说明。发布是正式发布，不是草稿，因为已安装的应用读取的是最新发布的清单；`gh release create` 上传文件期间让它保持草稿，所以应用不会看到压缩包还没上传的清单。
 
 `production` 只应该从 main 快进，在仓库设置里给它加分支保护（禁止强推）。
+
+## 预览版
+
+每次推送到 main，只改了 `*.md` 文件、`docs/` 或 `.claude/` 的除外，都会用那个提交编译并发布一个预览版（`.github/workflows/preview.yml`），合并之后马上就能试用。更新的推送会取消还在编译的预览版；也可以在 main 上手动运行这个 workflow（Actions › preview › Run workflow）。
+
+1. 版本号是上一个发布的版本号把修订号加一，再加上 `-preview.<N>`，N 是那个发布的 tag 之后的提交数（`go run ./tools/release preview-version`）：v0.4.0 之后是 `0.4.1-preview.1`、`0.4.1-preview.2`……下一个发布不管是修订版还是次版本，都比它们新。第一次发布之前会是 `0.0.1-preview.<N>`，N 数的是所有提交。提交本身就是一个发布，或者已经有预览版时，不编译。预览版的 tag 永远不算上一个发布：`tools/release` 只认 `vMAJOR.MINOR.PATCH` 形式的 tag，所以发布、`version` 和 `draft` 都不看它们。
+2. 和发布一样用 `.github/workflows/build.yml` 编译五个平台，但没有私钥：`mygo build` 不写更新文件（它会提示 "Not signing an update"），也不需要 `CHANGELOG.md` 里有这个版本的一节，任务也不检查清单。私钥不进每次合并都运行的 workflow。
+3. 在这个提交上打 tag `v<版本>`，发布标题为 `<版本>` 的 GitHub 预发布（prerelease），附上安装包、`SHA256SUMS` 和许可证。说明先用中英文写明是哪个提交、不是正式发布，再列出上一个发布之后的提交（`go run ./tools/release draft`），最后接上 `.github/release-install.md`。
+4. 按版本号保留最新的 5 个预览版，删掉更早的和它们的 tag（`.github/scripts/prune-previews.sh`），也删掉被取消的运行留下的预览版草稿。它从不动正式发布和其他预发布；`.github/scripts/prune-previews-test.sh` 用一个假的 `gh` 测试它，`--dry-run` 只列出会删什么。
+
+预发布永远不是已安装的应用检查的最新发布，应用也不接收预发布（`Updater.SetPrereleases`），所以已安装的副本不会更新到预览版：预览版要手动下载。从预览版安装的应用会收到下一个正式发布的更新。
 
 ## 给更新签名
 
@@ -143,7 +154,7 @@ updates.go           更新窗口（MyGo 的 updater 插件，原生 UI）、“
 keychain.go          系统凭据存储（mygo.Secrets）：Platform 的 SecretGet/Set/Delete
 locales/             界面文案：en.json、zh-Hans.json；catalog_gen.go 由 mygo 生成，不要手改
 tools/natives/       CI 跑测试前先下载 libghostty-vt，最多重试五分钟（见“测试”）
-tools/release/       发布用的工具：从 CHANGELOG.md 读出下一个版本号和更新说明，按提交列出草稿，收集第三方许可证（notices/ 是以二进制打包的库的许可证）
+tools/release/       发布用的工具：从 CHANGELOG.md 读出下一个版本号和更新说明，按提交列出草稿，算出预览版的版本号，收集第三方许可证（notices/ 是以二进制打包的库的许可证）
 tools/screenshots/   从 internal/app 的测试重新生成 docs/screenshots/ 里的 README 截图
 internal/
   config/            主机和文件夹（hosts.json）、设置的读写，背景图片的副本，配置目录；proxy.go 是代理设置和跳板机链（找循环）；tunnels.go 是隧道设置；keys.go 是退格键和删除键发送什么；sync.go 是“同步”页的设置、哪些设置要同步、sync-state.json 和同步前 hosts.json 的副本；history.go 是命令输入框的历史文件，以及读取 bash 和 zsh 的历史文件；quickcommands.go 是“命令”页的 quickcommands.json；cmdeditor.go 是命令编辑器的 commandeditor.txt；localshell.go 把本地终端程序（localShell）分成参数

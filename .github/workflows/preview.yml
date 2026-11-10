@@ -1,0 +1,114 @@
+name: preview
+
+# Every push to main publishes a preview: a GitHub prerelease of the app
+# built from that commit, tagged v<last release's version, patch+1>-preview.<N>,
+# N the commits since the last release tag (go run ./tools/release
+# preview-version). A prerelease is never the latest release, so installed
+# apps don't update to it; people download it by hand. The 5 newest
+# previews are kept, older ones are deleted with their tags.
+#
+# Previews are not signed: this workflow never gets the update key, so
+# mygo build makes no update and needs no CHANGELOG.md section.
+on:
+  push:
+    branches: [main]
+    # Changes that don't change the app.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".claude/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push cancels a preview still building. Separate from the
+# release's group, which is never cancelled.
+concurrency:
+  group: preview
+  cancel-in-progress: true
+
+jobs:
+  version:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - id: next
+        # Nothing when the commit is a release's own, or already has its
+        # preview (a re-run, or a dispatch after the push's run).
+        run: |
+          version=$(go run ./tools/release preview-version)
+          if [ -n "$version" ] && git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then
+            echo "::notice::v$version is already published"
+            version=
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    if: needs.version.outputs.version != ''
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      sign: false
+
+  publish:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: actions/download-artifact@v8
+        with:
+          path: upload
+          merge-multiple: true
+      - name: Licenses and checksums
+        run: |
+          cp LICENSE upload/LICENSE.txt
+          go run ./tools/release licenses > upload/THIRD_PARTY_LICENSES.txt
+          (cd upload && sha256sum * > SHA256SUMS)
+          cat upload/SHA256SUMS
+      - name: Release notes
+        # What it is, in both languages, the commits since the last release
+        # (tools/release draft), then how to install.
+        run: |
+          sha=${GITHUB_SHA:0:7}
+          link="[$sha]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA)"
+          {
+            echo "Preview build of main at $link, not a release; installed apps don't update to it."
+            echo
+            echo "main 分支在 $link 的预览版，不是正式发布；已安装的应用不会更新到它。"
+            echo
+            go run ./tools/release draft
+            echo
+            cat .github/release-install.md
+          } > notes.md
+      - name: Publish
+        # A prerelease, never the latest release, which installed apps
+        # check. gh keeps it a draft while it uploads the files.
+        run: |
+          gh release create "v$VERSION" upload/* \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --notes-file notes.md \
+            --prerelease \
+            --latest=false
+      - name: Delete older previews
+        run: .github/scripts/prune-previews.sh 5

@@ -41,6 +41,8 @@ Download the latest build from [Releases](https://github.com/TooonyChen/finallys
 | Debian, Ubuntu (ARM64) | `finallyshell_<version>_arm64.deb` |
 | Other Linux (ARM64) | `finallyshell-<version>-linux-arm64.tar.gz`; `sh install.sh` installs it in `~/.local` |
 
+To try what's on main before it's released, every merge also publishes a preview build on the [Releases](https://github.com/TooonyChen/finallyshell/releases) page, marked Pre-release. Installed apps don't update to previews; download them by hand.
+
 The macOS app isn't notarized by Apple yet, so macOS blocks it the first time you open it. After dragging it to Applications, run:
 
 ```bash

@@ -5,6 +5,7 @@
 //	go run ./tools/release version          # the next version, or nothing
 //	go run ./tools/release notes [version]  # its notes, from CHANGELOG.md
 //	go run ./tools/release draft            # the commits since the last release
+//	go run ./tools/release preview-version  # the version of a preview of HEAD
 //	go run ./tools/release licenses         # THIRD_PARTY_LICENSES.txt
 //
 // Releases are tagged vMAJOR.MINOR.PATCH. CHANGELOG.md, written by hand,
@@ -14,12 +15,17 @@
 // the last tag; otherwise there is nothing to release. The commits since
 // the last tag only check that version by their Conventional Commits type
 // (see BumpOf): a version lower than they call for is a warning.
+//
+// The preview workflow (.github/workflows/preview.yml) publishes every
+// push to main as a prerelease tagged v<version>-preview.<n> (see
+// PreviewVersion). Those tags never count as the last release.
 package main
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -39,6 +45,8 @@ func main() {
 		err = printNotes(args[1:])
 	case args[0] == "draft" && len(args) == 1:
 		err = printDraft()
+	case args[0] == "preview-version" && len(args) == 1:
+		err = printPreviewVersion()
 	case args[0] == "licenses" && len(args) == 1:
 		err = ThirdPartyLicenses(".", os.Stdout)
 	default:
@@ -51,7 +59,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "usage: go run ./tools/release version | notes [version] | draft | licenses")
+	fmt.Fprintln(os.Stderr, "usage: go run ./tools/release version | notes [version] | draft | preview-version | licenses")
 	os.Exit(2)
 }
 
@@ -146,7 +154,51 @@ func printDraft() error {
 	return nil
 }
 
-// tagPattern matches release tags, for git's glob matching.
+// printPreviewVersion prints the version of a preview of HEAD, or nothing
+// when HEAD is a release's own commit, and says why on stderr.
+func printPreviewVersion() error {
+	v, err := previewVersion()
+	if err != nil {
+		return err
+	}
+	if v == "" {
+		report("notice", "nothing to preview: HEAD is the last release's commit")
+		return nil
+	}
+	report("notice", v)
+	fmt.Println(v)
+	return nil
+}
+
+// previewVersion is the version of a preview of HEAD (PreviewVersion),
+// counting the commits since the last release tag, or "" when HEAD is that
+// tag's commit.
+func previewVersion() (string, error) {
+	last, err := lastTag()
+	if err != nil {
+		return "", err
+	}
+	rev := "HEAD"
+	if last != "" {
+		rev = last + "..HEAD"
+	}
+	out, err := git("rev-list", "--count", rev)
+	if err != nil {
+		return "", err
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(out))
+	if err != nil {
+		return "", fmt.Errorf("git rev-list --count %s printed %q, not a number", rev, out)
+	}
+	if n == 0 {
+		return "", nil
+	}
+	return PreviewVersion(last, n)
+}
+
+// tagPattern matches release tags, for git's glob matching. It matches
+// preview tags too, such as v0.4.1-preview.3, which lastTag skips as
+// ParseVersion refuses them.
 const tagPattern = "v[0-9]*.[0-9]*.[0-9]*"
 
 func git(args ...string) (string, error) {

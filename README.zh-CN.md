@@ -41,6 +41,8 @@
 | Debian、Ubuntu（ARM64） | `finallyshell_<版本>_arm64.deb` |
 | 其他 Linux（ARM64） | `finallyshell-<版本>-linux-arm64.tar.gz`，运行 `sh install.sh` 装到 `~/.local` |
 
+想在发布之前试用 main 上的改动：每次合并都会在 [Releases](https://github.com/TooonyChen/finallyshell/releases) 页面发布一个预览版，标为 Pre-release。已安装的应用不会更新到预览版，需要手动下载。
+
 macOS 版还没有经过 Apple 公证，第一次打开会被拦下。拖进“应用程序”后运行：
 
 ```bash

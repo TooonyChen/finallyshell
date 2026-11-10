@@ -117,3 +117,25 @@ func (v Version) Next(b Bump) Version {
 	}
 	return v
 }
+
+// PreviewVersion is the version of a preview build of main, n commits
+// after last, the newest release tag: the next patch version with the
+// pre-release "preview.<n>", 0.4.1-preview.3 three commits after v0.4.0.
+// Semantic versioning orders a pre-release before its version, so the
+// next release, patch or minor, is newer than every preview after the
+// last one, and an app on a preview is offered it. With no release yet
+// (last ""), it is 0.0.1-preview.<n>, n counting every commit. n is at
+// least 1: a release's own commit has no preview.
+func PreviewVersion(last string, n int) (string, error) {
+	var v Version
+	if last != "" {
+		var err error
+		if v, err = ParseVersion(last); err != nil {
+			return "", err
+		}
+	}
+	if n < 1 {
+		return "", fmt.Errorf("a preview is at least one commit after the last release, not %d", n)
+	}
+	return fmt.Sprintf("%s-preview.%d", v.Next(Patch), n), nil
+}
