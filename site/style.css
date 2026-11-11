@@ -82,3 +82,5 @@ th { color: var(--muted); font-weight: 600; }
 
 footer { margin-top: 40px; padding: 24px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; }
 footer p { margin: 0 0 6px; }
+.badges { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 18px; }
+.badges img { display: block; }
