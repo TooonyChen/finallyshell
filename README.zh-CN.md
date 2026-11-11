@@ -29,6 +29,9 @@
 
 它是用 Go 和 [MyGo](https://github.com/egoist/mygo) 界面库写的原生程序，不需要装 Java。终端用的是 [Ghostty](https://ghostty.org) 的终端引擎 libghostty-vt。密码存在系统的钥匙串里，不写进文件。
 
+> [!IMPORTANT]
+> Finallyshell 没有官方网站。本仓库和它的 [Releases](https://github.com/TooonyChen/finallyshell/releases) 是唯一的官方下载来源；以 Finallyshell 名义提供下载的网站都与本项目无关。
+
 ## 安装
 
 在 [Releases](https://github.com/TooonyChen/finallyshell/releases/latest) 下载最新版本：
