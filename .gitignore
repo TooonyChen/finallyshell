@@ -4,3 +4,4 @@ build/
 dist/
 /resources/LICENSE.txt
 /resources/THIRD_PARTY_LICENSES.txt
+_site/

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finallyshell：布局和 FinalShell 一样的 SSH 客户端</title>
+<meta name="description" content="布局和 FinalShell 一样、会话标签竖着排的 SSH 客户端，用 Go 编写。终端、SFTP 文件和服务器监控在同一个原生窗口里，支持 macOS、Windows 和 Linux。">
+<meta property="og:title" content="Finallyshell：布局和 FinalShell 一样的 SSH 客户端">
+<meta property="og:description" content="布局和 FinalShell 一样、会话标签竖着排的 SSH 客户端，用 Go 编写。终端、SFTP 文件和服务器监控在同一个原生窗口里，支持 macOS、Windows 和 Linux。">
+<meta property="og:image" content="https://tooonychen.github.io/finallyshell/screenshots/main-zh-CN.png">
+<link rel="canonical" href="https://tooonychen.github.io/finallyshell/zh-CN/">
+<link rel="alternate" hreflang="en" href="https://tooonychen.github.io/finallyshell/">
+<link rel="alternate" hreflang="zh-Hans" href="https://tooonychen.github.io/finallyshell/zh-CN/">
+<link rel="icon" type="image/png" href="../icon.png">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="../zh-CN/"><img src="../icon.png" alt="">Finallyshell</a>
+    <nav class="links">
+      <a href="#download">下载</a>
+      <a href="https://github.com/TooonyChen/finallyshell/blob/main/docs/zh-CN/features.md">文档</a>
+      <a href="https://github.com/TooonyChen/finallyshell">GitHub</a>
+      <a href="../" lang="en">English</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>布局和 FinalShell 一样、会话标签竖着排的 SSH 客户端</h1>
+      <p>左上是服务器状态，下面是会话，右边是终端，终端下面是服务器上的文件。用 Go 写的原生程序，不需要装 Java。</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/TooonyChen/finallyshell/releases/latest">从 GitHub Releases 下载</a>
+        <a class="button" href="https://github.com/TooonyChen/finallyshell">源代码</a>
+      </div>
+      <div class="platforms">macOS · Windows · Linux</div>
+      <div class="shot"><img src="../screenshots/main-zh-CN.png" width="2672" height="1808" alt="Finallyshell 主窗口：服务器监控、会话列表、终端和文件面板"></div>
+    </div>
+
+    <div class="notice">
+      <strong>认准官方渠道</strong>
+      本页面和 <a href="https://github.com/TooonyChen/finallyshell">GitHub 仓库</a>是本项目仅有的官方渠道，<a href="https://github.com/TooonyChen/finallyshell/releases">GitHub Releases</a> 是唯一的官方下载来源。以 Finallyshell 名义提供下载的其他网站都与本项目无关。
+    </div>
+
+    <section class="feature">
+      <div class="text">
+        <h2>服务器上的文件就在终端下面</h2>
+        <p>通过 SFTP 浏览服务器上的文件。把文件拖进来就能上传，传输进度随时可见，文本文件可以用内置编辑器直接改。</p>
+      </div>
+      <div class="shot"><img src="../screenshots/transfers-zh-CN.png" width="1552" height="1128" loading="lazy" alt="文件面板和传输列表"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>服务器状态一眼看清</h2>
+        <p>Linux 服务器的 CPU、内存、网络、磁盘和进程显示在会话旁边，走的是同一个连接。</p>
+      </div>
+      <div class="shot"><img src="../screenshots/system-info-zh-CN.png" width="1552" height="1128" loading="lazy" alt="服务器监控的系统信息"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>原来的服务器直接带过来</h2>
+        <p>可以导入 FinalShell、Xshell、SecureCRT、MobaXterm 的连接和文件夹，<code>~/.ssh/config</code> 里的主机，或者 CSV、Excel 格式的服务器列表。</p>
+      </div>
+      <div class="shot"><img src="../screenshots/import-finalshell-zh-CN.png" width="1832" height="1288" loading="lazy" alt="从 FinalShell 导入连接"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>常用命令点一下就发</h2>
+        <p>把常用的命令存成按钮，或者在命令编辑器里写几行直接发送，可以发给一个会话，也可以同时发给多个。</p>
+      </div>
+      <div class="shot"><img src="../screenshots/quick-commands-zh-CN.png" width="2192" height="834" loading="lazy" alt="终端下方的快捷命令"></div>
+    </section>
+
+    <div class="download" id="download">
+      <h2>下载</h2>
+      <p>所有版本都在 <a href="https://github.com/TooonyChen/finallyshell/releases/latest">GitHub Releases</a>。macOS 和 Windows 第一次打开的处理方法、Linux 需要的依赖，见<a href="https://github.com/TooonyChen/finallyshell/blob/main/README.zh-CN.md#安装">安装说明</a>。</p>
+      <div class="table">
+        <table>
+          <tr><th>系统</th><th>文件</th></tr>
+          <tr><td>macOS（Apple 芯片）</td><td><code>finallyshell-&lt;版本&gt;-arm64.dmg</code></td></tr>
+          <tr><td>macOS（Intel 芯片）</td><td><code>finallyshell-&lt;版本&gt;-amd64.dmg</code></td></tr>
+          <tr><td>Windows（x64）</td><td><code>finallyshell-setup-&lt;版本&gt;-amd64.exe</code></td></tr>
+          <tr><td>Debian、Ubuntu</td><td><code>finallyshell_&lt;版本&gt;_amd64.deb、_arm64.deb</code></td></tr>
+          <tr><td>其他 Linux</td><td><code>finallyshell-&lt;版本&gt;-linux-amd64.tar.gz、-arm64.tar.gz</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>源码可见，采用 <a href="https://github.com/TooonyChen/finallyshell/blob/main/LICENSE">PolyForm Noncommercial 和 PolyForm Internal Use 许可证</a>。</p>
+    <p>Copyright © 2026 Tony Chen · <a href="https://github.com/TooonyChen/finallyshell">github.com/TooonyChen/finallyshell</a></p>
+  </footer>
+</div>
+</body>
+</html>

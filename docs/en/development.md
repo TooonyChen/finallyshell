@@ -108,6 +108,23 @@ The list of frames, their titles and crops is `shots` in
 scenes (connection manager, connection editor, options, import, file
 editor) come from the existing tests of those windows.
 
+## Website
+
+The project site, <https://tooonychen.github.io/finallyshell/>, is the
+static pages in `site/`: `index.html` in English, `zh-CN/index.html` in
+Simplified Chinese and one `style.css`, with no build step and no
+scripts. It shows the screenshots of `docs/screenshots/` and
+`resources/icon.png`; `site/build.sh` copies them next to the pages. To
+look at it:
+
+```sh
+sh site/build.sh && python3 -m http.server -d _site
+```
+
+The `pages` workflow publishes it on every push to main that changes the
+pages, the screenshots or the icon. Keep the two pages saying the same
+thing, and what they say about official sources the same as the READMEs.
+
 ## Releasing
 
 A release is a version's section in `CHANGELOG.md`: write it, merge it,

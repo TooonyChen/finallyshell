@@ -74,6 +74,16 @@ go run ./tools/screenshots
 
 它把 `SHOT_DIR` 设成一个临时文件夹，运行 `internal/app` 的测试，再把选中的画面复制到 `docs/screenshots/`。测试只画窗口的内容，所以这个工具给它加上 macOS 风格的标题栏（带窗口的标题）、圆角、细边框和阴影。要哪些画面、它们的标题和裁剪写在 `tools/screenshots/main.go` 的 `shots` 里。主窗口的场景来自 `internal/app/readme_test.go` 的 `TestReadmeScreenshots`；子窗口的场景（连接管理器、连接编辑器、选项、导入、文件编辑器）来自这些窗口原有的测试。
 
+## 网站
+
+项目网站 <https://tooonychen.github.io/finallyshell/> 是 `site/` 里的静态页面：英文的 `index.html`、简体中文的 `zh-CN/index.html` 和一份 `style.css`，没有构建步骤，也没有脚本。它用的是 `docs/screenshots/` 里的截图和 `resources/icon.png`，由 `site/build.sh` 复制到页面旁边。本地查看：
+
+```sh
+sh site/build.sh && python3 -m http.server -d _site
+```
+
+每次推送到 main 且改动了页面、截图或图标时，`pages` 工作流会发布它。两个页面的内容要一致，关于官方渠道的说法要和 README 一致。
+
 ## 发布
 
 发布一个版本，就是在 `CHANGELOG.md` 里写好它的一节，合并，再把 main 推到 `production` 分支。

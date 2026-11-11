@@ -1,0 +1,45 @@
+name: pages
+
+# Publishes the project site, https://tooonychen.github.io/finallyshell/,
+# from site/ on main. The pages have no build step; the site shows the
+# README's screenshots and the app icon, copied in here so that there is
+# one copy of each in the repository.
+#
+# Needs Settings › Pages › Source set to "GitHub Actions", once.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "docs/screenshots/**"
+      - "resources/icon.png"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; a running one finishes.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: assemble
+        run: sh site/build.sh _site
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

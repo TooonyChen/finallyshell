@@ -16,6 +16,7 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
+      - "site/**"
       - ".claude/**"
   workflow_dispatch:
 

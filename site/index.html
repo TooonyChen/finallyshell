@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finallyshell: an SSH client with FinalShell's layout</title>
+<meta name="description" content="An SSH client with FinalShell's layout and vertical session tabs, written in Go. Terminal, SFTP files and server monitoring in one native window for macOS, Windows and Linux.">
+<meta property="og:title" content="Finallyshell: an SSH client with FinalShell's layout">
+<meta property="og:description" content="An SSH client with FinalShell's layout and vertical session tabs, written in Go. Terminal, SFTP files and server monitoring in one native window for macOS, Windows and Linux.">
+<meta property="og:image" content="https://tooonychen.github.io/finallyshell/screenshots/main-en.png">
+<link rel="canonical" href="https://tooonychen.github.io/finallyshell/">
+<link rel="alternate" hreflang="en" href="https://tooonychen.github.io/finallyshell/">
+<link rel="alternate" hreflang="zh-Hans" href="https://tooonychen.github.io/finallyshell/zh-CN/">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href=""><img src="icon.png" alt="">Finallyshell</a>
+    <nav class="links">
+      <a href="#download">Download</a>
+      <a href="https://github.com/TooonyChen/finallyshell/blob/main/docs/en/features.md">Docs</a>
+      <a href="https://github.com/TooonyChen/finallyshell">GitHub</a>
+      <a href="zh-CN/" lang="zh-Hans">简体中文</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <h1>An SSH client with FinalShell's layout and vertical session tabs</h1>
+      <p>Server stats at the top left, sessions under them, the terminal on the right and the remote files below it. A native app written in Go, with no Java runtime to install.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/TooonyChen/finallyshell/releases/latest">Download from GitHub Releases</a>
+        <a class="button" href="https://github.com/TooonyChen/finallyshell">Source code</a>
+      </div>
+      <div class="platforms">macOS · Windows · Linux</div>
+      <div class="shot"><img src="screenshots/main-en.png" width="2672" height="1808" alt="Finallyshell's main window: server monitor, session list, terminal and file panel"></div>
+    </div>
+
+    <div class="notice">
+      <strong>Where the real Finallyshell is</strong>
+      This page and the <a href="https://github.com/TooonyChen/finallyshell">GitHub repository</a> are the project's only official places, and <a href="https://github.com/TooonyChen/finallyshell/releases">GitHub Releases</a> is the only official download. A site that offers downloads under the Finallyshell name is not affiliated with this project.
+    </div>
+
+    <section class="feature">
+      <div class="text">
+        <h2>Remote files next to the terminal</h2>
+        <p>Browse the server over SFTP under the terminal. Drag files in to upload, follow transfers as they run, and edit remote text files in the built-in editor.</p>
+      </div>
+      <div class="shot"><img src="screenshots/transfers-en.png" width="1552" height="1128" loading="lazy" alt="The file panel with a list of transfers"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>See how the server is doing</h2>
+        <p>CPU, memory, network, disks and processes of a Linux server, shown beside the session and read over the same connection.</p>
+      </div>
+      <div class="shot"><img src="screenshots/system-info-en.png" width="1552" height="1128" loading="lazy" alt="The server monitor's system information"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>Bring your hosts with you</h2>
+        <p>Import connections and folders from FinalShell, Xshell, SecureCRT and MobaXterm, the hosts in your <code>~/.ssh/config</code>, or a server list in a CSV or Excel file.</p>
+      </div>
+      <div class="shot"><img src="screenshots/import-finalshell-en.png" width="1832" height="1288" loading="lazy" alt="Importing connections from FinalShell"></div>
+    </section>
+
+    <section class="feature">
+      <div class="text">
+        <h2>Commands one click away</h2>
+        <p>Save the commands you type often as buttons, write a few lines in the command editor and send them, to one session or to several at once.</p>
+      </div>
+      <div class="shot"><img src="screenshots/quick-commands-en.png" width="2192" height="834" loading="lazy" alt="Quick commands under the terminal"></div>
+    </section>
+
+    <div class="download" id="download">
+      <h2>Download</h2>
+      <p>Every build is on <a href="https://github.com/TooonyChen/finallyshell/releases/latest">GitHub Releases</a>. The <a href="https://github.com/TooonyChen/finallyshell#install">install notes</a> cover the first launch on macOS and Windows and what Linux needs.</p>
+      <div class="table">
+        <table>
+          <tr><th>System</th><th>File</th></tr>
+          <tr><td>macOS (Apple silicon)</td><td><code>finallyshell-&lt;version&gt;-arm64.dmg</code></td></tr>
+          <tr><td>macOS (Intel)</td><td><code>finallyshell-&lt;version&gt;-amd64.dmg</code></td></tr>
+          <tr><td>Windows (x64)</td><td><code>finallyshell-setup-&lt;version&gt;-amd64.exe</code></td></tr>
+          <tr><td>Debian, Ubuntu</td><td><code>finallyshell_&lt;version&gt;_amd64.deb, _arm64.deb</code></td></tr>
+          <tr><td>Other Linux</td><td><code>finallyshell-&lt;version&gt;-linux-amd64.tar.gz, -arm64.tar.gz</code></td></tr>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Source-available under the <a href="https://github.com/TooonyChen/finallyshell/blob/main/LICENSE">PolyForm Noncommercial and PolyForm Internal Use licenses</a>.</p>
+    <p>Copyright © 2026 Tony Chen · <a href="https://github.com/TooonyChen/finallyshell">github.com/TooonyChen/finallyshell</a></p>
+  </footer>
+</div>
+</body>
+</html>
