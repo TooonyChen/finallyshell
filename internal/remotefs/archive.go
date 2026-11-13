@@ -306,10 +306,13 @@ func ExtractArchive(ctx context.Context, r io.Reader, dir string, roots []string
 }
 
 func (x *extractor) unpack(r io.Reader) error {
-	zr, err := gzip.NewReader(bufio.NewReaderSize(r, 64<<10))
+	buf := bufio.NewReaderSize(r, 64<<10)
+	member, err := gzip.NewReader(buf)
 	if err != nil {
 		return &streamError{err}
 	}
+	member.Multistream(false)
+	zr := &archiveGzipReader{buf: buf, member: member}
 	tr := tar.NewReader(zr)
 	for {
 		hdr, err := tr.Next()
@@ -330,6 +333,42 @@ func (x *extractor) unpack(r io.Reader) error {
 		if err := x.entry(hdr, tr); err != nil {
 			return err
 		}
+	}
+}
+
+// archiveGzipReader accepts the zero padding bsdtar writes after the
+// last gzip member, while checking the trailer of every member.
+type archiveGzipReader struct {
+	buf    *bufio.Reader
+	member *gzip.Reader
+}
+
+func (r *archiveGzipReader) Read(p []byte) (int, error) {
+	for {
+		n, err := r.member.Read(p)
+		if err != io.EOF {
+			return n, err
+		}
+		if n > 0 {
+			return n, nil
+		}
+		next, err := r.buf.Peek(1)
+		if err != nil {
+			return 0, err
+		}
+		if next[0] == 0 {
+			b, err := r.buf.ReadByte()
+			for ; err == nil; b, err = r.buf.ReadByte() {
+				if b != 0 {
+					return 0, gzip.ErrHeader
+				}
+			}
+			return 0, err
+		}
+		if err := r.member.Reset(r.buf); err != nil {
+			return 0, err
+		}
+		r.member.Multistream(false)
 	}
 }
 
@@ -753,9 +792,10 @@ func dirArg(p string) string {
 }
 
 // downloadScript is what the server runs to pack names in dir.
+// COPYFILE_DISABLE keeps macOS tar from adding AppleDouble entries.
 func downloadScript(dir string, names []string) string {
 	var b strings.Builder
-	b.WriteString("cd " + dirArg(dir) + " && exec tar -czf - --")
+	b.WriteString("cd " + dirArg(dir) + " && COPYFILE_DISABLE=1 exec tar -czf - --")
 	for _, n := range names {
 		b.WriteString(" " + ShellQuote(n))
 	}
