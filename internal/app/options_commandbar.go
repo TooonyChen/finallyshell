@@ -84,7 +84,7 @@ func (a *App) commandBarKeys(goos string) []commandBarKey {
 	return []commandBarKey{
 		{label(keyCombo{0, ui.KeyEnter}), locales.CmdBarKeyEnter()},
 		{label(keyCombo{0, ui.KeyTab}), locales.CmdBarKeyTab()},
-		{label(keyCombo{0, ui.KeyUp}, historyKey), locales.CmdBarKeyHistory()},
+		{label(keyCombo{0, ui.KeyUp}, historyKey(goos)), locales.CmdBarKeyHistory()},
 		{label(keyCombo{0, ui.KeyLeft}, keyCombo{0, ui.KeyRight}), locales.CmdBarKeyFields()},
 		{label(keyCombo{0, ui.KeyEscape}), locales.CmdBarKeyEsc()},
 		{a.shortcutLabel(scFocusBar), locales.CmdBarKeyFocus()},

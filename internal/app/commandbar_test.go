@@ -379,10 +379,11 @@ func TestCommandBarHistory(t *testing.T) {
 	}
 
 	tt.Type("yum")
-	tt.Key(ui.Alt, ui.KeyH)
+	history := historyKey(runtime.GOOS)
+	tt.Key(history.Mods, history.Key)
 	tt.Frame()
 	if s.bar.popup != popupHistory {
-		t.Fatalf("Alt+H: popup %d", s.bar.popup)
+		t.Fatalf("history shortcut: popup %d", s.bar.popup)
 	}
 	v = popupDone(t, p, a, s)
 	if got := itemNames(v); !slices.Equal(got, []string{"yum update", "yum -y install epel-release"}) {
@@ -406,7 +407,7 @@ func TestCommandBarHistory(t *testing.T) {
 	if s.bar.text != "epel-release" || s.bar.popup != popupNone {
 		t.Errorf("Enter on a field: %q, popup %d", s.bar.text, s.bar.popup)
 	}
-	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Type("rpm -q ")
 	tt.Key(0, ui.KeyUp)
 	tt.Key(0, ui.KeyEnter) // nothing starts with it: sent, as without it
@@ -416,7 +417,7 @@ func TestCommandBarHistory(t *testing.T) {
 	}
 
 	// The whole command, with Enter on none.
-	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Type("sys")
 	tt.Key(0, ui.KeyUp)
 	tt.Key(0, ui.KeyEnter)
@@ -427,7 +428,7 @@ func TestCommandBarHistory(t *testing.T) {
 
 	// Without the server's history, only the host's.
 	a.changeSettings(func() { a.settings.NoServerHistory = true })
-	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Key(0, ui.KeyBackspace)
 	tt.Key(0, ui.KeyUp)
 	v = popupDone(t, p, a, s)
@@ -470,7 +471,8 @@ func TestCommandBarSwitches(t *testing.T) {
 	}
 	a.changeSettings(func() { a.settings.NoCommandBarHistory = true })
 	tt.Key(0, ui.KeyUp)
-	tt.Key(ui.Alt, ui.KeyH)
+	history := historyKey(runtime.GOOS)
+	tt.Key(history.Mods, history.Key)
 	tt.Frame()
 	if tt.HasText(locales.CmdBarHistory()) {
 		t.Error("the History button shows with the history off")
@@ -560,7 +562,7 @@ func TestCommandBarPage(t *testing.T) {
 	}
 	a.settings.Shortcuts = config.Shortcuts{}
 	tt.Frame()
-	if got := a.commandBarKeys("darwin"); got[0].keys != "↩" || got[2].keys != "↑ / ⌥H" {
+	if got := a.commandBarKeys("darwin"); got[0].keys != "↩" || got[2].keys != "↑ / ⇧⌘H" {
 		t.Errorf("macOS keys %q", got)
 	}
 	saveShot(t, tt, "options-commandbar-en.png")

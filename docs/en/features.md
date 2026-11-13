@@ -1198,7 +1198,7 @@ and lists its keys (see [Terminal › Command bar](#terminal--command-bar)).
   home folder. Folders are listed over the session's SFTP, so a server
   without SFTP shows the error in the popup, while sending and the history
   still work.
-- Up, Alt+H or the "History" button opens the history picker (the
+- Up, Alt+H (Cmd+Shift+H on macOS) or the "History" button opens the history picker (the
   button keeps the keyboard in the bar, and closes the picker when it is
   open; it is hidden while the history picker is off): the commands sent
   before that
@@ -2257,7 +2257,7 @@ is `optionAsAlt`.
 ### Terminal › Command bar
 
 Under "Show the command bar under the terminal", a "Keys" section lists
-the bar's keys: Enter, Tab, Up or Alt+H, Left and Right in the history
+the bar's keys: Enter, Tab, Up or the history shortcut, Left and Right in the history
 picker, Esc, and the Focus command bar shortcut as it is bound on
 Terminal › Shortcuts. The bar itself shows no key help.
 
@@ -2268,7 +2268,7 @@ applied at once, to every session:
 |---|---|---|
 | Show the command bar under the terminal | `noCommandBar` | Off hides the bar in every session: no popups, no history kept or read, no exec channel opened for it. The other switches can't change while it is off. |
 | Path picker | `noCommandBarPaths` | Tab on a path, or on a word that isn't the first. |
-| History picker | `noCommandBarHistory` | Up, Alt+H and the History button, which is hidden while it is off. Off also stops keeping the commands sent. |
+| History picker | `noCommandBarHistory` | Up, Alt+H (Cmd+Shift+H on macOS) and the History button, which is hidden while it is off. Off also stops keeping the commands sent. |
 | Command completion | `noCommandBarCommands` | Tab on the first word; off, Tab there opens the path picker. |
 | Read the server's shell history | `noServerHistory` | `~/.bash_history` and `~/.zsh_history` in the history picker. |
 

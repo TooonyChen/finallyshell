@@ -1,6 +1,7 @@
 package app
 
 import (
+	"runtime"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -23,7 +24,7 @@ import (
 //     path picker for the current folder. Typing filters it, Backspace in
 //     an empty filter goes up a folder, Enter or Tab takes the entry
 //     highlighted.
-//   - Up, or Alt+H: the history picker, the commands sent before that
+//   - Up, or the history shortcut: the history picker, the commands sent before that
 //     start with what is typed; Left and Right highlight one field (word)
 //     of the command highlighted, and Enter takes the field, or the whole
 //     command when none is highlighted.
@@ -113,8 +114,13 @@ func (a *App) toggleBarFocus() {
 	}
 }
 
-// historyKey is Alt+H, which opens the history picker.
-var historyKey = keyCombo{ui.Alt, ui.KeyH}
+// historyKey opens the history picker. Option+H types into the input on macOS.
+func historyKey(goos string) keyCombo {
+	if goos == "darwin" {
+		return keyCombo{ui.Super | ui.Shift, ui.KeyH}
+	}
+	return keyCombo{ui.Alt, ui.KeyH}
+}
 
 // commandBar is s's bar, under its terminal, and its popups.
 func (a *App) commandBar(c *ui.Context, s *Session) {
@@ -157,7 +163,8 @@ func (a *App) commandBar(c *ui.Context, s *Session) {
 		b.focus = false
 	}
 	b.focused = input.Focused()
-	if a.historyOn() && (button || row.Shortcut(historyKey.Mods, historyKey.Key)) {
+	history := historyKey(runtime.GOOS)
+	if a.historyOn() && (button || row.Shortcut(history.Mods, history.Key)) {
 		if b.popup == popupHistory {
 			b.popup = popupNone
 		} else {
