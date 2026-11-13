@@ -69,7 +69,7 @@ func rowCenters(t *testing.T, a *App, tt *ui.Tester) [][2]float32 {
 		centers = append(centers, [2]float32{x, y0 + float32(i-first)*pitch})
 	}
 	for _, i := range named {
-		if _, y := rowCenter(t, tt, a.sessions[i].label()); y != centers[i][1] {
+		if _, y := rowCenter(t, tt, a.sessions[i].label()); !near(y, centers[i][1]) {
 			t.Fatalf("row %d (%s) at %.1f, not %.1f", i, a.sessions[i].label(), y, centers[i][1])
 		}
 	}

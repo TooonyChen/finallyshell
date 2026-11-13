@@ -201,7 +201,8 @@ func TestConnectionManager(t *testing.T) {
 	a, p := testApp(t)
 	tt := ui.NewTester(a.View, 1280, 820)
 	p.tt = tt
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyO) // with no hosts, on a new one
+	managerKey := a.shortcut(scManager)
+	tt.Key(managerKey.Mods, managerKey.Key) // with no hosts, on a new one
 	if !a.windowOpen(WindowManager) || !a.windowOpen(WindowEditor) {
 		t.Fatalf("manager %v editor %v", a.windowOpen(WindowManager), a.windowOpen(WindowEditor))
 	}

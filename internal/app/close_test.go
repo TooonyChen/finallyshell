@@ -73,7 +73,8 @@ var closeWith = map[string]func(t *testing.T, a *App, tt *ui.Tester, row int){
 		if row != a.active {
 			t.Fatal("the shortcut closes the selected session")
 		}
-		tt.Key(ui.Ctrl|ui.Shift, ui.KeyW)
+		closeTab := a.shortcut(scCloseTab)
+		tt.Key(closeTab.Mods, closeTab.Key)
 	},
 	"button": func(t *testing.T, a *App, tt *ui.Tester, row int) {
 		// The close button shows on the selected row, and on the row

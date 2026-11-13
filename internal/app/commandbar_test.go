@@ -247,7 +247,7 @@ func TestCommandBarPaths(t *testing.T) {
 
 	// Backspace in an empty filter goes up, from etc/ssh/ to etc/, then
 	// to the home folder.
-	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Type("ls etc/ssh/")
 	tt.Key(0, ui.KeyTab)
 	popupDone(t, p, a, s)
@@ -710,7 +710,7 @@ func TestCommandBarControlNames(t *testing.T) {
 		t.Errorf("a click on a bad name: %q", s.bar.text)
 	}
 	tt.Key(0, ui.KeyEscape)
-	tt.Key(ui.Ctrl, ui.KeyA)
+	tt.Key(ui.Cmd, ui.KeyA)
 	tt.Key(0, ui.KeyBackspace)
 	tt.Key(0, ui.KeyUp)
 	v = popupDone(t, p, a, s)

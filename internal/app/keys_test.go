@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"io"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -115,12 +116,20 @@ var shellKeys = []keyCase{
 	{"Alt+.", ui.Alt, ui.KeyPeriod, "\x1b."},
 }
 
+func terminalSelectAllModifier() ui.Modifiers {
+	if runtime.GOOS == "darwin" {
+		return ui.Super
+	}
+	return ui.Ctrl | ui.Shift
+}
+
 // TestTerminalKeysReachShell presses keys on the terminal in the app's
 // window and checks the bytes that reach the shell's connection: the
 // window's shortcuts and the terminal's copy and paste keys must leave
 // the shell its control keys.
 func TestTerminalKeysReachShell(t *testing.T) {
 	a, p := testApp(t)
+	a.settings.OptionAsAlt = true
 	s := demoSession(a, "web-1", "45.56.78.90")
 	other := demoSession(a, "db-1", "10.0.0.12")
 	a.active = 0
@@ -170,18 +179,20 @@ func TestTerminalKeysReachShell(t *testing.T) {
 	// Plain Ctrl+C interrupts even with a selection: copying is
 	// Ctrl+Shift+C here (Cmd+C on macOS).
 	tt.SetClipboard("")
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyA) // select all
+	tt.Key(terminalSelectAllModifier(), ui.KeyA)
 	press(keyCase{"Ctrl+C with a selection", ui.Ctrl, ui.KeyC, "\x03"})
 	if got := tt.Clipboard(); got != "" {
 		t.Errorf("Ctrl+C copied %q", got)
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyA)
-	press(keyCase{"Ctrl+Shift+C", ui.Ctrl | ui.Shift, ui.KeyC, ""})
+	tt.Key(terminalSelectAllModifier(), ui.KeyA)
+	copyKey := a.shortcut(scCopy)
+	press(keyCase{"copy", copyKey.Mods, copyKey.Key, ""})
 	if got := tt.Clipboard(); !strings.Contains(got, "copy me") {
-		t.Errorf("Ctrl+Shift+C copied %q", got)
+		t.Errorf("copy shortcut copied %q", got)
 	}
 	tt.SetClipboard("pasted")
-	press(keyCase{"Ctrl+Shift+V", ui.Ctrl | ui.Shift, ui.KeyV, "pasted"})
+	pasteKey := a.shortcut(scPaste)
+	press(keyCase{"paste", pasteKey.Mods, pasteKey.Key, "pasted"})
 
 	// The window's shortcuts take their keys, and send nothing.
 	window := func(name string, mods ui.Modifiers, key ui.Key, ok func() bool) {
@@ -191,18 +202,23 @@ func TestTerminalKeysReachShell(t *testing.T) {
 			t.Errorf("%s: sent %q, did not do its action (active %d of %d)", name, got, a.active, len(a.sessions))
 		}
 	}
-	window("Ctrl+Shift+O", ui.Ctrl|ui.Shift, ui.KeyO, func() bool { return a.windowOpen(WindowManager) })
+	action := func(id shortcutID, ok func() bool) {
+		k := a.shortcut(id)
+		window(a.shortcutLabel(id), k.Mods, k.Key, ok)
+	}
+	action(scManager, func() bool { return a.windowOpen(WindowManager) })
 	a.closeWindow(WindowManager)
 	tt.Frame()
 	focus()
 	press(keyCase{"Ctrl+C after the manager", ui.Ctrl, ui.KeyC, "\x03"})
-	// Super is the Windows key here, which the shell never gets; Cmd+T on
-	// macOS opens a tab.
-	window("Super+T", ui.Super, ui.KeyT, func() bool { return !a.windowOpen(WindowManager) && len(a.sessions) == 2 })
+	// The Super key stays with the OS unless it is an app shortcut.
+	if runtime.GOOS != "darwin" {
+		window("Super+T", ui.Super, ui.KeyT, func() bool { return !a.windowOpen(WindowManager) && len(a.sessions) == 2 })
+	}
 
 	// The find bar takes the keyboard, and Escape gives it back to the
 	// terminal.
-	window("Ctrl+Shift+F", ui.Ctrl|ui.Shift, ui.KeyF, func() bool { return s.pane().find.open })
+	action(scFind, func() bool { return s.pane().find.open })
 	tt.Key(0, ui.KeyEscape)
 	if got := conn.sent(t, term); got != "" || s.pane().find.open {
 		t.Errorf("Escape in the find bar: sent %q, open %v", got, s.pane().find.open)
@@ -211,32 +227,34 @@ func TestTerminalKeysReachShell(t *testing.T) {
 	press(keyCase{"Ctrl+C after the find bar", ui.Ctrl, ui.KeyC, "\x03"})
 
 	// In full screen the shell keeps its keys, Escape too.
-	window("Ctrl+Shift+Enter", ui.Ctrl|ui.Shift, ui.KeyEnter, func() bool { return a.fullScreen.on })
+	action(scFullScreen, func() bool { return a.fullScreen.on })
 	focus()
 	press(keyCase{"Ctrl+C in full screen", ui.Ctrl, ui.KeyC, "\x03"})
 	press(keyCase{"Esc in full screen", 0, ui.KeyEscape, "\x1b"})
 	if !a.fullScreen.on {
 		t.Error("Escape left full screen over a shell")
 	}
-	window("Ctrl+Shift+Enter again", ui.Ctrl|ui.Shift, ui.KeyEnter, func() bool { return !a.fullScreen.on })
+	action(scFullScreen, func() bool { return !a.fullScreen.on })
 	focus()
 
-	window("Ctrl+Tab", ui.Ctrl, ui.KeyTab, func() bool { return a.current() == other })
-	window("Ctrl+Shift+Tab", ui.Ctrl|ui.Shift, ui.KeyTab, func() bool { return a.current() == s })
-	window("Alt+2", ui.Alt, ui.Key2, func() bool { return a.current() == other })
-	window("Alt+9, past the tabs", ui.Alt, ui.Key9, func() bool { return a.current() == other })
-	window("Alt+1", ui.Alt, ui.Key1, func() bool { return a.current() == s })
+	action(scNextTab, func() bool { return a.current() == other })
+	action(scPreviousTab, func() bool { return a.current() == s })
+	switchTab := a.shortcut(scSwitchTab)
+	window("switch to tab 2", switchTab.Mods, ui.Key2, func() bool { return a.current() == other })
+	window("switch past the last tab", switchTab.Mods, ui.Key9, func() bool { return a.current() == other })
+	window("switch to tab 1", switchTab.Mods, ui.Key1, func() bool { return a.current() == s })
 	focus()
 	press(keyCase{"Ctrl+C after switching back", ui.Ctrl, ui.KeyC, "\x03"})
 
-	window("Ctrl+Shift+T", ui.Ctrl|ui.Shift, ui.KeyT, func() bool {
+	action(scNewTab, func() bool {
 		return len(a.sessions) == 3 && a.current().isNewTab() && !a.windowOpen(WindowManager)
 	})
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyW) // the new tab
-	tt.Key(ui.Alt, ui.Key1)
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyW)
+	closeTab := a.shortcut(scCloseTab)
+	tt.Key(closeTab.Mods, closeTab.Key) // the new tab
+	tt.Key(switchTab.Mods, ui.Key1)
+	tt.Key(closeTab.Mods, closeTab.Key)
 	if len(a.sessions) != 1 || a.sessions[0] != other {
-		t.Errorf("Ctrl+Shift+W left %d sessions", len(a.sessions))
+		t.Errorf("close tab left %d sessions", len(a.sessions))
 	}
 }
 
@@ -245,15 +263,17 @@ func TestTerminalKeysReachShell(t *testing.T) {
 // terminals made after.
 func TestReboundKeys(t *testing.T) {
 	a, p := testApp(t)
+	a.settings.OptionAsAlt = true
 	s := demoSession(a, "web-1", "45.56.78.90")
 	other := demoSession(a, "db-1", "10.0.0.12")
 	a.active = 0
 	sc := &a.settings.Shortcuts
-	rebind(sc, "linux", scNextTab, keyCombo{ui.Ctrl | ui.Shift, ui.KeyPageDown})
-	rebind(sc, "linux", scCopy, keyCombo{ui.Ctrl | ui.Alt, ui.KeyC})
-	rebind(sc, "linux", scPaste, keyCombo{ui.Ctrl | ui.Shift, ui.KeyC}) // copy's old key
-	rebind(sc, "linux", scSwitchTab, keyCombo{ui.Ctrl | ui.Alt, ui.Key1})
-	rebind(sc, "linux", scFind, keyCombo{})
+	oldNext, oldCopy, oldPaste, oldFind := a.shortcut(scNextTab), a.shortcut(scCopy), a.shortcut(scPaste), a.shortcut(scFind)
+	rebind(sc, runtime.GOOS, scNextTab, keyCombo{ui.Ctrl | ui.Shift, ui.KeyPageDown})
+	rebind(sc, runtime.GOOS, scCopy, keyCombo{ui.Ctrl | ui.Alt, ui.KeyC})
+	rebind(sc, runtime.GOOS, scPaste, oldCopy)
+	rebind(sc, runtime.GOOS, scSwitchTab, keyCombo{ui.Ctrl | ui.Alt, ui.Key1})
+	rebind(sc, runtime.GOOS, scFind, keyCombo{})
 	conn := &keyConn{done: make(chan struct{})}
 	defer close(conn.done)
 	opts := a.terminalOptions(s.Host)
@@ -273,9 +293,9 @@ func TestReboundKeys(t *testing.T) {
 	}
 	focus()
 
-	tt.Key(ui.Ctrl, ui.KeyTab) // no longer next tab
-	if got := conn.sent(t, term); got == "" || a.current() != s {
-		t.Errorf("Ctrl+Tab: sent %q, active %d", got, a.active)
+	tt.Key(oldNext.Mods, oldNext.Key)
+	if got := conn.sent(t, term); a.current() != s || runtime.GOOS != "darwin" && got == "" {
+		t.Errorf("old next-tab key: sent %q, active %d", got, a.active)
 	}
 	tt.Key(ui.Ctrl|ui.Shift, ui.KeyPageDown)
 	if got := conn.sent(t, term); got != "" || a.current() != other {
@@ -290,25 +310,25 @@ func TestReboundKeys(t *testing.T) {
 	if got := conn.sent(t, term); got != "\x1b2" || a.current() != s {
 		t.Errorf("Alt+2: sent %q, active %d", got, a.active)
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyF) // find has no key
+	tt.Key(oldFind.Mods, oldFind.Key) // find has no key
 	if got := conn.sent(t, term); s.pane().find.open {
-		t.Errorf("Ctrl+Shift+F: sent %q, find open %v", got, s.pane().find.open)
+		t.Errorf("old find key: sent %q, find open %v", got, s.pane().find.open)
 	}
 
 	tt.SetClipboard("")
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyA) // select all
+	tt.Key(terminalSelectAllModifier(), ui.KeyA)
 	tt.Key(ui.Ctrl|ui.Alt, ui.KeyC)
 	if got := conn.sent(t, term); got != "" || !strings.Contains(tt.Clipboard(), "copy me") {
 		t.Errorf("Ctrl+Alt+C: sent %q, copied %q", got, tt.Clipboard())
 	}
 	tt.SetClipboard("pasted")
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyC)
+	tt.Key(oldCopy.Mods, oldCopy.Key)
 	if got := conn.sent(t, term); got != "pasted" {
-		t.Errorf("Ctrl+Shift+C, now paste: sent %q", got)
+		t.Errorf("old copy key, now paste: sent %q", got)
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyV) // paste's old key, now no one's
+	tt.Key(oldPaste.Mods, oldPaste.Key)
 	if got := conn.sent(t, term); got == "pasted" {
-		t.Errorf("Ctrl+Shift+V still pastes")
+		t.Errorf("old paste key still pastes")
 	}
 }
 

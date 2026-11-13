@@ -174,17 +174,19 @@ func TestShortcutFormat(t *testing.T) {
 func TestRebindPersists(t *testing.T) {
 	a, p := testApp(t)
 	sc := &a.settings.Shortcuts
+	closeTab := a.shortcut(scCloseTab)
+	defaultFind := a.shortcut(scFind)
 	a.changeSettings(func() {
-		rebind(sc, "linux", scFind, keyCombo{ui.Ctrl | ui.Shift, ui.KeyW}) // close tab's
+		rebind(sc, runtime.GOOS, scFind, closeTab)
 	})
-	if sc.Find != "Ctrl+Shift+W" || sc.CloseTab != "none" {
+	if sc.Find != closeTab.format(false) || sc.CloseTab != "none" {
 		t.Fatalf("shortcuts %+v", *sc)
 	}
-	a.changeSettings(func() { rebind(sc, "linux", scFind, actionOf(scFind).other) })
+	a.changeSettings(func() { rebind(sc, runtime.GOOS, scFind, defaultFind) })
 	if sc.Find != "" || sc.CloseTab != "none" {
 		t.Fatalf("back to the default: %+v", *sc)
 	}
-	a.changeSettings(func() { rebind(sc, "linux", scSwitchTab, keyCombo{ui.Ctrl | ui.Alt, ui.Key5}) })
+	a.changeSettings(func() { rebind(sc, runtime.GOOS, scSwitchTab, keyCombo{ui.Ctrl | ui.Alt, ui.Key5}) })
 	data, err := os.ReadFile(filepath.Join(config.Dir(), "settings.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -195,14 +197,14 @@ func TestRebindPersists(t *testing.T) {
 		t.Errorf("saved %s", got)
 	}
 	b := New(p)
-	if b.shortcut(scCloseTab) != (keyCombo{}) || b.shortcut(scSwitchTab) != (keyCombo{ui.Ctrl | ui.Alt, ui.Key1}) || b.shortcut(scFind) != actionOf(scFind).other {
+	if b.shortcut(scCloseTab) != (keyCombo{}) || b.shortcut(scSwitchTab) != (keyCombo{ui.Ctrl | ui.Alt, ui.Key1}) || b.shortcut(scFind) != defaultFind {
 		t.Errorf("read back %+v", b.settings.Shortcuts)
 	}
 	if b.shortcutLabel(scCloseTab) != locales.ShortcutNone() {
 		t.Errorf("no key shows %q", b.shortcutLabel(scCloseTab))
 	}
 	b.settings.Shortcuts.Find = "Ctrl+Nonsense"
-	if b.shortcut(scFind) != actionOf(scFind).other {
+	if b.shortcut(scFind) != defaultFind {
 		t.Errorf("an unreadable key: %v", b.shortcut(scFind))
 	}
 	// Settings without shortcuts write none.
@@ -286,15 +288,16 @@ func TestShortcutsPage(t *testing.T) {
 	}
 	saveShot(t, tt, "shortcuts-refused-en.png")
 	// One of another action's is a clash, which it gives up.
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyT)
+	newTab := a.shortcut(scNewTab)
+	tt.Key(newTab.Mods, newTab.Key)
 	if !tt.HasText(locales.ShortcutConflict(locales.NewTab())) {
-		t.Errorf("Ctrl+Shift+T: no clash; texts %q", tt.Texts())
+		t.Errorf("new-tab key: no clash; texts %q", tt.Texts())
 	}
 	saveShot(t, tt, "shortcuts-conflict-en.png")
 	if err := tt.Click(locales.Ok()); err != nil {
 		t.Fatal(err)
 	}
-	if a.shortcutsUI.capturing || a.settings.Shortcuts.Find != "Ctrl+Shift+T" || a.settings.Shortcuts.NewTab != "none" {
+	if a.shortcutsUI.capturing || a.settings.Shortcuts.Find != newTab.format(false) || a.settings.Shortcuts.NewTab != "none" {
 		t.Fatalf("after OK: %+v", a.settings.Shortcuts)
 	}
 	if config.LoadSettings().Shortcuts != a.settings.Shortcuts {
@@ -304,14 +307,14 @@ func TestShortcutsPage(t *testing.T) {
 	if err := tt.Click(locales.ShortcutChange()); err != nil {
 		t.Fatal(err)
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyA)
+	tt.Key(terminalSelectAllModifier(), ui.KeyA)
 	if !tt.HasText(locales.ShortcutTerminalKey()) {
-		t.Errorf("Ctrl+Shift+A: texts %q", tt.Texts())
+		t.Errorf("select-all key: texts %q", tt.Texts())
 	}
 	if err := tt.Click(locales.Cancel()); err != nil {
 		t.Fatal(err)
 	}
-	if a.settings.Shortcuts.Find != "Ctrl+Shift+T" {
+	if a.settings.Shortcuts.Find != newTab.format(false) {
 		t.Errorf("Cancel kept %+v", a.settings.Shortcuts)
 	}
 
@@ -327,13 +330,18 @@ func TestShortcutsPage(t *testing.T) {
 	if err := tt.Click("修改…"); err != nil {
 		t.Fatal(err)
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyO)
+	manager := a.shortcut(scManager)
+	tt.Key(manager.Mods, manager.Key)
 	if !tt.HasText("“连接管理器”正在使用这个组合键，保存后它将没有快捷键。") {
 		t.Errorf("no clash in Chinese; texts %q", tt.Texts())
 	}
 	saveShot(t, tt, "shortcuts-conflict-zh.png")
 	tt.Key(ui.Alt, ui.KeyF)
-	if !tt.HasText("Alt 加这个键在 shell 里是 Meta 键（如 Alt+B、Alt+F 按词移动）。") {
+	altWarning := locales.ShortcutShellAlt()
+	if runtime.GOOS == "darwin" {
+		altWarning = locales.ShortcutOption()
+	}
+	if !tt.HasText(altWarning) {
 		t.Errorf("no refusal in Chinese; texts %q", tt.Texts())
 	}
 	saveShot(t, tt, "shortcuts-refused-zh.png")

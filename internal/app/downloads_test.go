@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"slices"
 	"strings"
 	"sync"
@@ -113,7 +114,7 @@ func TestDownloadPopover(t *testing.T) {
 		t.Fatal("the popover did not open")
 	}
 	texts := strings.Join(tt.Texts(), "\n")
-	if !strings.Contains(texts, "incoming") || !tt.HasText(locales.ChangeFolder()) || !tt.HasText(showFolderLabel("linux")) {
+	if !strings.Contains(texts, "incoming") || !tt.HasText(locales.ChangeFolder()) || !tt.HasText(showFolderLabel(runtime.GOOS)) {
 		t.Errorf("no folder line; texts %q", tt.Texts())
 	}
 	// Newest first: the failed one above the done one.
@@ -139,7 +140,7 @@ func TestDownloadPopover(t *testing.T) {
 	p.openErr = nil
 
 	// Show in folder opens the download folder.
-	if err := tt.Click(showFolderLabel("linux")); err != nil {
+	if err := tt.Click(showFolderLabel(runtime.GOOS)); err != nil {
 		t.Fatal(err)
 	}
 	if p.openedPaths[len(p.openedPaths)-1] != folder {
@@ -173,7 +174,7 @@ func TestDownloadPopover(t *testing.T) {
 
 	p.SetLocale("zh-Hans")
 	tt.Frame()
-	for _, want := range []string{"更改…", "在文件夹中显示", "打开", "清除已完成", "已完成"} {
+	for _, want := range []string{"更改…", showFolderLabel(runtime.GOOS), "打开", "清除已完成", "已完成"} {
 		if !tt.HasText(want) {
 			t.Errorf("no %q in Chinese; texts %q", want, tt.Texts())
 		}

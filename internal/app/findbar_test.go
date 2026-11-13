@@ -55,9 +55,10 @@ func findTerm(t *testing.T) (*App, *fakePlatform, *Session, *keyConn, *ui.Tester
 func TestFindBar(t *testing.T) {
 	a, p, s, conn, tt := findTerm(t)
 	term := s.term()
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyF)
+	find := a.shortcut(scFind)
+	tt.Key(find.Mods, find.Key)
 	if !s.pane().find.open || conn.sent(t, term) != "" {
-		t.Fatal("Ctrl+Shift+F opened no find bar")
+		t.Fatal("the find shortcut opened no find bar")
 	}
 	tt.Type("needle")
 	status := func() terminal.SearchStatus {
@@ -122,7 +123,7 @@ func TestFindBar(t *testing.T) {
 
 	// Opening it again searches for the same text, which the key selects
 	// to type over.
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyF)
+	tt.Key(find.Mods, find.Key)
 	tt.Frame()
 	if st := status(); st.Total != 4 {
 		t.Errorf("again: %+v", st)
@@ -148,7 +149,8 @@ func TestFullScreen(t *testing.T) {
 			t.Fatalf("no %q before full screen", x)
 		}
 	}
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
+	fullScreen := a.shortcut(scFullScreen)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
 	if !a.fullScreen.on || !p.full {
 		t.Fatalf("full screen %v, window %v", a.fullScreen.on, p.full)
 	}
@@ -164,7 +166,7 @@ func TestFullScreen(t *testing.T) {
 		t.Errorf("Escape over the shell: sent %q, full screen %v", got, a.fullScreen.on)
 	}
 	saveShot(t, tt, "fullscreen-en.png")
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
 	if a.fullScreen.on || p.full {
 		t.Fatalf("still full screen %v, window %v", a.fullScreen.on, p.full)
 	}
@@ -177,7 +179,7 @@ func TestFullScreen(t *testing.T) {
 	// On a new tab, Escape leaves.
 	p.SetLocale("zh-Hans")
 	a.NewTab()
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
 	if !a.fullScreen.on || tt.HasText("会话 (2)") || !tt.HasText("快速连接") {
 		t.Fatalf("full screen on a new tab; texts %q", tt.Texts())
 	}
@@ -190,13 +192,13 @@ func TestFullScreen(t *testing.T) {
 	// A window in the system's full screen already stays there; one the
 	// app put there that leaves by the system's means ends the app's.
 	p.full = true
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
 	if !p.full || a.fullScreen.on {
 		t.Errorf("the user's full screen: window %v, app %v", p.full, a.fullScreen.on)
 	}
 	p.full = false
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyEnter)
+	tt.Key(fullScreen.Mods, fullScreen.Key)
 	p.full = false // the green button
 	a.WindowLeftFullScreen()
 	tt.Frame()

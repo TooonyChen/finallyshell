@@ -350,7 +350,7 @@ func TestPanelTabsWheel(t *testing.T) {
 	tt.Wheel(files.X+files.W/2, y, 0, 120)
 	tt.Advance(time.Second)
 	tt.Frame()
-	if r := last(); r.W != full || r.X+r.W > hide.X {
+	if r := last(); !near(r.W, full) || r.X+r.W > hide.X {
 		t.Errorf("Commands at %+v after the wheel (%v wide), the buttons from %v", r, full, hide.X)
 	}
 	if h, _ := tt.Find(locales.HidePanel()); h != hide {

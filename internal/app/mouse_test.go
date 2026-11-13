@@ -74,11 +74,19 @@ func openMousePage(t *testing.T, a *App, p *fakePlatform) *ui.Tester {
 // The Mouse page shows its options in both languages, and each one it
 // changes is saved.
 func TestMousePage(t *testing.T) {
+	key, chinese := "Ctrl", "Ctrl+单击打开链接"
+	wheel := locales.OptionWheelLines()
+	switch runtime.GOOS {
+	case "darwin":
+		key, chinese = "Cmd", "Cmd+单击打开链接"
+	case "windows":
+		wheel = locales.OptionWheelLinesWindows()
+	}
 	a, p := testApp(t)
 	tt := openMousePage(t, a, p)
 	for _, s := range []string{
 		locales.MouseSelection(), locales.OptionCopyOnSelect(), locales.MouseRightClick(), locales.RightClickMenu(),
-		locales.MouseLinks(), locales.OptionOpenLinks("Ctrl"), locales.MouseScrolling(), locales.OptionWheelLines(),
+		locales.MouseLinks(), locales.OptionOpenLinks(key), locales.MouseScrolling(), wheel,
 	} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q; texts %q", s, tt.Texts())
@@ -94,7 +102,7 @@ func TestMousePage(t *testing.T) {
 
 	p.SetLocale("zh-Hans")
 	tt.Frame()
-	for _, s := range []string{"鼠标", "选择", "选中即复制", "右键", "显示右键菜单", "链接", "Ctrl+单击打开链接", "滚动", "鼠标滚轮每格滚动行数", "已打开的会话在重新连接后生效。"} {
+	for _, s := range []string{"鼠标", "选择", "选中即复制", "右键", "显示右键菜单", "链接", chinese, "滚动", "鼠标滚轮每格滚动行数", "已打开的会话在重新连接后生效。"} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q in Chinese; texts %q", s, tt.Texts())
 		}
@@ -110,7 +118,7 @@ func TestMousePage(t *testing.T) {
 	if err := tt.Click(locales.RightClickCopyOrPaste()); err != nil {
 		t.Fatal(err)
 	}
-	for _, label := range []string{locales.OptionCopyOnSelect(), locales.OptionOpenLinks("Ctrl")} {
+	for _, label := range []string{locales.OptionCopyOnSelect(), locales.OptionOpenLinks(key)} {
 		if err := tt.Click(label); err != nil {
 			t.Fatal(err)
 		}
@@ -147,7 +155,7 @@ func TestMousePage(t *testing.T) {
 	if err := tt.Click(locales.RightClickMenu()); err != nil {
 		t.Fatal(err)
 	}
-	for _, label := range []string{locales.OptionCopyOnSelect(), locales.OptionOpenLinks("Ctrl")} {
+	for _, label := range []string{locales.OptionCopyOnSelect(), locales.OptionOpenLinks(key)} {
 		if err := tt.Click(label); err != nil {
 			t.Fatal(err)
 		}

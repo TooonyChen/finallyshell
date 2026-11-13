@@ -153,14 +153,14 @@ func TestFileEditorOpenEditSave(t *testing.T) {
 		t.Errorf("text %q", got)
 	}
 
-	// Edit and save with Ctrl+S: the line endings and the mode stay.
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	// Editing and saving preserves line endings and mode.
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("echo done\n")
 	w.Frame()
 	if !sh.modified() || a.unsavedFiles() != 1 {
 		t.Fatal("typing did not modify it")
 	}
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	f.saved(t, sh)
 	if sh.saveErr != nil {
 		t.Fatal(sh.saveErr)
@@ -206,7 +206,7 @@ func TestFileEditorOpenEditSave(t *testing.T) {
 
 	// A change shows as a dot on its tab, until it is saved.
 	w.Frame()
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("  rotate: daily\n")
 	w.Frame()
 	if !yml.modified() || yml.code.Buffer.LineEnding() != "\n" {
@@ -248,7 +248,7 @@ func TestFileEditorConflict(t *testing.T) {
 	w.Type("# mine\n")
 	other := appYAML + "# theirs\n"
 	os.WriteFile(filepath.Join(f.dir, "app.yaml"), []byte(other), 0o640)
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	f.saved(t, tab)
 	w.Frame()
 	if !tab.conflict || !w.HasText(locales.EditorConflict("app.yaml")) || f.read(t, "app.yaml") != other {
@@ -273,7 +273,7 @@ func TestFileEditorConflict(t *testing.T) {
 	// the edit back.
 	w.Type("# mine again\n")
 	os.WriteFile(filepath.Join(f.dir, "app.yaml"), []byte(other), 0o640)
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	f.saved(t, tab)
 	w.Frame()
 	if err := w.Click(locales.EditorReload()); err != nil {
@@ -388,7 +388,7 @@ func TestFileEditorEncodings(t *testing.T) {
 	p.SetLocale("")
 
 	// Saved back in GB18030, with the line endings it had.
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("端口=22\n")
 	a.saveTab(tab, false)
 	f.saved(t, tab)
@@ -432,9 +432,9 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 	yml := f.tab(t, "app.yaml")
 	w := f.window(t)
 
-	// Closing an unchanged tab asks nothing; Ctrl+W closes the tab, not
+	// Closing an unchanged tab asks nothing; the shortcut closes the tab, not
 	// the window.
-	w.Key(ui.Ctrl, ui.KeyW)
+	w.Key(ui.Cmd, ui.KeyW)
 	if len(a.fe.tabs) != 1 || a.fe.current() != yml || !a.windowOpen(WindowFileEditor) {
 		t.Fatalf("tabs %d", len(a.fe.tabs))
 	}
@@ -444,7 +444,7 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 
 	// A changed one asks; Cancel keeps it, Don't Save closes it.
 	w.Type("x")
-	w.Key(ui.Ctrl, ui.KeyW)
+	w.Key(ui.Cmd, ui.KeyW)
 	w.Frame()
 	if a.fe.askTab != sh || !w.HasText(locales.EditorUnsavedTitle("deploy.sh")) {
 		t.Fatalf("no question; texts %q", w.Texts())
@@ -454,7 +454,7 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 	if len(a.fe.tabs) != 2 || a.fe.askTab != nil {
 		t.Fatal("Cancel closed it")
 	}
-	w.Key(ui.Ctrl, ui.KeyW)
+	w.Key(ui.Cmd, ui.KeyW)
 	w.Frame()
 	w.Click(locales.DontSave())
 	if len(a.fe.tabs) != 1 || f.read(t, "deploy.sh") != deployScript {
@@ -494,7 +494,7 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 	a.openRemoteFile(f.s, filepath.Join(f.dir, "app.yaml"))
 	tab := f.tab(t, "app.yaml")
 	w = f.window(t)
-	w.Key(ui.Ctrl, ui.KeyF)
+	w.Key(ui.Cmd, ui.KeyF)
 	w.Frame()
 	w.Type("port")
 	w.Frame()
@@ -536,14 +536,14 @@ func TestFileEditorDisconnect(t *testing.T) {
 		t.Fatalf("no note; texts %q", w.Texts())
 	}
 	saveShot(t, w, "editor-disconnected.png")
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	if tab.saving || !tab.modified() {
 		t.Fatal("saved while disconnected")
 	}
 
 	a.reconnect(f.s)
 	p.until(t, "the new SFTP client", func() bool { return f.s.status == statusConnected && f.s.sftp != nil })
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	f.saved(t, tab)
 	if got := f.read(t, "app.yaml"); got != "# offline\n"+appYAML || tab.saveErr != nil {
 		t.Errorf("saved %q, err %v", got, tab.saveErr)
@@ -568,8 +568,9 @@ func TestFileEditorDisconnect(t *testing.T) {
 // On macOS Cmd+S saves and Cmd+W closes the tab, not the window; hiding
 // the main window to the tray keeps an editor with changes open.
 func TestFileEditorMacKeysAndTray(t *testing.T) {
+	wasMacOS := macOS
 	macOS = true
-	t.Cleanup(func() { macOS = false })
+	t.Cleanup(func() { macOS = wasMacOS })
 	f := newEditorFixture(t)
 	a, p := f.a, f.p
 	a.openRemoteFile(f.s, filepath.Join(f.dir, "app.yaml"))
@@ -658,9 +659,9 @@ func TestSSHFileEditor(t *testing.T) {
 	f := &editorFixture{a: a, p: p, s: s}
 	tab := f.tab(t, name+".sh")
 	w := f.window(t)
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("echo live\n")
-	w.Key(ui.Ctrl, ui.KeyS)
+	w.Key(ui.Cmd, ui.KeyS)
 	f.saved(t, tab)
 	if got := get(script); got != deployScript+"echo live\r\n" || tab.saveErr != nil {
 		t.Fatalf("saved %q, err %v", got, tab.saveErr)
@@ -690,7 +691,7 @@ func TestSSHFileEditor(t *testing.T) {
 	a.openRemoteFile(s, link)
 	lt := f.tab(t, name+"-link.conf")
 	w.Frame()
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("b=2\n")
 	a.saveTab(lt, false)
 	f.saved(t, lt)
@@ -703,7 +704,7 @@ func TestSSHFileEditor(t *testing.T) {
 	gt := f.tab(t, name+".txt")
 	a.setEncoding(gt, encGB18030)
 	w.Frame()
-	w.Key(ui.Ctrl, ui.KeyEnd)
+	w.Key(ui.Cmd, ui.KeyEnd)
 	w.Type("端口=22\n")
 	a.saveTab(gt, false)
 	f.saved(t, gt)
