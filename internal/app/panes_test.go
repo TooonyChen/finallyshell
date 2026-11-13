@@ -346,7 +346,9 @@ func TestClosePanes(t *testing.T) {
 	if s.split() || barPlaceholder(tt) != "" {
 		t.Error("one pane still shown split")
 	}
+	p.answer = true
 	press(tt, a, scCloseTab)
+	p.until(t, "the confirmed close", func() bool { return !a.askingCloseSession })
 	if slices.Contains(a.sessions, s) {
 		t.Fatal("the last pane's close key left the session")
 	}

@@ -163,6 +163,11 @@ func (a *App) generalPage(c *ui.Context) {
 			a.changeSettings(func() { a.settings.NoConfirmClose = !confirm })
 		}
 		widgets.Muted(c, locales.OptionConfirmCloseNote()).FontSize(12).PaddingStart(18)
+		confirmSession := !a.settings.NoConfirmCloseSession
+		if ui.Checkbox(c, &confirmSession, locales.OptionConfirmCloseSession()).Changed() {
+			a.changeSettings(func() { a.settings.NoConfirmCloseSession = !confirmSession })
+		}
+		widgets.Muted(c, locales.OptionConfirmCloseSessionNote()).FontSize(12).PaddingStart(18)
 	})
 
 	ui.Column(c).Gap(8).Padding(8, 0, 0, 0).Children(func() {

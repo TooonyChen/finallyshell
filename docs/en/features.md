@@ -2071,6 +2071,9 @@ file icon theme page under [File icon themes](#file-icon-themes).
   menu, Cmd+Q on macOS) asks once first, with the system's message box.
   With the tray option also on, the close button hides the window without
   asking, and only "Quit" asks.
+- Confirm before closing SSH sessions (on by default): closing a connected
+  or connecting SSH session asks for confirmation. Cancel keeps the session
+  open. This has its own setting under General.
 - Connections: "Send a keepalive every N seconds", 30 by default, 0 to
   turn keepalives off, up to 3600. See
   [Sessions and tabs](#sessions-and-tabs). Saved as `keepAliveSeconds`.

@@ -101,6 +101,8 @@ type Settings struct {
 	// NoConfirmClose quits without asking while sessions are open; by
 	// default closing the window, or quitting, asks first.
 	NoConfirmClose bool `json:"noConfirmClose,omitempty"`
+	// NoConfirmCloseSession closes a connected or connecting SSH session without asking.
+	NoConfirmCloseSession bool `json:"noConfirmCloseSession,omitempty"`
 	// KeepAliveSeconds is the seconds between the keepalives sent on
 	// each connection: 0, as a file without it reads, for
 	// DefaultKeepAliveSeconds, and KeepAliveOff (any negative number)

@@ -15,6 +15,34 @@ type Confirmation struct {
 	OK, Cancel string
 }
 
+func (a *App) requestCloseSession(s *Session) {
+	if a.settings.NoConfirmCloseSession || s.Host == nil || s.isLocal() ||
+		(s.status != statusConnected && s.status != statusConnecting) {
+		a.closeSession(s)
+		return
+	}
+	if a.askingCloseSession {
+		return
+	}
+	a.askingCloseSession = true
+	q := Confirmation{
+		Title:   locales.AppTitle(),
+		Message: locales.ConfirmCloseSessionTitle(s.label()),
+		Detail:  locales.ConfirmCloseSessionNote(),
+		OK:      locales.CloseSession(),
+		Cancel:  locales.Cancel(),
+	}
+	go func() {
+		yes := a.plat.Confirm(q)
+		a.post(func() {
+			a.askingCloseSession = false
+			if yes {
+				a.closeSession(s)
+			}
+		})
+	}()
+}
+
 // The main window's close button and quitting, as the General options say:
 //
 //	                    close button                 Quit (tray menu, Cmd+Q, ...)

@@ -124,6 +124,7 @@ func TestTerminalKeysReachShell(t *testing.T) {
 	s := demoSession(a, "web-1", "45.56.78.90")
 	other := demoSession(a, "db-1", "10.0.0.12")
 	a.active = 0
+	a.settings.NoConfirmCloseSession = true
 	conn := &keyConn{done: make(chan struct{})}
 	defer close(conn.done)
 	opts := a.terminalOptions(s.Host)

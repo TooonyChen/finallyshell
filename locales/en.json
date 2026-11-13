@@ -555,6 +555,8 @@
   "optionMinimizeToTray": "Minimize to tray when closed",
   "optionConfirmClose": "Confirm before closing the window",
   "optionConfirmCloseNote": "Asks only while sessions are connected or connecting.",
+  "optionConfirmCloseSession": "Confirm before closing SSH sessions",
+  "optionConfirmCloseSessionNote": "Asks when the SSH session is connected or connecting.",
   "optionsConnections": "Connections",
   "optionKeepAliveBefore": "Send a keepalive every",
   "optionKeepAliveAfter": "seconds",
@@ -624,6 +626,8 @@
   "terminalSessionTabs": "Session tabs",
   "optionAgentIcons": "Show the coding agent running in each tab",
   "optionAgentIconsNote": "While Claude Code, Codex, Gemini CLI or another coding agent runs in a session's shell, its logo shows next to the tab's name. The app reads the server's /proc over an exec channel to tell, so it needs a Linux server whose host has the exec channel on.",
+  "confirmCloseSessionTitle": "Close SSH session ‘{name}’?",
+  "confirmCloseSessionNote": "This will end the SSH connection.",
   "confirmQuitTitle": "Quit Finallyshell?",
   "confirmQuitBody": "{count, plural, one {# session is open. Quitting disconnects it.} other {# sessions are open. Quitting disconnects them.}}",
   "@confirmQuitBody": {

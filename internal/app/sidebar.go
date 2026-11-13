@@ -237,7 +237,7 @@ func (a *App) sessionPanel(c *ui.Context) {
 		})
 		a.renameKey(c)
 		if closing != nil {
-			a.closeSession(closing)
+			a.requestCloseSession(closing)
 		}
 	})
 }

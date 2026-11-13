@@ -4126,6 +4126,26 @@ func (msgs Messages) OptionConfirmCloseNote() string {
 	return Catalog.Format(msgs.locale, "optionConfirmCloseNote", nil)
 }
 
+// OptionConfirmCloseSession says "Confirm before closing SSH sessions"
+// in the language the app shows.
+func OptionConfirmCloseSession() string { return In(i18n.Locale()).OptionConfirmCloseSession() }
+
+// OptionConfirmCloseSession says "Confirm before closing SSH sessions"
+// in the language of msgs.
+func (msgs Messages) OptionConfirmCloseSession() string {
+	return Catalog.Format(msgs.locale, "optionConfirmCloseSession", nil)
+}
+
+// OptionConfirmCloseSessionNote says "Asks when the SSH session is connected or connecting."
+// in the language the app shows.
+func OptionConfirmCloseSessionNote() string { return In(i18n.Locale()).OptionConfirmCloseSessionNote() }
+
+// OptionConfirmCloseSessionNote says "Asks when the SSH session is connected or connecting."
+// in the language of msgs.
+func (msgs Messages) OptionConfirmCloseSessionNote() string {
+	return Catalog.Format(msgs.locale, "optionConfirmCloseSessionNote", nil)
+}
+
 // OptionsConnections says "Connections"
 // in the language the app shows.
 func OptionsConnections() string { return In(i18n.Locale()).OptionsConnections() }
@@ -4744,6 +4764,28 @@ func OptionAgentIconsNote() string { return In(i18n.Locale()).OptionAgentIconsNo
 // in the language of msgs.
 func (msgs Messages) OptionAgentIconsNote() string {
 	return Catalog.Format(msgs.locale, "optionAgentIconsNote", nil)
+}
+
+// ConfirmCloseSessionTitle says "Close SSH session ‘{name}’?"
+// in the language the app shows.
+func ConfirmCloseSessionTitle(name string) string {
+	return In(i18n.Locale()).ConfirmCloseSessionTitle(name)
+}
+
+// ConfirmCloseSessionTitle says "Close SSH session ‘{name}’?"
+// in the language of msgs.
+func (msgs Messages) ConfirmCloseSessionTitle(name string) string {
+	return Catalog.Format(msgs.locale, "confirmCloseSessionTitle", map[string]any{"name": name})
+}
+
+// ConfirmCloseSessionNote says "This will end the SSH connection."
+// in the language the app shows.
+func ConfirmCloseSessionNote() string { return In(i18n.Locale()).ConfirmCloseSessionNote() }
+
+// ConfirmCloseSessionNote says "This will end the SSH connection."
+// in the language of msgs.
+func (msgs Messages) ConfirmCloseSessionNote() string {
+	return Catalog.Format(msgs.locale, "confirmCloseSessionNote", nil)
 }
 
 // ConfirmQuitTitle says "Quit Finallyshell?"

@@ -415,6 +415,7 @@ func hostsOf(rows []*Session) []*config.Host {
 
 func TestNewTabRows(t *testing.T) {
 	a, _, tt, _ := startApp(t)
+	a.settings.NoConfirmCloseSession = true
 	s := demoSession(a, "web-1", "203.0.113.10") // a session after the new tab
 
 	// The "+" button, after the options and local terminal buttons, adds
@@ -432,13 +433,14 @@ func TestNewTabRows(t *testing.T) {
 		t.Errorf("new tabs counted as sessions; texts %q", tt.Texts())
 	}
 
-	// Ctrl+Tab goes through the new tabs and the session; the side panel
+	// The next-tab shortcut goes through the new tabs and the session; the side panel
 	// shows the skeleton on a new tab.
+	nextTab := a.shortcut(scNextTab)
 	for _, want := range []*Session{a.sessions[0], s, a.sessions[2]} {
-		tt.Key(ui.Ctrl, ui.KeyTab)
+		tt.Key(nextTab.Mods, nextTab.Key)
 		tt.Frame()
 		if a.current() != want {
-			t.Fatalf("Ctrl+Tab selected row %d", a.active)
+			t.Fatalf("next tab selected row %d", a.active)
 		}
 		if ip := tt.HasText("IP -"); ip != want.isNewTab() {
 			t.Errorf("row %d: skeleton shown %v", a.active, ip)
@@ -465,11 +467,12 @@ func TestNewTabRows(t *testing.T) {
 	}
 	saveShot(t, tt, "start-rows-en.png")
 
-	// Ctrl+Shift+W closes new tabs as it closes sessions; with none left
+	// The close-tab shortcut closes new tabs as it closes sessions; with none left
 	// the start page still shows, and connecting there opens a tab.
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyW)
+	closeTab := a.shortcut(scCloseTab)
+	tt.Key(closeTab.Mods, closeTab.Key)
 	a.active = 0
-	tt.Key(ui.Ctrl|ui.Shift, ui.KeyW)
+	tt.Key(closeTab.Mods, closeTab.Key)
 	tt.Frame()
 	if len(a.sessions) != 0 {
 		t.Fatalf("%d rows left", len(a.sessions))

@@ -56,7 +56,7 @@ func TestOptionsPages(t *testing.T) {
 			t.Errorf("no entry %q; texts %q", pg.title(), tt.Texts())
 		}
 	}
-	for _, s := range []string{locales.OptionAutoSelectTab(), locales.OptionMinimizeToTray(), locales.OptionConfirmClose(), locales.FollowSystem()} {
+	for _, s := range []string{locales.OptionAutoSelectTab(), locales.OptionMinimizeToTray(), locales.OptionConfirmClose(), locales.OptionConfirmCloseSession(), locales.FollowSystem()} {
 		if !tt.HasText(s) {
 			t.Errorf("the General page has no %q", s)
 		}
@@ -97,7 +97,7 @@ func TestOptionsPages(t *testing.T) {
 	if err := tt.Click("常规"); err != nil {
 		t.Fatal(err)
 	}
-	for _, s := range []string{"自动选中标签", "关闭时最小化到托盘", "关闭窗口前确认", "界面语言"} {
+	for _, s := range []string{"自动选中标签", "关闭时最小化到托盘", "关闭窗口前确认", "关闭 SSH 会话前确认", "界面语言"} {
 		if !tt.HasText(s) {
 			t.Errorf("no %q in Chinese; texts %q", s, tt.Texts())
 		}
@@ -116,12 +116,13 @@ func TestGeneralOptionsPersist(t *testing.T) {
 	}
 	a.openOptions()
 	tt := p.show(t, WindowOptions)
-	for _, label := range []string{locales.OptionAutoSelectTab(), locales.OptionMinimizeToTray(), locales.OptionConfirmClose()} {
+	labels := []string{locales.OptionAutoSelectTab(), locales.OptionMinimizeToTray(), locales.OptionConfirmClose(), locales.OptionConfirmCloseSession()}
+	for _, label := range labels {
 		if err := tt.Click(label); err != nil {
 			t.Fatal(err)
 		}
 	}
-	want := config.Settings{NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true}
+	want := config.Settings{NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true, NoConfirmCloseSession: true}
 	if a.settings != want || config.LoadSettings() != want {
 		t.Fatalf("settings %+v, saved %+v", a.settings, config.LoadSettings())
 	}
@@ -131,7 +132,7 @@ func TestGeneralOptionsPersist(t *testing.T) {
 	if b.settings != want {
 		t.Fatalf("read back %+v", b.settings)
 	}
-	for _, label := range []string{locales.OptionAutoSelectTab(), locales.OptionMinimizeToTray(), locales.OptionConfirmClose()} {
+	for _, label := range labels {
 		if err := tt.Click(label); err != nil {
 			t.Fatal(err)
 		}
