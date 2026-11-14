@@ -20,12 +20,14 @@ func (a *App) monitorPanel(c *ui.Context) {
 	if s != nil && s.isNewTab() {
 		s = nil
 	}
-	ui.Scroll(c).Fill().ContextMenu(a.monitorMenu).Children(func() {
-		if s.isLocal() {
-			localMonitor(c)
-			return
-		}
-		a.serverView(c, s)
+	ui.Column(c).Fill().Padding(c.TitleBar().Height, 0, 0, 0).Children(func() {
+		ui.Scroll(c).Fill().ContextMenu(a.monitorMenu).Children(func() {
+			if s.isLocal() {
+				localMonitor(c)
+				return
+			}
+			a.serverView(c, s)
+		})
 	})
 }
 
