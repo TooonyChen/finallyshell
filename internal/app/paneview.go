@@ -219,7 +219,7 @@ func (a *App) closeCurrent() {
 	case s.split() && !s.isPanelTab():
 		a.closePane(s, s.pane())
 	default:
-		a.closeSession(s)
+		a.requestCloseSession(s)
 	}
 }
 

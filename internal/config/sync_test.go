@@ -23,7 +23,7 @@ func TestSettingsSyncDecided(t *testing.T) {
 func TestSyncedSettingsRoundTrip(t *testing.T) {
 	s := Settings{
 		Language: "zh-Hans", TermFontSize: 15, TermTheme: "Nord", SidebarWidth: 300,
-		DownloadDir: "/home/me/dl", TermBackground: "bg.png",
+		ConfirmCloseSession: true, DownloadDir: "/home/me/dl", TermBackground: "bg.png",
 		Sync: SyncSettings{Provider: SyncGist},
 	}
 	m := SyncedSettings(s)
@@ -32,14 +32,14 @@ func TestSyncedSettingsRoundTrip(t *testing.T) {
 			t.Errorf("%s is synced", k)
 		}
 	}
-	if string(m["termTheme"]) != `"Nord"` || string(m["termFontSize"]) != "15" {
+	if string(m["termTheme"]) != `"Nord"` || string(m["termFontSize"]) != "15" || string(m["confirmCloseSession"]) != "true" {
 		t.Errorf("synced = %s", m)
 	}
 
-	// Another device's: the theme changed, the font size reset.
+	// Another device changed the theme and reset the font size and close confirmation.
 	other := map[string]json.RawMessage{"language": json.RawMessage(`"zh-Hans"`), "termTheme": json.RawMessage(`"Dracula"`)}
 	got := WithSyncedSettings(s, other)
-	if got.TermTheme != "Dracula" || got.TermFontSize != 0 {
+	if got.TermTheme != "Dracula" || got.TermFontSize != 0 || got.ConfirmCloseSession {
 		t.Errorf("synced settings not applied: %+v", got)
 	}
 	if got.SidebarWidth != 300 || got.DownloadDir != "/home/me/dl" || got.TermBackground != "bg.png" || got.Sync.Provider != SyncGist {

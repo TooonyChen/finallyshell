@@ -229,6 +229,7 @@ type App struct {
 	agentOptionCheck agentCheck
 	// Quitting: asking whether to, or told to go ahead.
 	askingQuit, quitApproved bool
+	askingCloseSession       bool
 
 	// The question before replacing files.
 	replace *replaceQuestion

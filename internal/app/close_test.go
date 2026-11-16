@@ -149,3 +149,32 @@ func TestCloseSessionKeepsOneSelected(t *testing.T) {
 		}
 	}
 }
+
+func TestConfirmCloseSSHSession(t *testing.T) {
+	for _, how := range []string{"button", "menu", "shortcut"} {
+		t.Run(how, func(t *testing.T) {
+			a, p := testApp(t)
+			s := coloredSession(t, a, "web", 0)
+			if how == "button" {
+				s.status = statusConnecting
+			}
+			a.active = 0
+			a.settings.NoConfirmClose = true
+			a.settings.ConfirmCloseSession = true
+			tt := ui.NewTester(a.View, 1280, 820)
+			p.tt = tt
+			closeWith[how](t, a, tt, 0)
+			p.until(t, "the canceled close", func() bool { return !a.askingCloseSession })
+			if q := p.questions(); len(q) != 1 || q[0].Message != locales.ConfirmCloseSessionTitle(s.label()) ||
+				q[0].Detail != locales.ConfirmCloseSessionNote() || a.current() != s || s.term() == nil {
+				t.Fatalf("cancel left %d sessions with questions %+v", len(a.sessions), q)
+			}
+			p.answer = true
+			closeWith[how](t, a, tt, 0)
+			p.until(t, "the confirmed close", func() bool { return !a.askingCloseSession })
+			if len(a.sessions) != 0 || len(p.questions()) != 2 {
+				t.Fatal("confirming did not close the session")
+			}
+		})
+	}
+}
