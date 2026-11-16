@@ -280,12 +280,13 @@ func main() {
 		a := app.New(plat)
 		a.NewTab() // it starts on the start page
 		plat.win = mygo.NewWindow(mygo.WindowOptions{
-			Title:     locales.AppTitle(),
-			Width:     1280,
-			Height:    820,
-			MinWidth:  900,
-			MinHeight: 560,
-			Content:   ui.View(a.View),
+			Title:         locales.AppTitle(),
+			Width:         1280,
+			Height:        820,
+			MinWidth:      900,
+			MinHeight:     560,
+			TitleBarStyle: mygo.TitleBarHidden,
+			Content:       ui.View(a.View),
 		})
 		plat.win.OnLeaveFullScreen(a.WindowLeftFullScreen)
 		// The close button may hide the window to the tray, or ask first;
