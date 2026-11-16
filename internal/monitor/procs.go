@@ -40,7 +40,11 @@ const procMark = "---FINALLYSHELL:"
 
 // procsScript lists the processes in one round trip. It is POSIX sh and
 // runs with BusyBox's tools: BusyBox's ps has no -e, pcpu or widths, so
-// the second ps is the one it runs. The kernel's name and the CPU time
+// the last ps is the one it runs. Old procps (3.3.10, CentOS 7) rejects
+// the :32 width override, so the middle ps, the same columns without the
+// width, is what it runs: without -e, ps on an exec channel with no
+// controlling terminal lists only the invoker's own processes, which
+// parse drops. The kernel's name and the CPU time
 // come from /proc/<pid>/stat, which every process may read, and the
 // executables from one ls of the /proc/<pid>/exe links rather than a
 // readlink for each: those of other users' processes fail without root,
@@ -51,7 +55,7 @@ m() { echo "` + procMark + `$1---"; }
 m self; echo $$
 m uname; uname -s
 m cpu; grep '^cpu' /proc/stat 2>/dev/null
-m ps; ps -eo pid=,ppid=,user:32=,rss=,pcpu=,args= 2>/dev/null || ps -o pid=,ppid=,user=,rss=,args= 2>/dev/null
+m ps; ps -eo pid=,ppid=,user:32=,rss=,pcpu=,args= 2>/dev/null || ps -eo pid=,ppid=,user=,rss=,pcpu=,args= 2>/dev/null || ps -o pid=,ppid=,user=,rss=,args= 2>/dev/null
 m stat; cat /proc/[0-9]*/stat 2>/dev/null
 m exe; ls -l /proc/[0-9]*/exe 2>/dev/null
 m end
