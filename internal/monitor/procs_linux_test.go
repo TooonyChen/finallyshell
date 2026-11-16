@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"syscall"
@@ -115,5 +116,46 @@ func TestSignalScript(t *testing.T) {
 	}
 	if err := signalResult("", "", nil); err != nil {
 		t.Errorf("sent: %v", err)
+	}
+}
+
+// Old procps (3.3.10, CentOS 7) rejects the :32 width override, so the
+// first ps of procsScript fails. The fallback must still list every
+// process: without -e, ps on an exec channel with no controlling
+// terminal lists only the script's own processes, which parse drops,
+// and the Processes tab shows 0 processes (#213).
+func TestProcsScriptOldProcps(t *testing.T) {
+	realPS, err := exec.LookPath("ps")
+	if err != nil {
+		t.Skip("ps not on PATH")
+	}
+	// A ps that acts like old procps on the width override, like a
+	// modern procps on -e, and like ps without -e on an exec channel:
+	// only the invoker's own shell and itself.
+	stub := "#!/bin/sh\n" +
+		"case \"$*\" in *user:32=*) exit 1;; esac\n" +
+		"case \"$*\" in *-e*) exec " + realPS + " \"$@\";; esac\n" +
+		"printf ' %s 0 root 1000 sh -s\\n' \"$PPID\"\n" +
+		"printf ' %s %s root 1000 ps -o pid=,ppid=,user=,rss=,args=\\n' \"$$\" \"$PPID\"\n"
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "ps"), []byte(stub), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+":"+os.Getenv("PATH"))
+	out, status := runLocal(t, procsScript)
+	if status != 0 {
+		t.Fatalf("script exited %d: %q", status, out)
+	}
+	var l ProcessLister
+	procs, err := l.parse(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(procs) == 0 {
+		t.Fatal("no processes listed: the fallback did not select all processes")
+	}
+	// PID 1 is always there when ps selects every process.
+	if i := slices.IndexFunc(procs, func(p Process) bool { return p.PID == 1 }); i < 0 {
+		t.Errorf("%d processes, without pid 1", len(procs))
 	}
 }
