@@ -10,6 +10,7 @@ import (
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
 
+	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -362,6 +363,18 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 				a.openRemoteFile(s, path.Join(f.cwd, e.Name))
 			}
 		}
+		// Handle file paste only with the table's focus. The terminal and
+		// text fields keep their own paste behavior.
+		if s.sftp != nil && f.cwd != "" && f.table.Shortcut(c, ui.Cmd, ui.KeyV) && !c.ShortcutRepeated() {
+			data := c.Services().ReadClipboardData(transfer.FileList, transfer.URIList)
+			if files, err := data.Files(); err == nil && len(files) > 0 {
+				a.upload(s, files, f.cwd)
+			}
+		}
+		if s.sftp != nil && f.cwd != "" && f.chosen.Len() > 0 &&
+			f.table.Shortcut(c, ui.Cmd, ui.KeyC) && !c.ShortcutRepeated() {
+			a.copyRemoteFiles(s, f.chosenNames())
+		}
 		// F2 renames the row chosen; Delete, or Cmd+Backspace as in
 		// Finder, deletes those chosen.
 		rename := f.table.Shortcut(c, 0, ui.KeyF2)
@@ -382,6 +395,9 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 				m.Separator()
 			}
 			a.downloadMenuItems(m, s, names)
+			if m.Item(locales.Copy()).Shortcut(ui.Cmd, ui.KeyC).Disabled(s.sftp == nil || f.cwd == "" || len(names) == 0).Chosen() {
+				a.copyRemoteFiles(s, names)
+			}
 			m.Separator()
 			a.uploadMenuItems(m, s, f.cwd)
 			m.Separator()

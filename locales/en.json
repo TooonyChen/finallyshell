@@ -156,6 +156,8 @@
   "homeFolder": "Home folder",
   "followTerminalDir": "Follow the terminal's folder",
   "copyPath": "Copy path",
+  "copyToClipboard": "Copy to clipboard",
+  "fileCopyClipboardChanged": "The clipboard changed. Copy the files again to paste them.",
   "sftpUnavailable": "SFTP unavailable: {error}",
   "cannotOpenFolder": "Cannot open {dir}: {error}",
   "uploadFiles": "Upload files…",

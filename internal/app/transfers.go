@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"sync"
 	"time"
 
 	"finallyshell/internal/icons"
@@ -48,6 +49,10 @@ type transferJob struct {
 	src    string // a local path to upload, or a remote one to download
 	dstDir string // the remote or local directory it goes into
 	local  string // the local copy of a finished download
+	// A clipboard download stages all srcs in a private directory. The
+	// token lets it publish only while its copy request owns the clipboard.
+	clipboard      bool
+	clipboardToken string
 
 	// archive packs srcs, all in one folder, with tar on the server,
 	// over an exec channel of ssh (archive.go); src is the first.
@@ -81,10 +86,11 @@ func (t *transferJob) name() string {
 func (t *transferJob) finished() bool { return t.state >= transferDone }
 
 type transferQueue struct {
-	jobs    []*transferJob
-	running int
-	nextID  int64
-	list    ui.ListState
+	jobs           []*transferJob
+	running        int
+	nextID         int64
+	list           ui.ListState
+	pruneClipboard sync.Once
 
 	popover downloadsPopover // the file panel's Downloads popover (downloads.go)
 	shown   taskbarState     // what the app's icon shows of them
@@ -285,6 +291,9 @@ func (a *App) run(t *transferJob) {
 	go func() {
 		local, skipped, err := a.transfer(ctx, t, report)
 		a.post(func() {
+			if t.clipboard {
+				err = a.finishFileCopy(ctx, t, local, err)
+			}
 			cancel()
 			q.running--
 			t.current = ""
@@ -312,6 +321,10 @@ func (a *App) run(t *transferJob) {
 // how far it is, and returns the local copy of a download, and the links
 // an archive download did not make.
 func (a *App) transfer(ctx context.Context, t *transferJob, report remotefs.ArchiveProgress) (string, remotefs.SkippedLinks, error) {
+	if t.clipboard {
+		dir, err := a.stageFileCopy(ctx, t, report)
+		return dir, remotefs.SkippedLinks{}, err
+	}
 	local, err := a.copyFiles(ctx, t, report)
 	if err != nil || !t.archive || t.dir != download {
 		return local, remotefs.SkippedLinks{}, err
@@ -374,7 +387,7 @@ func (t *transferJob) measure(ctx context.Context) (int64, error) {
 	case t.dir == upload:
 		return remotefs.LocalSize(t.src)
 	}
-	return remotefs.RemoteSize(t.sftp, t.src)
+	return remotefs.RemoteSizeContext(ctx, t.sftp, t.src)
 }
 
 // progress records done bytes, and the speed over the last second.
@@ -427,11 +440,15 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 		if t.archive {
 			dirLabel = t.archiveLabel()
 		}
+		detail := dirLabel + " → " + dest
+		if t.clipboard {
+			detail = locales.CopyToClipboard()
+		}
 		ui.Icon(c, ic).FontSize(16).TextColor(theme.TextMuted)
 		ui.Column(c).Grow(1).MinWidth(0).Gap(3).Children(func() {
 			ui.Row(c).Gap(8).Children(func() {
 				ui.Text(c, t.name()).SingleLine().Shrink(1).MinWidth(0)
-				widgets.Muted(c, dirLabel+" → "+dest).FontSize(11.5).SingleLine().Grow(1).MinWidth(0)
+				widgets.Muted(c, detail).FontSize(11.5).SingleLine().Grow(1).MinWidth(0)
 			})
 			switch t.state {
 			case transferWaiting:
@@ -472,7 +489,7 @@ func (a *App) transferRow(c *ui.Context, t *transferJob) {
 			if widgets.IconButton(c, "rotate-cw", locales.Retry()).Disabled(!ok).Clicked() && ok {
 				a.retry(t)
 			}
-		case t.state == transferDone && t.local != "":
+		case t.state == transferDone && t.local != "" && !t.clipboard:
 			if widgets.IconButton(c, "external-link", locales.OpenFile()).Clicked() {
 				a.openDownload(t)
 			}

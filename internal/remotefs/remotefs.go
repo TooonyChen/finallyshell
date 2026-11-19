@@ -158,6 +158,14 @@ func LocalSize(p string) (int64, error) {
 // RemoteSize is the number of bytes of the files in p, a file or a
 // directory, as Download would fetch them.
 func RemoteSize(c *sftp.Client, p string) (int64, error) {
+	return RemoteSizeContext(context.Background(), c, p)
+}
+
+// RemoteSizeContext measures a download, stopping between requests if canceled.
+func RemoteSizeContext(ctx context.Context, c *sftp.Client, p string) (int64, error) {
+	if err := ctx.Err(); err != nil {
+		return 0, err
+	}
 	fi, err := c.Stat(p)
 	if err != nil {
 		return 0, err
@@ -166,22 +174,26 @@ func RemoteSize(c *sftp.Client, p string) (int64, error) {
 		return fi.Size(), nil
 	}
 	var total int64
-	err = walkRemote(c, p, func(_ string, fi fs.FileInfo) error {
-		total += fi.Size()
+	err = walkRemote(ctx, c, p, func(_ string, fi fs.FileInfo) error {
+		if !fi.IsDir() {
+			total += fi.Size()
+		}
 		return nil
 	})
 	return total, err
 }
 
-// walkRemote calls file for each regular file under the directory dir,
-// with its path. Links to directories are not followed, which keeps a
-// link to a parent from looping.
-func walkRemote(c *sftp.Client, dir string, file func(p string, fi fs.FileInfo) error) error {
-	infos, err := c.ReadDir(dir)
+// walkRemote visits directories and regular files under dir. It skips
+// directory symlinks to avoid loops.
+func walkRemote(ctx context.Context, c *sftp.Client, dir string, visit func(p string, fi fs.FileInfo) error) error {
+	infos, err := c.ReadDirContext(ctx, dir)
 	if err != nil {
 		return err
 	}
 	for _, fi := range infos {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		p := path.Join(dir, fi.Name())
 		if fi.Mode()&fs.ModeSymlink != 0 {
 			target, err := c.Stat(p)
@@ -190,13 +202,13 @@ func walkRemote(c *sftp.Client, dir string, file func(p string, fi fs.FileInfo) 
 			}
 			fi = target
 		}
-		switch {
-		case fi.IsDir():
-			if err := walkRemote(c, p, file); err != nil {
+		if fi.IsDir() || fi.Mode().IsRegular() {
+			if err := visit(p, fi); err != nil {
 				return err
 			}
-		case fi.Mode().IsRegular():
-			if err := file(p, fi); err != nil {
+		}
+		if fi.IsDir() {
+			if err := walkRemote(ctx, c, p, visit); err != nil {
 				return err
 			}
 		}
@@ -323,6 +335,19 @@ func uploadFile(c *sftp.Client, src, dst string, fi fs.FileInfo, cnt *counter) (
 // directory dstDir, as dstDir/<name of src>, replacing files that are
 // there, and returns the local path.
 func Download(ctx context.Context, c *sftp.Client, src, dstDir string, progress Progress) (string, error) {
+	return download(ctx, c, src, dstDir, progress, false)
+}
+
+// DownloadNew copies src into a private staging directory and rejects
+// names that would overwrite another staged file or directory.
+func DownloadNew(ctx context.Context, c *sftp.Client, src, dstDir string, progress Progress) (string, error) {
+	return download(ctx, c, src, dstDir, progress, true)
+}
+
+func download(ctx context.Context, c *sftp.Client, src, dstDir string, progress Progress, exclusive bool) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
 	var done int64
 	cnt := &counter{ctx: ctx, done: &done, progress: progress}
 	fi, err := c.Stat(src)
@@ -330,22 +355,30 @@ func Download(ctx context.Context, c *sftp.Client, src, dstDir string, progress 
 		return "", err
 	}
 	dst := filepath.Join(dstDir, path.Base(src))
-	if !fi.IsDir() {
-		return dst, downloadFile(c, src, dst, fi, cnt)
+	makeDir, flags := os.MkdirAll, os.O_WRONLY|os.O_CREATE|os.O_TRUNC
+	if exclusive {
+		makeDir, flags = os.Mkdir, os.O_WRONLY|os.O_CREATE|os.O_EXCL
 	}
-	if err := os.MkdirAll(dst, 0o755); err != nil {
+	if !fi.IsDir() {
+		if !fi.Mode().IsRegular() {
+			return "", fmt.Errorf("%s: %w", src, errors.ErrUnsupported)
+		}
+		return dst, downloadFile(c, src, dst, fi, cnt, flags)
+	}
+	if err := makeDir(dst, 0o755); err != nil {
 		return dst, err
 	}
-	return dst, walkRemote(c, src, func(p string, fi fs.FileInfo) error {
+	return dst, walkRemote(ctx, c, src, func(p string, fi fs.FileInfo) error {
 		rel := strings.TrimPrefix(p, strings.TrimSuffix(src, "/")+"/")
-		target := filepath.Join(dst, filepath.FromSlash(rel))
-		if !isInside(dst, target) {
+		local := filepath.FromSlash(rel)
+		target := filepath.Join(dst, local)
+		if !filepath.IsLocal(local) || !isInside(dst, target) {
 			return fmt.Errorf("unsafe name %q", rel)
 		}
-		if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-			return err
+		if fi.IsDir() {
+			return makeDir(target, 0o755)
 		}
-		return downloadFile(c, p, target, fi, cnt)
+		return downloadFile(c, p, target, fi, cnt, flags)
 	})
 }
 
@@ -356,13 +389,13 @@ func isInside(dir, p string) bool {
 	return err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel)
 }
 
-func downloadFile(c *sftp.Client, src, dst string, fi fs.FileInfo, cnt *counter) (err error) {
+func downloadFile(c *sftp.Client, src, dst string, fi fs.FileInfo, cnt *counter, flags int) (err error) {
 	in, err := c.Open(src)
 	if err != nil {
 		return fmt.Errorf("%s: %w", src, err)
 	}
 	defer in.Close()
-	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
+	out, err := os.OpenFile(dst, flags, 0o644)
 	if err != nil {
 		return err
 	}

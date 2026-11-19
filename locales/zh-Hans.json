@@ -102,6 +102,8 @@
   "homeFolder": "主目录",
   "followTerminalDir": "跟随终端目录",
   "copyPath": "复制路径",
+  "copyToClipboard": "复制到剪贴板",
+  "fileCopyClipboardChanged": "剪贴板已更改。请重新复制文件后再粘贴。",
   "sftpUnavailable": "SFTP 不可用：{error}",
   "cannotOpenFolder": "无法打开 {dir}：{error}",
   "uploadFiles": "上传文件…",

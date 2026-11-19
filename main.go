@@ -13,6 +13,7 @@ import (
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo"
+	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -246,6 +247,14 @@ func (p *platform) TempDir() string {
 		dir = filepath.Join(os.TempDir(), "finallyshell")
 	}
 	return filepath.Join(dir, "opened")
+}
+
+func (p *platform) ReadClipboardFormat(format transfer.Format) ([]byte, error) {
+	return mygo.Clipboard.ReadFormat(format)
+}
+
+func (p *platform) WriteClipboardData(data transfer.Data) error {
+	return mygo.Clipboard.Write(data)
 }
 
 // SetFullScreen and IsFullScreen put the main window in the system's full

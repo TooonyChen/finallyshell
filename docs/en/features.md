@@ -1456,7 +1456,10 @@ panel goes to the folder it was in.
 ### Upload and download
 
 Upload: drag files or folders from Explorer or Finder onto the file table
-(they go to the current folder) or onto a folder in the folder tree. The
+(they go to the current folder) or onto a folder in the folder tree. To
+upload from the clipboard, copy files or folders in your system's file
+manager, click the remote file table, and press Cmd+V on macOS or Ctrl+V
+on Windows and Linux. The files go to the current remote folder. The
 toolbar's upload button and the context menu can also choose files or a
 folder.
 
@@ -1467,6 +1470,17 @@ options. "Download to…" in the context menu chooses a location instead.
 With "Ask where to save each download" checked on the Transfers page, the
 download button always asks for the location first with the system's
 folder chooser.
+
+To paste remote files on your computer, select them in the file table
+and press Cmd+C on macOS or Ctrl+C on Windows and Linux, or choose Copy
+from the table's context menu. Finallyshell downloads the selection to
+its cache. The toolbar's Downloads queue and the Transfers tab show
+progress and let you cancel. Once the copy is marked Done, paste in
+the destination folder in your system's file manager. The file
+manager handles filename conflicts.
+Copying something else while the download runs keeps the newer clipboard
+contents. Cached copies older than a day are cleaned up on the first
+file copy after the app restarts.
 
 ### Archive transfer
 

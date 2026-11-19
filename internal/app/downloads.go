@@ -149,6 +149,7 @@ func (a *App) canRetry(t *transferJob) bool {
 	s := t.sess
 	return (t.state == transferFailed || t.state == transferCanceled) &&
 		slices.Contains(a.sessions, s) && s.status == statusConnected && s.sftp != nil &&
+		(!t.clipboard || len(t.srcs) > 0) &&
 		(!t.archive || s.client != nil)
 }
 
@@ -160,6 +161,14 @@ func (a *App) retry(t *transferJob) {
 	i := slices.Index(q.jobs, t)
 	if i < 0 || !a.canRetry(t) {
 		return
+	}
+	if t.clipboard {
+		token, err := a.reserveFileClipboard()
+		if err != nil {
+			t.state, t.err = transferFailed, err
+			return
+		}
+		t.clipboardToken = token
 	}
 	q.jobs = slices.Delete(q.jobs, i, i+1)
 	t.sftp, t.ssh = t.sess.sftp, t.sess.client

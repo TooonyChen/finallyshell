@@ -16,6 +16,7 @@ import (
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/plugins/terminal"
+	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 )
 
@@ -68,8 +69,10 @@ type Platform interface {
 	// Zero transfers clear both. See downloads.go.
 	ShowTransfers(count int, progress float64)
 	// TempDir is a folder of the app's for the copies of remote files it
-	// opens with other apps.
+	// opens with other apps or publishes to the clipboard.
 	TempDir() string
+	ReadClipboardFormat(transfer.Format) ([]byte, error)
+	WriteClipboardData(transfer.Data) error
 	// SetLocale shows the language of tag, or the system's for "".
 	SetLocale(tag string)
 	// Languages are the languages the app is written in.

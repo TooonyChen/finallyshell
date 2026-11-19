@@ -17,6 +17,7 @@ import (
 
 	"github.com/egoist/mygo/i18n"
 	"github.com/egoist/mygo/plugins/terminal"
+	"github.com/egoist/mygo/transfer"
 	"github.com/egoist/mygo/ui"
 	"github.com/pkg/sftp"
 )
@@ -42,6 +43,8 @@ type fakePlatform struct {
 	fakeAppearance
 	*fakeSecrets
 	fakeUpdates
+
+	clipboardWriteErr error
 }
 
 func newFakePlatform(t *testing.T) *fakePlatform {
@@ -56,7 +59,17 @@ func (p *fakePlatform) OpenFiles(string, bool) ([]string, error) { return p.open
 func (p *fakePlatform) DownloadsDir() string                     { return p.downloads }
 func (p *fakePlatform) ShowInFolder(path string)                 { p.shown = append(p.shown, path) }
 func (p *fakePlatform) TempDir() string                          { return filepath.Join(p.downloads, "opened") }
-func (p *fakePlatform) Languages() []string                      { return []string{"en", "zh-Hans"} }
+func (p *fakePlatform) ReadClipboardFormat(format transfer.Format) ([]byte, error) {
+	return p.tt.ClipboardData().Read(format)
+}
+func (p *fakePlatform) WriteClipboardData(data transfer.Data) error {
+	if p.clipboardWriteErr != nil {
+		return p.clipboardWriteErr
+	}
+	p.tt.SetClipboardData(data)
+	return nil
+}
+func (p *fakePlatform) Languages() []string { return []string{"en", "zh-Hans"} }
 func (p *fakePlatform) SetLocale(tag string) {
 	p.locale = tag
 	if p.tt != nil {
