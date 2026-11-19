@@ -1316,8 +1316,13 @@ In `settings.json` these are `termFontFamily`, `termFontSize`,
 ## File panel
 
 The "Files" tab at the bottom right browses the server over SFTP: a folder
-tree on the left, a file table on the right (with multiple selection), and
-a path bar where a path can be typed directly.
+tree on the left and a file table on the right (with multiple selection).
+The path bar defaults to a text field where you can type or paste a path
+and press Enter to open it. Choose **Breadcrumb navigation** under
+**Options › File manager › Path bar style** to switch modes in all sessions.
+In breadcrumb mode, click a folder in the path bar to go straight to it.
+When space is tight, the ellipsis menu holds the earlier folders. Click the
+pencil to edit the path, then press Enter to open it or Escape to cancel.
 
 ### Following the terminal's folder
 

@@ -42,7 +42,16 @@ func (f *editorFixture) menu(t *testing.T, name, item string) {
 func (f *editorFixture) treeMenu(t *testing.T, p, item string) {
 	t.Helper()
 	f.showInTree(t, p)
-	f.menu(t, filepath.Base(p), item)
+	f.tt.RightClickAt(treeRowCenter(t, f.tt, p))
+	if err := f.tt.ChooseMenuItem(item); err != nil {
+		t.Fatalf("%s: %v; menu %q", p, err, f.tt.Menu())
+	}
+	f.tt.Frame()
+}
+
+func treeRowCenter(t *testing.T, tt *ui.Tester, dir string) (x, y float32) {
+	t.Helper()
+	return rowCenter(t, tt, locales.KindFolder()+" "+dir)
 }
 
 func (f *editorFixture) showInTree(t *testing.T, p string) {
@@ -286,7 +295,7 @@ func TestFileOpsInTree(t *testing.T) {
 
 	// The root has no Rename or Delete.
 	f.showInTree(t, "/")
-	tt.RightClickAt(rowCenter(t, tt, "/"))
+	tt.RightClickAt(treeRowCenter(t, tt, "/"))
 	if menu := tt.Menu(); slices.Contains(menu, locales.Rename()) || slices.Contains(menu, locales.Delete()) || !slices.Contains(menu, locales.NewFolder()) {
 		t.Errorf("menu of /: %q", menu)
 	}

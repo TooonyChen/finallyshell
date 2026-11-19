@@ -230,7 +230,7 @@ func TestArchiveTreeMenu(t *testing.T) {
 	f.a.openDir(f.s, f.dir)
 	f.settled(t)
 	f.showInTree(t, filepath.Join(f.dir, "srv"))
-	f.tt.RightClickAt(rowCenter(t, f.tt, "srv"))
+	f.tt.RightClickAt(treeRowCenter(t, f.tt, filepath.Join(f.dir, "srv")))
 	if menu := f.tt.Menu(); !slices.Contains(menu, locales.DownloadAsArchive()) || !slices.Contains(menu, locales.UploadAsArchive()) {
 		t.Errorf("folder menu %q", menu)
 	}
@@ -254,7 +254,7 @@ func TestArchiveTreeMenu(t *testing.T) {
 
 	f.tt.CloseMenu()
 	f.showInTree(t, "/")
-	f.tt.RightClickAt(rowCenter(t, f.tt, "/"))
+	f.tt.RightClickAt(treeRowCenter(t, f.tt, "/"))
 	if menu := f.tt.Menu(); slices.Contains(menu, locales.DownloadAsArchive()) || !slices.Contains(menu, locales.UploadAsArchive()) {
 		t.Errorf("root menu %q", menu)
 	}

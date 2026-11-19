@@ -190,6 +190,7 @@ default.
 | `termBackgroundOpacity` | Image opacity in percent, 5 to 100. | 30 |
 | `keepManagerOpen` | `true` keeps the connection manager open after connecting. | It closes. |
 | `fileIconTheme` | `minimal`, `bundled:seti`, or `<publisher>.<name>/<theme ID>`. | Material Icon Theme |
+| `filePathBreadcrumbs` | `true` shows breadcrumb navigation in the file panel's path bar. | Path input. |
 | `noFollowTerminalDir` | `true` keeps the file panel where it is when the shell's folder changes. | It follows. |
 | `noAgentIcons` | `true` hides the logo of the coding agent running in a session tab, and stops reading the program in the shell's foreground for it. | Shown. |
 | `noCommandBar` | `true` hides the command bar under the terminal, and all it does. | Shown. |

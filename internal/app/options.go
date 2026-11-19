@@ -88,7 +88,7 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageFiles, title: locales.OptionsFileManager,
-		view: nil,
+		view: (*App).fileManagerPage,
 	},
 	{
 		id: pageFileIcons, parent: pageFiles, title: locales.OptionsFileIcons,
@@ -180,6 +180,21 @@ func (a *App) generalPage(c *ui.Context) {
 	})
 
 	a.updatesSection(c)
+}
+
+func (a *App) fileManagerPage(c *ui.Context) {
+	ui.Text(c, locales.FilePathBarStyle()).Bold()
+	breadcrumbs := a.settings.FilePathBreadcrumbs
+	ui.RadioGroup(c, func() {
+		ui.Radio(c, &breadcrumbs, false, locales.FilePathBarInput())
+		ui.Radio(c, &breadcrumbs, true, locales.FilePathBarBreadcrumbs())
+	}).Row().Gap(16).Label(locales.FilePathBarStyle())
+	if breadcrumbs != a.settings.FilePathBreadcrumbs {
+		a.changeSettings(func() {
+			a.settings.FilePathBreadcrumbs = breadcrumbs
+			a.resetFilePathEdits()
+		})
+	}
 }
 
 // changeSettings changes the settings with fn, saves them and shows the

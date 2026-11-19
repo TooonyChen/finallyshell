@@ -421,6 +421,9 @@ func (a *App) applyPayload(p *cloudsync.Payload) {
 		if a.settings.Appearance.Normal() != before.Appearance.Normal() {
 			a.plat.SetAppearance(a.settings.Appearance.Normal())
 		}
+		if a.settings.FilePathBreadcrumbs != before.FilePathBreadcrumbs {
+			a.resetFilePathEdits()
+		}
 		a.applyTerminalSettings()
 		a.applyAgentIcons()
 	}

@@ -1022,6 +1022,26 @@ func (msgs Messages) KindExtFile(ext string) string {
 	return Catalog.Format(msgs.locale, "kindExtFile", map[string]any{"ext": ext})
 }
 
+// EditRemotePath says "Edit remote path"
+// in the language the app shows.
+func EditRemotePath() string { return In(i18n.Locale()).EditRemotePath() }
+
+// EditRemotePath says "Edit remote path"
+// in the language of msgs.
+func (msgs Messages) EditRemotePath() string {
+	return Catalog.Format(msgs.locale, "editRemotePath", nil)
+}
+
+// MoreParentFolders says "More parent folders"
+// in the language the app shows.
+func MoreParentFolders() string { return In(i18n.Locale()).MoreParentFolders() }
+
+// MoreParentFolders says "More parent folders"
+// in the language of msgs.
+func (msgs Messages) MoreParentFolders() string {
+	return Catalog.Format(msgs.locale, "moreParentFolders", nil)
+}
+
 // ParentFolder says "Parent folder"
 // in the language the app shows.
 func ParentFolder() string { return In(i18n.Locale()).ParentFolder() }
@@ -7072,6 +7092,36 @@ func OptionsFileManager() string { return In(i18n.Locale()).OptionsFileManager()
 // in the language of msgs.
 func (msgs Messages) OptionsFileManager() string {
 	return Catalog.Format(msgs.locale, "optionsFileManager", nil)
+}
+
+// FilePathBarStyle says "Path bar style"
+// in the language the app shows.
+func FilePathBarStyle() string { return In(i18n.Locale()).FilePathBarStyle() }
+
+// FilePathBarStyle says "Path bar style"
+// in the language of msgs.
+func (msgs Messages) FilePathBarStyle() string {
+	return Catalog.Format(msgs.locale, "filePathBarStyle", nil)
+}
+
+// FilePathBarInput says "Path input"
+// in the language the app shows.
+func FilePathBarInput() string { return In(i18n.Locale()).FilePathBarInput() }
+
+// FilePathBarInput says "Path input"
+// in the language of msgs.
+func (msgs Messages) FilePathBarInput() string {
+	return Catalog.Format(msgs.locale, "filePathBarInput", nil)
+}
+
+// FilePathBarBreadcrumbs says "Breadcrumb navigation"
+// in the language the app shows.
+func FilePathBarBreadcrumbs() string { return In(i18n.Locale()).FilePathBarBreadcrumbs() }
+
+// FilePathBarBreadcrumbs says "Breadcrumb navigation"
+// in the language of msgs.
+func (msgs Messages) FilePathBarBreadcrumbs() string {
+	return Catalog.Format(msgs.locale, "filePathBarBreadcrumbs", nil)
 }
 
 // OptionsFileIcons says "File icon theme"

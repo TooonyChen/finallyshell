@@ -223,6 +223,9 @@ type Settings struct {
 	// "<publisher>.<extension>/<theme>" for one installed from a VSIX or in
 	// an editor such as VS Code.
 	FileIconTheme string `json:"fileIconTheme,omitempty"`
+	// FilePathBreadcrumbs shows clickable folders in the file panel's path
+	// bar. The default is an editable path field.
+	FilePathBreadcrumbs bool `json:"filePathBreadcrumbs,omitempty"`
 	// NoFollowTerminalDir keeps the file panel where the user browsed it
 	// when the shell's working directory changes; by default the panel
 	// goes to it (the toggle in the panel's toolbar).

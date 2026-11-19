@@ -15,14 +15,16 @@ import (
 
 // fileState is the file panel of a session.
 type fileState struct {
-	cwd      string
-	pathEdit string
-	entries  []remotefs.Entry
-	loading  bool
-	err      error
-	table    ui.ListState
-	chosen   ui.Selection[string] // names in cwd
-	row      int
+	cwd         string
+	pathEdit    string
+	pathEditing bool
+	entries     []remotefs.Entry
+	loading     bool
+	listRequest uint64
+	err         error
+	table       ui.ListState
+	chosen      ui.Selection[string] // names in cwd
+	row         int
 
 	// reveal is a name to choose in the table once cwd is read again: a
 	// file just renamed or made.
@@ -84,22 +86,34 @@ func (a *App) listDir(s *Session, dir string, quiet bool) {
 	if s.sftp == nil {
 		return
 	}
-	dir = path.Clean(dir)
 	f := &s.files
+	if !path.IsAbs(dir) {
+		dir = path.Join("/", f.cwd, dir)
+	}
+	dir = path.Clean(dir)
+	f.listRequest++
+	request := f.listRequest
 	f.loading = true
 	if !quiet {
 		f.err = nil
-		f.pathEdit = dir
+		if !a.settings.FilePathBreadcrumbs {
+			f.pathEdit = dir
+		}
 	}
 	sc := s.sftp
 	go func() {
 		entries, err := remotefs.ReadDir(sc, dir)
 		a.post(func() {
+			if request != f.listRequest || sc != s.sftp {
+				return
+			}
 			f.loading = false
 			if err != nil {
 				if !quiet {
 					f.err = &dirError{dir, err}
-					f.pathEdit = f.cwd
+					if !a.settings.FilePathBreadcrumbs {
+						f.pathEdit = f.cwd
+					}
 				}
 				return
 			}
@@ -108,7 +122,10 @@ func (a *App) listDir(s *Session, dir string, quiet bool) {
 				f.chosen.Clear()
 				f.row = -1
 			}
-			f.cwd, f.pathEdit, f.entries = dir, dir, entries
+			f.cwd, f.entries = dir, entries
+			if !f.pathEditing {
+				f.pathEdit = dir
+			}
 			f.subdirs[dir] = dirNames(dir, entries)
 			if i := slices.IndexFunc(entries, func(e remotefs.Entry) bool { return e.Name == f.reveal }); f.reveal != "" && i >= 0 {
 				f.chosen.Clear()
@@ -211,10 +228,12 @@ func (a *App) filePanel(c *ui.Context) {
 	}
 	f := &s.files
 	ui.Column(c.Key(s.ID)).Grow(1).Children(func() {
-		ui.Row(c).Padding(4, 8).Gap(4).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
-			if ui.TextInput(c, &f.pathEdit).Grow(1).Submitted() {
-				a.openDir(s, f.pathEdit)
-			}
+		toolbar := ui.Row(c).Padding(4, 8).Gap(4).BorderWidth(0, 0, 1, 0).BorderColor(colors.line)
+		if a.settings.FilePathBreadcrumbs {
+			toolbar.AlignItems(ui.Center)
+		}
+		toolbar.Children(func() {
+			a.filePathBar(c, s)
 			if widgets.IconButton(c, "arrow-up", locales.ParentFolder()).Clicked() && f.cwd != "" {
 				a.openDir(s, path.Dir(f.cwd))
 			}
@@ -286,7 +305,7 @@ func (a *App) dirTree(c *ui.Context, s *Session) {
 		}
 		return subs
 	}, func(dir string) {
-		row := ui.Row(c).Gap(5).Grow(1).Radius(4)
+		row := ui.Row(c).Gap(5).Grow(1).Radius(4).Label(locales.KindFolder() + " " + dir)
 		a.dropZone(row, s, dir)
 		row.ContextMenu(func(m *ui.Menu) { a.treeMenu(c, m, s, dir) })
 		row.Children(func() {
