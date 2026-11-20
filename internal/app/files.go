@@ -5,6 +5,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	"finallyshell/internal/remotefs"
 	"finallyshell/internal/widgets"
@@ -13,16 +14,26 @@ import (
 	"github.com/egoist/mygo/ui"
 )
 
+// fileSearchDelay is how long typing in the table's search waits before
+// the rows are filtered.
+const fileSearchDelay = 250 * time.Millisecond
+
 // fileState is the file panel of a session.
 type fileState struct {
 	cwd      string
 	pathEdit string
 	entries  []remotefs.Entry
-	loading  bool
-	err      error
-	table    ui.ListState
-	chosen   ui.Selection[string] // names in cwd
-	row      int
+	// search is what the search field holds; filter is the search the rows
+	// show, once typing has paused, and shown are those rows.
+	search  string
+	filter  string
+	shown   []remotefs.Entry
+	searchT *time.Timer
+	loading bool
+	err     error
+	table   ui.ListState
+	chosen  ui.Selection[string] // names in cwd
+	row     int
 
 	// reveal is a name to choose in the table once cwd is read again: a
 	// file just renamed or made.
@@ -66,12 +77,70 @@ func (f *fileState) init() {
 // chosenNames are the names of the rows chosen in the table.
 func (f *fileState) chosenNames() []string {
 	var names []string
-	for _, e := range f.entries {
+	for _, e := range f.shown {
 		if f.chosen.Has(e.Name) {
 			names = append(names, e.Name)
 		}
 	}
 	return names
+}
+
+// searchFiles filters the table once typing in its search field pauses.
+func (a *App) searchFiles(s *Session) {
+	f := &s.files
+	f.stopSearchTimer()
+	if f.search == "" {
+		f.applySearch()
+		return
+	}
+	dir := f.cwd
+	f.searchT = time.AfterFunc(fileSearchDelay, func() {
+		a.post(func() {
+			// The panel may have moved to another folder meanwhile.
+			if f.cwd == dir {
+				f.applySearch()
+			}
+		})
+	})
+}
+
+// applySearch filters the rows by what the search field holds.
+func (f *fileState) applySearch() {
+	f.filter = f.search
+	f.rebuildShown()
+}
+
+func (f *fileState) stopSearchTimer() {
+	if f.searchT != nil {
+		f.searchT.Stop()
+		f.searchT = nil
+	}
+}
+
+// rebuildShown recomputes the rows: every entry, or those whose name holds
+// the filter, without case. The row chosen stays chosen when it is shown.
+func (f *fileState) rebuildShown() {
+	prev := ""
+	if f.row >= 0 && f.row < len(f.shown) {
+		prev = f.shown[f.row].Name
+	}
+	if q := strings.ToLower(f.filter); q != "" {
+		f.shown = make([]remotefs.Entry, 0, len(f.entries))
+		for _, e := range f.entries {
+			if strings.Contains(strings.ToLower(e.Name), q) {
+				f.shown = append(f.shown, e)
+			}
+		}
+	} else {
+		f.shown = f.entries
+	}
+	f.row = -1
+	for i, e := range f.shown {
+		if e.Name == prev {
+			f.row = i
+			break
+		}
+	}
 }
 
 // openDir lists dir in the table and makes it the current directory.
@@ -107,10 +176,14 @@ func (a *App) listDir(s *Session, dir string, quiet bool) {
 			if dir != f.cwd {
 				f.chosen.Clear()
 				f.row = -1
+				// A search belongs to the folder it was typed in.
+				f.stopSearchTimer()
+				f.search, f.filter = "", ""
 			}
 			f.cwd, f.pathEdit, f.entries = dir, dir, entries
 			f.subdirs[dir] = dirNames(dir, entries)
-			if i := slices.IndexFunc(entries, func(e remotefs.Entry) bool { return e.Name == f.reveal }); f.reveal != "" && i >= 0 {
+			f.rebuildShown()
+			if i := slices.IndexFunc(f.shown, func(e remotefs.Entry) bool { return e.Name == f.reveal }); f.reveal != "" && i >= 0 {
 				f.chosen.Clear()
 				f.chosen.Add(f.reveal)
 				f.row = i
@@ -212,8 +285,13 @@ func (a *App) filePanel(c *ui.Context) {
 	f := &s.files
 	ui.Column(c.Key(s.ID)).Grow(1).Children(func() {
 		ui.Row(c).Padding(4, 8).Gap(4).BorderWidth(0, 0, 1, 0).BorderColor(colors.line).Children(func() {
-			if ui.TextInput(c, &f.pathEdit).Grow(1).Submitted() {
+			if ui.TextInput(c, &f.pathEdit).Grow(1).Shrink(1).MinWidth(80).Submitted() {
 				a.openDir(s, f.pathEdit)
+			}
+			search := ui.SearchField(c, &f.search).Placeholder(locales.SearchFiles()).
+				Label(locales.SearchFiles()).Width(150).MinWidth(60).Shrink(1).Margin(0, 2)
+			if search.Changed() {
+				a.searchFiles(s)
 			}
 			if widgets.IconButton(c, "arrow-up", locales.ParentFolder()).Clicked() && f.cwd != "" {
 				a.openDir(s, path.Dir(f.cwd))
@@ -309,7 +387,7 @@ func (a *App) dirTree(c *ui.Context, s *Session) {
 
 func (a *App) fileTable(c *ui.Context, s *Session) {
 	f := &s.files
-	entries := f.entries
+	entries := f.shown
 	f.table.Selected = &f.row
 	f.table.Selection = &f.chosen
 	f.table.Key = func(i int) any { return entries[i].Name }

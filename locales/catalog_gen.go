@@ -582,6 +582,16 @@ func (msgs Messages) SearchConnections() string {
 	return Catalog.Format(msgs.locale, "searchConnections", nil)
 }
 
+// SearchFiles says "Search files"
+// in the language the app shows.
+func SearchFiles() string { return In(i18n.Locale()).SearchFiles() }
+
+// SearchFiles says "Search files"
+// in the language of msgs.
+func (msgs Messages) SearchFiles() string {
+	return Catalog.Format(msgs.locale, "searchFiles", nil)
+}
+
 // ConnTreeEmpty says "No connections yet. Click + to add one."
 // in the language the app shows.
 func ConnTreeEmpty() string { return In(i18n.Locale()).ConnTreeEmpty() }

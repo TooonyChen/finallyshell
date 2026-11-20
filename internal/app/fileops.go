@@ -91,7 +91,7 @@ func (a *App) askDeleteChosen(s *Session) {
 	f := &s.files
 	names := f.chosenNames()
 	dirs := false
-	for _, e := range f.entries {
+	for _, e := range f.shown {
 		// A link to a folder goes alone, as a file does.
 		if f.chosen.Has(e.Name) && e.IsDir() && !e.Link {
 			dirs = true

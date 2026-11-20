@@ -53,6 +53,7 @@
   "leftPanelPages": "会话或连接",
   "connectionsPage": "连接",
   "searchConnections": "搜索连接",
+  "searchFiles": "搜索文件",
   "connTreeEmpty": "还没有连接。点 + 添加一个。",
   "deleteHostBody": "它会移到已删除的连接中，在连接管理器里勾选“显示已删除”可以恢复。",
   "scSwitchLeftPanel": "切换会话/连接",
