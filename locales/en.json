@@ -100,6 +100,7 @@
   "leftPanelPages": "Sessions or connections",
   "connectionsPage": "Connections",
   "searchConnections": "Search connections",
+  "searchFiles": "Search files",
   "connTreeEmpty": "No connections yet. Click + to add one.",
   "deleteHostBody": "It moves to the deleted connections, which “Show deleted” in the connection manager lists to restore.",
   "scSwitchLeftPanel": "Switch sessions / connections",

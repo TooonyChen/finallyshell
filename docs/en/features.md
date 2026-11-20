@@ -1319,6 +1319,11 @@ The "Files" tab at the bottom right browses the server over SFTP: a folder
 tree on the left, a file table on the right (with multiple selection), and
 a path bar where a path can be typed directly.
 
+The search field beside the path bar filters the table a quarter of a
+second after the last key: rows whose name holds the text anywhere,
+without case, files and folders alike. Escape or the field's × clears it
+and every row comes back. Another folder starts with no search.
+
 ### Following the terminal's folder
 
 When the shell's working directory changes, as after `cd /var/log`, the
