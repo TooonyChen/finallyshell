@@ -428,7 +428,7 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 	a, p := f.a, f.p
 	a.openRemoteFile(f.s, filepath.Join(f.dir, "app.yaml"))
 	a.openRemoteFile(f.s, filepath.Join(f.dir, "deploy.sh"))
-	sh := f.tab(t, "deploy.sh")
+	f.tab(t, "deploy.sh")
 	yml := f.tab(t, "app.yaml")
 	w := f.window(t)
 
@@ -439,7 +439,7 @@ func TestFileEditorUnsavedPrompts(t *testing.T) {
 		t.Fatalf("tabs %d", len(a.fe.tabs))
 	}
 	a.openRemoteFile(f.s, filepath.Join(f.dir, "deploy.sh"))
-	sh = f.tab(t, "deploy.sh")
+	sh := f.tab(t, "deploy.sh")
 	w.Frame()
 
 	// A changed one asks; Cancel keeps it, Don't Save closes it.

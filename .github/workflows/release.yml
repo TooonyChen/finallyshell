@@ -65,6 +65,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # For the build provenance and SBOM attestations below.
+      id-token: write
+      attestations: write
     env:
       VERSION: ${{ needs.version.outputs.version }}
       GH_TOKEN: ${{ github.token }}
@@ -89,12 +92,35 @@ jobs:
               exit 1
             fi
           done
+      - name: SBOM
+        # A software bill of materials for what is in the binaries: the
+        # dependencies a user's security team wants to look up. Written
+        # before the checksums, so SHA256SUMS covers it too.
+        uses: anchore/sbom-action@v0
+        with:
+          path: upload
+          format: spdx-json
+          output-file: upload/SBOM.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
       - name: Licenses and checksums
         run: |
           cp LICENSE upload/LICENSE.txt
           go run ./tools/release licenses > upload/THIRD_PARTY_LICENSES.txt
           (cd upload && sha256sum * > SHA256SUMS)
           cat upload/SHA256SUMS
+      - name: Attest the builds
+        # Signed by GitHub's own key, not ours: anyone can run
+        #   gh attestation verify <file> -R TooonyChen/finallyshell
+        # and see that this workflow, in this repository, built it.
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: upload/*
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: upload/*
+          sbom-path: upload/SBOM.spdx.json
       - name: Release notes
         # The version's section of CHANGELOG.md, in both languages, then
         # how to install, in both too.

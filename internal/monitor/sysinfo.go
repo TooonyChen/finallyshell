@@ -348,7 +348,7 @@ func parseAddrs(s string) []Addr {
 		}
 		var ip string
 		prefix := -1
-		rest := f[1:]
+		var rest []string
 		switch {
 		case f[1] == "addr:" && len(f) > 2: // inet6 addr: fe80::1/64 Scope:Link
 			ip, rest = f[2], f[3:]

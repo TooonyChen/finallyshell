@@ -58,4 +58,31 @@ jobs:
         with:
           path: ${{ steps.natives.outputs.dir }}
           key: ${{ steps.restore.outputs.cache-primary-key }}
-      - run: go test -race ./...
+      - name: staticcheck
+        # The checks go vet does not have: unused values, impossible
+        # conditions, deprecated API, and the style checks we keep.
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2026.2.2
+          staticcheck ./...
+      - name: govulncheck
+        # Only what the code actually reaches: a CVE in a package nothing
+        # calls does not fail the build.
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          govulncheck ./...
+      - run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
+      - name: Fuzz the sync envelope
+        # Half a minute per run on the parser that reads a file another
+        # machine wrote. The seeds run in `go test` anyway; this is the
+        # part that looks for what the seeds do not have.
+        run: go test -run '^$' -fuzz FuzzOpen -fuzztime 30s ./internal/cloudsync
+      - name: Coverage
+        # Printed, not enforced: a floor that fails builds teaches people to
+        # pad tests. The number in the log is enough to spot a drop.
+        run: go tool cover -func=coverage.out | tail -1
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: coverage
+          path: coverage.out
+          if-no-files-found: ignore

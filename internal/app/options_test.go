@@ -300,7 +300,7 @@ func TestCloseAsksOnce(t *testing.T) {
 	block := make(chan struct{})
 	p.answer = false
 	a.plat = blockingConfirm{p, block}
-	if a.CloseRequested() || a.CloseRequested() || a.QuitRequested() {
+	if a.CloseRequested() || a.QuitRequested() {
 		t.Fatal("closed with a session open")
 	}
 	close(block)

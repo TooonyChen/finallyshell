@@ -216,7 +216,7 @@ func (r *sshReader) parse(text, name string, outer [][]string, depth int) {
 			r.include(args, name, n, conds, depth)
 		case "port":
 			if p, err := strconv.Atoi(args[0]); err != nil || p < 1 || p > 65535 {
-				r.problem(name, n, SSHBadPort, fmt.Errorf("Port %s", args[0]))
+				r.problem(name, n, SSHBadPort, fmt.Errorf("port %s", args[0]))
 				continue
 			}
 			fallthrough
@@ -241,7 +241,7 @@ func (r *sshReader) host(args []string, name string, line int) {
 	}
 	switch {
 	case len(args) == 0:
-		r.problem(name, line, SSHBadLine, errors.New("Host without a name"))
+		r.problem(name, line, SSHBadLine, errors.New("host without a name"))
 	case names == 0:
 		r.problem(name, line, SSHPatternsOnly, nil)
 	}
@@ -264,7 +264,7 @@ func (r *sshReader) include(args []string, name string, line int, conds [][]stri
 		}
 		files, err := filepath.Glob(path)
 		if err != nil {
-			r.problem(name, line, SSHBadLine, fmt.Errorf("Include %s: %w", arg, err))
+			r.problem(name, line, SSHBadLine, fmt.Errorf("include %s: %w", arg, err))
 			continue
 		}
 		for _, f := range files {

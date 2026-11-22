@@ -1,0 +1,29 @@
+version: 2
+
+# Dependencies are pinned, and a pinned dependency is only as safe as the
+# speed it is updated: this app talks to SSH servers and stores passwords,
+# so a CVE in x/crypto matters here more than in most projects.
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for the small stuff, so a week of patches is one review.
+      golang-x:
+        patterns:
+          - golang.org/x/*
+      patch:
+        update-types:
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        update-types:
+          - minor
+          - patch

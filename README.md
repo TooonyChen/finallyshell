@@ -204,6 +204,26 @@ The defaults follow FinalShell; the panes' follow Ghostty on macOS and Windows T
 
 **Does it support Telnet, RDP or serial ports?** No, only SSH and SFTP.
 
+## Privacy
+
+There is no telemetry, no crash reporting, and no analytics. Hosts and
+passwords stay on your machine (keychain), and the sync file is encrypted
+on the device before it is uploaded.
+
+The complete list of endpoints the app can reach:
+
+| Endpoint | When |
+| --- | --- |
+| GitHub (releases API) | version checks; update archives are signed with the key in `mygo.json` |
+| your own SSH servers | always — that is the product |
+| Gist / WebDAV / S3 | only if you configure sync; the file is AES-256-GCM under an Argon2id key |
+| `raw.githubusercontent.com`, `cdn.jsdelivr.net` | only when you download the offline IP database |
+| `api.ip.sb`, `ip-api.com` | only if you turn on online IP locations (off by default); ip-api is plaintext HTTP, the fallback when ip.sb is busy |
+| `nxtrace.org` | only when you run NextTrace |
+
+[SECURITY.md](SECURITY.md) has the details, including what the online
+location lookups expose and how to avoid them entirely.
+
 ## Build from source
 
 You need Go 1.27.3 or later.
