@@ -144,7 +144,7 @@ func keyTypeLabel(k ssh.PublicKey) string {
 				label += " " + strconv.Itoa(rk.N.BitLen())
 			}
 		}
-	case t == ssh.InsecureKeyAlgoDSA:
+	case t == "ssh-dss": // ssh.InsecureKeyAlgoDSA, spelled out: the constant is deprecated
 		label = "DSA"
 	default:
 		label = t
