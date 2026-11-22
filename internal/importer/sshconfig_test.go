@@ -71,7 +71,7 @@ func TestReadSSHConfig(t *testing.T) {
 		t.Errorf("entries\n%+v\nwant\n%+v", got, want)
 	}
 	problems := []Problem{
-		{File: "config:35", Reason: SSHBadPort, Detail: "Port twenty-two"},
+		{File: "config:35", Reason: SSHBadPort, Detail: "port twenty-two"},
 		{File: "config.d/work.conf:5", Reason: SSHPatternsOnly},
 		{File: "config:37", Reason: SSHMatch},
 		{File: "config:45", Reason: SSHPatternsOnly},
