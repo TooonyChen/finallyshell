@@ -7414,6 +7414,46 @@ func (msgs Messages) SyncIntro() string {
 	return Catalog.Format(msgs.locale, "syncIntro", nil)
 }
 
+// SyncLocal says "Local folder"
+// in the language the app shows.
+func SyncLocal() string { return In(i18n.Locale()).SyncLocal() }
+
+// SyncLocal says "Local folder"
+// in the language of msgs.
+func (msgs Messages) SyncLocal() string {
+	return Catalog.Format(msgs.locale, "syncLocal", nil)
+}
+
+// SyncLocalDirectory says "Sync folder"
+// in the language the app shows.
+func SyncLocalDirectory() string { return In(i18n.Locale()).SyncLocalDirectory() }
+
+// SyncLocalDirectory says "Sync folder"
+// in the language of msgs.
+func (msgs Messages) SyncLocalDirectory() string {
+	return Catalog.Format(msgs.locale, "syncLocalDirectory", nil)
+}
+
+// SyncChooseFolder says "Choose sync folder…"
+// in the language the app shows.
+func SyncChooseFolder() string { return In(i18n.Locale()).SyncChooseFolder() }
+
+// SyncChooseFolder says "Choose sync folder…"
+// in the language of msgs.
+func (msgs Messages) SyncChooseFolder() string {
+	return Catalog.Format(msgs.locale, "syncChooseFolder", nil)
+}
+
+// SyncLocalHint says "Use your own sync tool to transfer finallyshell-sync.json between computers. This folder path stays on this computer …"
+// in the language the app shows.
+func SyncLocalHint() string { return In(i18n.Locale()).SyncLocalHint() }
+
+// SyncLocalHint says "Use your own sync tool to transfer finallyshell-sync.json between computers. This folder path stays on this computer …"
+// in the language of msgs.
+func (msgs Messages) SyncLocalHint() string {
+	return Catalog.Format(msgs.locale, "syncLocalHint", nil)
+}
+
 // SyncService says "Sync with"
 // in the language the app shows.
 func SyncService() string { return In(i18n.Locale()).SyncService() }

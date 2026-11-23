@@ -240,13 +240,20 @@ object of `settings.json`, missing while sync has never been set up:
 
 | Key | Meaning | Default (when missing) |
 |---|---|---|
-| `provider` | `gist`, `webdav` or `s3`. | Sync is off. |
+| `provider` | `local`, `gist`, `webdav` or `s3`. | Sync is off. |
+| `localDir` | This computer's folder containing `finallyshell-sync.json`, transported by your own sync tool. | None. |
 | `gistId` | The gist holding the file, found or created by the first sync. | Find or create one. |
 | `webdavUrl`, `webdavUser` | The WebDAV folder and user. | None. |
 | `s3Endpoint`, `s3Region`, `s3Bucket`, `s3Key`, `s3AccessKeyId` | The S3-compatible bucket, the file's key in it and the access key's ID. | Region `us-east-1`, key `finallyshell-sync.json`. |
 | `passwords` | `true` includes saved passwords. | Not included. |
 | `auto` | `true` syncs automatically. | Off. |
 | `interval` | Minutes between automatic syncs: 5, 15, 30 or 60. | 15 |
+
+The entire `sync` object stays on this computer for every provider,
+including its destination, automatic sync options and `localDir`. It is
+excluded from the encrypted payload. Computers may use different local
+folder paths; no machine identifier is needed to preserve them. The local
+folder provider needs the sync password but no service credential.
 
 Each settings key is either synced or kept on each computer; the lists are
 `syncedSettings` and `localSettings` in `internal/config/sync.go`. Kept

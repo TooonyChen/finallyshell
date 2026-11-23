@@ -17,6 +17,7 @@ const gistTokenURL = "https://github.com/settings/tokens/new?scopes=gist&descrip
 // syncProviders are the Sync page's choices of where to sync.
 var syncProviders = []choice[config.SyncProvider]{
 	{config.SyncOff, locales.SyncOff},
+	{config.SyncLocal, locales.SyncLocal},
 	{config.SyncGist, locales.SyncGist},
 	{config.SyncWebDAV, locales.SyncWebDAV},
 	{config.SyncS3, locales.SyncS3},
@@ -50,6 +51,8 @@ func (a *App) syncPage(c *ui.Context) {
 			return
 		}
 		switch s.Provider {
+		case config.SyncLocal:
+			a.localSyncFolderOption(c)
 		case config.SyncGist:
 			a.syncCredentialField(c, locales.SyncGistToken(), locales.SyncGistTokenHint())
 			ui.Field(c, "", func() { ui.Link(c, locales.SyncGistNewToken(), gistTokenURL) })

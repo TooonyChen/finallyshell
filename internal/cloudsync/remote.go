@@ -1,6 +1,6 @@
 // Package cloudsync syncs the app's connections and settings through
-// storage the user already has (a GitHub gist, a WebDAV folder, an
-// S3-compatible bucket): one file there, encrypted on the device with a
+// storage the user already has (a local folder, a GitHub gist, a WebDAV
+// folder, an S3-compatible bucket): one file there, encrypted on the device with a
 // password only the user knows, merged three ways with the local copy and
 // the last one synced.
 package cloudsync
