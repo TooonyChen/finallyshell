@@ -1,7 +1,10 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 	"time"
@@ -9,6 +12,255 @@ import (
 	"finallyshell/internal/cloudsync"
 	"finallyshell/internal/config"
 )
+
+func TestSyncQuickCommandsSaveFailureDuringSync(t *testing.T) {
+	r := &memRemote{}
+	one := newDevice(t, r)
+	one.a.quick().Commands = []*config.QuickCommand{{ID: "saved", Text: "uptime", Enter: true}}
+	if err := one.a.saveQuick(); err != nil {
+		t.Fatal(err)
+	}
+	one.sync(t)
+	two := newDevice(t, r)
+	two.sync(t)
+	before := config.LoadSyncState()
+	path := filepath.Join(two.dir, "quickcommands.json")
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	one.a.quick().Command("saved").Text = "whoami"
+	one.sync(t)
+	two.use(t)
+	two.a.startSync(false, time.Now())
+	two.a.quick().Command("saved").Text = "pwd"
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := two.a.saveQuick(); err == nil {
+		t.Fatal("the concurrent local save was not blocked")
+	}
+	two.p.until(t, "the sync", func() bool { return !two.a.sync.running })
+	if two.a.sync.err == nil || !bytes.Equal(config.LoadSyncState().Base, before.Base) {
+		t.Fatal("an unsaved concurrent edit advanced the merge base")
+	}
+	if two.a.quick().Command("saved").Text != "pwd" {
+		t.Fatal("the pending edit was lost")
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	two.a.quickUI = quickState{}
+	two.a.sync.state = config.LoadSyncState()
+	two.sync(t)
+	if two.a.quick().Command("saved").Text != "whoami" || r.writes() != 2 {
+		t.Fatal("reloading the old local file reverted the remote edit")
+	}
+}
+
+func TestSyncQuickCommandsPersistsRepairedIDs(t *testing.T) {
+	r := &memRemote{}
+	one := newDevice(t, r)
+	path := filepath.Join(one.dir, "quickcommands.json")
+	if err := os.WriteFile(path, []byte(`{"commands":[{"text":"uptime","enter":true}]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	one.sync(t)
+	two := newDevice(t, r)
+	two.sync(t)
+	two.a.quick().Commands[0].Text = "whoami"
+	two.sync(t)
+	// Reopening a file with missing IDs must not generate a different
+	// command identity, duplicate the old command and lose its edit.
+	one.a.quickUI = quickState{}
+	one.sync(t)
+	commands := one.a.quick().Commands
+	if len(commands) != 1 || commands[0].Text != "whoami" {
+		t.Fatalf("reloading unpersisted repaired IDs duplicated commands: %+v", commands)
+	}
+}
+
+func TestSyncQuickCommandsLocalSaveFailure(t *testing.T) {
+	r := &memRemote{}
+	d := newDevice(t, r)
+	d.a.quick().Commands = []*config.QuickCommand{{ID: "saved", Text: "uptime", Enter: true}}
+	if err := d.a.saveQuick(); err != nil {
+		t.Fatal(err)
+	}
+	d.sync(t)
+	before := config.LoadSyncState()
+	path := filepath.Join(d.dir, "quickcommands.json")
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d.a.quick().Command("saved").Text = "whoami"
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := d.a.saveQuick(); err == nil {
+		t.Fatal("the local save was not blocked")
+	}
+	// Hiding the warning must not allow the unsaved command to advance
+	// the merge base while its on-disk version is still old.
+	d.a.quickUI.saveErr = nil
+	d.a.startSync(false, time.Now())
+	if d.a.sync.running {
+		d.p.until(t, "the sync", func() bool { return !d.a.sync.running })
+	}
+	if d.a.sync.err == nil {
+		t.Fatal("sync succeeded after uploading an unsaved local command")
+	}
+	if r.writes() != 1 || !bytes.Equal(config.LoadSyncState().Base, before.Base) {
+		t.Fatal("failed local save changed the remote or merge base")
+	}
+	if d.a.quick().Command("saved").Text != "whoami" {
+		t.Fatal("the unsaved local edit was discarded")
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// Retrying first persists the edit, then uploads it. A later reload
+	// must read that saved version and avoid reverting the remote.
+	d.sync(t)
+	d.a.quickUI = quickState{}
+	d.a.sync.state = config.LoadSyncState()
+	d.sync(t)
+	if d.a.quick().Command("saved").Text != "whoami" || r.writes() != 2 {
+		t.Fatal("a reload reverted the successfully retried local edit")
+	}
+}
+
+func TestSyncQuickCommandsApplyFailure(t *testing.T) {
+	for _, reload := range []bool{false, true} {
+		t.Run(map[bool]string{false: "save failure", true: "unreadable file"}[reload], func(t *testing.T) {
+			r := &memRemote{}
+			one := newDevice(t, r)
+			one.a.quick().Commands = []*config.QuickCommand{{ID: "saved", Text: "uptime", Enter: true}}
+			one.sync(t)
+			two := newDevice(t, r)
+			two.sync(t)
+			before := config.LoadSyncState()
+			path := filepath.Join(two.dir, "quickcommands.json")
+			original, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			one.a.quick().Command("saved").Text = "whoami"
+			one.sync(t)
+			// The destination is blocked while the app has the old list
+			// cached, as when a Windows file is held open. Re-reading it
+			// also exercises the uncopyable-file path.
+			if err := os.Remove(path); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Mkdir(path, 0o700); err != nil {
+				t.Fatal(err)
+			}
+			if reload {
+				two.a.quickUI.store = nil
+			}
+			two.syncErr(t)
+			if two.a.sync.err == nil {
+				t.Fatal("sync succeeded although the received commands could not be saved")
+			}
+			if after := config.LoadSyncState(); !bytes.Equal(after.Base, before.Base) {
+				t.Fatal("failed apply advanced the merge base")
+			}
+			if !reload && two.a.quick().Command("saved").Text != "uptime" {
+				t.Fatal("failed apply changed the in-memory commands")
+			}
+			if err := os.Remove(path); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(path, original, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			// Simulate reopening the app's old file after the failure.
+			// Its retained base must still let it receive the new edit.
+			two.a.quickUI = quickState{}
+			two.a.sync.state = config.LoadSyncState()
+			two.sync(t)
+			if two.a.quick().Command("saved").Text != "whoami" || r.writes() != 2 {
+				t.Fatal("retry reverted the remote edit with the unsaved old file")
+			}
+		})
+	}
+}
+
+// A parse error must not turn the last synced commands into deletions.
+// LoadQuickCommands has preserved the broken file, so sync may repair
+// this computer from the remote instead.
+func TestSyncQuickCommandsBrokenLocalFile(t *testing.T) {
+	r := &memRemote{}
+	d := newDevice(t, r)
+	d.a.quick().Commands = []*config.QuickCommand{{ID: "saved", Text: "uptime", Enter: true}}
+	d.sync(t)
+	broken := []byte("{not json")
+	if err := os.WriteFile(filepath.Join(d.dir, "quickcommands.json"), broken, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	d.a.quickUI.store = nil
+	// Dismissing the load-error banner is not a request to clear the
+	// commands. This must remain true even after its error is hidden.
+	d.a.quick()
+	d.a.quickUI.loadErr = nil
+	d.sync(t)
+	if d.a.quick().Command("saved") == nil {
+		t.Fatal("a broken local file deleted the previously synced command")
+	}
+	if r.writes() != 1 {
+		t.Fatal("reading a broken local file overwrote the remote")
+	}
+	copies, _ := filepath.Glob(filepath.Join(d.dir, "quickcommands.json.broken-*"))
+	if len(copies) != 1 {
+		t.Fatal("the broken local document was not preserved")
+	}
+	if data, err := os.ReadFile(copies[0]); err != nil || string(data) != string(broken) {
+		t.Fatalf("backup: %q, %v", data, err)
+	}
+	// Once the remote repairs the local file, explicit edits sync again.
+	d.a.quick().Command("saved").Text = "whoami"
+	if err := d.a.saveQuick(); err != nil {
+		t.Fatal(err)
+	}
+	d.sync(t)
+	other := newDevice(t, r)
+	other.sync(t)
+	if other.a.quick().Command("saved").Text != "whoami" {
+		t.Fatal("recovered commands did not participate in later syncs")
+	}
+}
+
+func TestSyncQuickCommandsManualRecovery(t *testing.T) {
+	a, _ := testApp(t)
+	if err := os.WriteFile(filepath.Join(config.Dir(), "quickcommands.json"), []byte("{broken"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	q := a.quick()
+	if len(a.localPayload().QuickCommands) != 0 {
+		t.Fatal("an unreadable file was uploaded as an empty document")
+	}
+	q.AddCommand(&config.QuickCommand{Text: "pwd", Enter: true}, "")
+	if err := a.saveQuick(); err != nil {
+		t.Fatal(err)
+	}
+	if len(a.localPayload().QuickCommands) == 0 {
+		t.Fatal("a successfully saved replacement was omitted from sync")
+	}
+}
 
 func TestSyncQuickCommandsTwoDevices(t *testing.T) {
 	r := &memRemote{}

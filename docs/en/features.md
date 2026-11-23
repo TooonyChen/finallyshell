@@ -2333,6 +2333,17 @@ What is synced:
 - Saved quick commands and groups: names, command text, group membership,
   the Enter option, and group and button order. Commands are merged by ID
   independently, so edits to different commands on two computers survive.
+  New commands keep their position next to surviving neighbors when the
+  other computer adds or deletes commands. A local file that cannot be
+  read is left out of the upload, rather than treated as deleting every
+  command. After a successful save or repair from sync, it participates
+  again; dismissing its error banner does not erase remote commands.
+  If received commands cannot be saved, sync reports the error and keeps
+  the previous merge base, so retrying after fixing the file does not
+  overwrite remote edits with the old local file.
+  Unsaved local changes and repaired command IDs are saved before
+  uploading; a write failure stops sync and keeps the pending edit for
+  retry, even after its warning was dismissed.
 - With "Include saved passwords" checked, off by default, the passwords and
   key passphrases of the hosts that remember theirs. A computer that has it
   off keeps the passwords already in the file as they are. Private key

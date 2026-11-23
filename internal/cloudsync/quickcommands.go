@@ -1,6 +1,7 @@
 package cloudsync
 
 import (
+	"container/list"
 	"encoding/json"
 	"maps"
 	"slices"
@@ -46,29 +47,70 @@ func mergeQuickCommands(base, local, remote json.RawMessage) (json.RawMessage, i
 		if localMoved && remoteMoved && orderChanged(lists[1], lists[2]) {
 			conflicts++
 		}
-		if !localMoved && (remoteMoved || slices.Equal(itemIDs(lists[0]), itemIDs(lists[1]))) {
-			// Remote order wins when this device did not reorder. Keep
-			// local additions too, after the remote's surviving items.
-			remaining := byID(items)
-			ordered := make([]json.RawMessage, 0, len(items))
-			for _, item := range lists[2] {
-				if id := idOf(item); remaining[id] != nil {
-					ordered = append(ordered, remaining[id])
-					delete(remaining, id)
-				}
-			}
-			for _, item := range items {
-				if id := idOf(item); id == "" || remaining[id] != nil {
-					ordered = append(ordered, item)
-					delete(remaining, id)
-				}
-			}
-			items = ordered
+		primary, secondary := lists[1], lists[2]
+		if !localMoved && remoteMoved {
+			primary, secondary = secondary, primary
 		}
+		items = orderQuickItems(items, primary, secondary)
 		out[key], _ = json.Marshal(items)
 	}
 	data, _ := json.Marshal(out)
 	return data, conflicts
+}
+
+// orderQuickItems keeps the preferred side's order and places additions
+// from the other side next to their surviving neighbors. Appending every
+// addition at the end loses where a command was duplicated, even when
+// the preferred side only deleted an unrelated command.
+func orderQuickItems(items, primary, secondary []json.RawMessage) []json.RawMessage {
+	merged := byID(items)
+	ordered := list.New()
+	nodes := map[string]*list.Element{}
+	for _, item := range primary {
+		id := idOf(item)
+		if merged[id] != nil && nodes[id] == nil {
+			nodes[id] = ordered.PushBack(merged[id])
+		}
+	}
+	// For a leading addition, use the next surviving primary item.
+	next := make([]*list.Element, len(secondary))
+	var neighbor *list.Element
+	for i := len(secondary) - 1; i >= 0; i-- {
+		next[i] = neighbor
+		if node := nodes[idOf(secondary[i])]; node != nil {
+			neighbor = node
+		}
+	}
+	var previous *list.Element
+	for i, item := range secondary {
+		id := idOf(item)
+		if node := nodes[id]; node != nil {
+			previous = node
+			continue
+		}
+		if merged[id] == nil {
+			continue
+		}
+		switch {
+		case previous != nil:
+			previous = ordered.InsertAfter(merged[id], previous)
+		case next[i] != nil:
+			previous = ordered.InsertBefore(merged[id], next[i])
+		default:
+			previous = ordered.PushBack(merged[id])
+		}
+		nodes[id] = previous
+	}
+	out := make([]json.RawMessage, 0, len(items))
+	for node := ordered.Front(); node != nil; node = node.Next() {
+		out = append(out, node.Value.(json.RawMessage))
+	}
+	for _, item := range items {
+		if idOf(item) == "" {
+			out = append(out, item)
+		}
+	}
+	return out
 }
 
 func itemIDs(items []json.RawMessage) []string {

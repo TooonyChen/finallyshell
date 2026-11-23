@@ -31,6 +31,9 @@ func TestMergeQuickCommands(t *testing.T) {
 		{"local reorder", quickPayload(a, b, c), quickPayload(c, b, a), quickPayload(host("a", "remote"), b, c), []string{"c=C", "b=B", "a=remote"}, 0},
 		{"both reorder", quickPayload(a, b, c), quickPayload(b, a, c), quickPayload(a, c, b), []string{"b=B", "a=A", "c=C"}, 1},
 		{"old remote", quickPayload(a), quickPayload(a), &Payload{}, []string{"a=A"}, 0},
+		{"remote insertion and local deletion", quickPayload(a, b, c), quickPayload(a, b), quickPayload(a, host("x", "X"), b, c), []string{"a=A", "x=X", "b=B"}, 0},
+		{"local insertion and remote reorder", quickPayload(a, b, c), quickPayload(a, host("x", "X"), b, c), quickPayload(c, b, a), []string{"c=C", "b=B", "a=A", "x=X"}, 0},
+		{"concurrent insertions", quickPayload(a, b), quickPayload(a, host("x", "X"), b), quickPayload(a, host("y", "Y"), b), []string{"a=A", "y=Y", "x=X", "b=B"}, 0},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			merged, conflicts := Merge(test.base, test.local, test.remote)

@@ -40,7 +40,14 @@ type quickState struct {
 	// either: saving would replace it, so nothing is saved this run.
 	loadErr error
 	noSave  bool
-	saveErr error // why the last save failed, nil once one works
+	// loadFailed is separate from the dismissible banner: an unreadable
+	// file must not count as an intentional deletion during sync. A
+	// successful save (including repair from sync) clears it.
+	loadFailed bool
+	saveErr    error // why the last save failed, nil once one works
+	// savePending also survives dismissing saveErr. Sync first retries a
+	// failed local save or persists repaired command IDs before upload.
+	savePending bool
 
 	group  string // the group shown, "" for All
 	query  string // the search
@@ -73,6 +80,8 @@ func (a *App) quick() *config.QuickCommands {
 			var broken *config.BrokenFileError
 			q.loadErr, q.noSave = err, !errors.As(err, &broken)
 		}
+		q.loadFailed = err != nil
+		q.savePending = q.store.NeedsSave()
 	}
 	return q.store
 }
@@ -86,6 +95,10 @@ func (a *App) saveQuick() error {
 		return nil // the banner says so
 	}
 	q.saveErr = config.SaveQuickCommands(q.store)
+	q.savePending = q.saveErr != nil
+	if q.saveErr == nil {
+		q.loadFailed = false
+	}
 	return q.saveErr
 }
 

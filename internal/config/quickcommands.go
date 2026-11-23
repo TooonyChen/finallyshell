@@ -29,6 +29,9 @@ type QuickCommands struct {
 	Commands []*QuickCommand `json:"commands"`
 
 	extra extras
+	// needsSave records repaired identities that must be persisted before
+	// another device starts merging commands by those IDs.
+	needsSave bool
 }
 
 // QuickGroup is a group of quick commands.
@@ -123,6 +126,9 @@ func (c *QuickCommand) UnmarshalJSON(data []byte) error {
 // NewQuickCommands is an empty file's content.
 func NewQuickCommands() *QuickCommands { return &QuickCommands{Version: QuickCommandsVersion} }
 
+// NeedsSave says whether parsing repaired IDs that are not on disk yet.
+func (q *QuickCommands) NeedsSave() bool { return q.needsSave }
+
 // ParseQuickCommands reads the content of quickcommands.json. Nulls in
 // the lists are dropped, and entries without an ID, or with one another
 // entry has, get one of their own.
@@ -144,12 +150,14 @@ func ParseQuickCommands(data []byte) (*QuickCommands, error) {
 	for _, g := range q.Groups {
 		if g.ID == "" || seen[g.ID] {
 			g.ID = q.newID("g")
+			q.needsSave = true
 		}
 		seen[g.ID] = true
 	}
 	for _, c := range q.Commands {
 		if c.ID == "" || seen[c.ID] {
 			c.ID = q.newID("c")
+			q.needsSave = true
 		}
 		seen[c.ID] = true
 	}
@@ -208,7 +216,11 @@ func SaveQuickCommands(q *QuickCommands) error {
 	if err != nil {
 		return err
 	}
-	return writeFileAtomic(quickCommandsPath(), append(data, '\n'))
+	err = writeFileAtomic(quickCommandsPath(), append(data, '\n'))
+	if err == nil {
+		q.needsSave = false
+	}
+	return err
 }
 
 // newID returns an ID, starting with prefix, that no group or command of
