@@ -1,6 +1,6 @@
 package app
 
-// Sync: the connections, the settings that travel and, if the user
+// Sync: the connections, quick commands, the settings that travel and, if the user
 // wants, the saved passwords, kept in one file on storage the user has (a
 // GitHub gist, a WebDAV folder, an S3-compatible bucket), encrypted on
 // this device with the sync password (internal/cloudsync). The Sync page
@@ -183,7 +183,7 @@ func (a *App) keepSyncSecret(key, v string) {
 
 // localPayload is this device's payload, without secrets: its folders
 // and hosts, each without the time it last connected, which stays on this
-// device, and the settings that are synced.
+// device, the quick commands and the settings that are synced.
 func (a *App) localPayload() *cloudsync.Payload {
 	p := &cloudsync.Payload{Schema: cloudsync.PayloadSchema, Settings: config.SyncedSettings(a.settings)}
 	for _, f := range a.hosts.Folders {
@@ -197,6 +197,10 @@ func (a *App) localPayload() *cloudsync.Payload {
 		if b, err := json.Marshal(c); err == nil {
 			p.Hosts = append(p.Hosts, b)
 		}
+	}
+	quick := a.quick()
+	if !a.quickUI.noSave {
+		p.QuickCommands, _ = json.Marshal(quick)
 	}
 	return p
 }
@@ -374,11 +378,21 @@ func (a *App) syncDone(res *cloudsync.Result, err error, run syncRun) {
 	st.synced.Secrets = nil
 }
 
-// applyPayload makes this device's folders, hosts and synced settings
+// applyPayload makes this device's folders, hosts, quick commands and synced settings
 // those of p. Hosts keep the time they last connected here, and their
 // Host values, which sessions point at. hosts.json is copied first.
 func (a *App) applyPayload(p *cloudsync.Payload) {
 	local := a.localPayload()
+	if len(p.QuickCommands) != 0 && !a.quickUI.noSave &&
+		!cloudsync.Equal(&cloudsync.Payload{QuickCommands: local.QuickCommands}, &cloudsync.Payload{QuickCommands: p.QuickCommands}) {
+		if commands, err := config.ParseQuickCommands(p.QuickCommands); err == nil {
+			a.quickUI.store = commands
+			if commands.Group(a.quickUI.group) == nil {
+				a.quickUI.group = ""
+			}
+			a.saveQuick()
+		}
+	}
 	if !sameList(local.Folders, p.Folders) || !sameList(local.Hosts, p.Hosts) {
 		config.BackupHostsBeforeSync(a.hosts)
 		var folders []*config.Folder

@@ -11,7 +11,7 @@ import (
 // PayloadSchema is the version of the payload this build writes. A
 // remote file with a newer one is not merged, as this build would drop
 // what it does not know.
-const PayloadSchema = 1
+const PayloadSchema = 2
 
 // Payload is what the envelope encrypts: what is synced. Folders and
 // hosts are the objects of hosts.json, as JSON, each with its "id"; this
@@ -24,6 +24,8 @@ type Payload struct {
 
 	Folders []json.RawMessage `json:"folders"`
 	Hosts   []json.RawMessage `json:"hosts"`
+	// QuickCommands is quickcommands.json, including group and button order.
+	QuickCommands json.RawMessage `json:"quickCommands,omitempty"`
 	// Settings are the settings that are synced, by their key in
 	// settings.json.
 	Settings map[string]json.RawMessage `json:"settings"`
@@ -37,22 +39,24 @@ func (p *Payload) Clone() *Payload {
 	c := *p
 	c.Folders = slices.Clone(p.Folders)
 	c.Hosts = slices.Clone(p.Hosts)
+	c.QuickCommands = slices.Clone(p.QuickCommands)
 	c.Settings = maps.Clone(p.Settings)
 	c.Secrets = maps.Clone(p.Secrets)
 	return &c
 }
 
-// Equal says whether a and b hold the same folders, hosts, settings and
-// secrets. The order of folders and hosts, the device and the time do not
-// count.
+// Equal says whether a and b hold the same folders, hosts, quick commands,
+// settings and secrets. Quick command order counts; folder and host
+// order, the device and the time do not.
 func Equal(a, b *Payload) bool {
 	return sameItems(a.Folders, b.Folders) && sameItems(a.Hosts, b.Hosts) &&
+		sameJSON(a.QuickCommands, b.QuickCommands) &&
 		maps.EqualFunc(a.Settings, b.Settings, sameJSON) && maps.Equal(a.Secrets, b.Secrets)
 }
 
 // Merge merges local and remote three ways, against base, the payload
-// both last agreed on (nil when there is none). Each folder and host (by
-// its ID), each setting and each secret is merged on its own:
+// both last agreed on (nil when there is none). Each folder, host, quick
+// command and command group (by ID), setting and secret is merged on its own:
 //
 //   - changed on one side only, that side's is kept;
 //   - deleted on one side and unchanged on the other, it is deleted;
@@ -71,6 +75,8 @@ func Merge(base, local, remote *Payload) (merged *Payload, conflicts int) {
 	m.Folders, n = mergeItems(base.Folders, local.Folders, remote.Folders)
 	conflicts += n
 	m.Hosts, n = mergeItems(base.Hosts, local.Hosts, remote.Hosts)
+	conflicts += n
+	m.QuickCommands, n = mergeQuickCommands(base.QuickCommands, local.QuickCommands, remote.QuickCommands)
 	conflicts += n
 	m.Settings, n = mergeMap(base.Settings, local.Settings, remote.Settings, sameJSON)
 	conflicts += n

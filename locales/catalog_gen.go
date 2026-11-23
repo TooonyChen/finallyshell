@@ -7404,11 +7404,11 @@ func (msgs Messages) OptionsSync() string {
 	return Catalog.Format(msgs.locale, "optionsSync", nil)
 }
 
-// SyncIntro says "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted o…"
+// SyncIntro says "Keep connections, saved quick commands and settings the same on your computers, through storage you already have. Eve…"
 // in the language the app shows.
 func SyncIntro() string { return In(i18n.Locale()).SyncIntro() }
 
-// SyncIntro says "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted o…"
+// SyncIntro says "Keep connections, saved quick commands and settings the same on your computers, through storage you already have. Eve…"
 // in the language of msgs.
 func (msgs Messages) SyncIntro() string {
 	return Catalog.Format(msgs.locale, "syncIntro", nil)
@@ -7814,11 +7814,11 @@ func (msgs Messages) SyncReplaceRemote() string {
 	return Catalog.Format(msgs.locale, "syncReplaceRemote", nil)
 }
 
-// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. Wh…"
+// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections, quick commands and settings, encrypted with the sync pa…"
 // in the language the app shows.
 func SyncReplaceRemoteConfirm() string { return In(i18n.Locale()).SyncReplaceRemoteConfirm() }
 
-// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. Wh…"
+// SyncReplaceRemoteConfirm says "The remote file is replaced with this computer's connections, quick commands and settings, encrypted with the sync pa…"
 // in the language of msgs.
 func (msgs Messages) SyncReplaceRemoteConfirm() string {
 	return Catalog.Format(msgs.locale, "syncReplaceRemoteConfirm", nil)

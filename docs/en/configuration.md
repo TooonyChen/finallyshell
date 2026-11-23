@@ -279,10 +279,13 @@ Two more files belong to sync, next to `hosts.json`:
 The file on the service, `finallyshell-sync.json`, is JSON:
 `{"app": "finallyshell", "format": 1, "kdf": "argon2id", "salt": ..., "t": 3, "m": 65536, "p": 4, "cipher": "aes-256-gcm", "nonce": ..., "data": ...}`,
 the binary fields in base64. Decrypted, `data` is
-`{"schema": 1, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "settings": {...}, "secrets": {...}}`,
+`{"schema": 2, "device": ..., "updatedAt": ..., "folders": [...], "hosts": [...], "quickCommands": {...}, "settings": {...}, "secrets": {...}}`,
 where folders and hosts are those of `hosts.json`, settings the synced
 keys of `settings.json`, and secrets the saved passwords by their key in
-the credential store.
+the credential store. `quickCommands` is the complete `quickcommands.json`
+document, with groups and commands merged independently by ID and their
+order retained. Schema 1 files are read and upgraded on the next upload;
+update every computer before syncing with a schema 2 file.
 
 ## Command history
 
@@ -306,7 +309,7 @@ that it could.
 ## quickcommands.json
 
 The [Commands tab](features.md#commands-tab)'s quick commands, the same
-for every host:
+for every host, included in sync with their groups and order:
 
 ```json
 {
