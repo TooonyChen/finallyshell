@@ -9931,3 +9931,23 @@ func ErrAgentSign(error string) string { return In(i18n.Locale()).ErrAgentSign(e
 func (msgs Messages) ErrAgentSign(error string) string {
 	return Catalog.Format(msgs.locale, "errAgentSign", map[string]any{"error": error})
 }
+
+// ConnectSelected says "Connect Selected"
+// in the language the app shows.
+func ConnectSelected() string { return In(i18n.Locale()).ConnectSelected() }
+
+// ConnectSelected says "Connect Selected"
+// in the language of msgs.
+func (msgs Messages) ConnectSelected() string {
+	return Catalog.Format(msgs.locale, "connectSelected", nil)
+}
+
+// ConnectSelectedBody says "Open a session to each selected connection?"
+// in the language the app shows.
+func ConnectSelectedBody() string { return In(i18n.Locale()).ConnectSelectedBody() }
+
+// ConnectSelectedBody says "Open a session to each selected connection?"
+// in the language of msgs.
+func (msgs Messages) ConnectSelectedBody() string {
+	return Catalog.Format(msgs.locale, "connectSelectedBody", nil)
+}

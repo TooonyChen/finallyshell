@@ -14,6 +14,40 @@ import (
 // asking first.
 const connectAllAsk = 10
 
+// selectedHosts returns only the visible, selected connections, in tree
+// order. Selecting a folder does not implicitly select its contents.
+func (a *App) selectedHosts(m *managerState) []*config.Host {
+	var hosts []*config.Host
+	for row := range m.tree.Rows() {
+		it := m.tree.Item(row)
+		if !it.isHost() || !m.selected.Has(it) {
+			continue
+		}
+		if h := a.hosts.Host(it.host); h != nil && !h.Deleted() {
+			hosts = append(hosts, h)
+		}
+	}
+	return hosts
+}
+
+func (a *App) connectSelected(m *managerState) {
+	hosts := a.selectedHosts(m)
+	if len(hosts) == 0 {
+		return
+	}
+	if len(hosts) <= connectAllAsk {
+		a.connectHostsFrom(m, hosts)
+		return
+	}
+	n := len(hosts)
+	m.question = &managerQuestion{
+		title: func() string { return locales.ConnectAllTitle(n) },
+		body:  locales.ConnectSelectedBody,
+		ok:    locales.Connect,
+		yes:   func() { a.connectHostsFrom(m, hosts) },
+	}
+}
+
 // folderHosts are the connections, not deleted, in folder and in its
 // subfolders, in the order the tree of m shows them, its search aside:
 // the subfolders first, then the folder's own.

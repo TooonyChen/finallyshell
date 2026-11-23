@@ -1651,5 +1651,7 @@
   "errAgentNoAddress": "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General.",
   "errAgentNoKeys": "The SSH agent at {addr} has no keys",
   "errAgentRefused": "The server refused every key in the SSH agent",
-  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}"
+  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}",
+  "connectSelected": "Connect Selected",
+  "connectSelectedBody": "Open a session to each selected connection?"
 }

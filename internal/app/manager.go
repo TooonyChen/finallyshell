@@ -53,6 +53,7 @@ type managerState struct {
 	win WindowKind
 
 	tree        ui.OutlineState[managerItem]
+	selected    ui.Selection[managerItem]
 	row         int // the row chosen, -1 for none
 	sort        ui.SortOrder
 	query       string
@@ -452,8 +453,7 @@ func (m *managerState) chosen() (managerItem, bool) {
 
 // isChosen tells whether it is the item of the row chosen.
 func (m *managerState) isChosen(it managerItem) bool {
-	ch, ok := m.chosen()
-	return ok && ch == it
+	return m.selected.Has(it)
 }
 
 // rowOfItem is the row showing it in the last frame, -1 for none.
@@ -511,6 +511,7 @@ func (a *App) treeFrame(c *ui.Context, m *managerState, t *managerTree) (choose 
 		}
 	}
 	m.tree.List.Selected = &m.row
+	m.tree.List.Selection = &m.selected
 	m.tree.List.Label = func(row int) string { return a.managerTitle(m.tree.Item(row)) }
 	m.tree.List.DragRows = func(rows []int) any {
 		var items managerDrag
@@ -543,6 +544,8 @@ func (a *App) treeDropZone(m *managerState, later *[]func(), over *managerItem) 
 func (a *App) finishTree(c *ui.Context, m *managerState, tree ui.Element, choose int, later *[]func()) {
 	if choose >= 0 {
 		m.row = choose
+		m.selected.Clear()
+		m.selected.Add(m.tree.Item(choose))
 		m.tree.List.ScrollIntoView(choose)
 	}
 	if m.focus && m.tree.List.Focus(c) {
@@ -553,8 +556,12 @@ func (a *App) finishTree(c *ui.Context, m *managerState, tree ui.Element, choose
 		return
 	}
 	switch {
-	case tree.Submitted():
-		if it.isHost() {
+	// Modified double-clicks belong to selecting rows, even when the
+	// underlying list reports them as a submission.
+	case tree.Submitted() && c.Modifiers() == 0 && m.selected.Len() > 0:
+		if m.selected.Len() > 1 {
+			*later = append(*later, func() { a.connectSelected(m) })
+		} else if it.isHost() {
 			h := a.hosts.Host(it.host)
 			*later = append(*later, func() { a.connectFrom(m, h) })
 		} else if m.tree.Open.Has(it) {
@@ -693,6 +700,12 @@ func (a *App) managerTitle(it managerItem) string {
 // managerItemMenu is the context menu of a row of the tree of m.
 func (a *App) managerItemMenu(c *ui.Context, m *managerState, menu *ui.Menu, it managerItem, later *[]func()) {
 	do := func(fn func()) { *later = append(*later, fn) }
+	if m.selected.Len() > 1 && m.selected.Has(it) {
+		if menu.Item(locales.ConnectSelected()).Disabled(len(a.selectedHosts(m)) == 0).Chosen() {
+			do(func() { a.connectSelected(m) })
+		}
+		menu.Separator()
+	}
 	if !it.isHost() {
 		f := a.hosts.Folder(it.folder)
 		if f == nil {

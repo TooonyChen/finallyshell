@@ -491,6 +491,14 @@ password is not known asks for it, and the next ones wait, so the
 prompts come one at a time; Cancel skips that connection and goes on
 with the next. The Connections page has the same item.
 
+In both the connection manager and the Connections page, Ctrl-click
+(Cmd-click on macOS) adds or removes individual rows; Shift-click selects
+a range. Right-click a selected row and choose "Connect Selected", or
+press Enter, to open only the selected, visible connections in tree order.
+Selected folders do not include their contents automatically; deleted
+connections are skipped. More than 10 connections asks first. Other row
+menu actions still apply to the row the menu was opened on.
+
 Dragging a connection or folder onto a folder row moves it into that
 folder. Dropping it on a connection row moves it into the folder of that
 connection, and dropping it on empty space moves it to the top level. A
