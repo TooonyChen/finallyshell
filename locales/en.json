@@ -1651,5 +1651,10 @@
   "errAgentNoAddress": "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General.",
   "errAgentNoKeys": "The SSH agent at {addr} has no keys",
   "errAgentRefused": "The server refused every key in the SSH agent",
-  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}"
+  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}",
+  "keyPathHint": "For different folders on each computer, set Local private key directory in Options › Sync and enter %SSH_KEYS%/XXX.pem here. Also supports ~, %USERPROFILE%, $VAR and $'{VAR}'.",
+  "localKeyDirectory": "Local private key directory",
+  "localKeyDirectoryPlaceholder": "~/.ssh",
+  "chooseKeyDirectory": "Choose key directory…",
+  "localKeyDirectoryHint": "Choose this computer's folder, then enter %SSH_KEYS%/XXX.pem in the connection's Private key field. The folder setting and key files stay local. Empty uses the SSH_KEYS environment variable."
 }

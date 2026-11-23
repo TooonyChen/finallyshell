@@ -266,7 +266,7 @@ func (a *App) browseKey() {
 	ed := a.editor
 	dir := ""
 	if p := strings.TrimSpace(ed.keyPath); p != "" {
-		dir = filepath.Dir(sshx.ExpandHome(p))
+		dir = filepath.Dir(sshx.ResolveKeyPath(p, a.settings.SSHKeyDir))
 	} else if home, err := os.UserHomeDir(); err == nil {
 		if fi, err := os.Stat(filepath.Join(home, ".ssh")); err == nil && fi.IsDir() {
 			dir = filepath.Join(home, ".ssh")
@@ -372,12 +372,13 @@ func (a *App) sshPage(c *ui.Context, ed *connEditor, errs map[editorField]string
 			case config.AuthKey:
 				ui.Field(c, locales.FieldKeyFile(), func() {
 					ui.Row(c).Gap(8).Children(func() {
-						input(ui.TextInput(c, &ed.keyPath).Placeholder("~/.ssh/id_ed25519").Grow(1).MinWidth(0))
+						input(ui.TextInput(c, &ed.keyPath).Placeholder("%SSH_KEYS%/XXX.pem").Grow(1).MinWidth(0))
 						if ui.Button(c, locales.Browse()).Clicked() {
 							a.browseKey()
 						}
 					})
 				}).Error(errs[fieldKeyPath])
+				ui.Text(c, locales.KeyPathHint()).TextColor(theme.TextMuted).FontSize(12)
 				ui.Field(c, locales.FieldPassphrase(), func() {
 					input(ui.TextInput(c, &ed.passphrase).Password().Placeholder(locales.PassphrasePlaceholder()))
 				})

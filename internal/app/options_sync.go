@@ -78,6 +78,7 @@ func (a *App) syncPage(c *ui.Context) {
 	})
 
 	if s.Provider == config.SyncOff {
+		a.keyDirectoryOption(c)
 		return
 	}
 	ui.Column(c).Gap(8).Padding(8, 0, 0, 0).Children(func() {
@@ -138,6 +139,7 @@ func (a *App) syncPage(c *ui.Context) {
 			}
 		})
 	})
+	a.keyDirectoryOption(c)
 }
 
 // syncStatus says what sync is doing, did last, or lacks.

@@ -9931,3 +9931,53 @@ func ErrAgentSign(error string) string { return In(i18n.Locale()).ErrAgentSign(e
 func (msgs Messages) ErrAgentSign(error string) string {
 	return Catalog.Format(msgs.locale, "errAgentSign", map[string]any{"error": error})
 }
+
+// KeyPathHint says "For different folders on each computer, set Local private key directory in Options › Sync and enter %SSH_KEYS%/XXX.…"
+// in the language the app shows.
+func KeyPathHint() string { return In(i18n.Locale()).KeyPathHint() }
+
+// KeyPathHint says "For different folders on each computer, set Local private key directory in Options › Sync and enter %SSH_KEYS%/XXX.…"
+// in the language of msgs.
+func (msgs Messages) KeyPathHint() string {
+	return Catalog.Format(msgs.locale, "keyPathHint", nil)
+}
+
+// LocalKeyDirectory says "Local private key directory"
+// in the language the app shows.
+func LocalKeyDirectory() string { return In(i18n.Locale()).LocalKeyDirectory() }
+
+// LocalKeyDirectory says "Local private key directory"
+// in the language of msgs.
+func (msgs Messages) LocalKeyDirectory() string {
+	return Catalog.Format(msgs.locale, "localKeyDirectory", nil)
+}
+
+// LocalKeyDirectoryPlaceholder says "~/.ssh"
+// in the language the app shows.
+func LocalKeyDirectoryPlaceholder() string { return In(i18n.Locale()).LocalKeyDirectoryPlaceholder() }
+
+// LocalKeyDirectoryPlaceholder says "~/.ssh"
+// in the language of msgs.
+func (msgs Messages) LocalKeyDirectoryPlaceholder() string {
+	return Catalog.Format(msgs.locale, "localKeyDirectoryPlaceholder", nil)
+}
+
+// ChooseKeyDirectory says "Choose key directory…"
+// in the language the app shows.
+func ChooseKeyDirectory() string { return In(i18n.Locale()).ChooseKeyDirectory() }
+
+// ChooseKeyDirectory says "Choose key directory…"
+// in the language of msgs.
+func (msgs Messages) ChooseKeyDirectory() string {
+	return Catalog.Format(msgs.locale, "chooseKeyDirectory", nil)
+}
+
+// LocalKeyDirectoryHint says "Choose this computer's folder, then enter %SSH_KEYS%/XXX.pem in the connection's Private key field. The folder settin…"
+// in the language the app shows.
+func LocalKeyDirectoryHint() string { return In(i18n.Locale()).LocalKeyDirectoryHint() }
+
+// LocalKeyDirectoryHint says "Choose this computer's folder, then enter %SSH_KEYS%/XXX.pem in the connection's Private key field. The folder settin…"
+// in the language of msgs.
+func (msgs Messages) LocalKeyDirectoryHint() string {
+	return Catalog.Format(msgs.locale, "localKeyDirectoryHint", nil)
+}

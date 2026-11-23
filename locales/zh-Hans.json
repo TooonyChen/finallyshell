@@ -979,5 +979,10 @@
   "errAgentNoAddress": "找不到 SSH Agent：没有设置 SSH_AUTH_SOCK，请在 选项 › 常规 里填写 agent 的地址",
   "errAgentNoKeys": "SSH Agent 里没有私钥（地址：{addr}）",
   "errAgentRefused": "服务器拒绝了 agent 里的所有私钥",
-  "errAgentSign": "SSH Agent 没有签名（被拒绝或出错）：{error}"
+  "errAgentSign": "SSH Agent 没有签名（被拒绝或出错）：{error}",
+  "keyPathHint": "各电脑目录不同时，先在“选项 › 同步 › 本机私钥目录”设置文件夹，再在此填写 %SSH_KEYS%/XXX.pem。也支持 ~、%USERPROFILE%、$VAR 和 $'{VAR}'。",
+  "localKeyDirectory": "本机私钥目录",
+  "localKeyDirectoryPlaceholder": "%USERPROFILE%\\Documents\\VPS\\SSH",
+  "chooseKeyDirectory": "选择私钥目录…",
+  "localKeyDirectoryHint": "选择这台电脑的私钥文件夹，再在连接的“私钥文件”中填写 %SSH_KEYS%/XXX.pem。目录设置和私钥文件留在本机；留空使用系统的 SSH_KEYS 环境变量。"
 }

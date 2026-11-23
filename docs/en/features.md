@@ -2332,7 +2332,15 @@ What is synced:
 - With "Include saved passwords" checked, off by default, the passwords and
   key passphrases of the hosts that remember theirs. A computer that has it
   off keeps the passwords already in the file as they are. Private key
-  files are not synced; hosts keep their key's path.
+  files are not synced; hosts keep their key's path. Paths support `~`,
+  `%USERPROFILE%`, `$VAR` and `${VAR}`, expanded on the computer connecting.
+  Use `%USERPROFILE%\Documents\VPS\SSH\XXX.pem` when the folder layout is
+  the same on Windows computers. With different folders, choose
+  **Options › Sync › Local private key directory** on each computer and
+  save `%SSH_KEYS%/XXX.pem`. The directory setting stays local and takes
+  precedence over the `SSH_KEYS` environment variable; use forward
+  slashes for a path shared with macOS or Linux. Private key files must
+  be placed on each computer separately.
 
 Each sync merges three ways: this computer's data, the file's, and the
 data both had after the last sync, kept in `sync-state.json`, still

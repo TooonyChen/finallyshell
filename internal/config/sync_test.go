@@ -24,10 +24,11 @@ func TestSyncedSettingsRoundTrip(t *testing.T) {
 	s := Settings{
 		Language: "zh-Hans", TermFontSize: 15, TermTheme: "Nord", SidebarWidth: 300,
 		DownloadDir: "/home/me/dl", TermBackground: "bg.png",
-		Sync: SyncSettings{Provider: SyncGist},
+		SSHKeyDir: "/home/me/private-keys",
+		Sync:      SyncSettings{Provider: SyncGist},
 	}
 	m := SyncedSettings(s)
-	for _, k := range []string{"sidebarWidth", "downloadDir", "termBackground", "sync"} {
+	for _, k := range []string{"sidebarWidth", "downloadDir", "termBackground", "sync", "sshKeyDir"} {
 		if _, ok := m[k]; ok {
 			t.Errorf("%s is synced", k)
 		}
@@ -44,6 +45,9 @@ func TestSyncedSettingsRoundTrip(t *testing.T) {
 	}
 	if got.SidebarWidth != 300 || got.DownloadDir != "/home/me/dl" || got.TermBackground != "bg.png" || got.Sync.Provider != SyncGist {
 		t.Errorf("local settings changed: %+v", got)
+	}
+	if got.SSHKeyDir != s.SSHKeyDir {
+		t.Fatal("sync replaced this computer's private key directory")
 	}
 }
 
