@@ -19,6 +19,7 @@ func TestSettings(t *testing.T) {
 		NoAutoSelectTab: true, MinimizeToTray: true, NoConfirmClose: true,
 		CopyOnSelect: true, RightClick: RightClickCopyOrPaste, NoLinkClick: true, WheelLines: 5, KeepManagerOpen: true,
 		DownloadDir: "/srv/incoming", AskDownloadDir: true,
+		SSHKeyDir:     "/srv/private-keys",
 		TermBackspace: BackspaceCtrlH, TermDelete: DeleteDEL, TermEncoding: EncodingGBK,
 	}
 	if err := SaveSettings(want); err != nil {

@@ -111,6 +111,9 @@ type Settings struct {
 	// or on Windows a named pipe, \\.\pipe\<name>. "" for the default:
 	// SSH_AUTH_SOCK, or the Windows OpenSSH agent's pipe.
 	SSHAgent string `json:"sshAgent,omitempty"`
+	// SSHKeyDir is this computer's private key folder, used by SSH_KEYS
+	// in saved key paths. Empty uses the environment variable instead.
+	SSHKeyDir string `json:"sshKeyDir,omitempty"`
 
 	// The Mouse page of the terminal options, zero by default too.
 	//

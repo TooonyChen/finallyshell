@@ -120,6 +120,17 @@ credential store (see [Where passwords are stored](#where-passwords-are-stored))
   stored. Versions before SSH agent support read `agent` as `password`:
   a host synced to such a version asks for a password there, and saving it
   there makes it a password host.
+- `keyPath` is saved and synced as entered. `~`, `%VAR%`, `$VAR` and
+  `${VAR}` expand when reading the private key or choosing its folder.
+  Unknown variables remain literal. For different key directories, choose
+  **Options › Sync › Local private key directory** on each computer and
+  save `%SSH_KEYS%/XXX.pem`. This setting takes precedence over the
+  `SSH_KEYS` environment variable; empty uses the environment instead.
+  Directory settings, environment variables and key files stay local.
+  The local directory option is at the bottom of the Sync page, even with
+  sync off. `%USERPROFILE%` uses the Windows environment variable; a
+  redirected Documents folder may be elsewhere, so choose its actual
+  location with the local directory option in that case.
 - `folder` is the ID of the folder the host is in; empty means the top
   level. Folders nest through `parent`.
 - A host with `deletedAt` (the time it was deleted) is deleted. It is
@@ -167,6 +178,7 @@ default.
 | `noConfirmClose` | `true` closes and quits without asking while sessions are open. | Ask first. |
 | `keepAliveSeconds` | Seconds between the SSH keepalives of each connection, 1 to 3600 (higher reads as 3600); `-1` (any negative number) turns them off, which the options show as 0. Applies to new connections. | 30 (also for `0`) |
 | `sshAgent` | The SSH agent of the hosts with `"auth": "agent"`: a Unix socket's path (`~` for the home folder), such as `~/.bitwarden-ssh-agent.sock`, or on Windows a named pipe, `\\.\pipe\<name>`. This computer's own: not synced. Applies to new connections. | `SSH_AUTH_SOCK`; `\\.\pipe\openssh-ssh-agent` on Windows. |
+| `sshKeyDir` | This computer's private key directory (Options › Sync); resolves `SSH_KEYS` in key paths and is not synced. | Use the `SSH_KEYS` environment variable. |
 | `downloadDir` | Folder downloads go into. | The system's Downloads folder. |
 | `askDownloadDir` | `true` asks where to save each download. | Use `downloadDir`. |
 | `copyOnSelect` | `true` copies the mouse selection to the clipboard. | Off. |
@@ -255,7 +267,7 @@ local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `monitorHidden`, `bottomPanelHidden`, `bottomPanelSide`, `rightPanelWidth`,
 `monitorSide`, `rightMonitorPercent`, `commandEditorShown`,
 `commandEditorWidth`, `commandEditorPercent`, `commandEditorNoEnter`,
-`commandEditorClear`, `termBackground`, `localShell`, `sshAgent`, `downloadDir`,
+`commandEditorClear`, `termBackground`, `localShell`, `sshAgent`, `sshKeyDir`, `downloadDir`,
 `askDownloadDir`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are

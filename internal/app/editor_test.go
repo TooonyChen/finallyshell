@@ -35,6 +35,30 @@ type filePick struct {
 	title, dir string
 }
 
+func TestBrowsePortableKeyPath(t *testing.T) {
+	a, p := testApp(t)
+	dir := t.TempDir()
+	t.Setenv("FINALLYSHELL_TEST_KEYS", dir)
+	a.newConnection()
+	a.editor.keyPath = "%FINALLYSHELL_TEST_KEYS%/key.pem"
+	p.pick("")
+	a.browseKey()
+	p.until(t, "the key chooser", func() bool { return len(p.pickers()) == 1 })
+	if got := p.pickers()[0].dir; got != dir {
+		t.Fatalf("chooser directory %q, want %q", got, dir)
+	}
+	if a.editor.keyPath != "%FINALLYSHELL_TEST_KEYS%/key.pem" {
+		t.Fatal("cancelling replaced the saved variable path")
+	}
+	a.settings.SSHKeyDir = dir
+	a.editor.keyPath = "%SSH_KEYS%/key.pem"
+	a.browseKey()
+	p.until(t, "the configured key directory", func() bool { return len(p.pickers()) == 2 })
+	if p.pickers()[1].dir != dir || a.editor.keyPath != "%SSH_KEYS%/key.pem" {
+		t.Fatal("browsing did not use the configured local directory")
+	}
+}
+
 func (p *fakeFilePicker) OpenFile(parent WindowKind, title, dir string) (string, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()

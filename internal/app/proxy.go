@@ -37,7 +37,7 @@ func usesProxyPassword(h *config.Host) bool {
 // its proxy, without its jump host. It reads the settings, so it runs on
 // the UI thread.
 func (a *App) hopOptions(h *config.Host, secret string, ask func(*sshx.HostKeyQuestion)) sshx.Options {
-	opts := sshx.Options{AskHostKey: ask}
+	opts := sshx.Options{AskHostKey: ask, KeyDir: a.settings.SSHKeyDir}
 	switch h.Auth {
 	case config.AuthAgent:
 		opts.Agent = a.settings.SSHAgent

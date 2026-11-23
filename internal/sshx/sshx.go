@@ -62,6 +62,8 @@ type HostKeyQuestion struct {
 type Options struct {
 	Password   string
 	Passphrase string
+	// KeyDir is this computer's private key folder for SSH_KEYS in paths.
+	KeyDir string
 	// AskHostKey shows q and returns at once; the answer comes on q.Answer.
 	AskHostKey func(q *HostKeyQuestion)
 	// KnownHosts is the known_hosts file: <config dir>/known_hosts when
@@ -150,7 +152,7 @@ func authMethods(h *config.Host, opts Options) ([]ssh.AuthMethod, *agentLogin, e
 	}
 	var methods []ssh.AuthMethod
 	if h.Auth == config.AuthKey {
-		data, err := os.ReadFile(ExpandHome(h.KeyPath))
+		data, err := os.ReadFile(ResolveKeyPath(h.KeyPath, opts.KeyDir))
 		if err != nil {
 			return nil, nil, &KeyFileError{Err: err}
 		}
