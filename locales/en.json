@@ -1226,7 +1226,7 @@
     }
   },
   "optionsSync": "Sync",
-  "syncIntro": "Keep connections and settings the same on your computers, through storage you already have. Everything is encrypted on this computer with your sync password before it leaves; Finallyshell runs no server and sees nothing.",
+  "syncIntro": "Keep connections, saved quick commands and settings the same on your computers, through storage you already have. Everything is encrypted on this computer with your sync password before it leaves; Finallyshell runs no server and sees nothing.",
   "syncService": "Sync with",
   "syncOff": "Off",
   "syncGist": "GitHub Gist",
@@ -1289,7 +1289,7 @@
     }
   },
   "syncReplaceRemote": "Replace the Remote with This Computer's Data…",
-  "syncReplaceRemoteConfirm": "The remote file is replaced with this computer's connections and settings, encrypted with the sync password above. What only other computers have is lost from it, and they need the new password.",
+  "syncReplaceRemoteConfirm": "The remote file is replaced with this computer's connections, quick commands and settings, encrypted with the sync password above. What only other computers have is lost from it, and they need the new password.",
   "syncReplaceRemoteYes": "Replace",
   "syncErrWrongPassword": "The sync password does not match the one the remote file was encrypted with.",
   "syncErrAuth": "The service refused the credentials. Check the token, user, password or keys.",

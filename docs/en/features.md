@@ -1971,8 +1971,9 @@ and kept in `quickcommands.json` (see
   [above](#bottom-panel-in-a-tab-of-its-own)), for a board of commands
   as high as the window; its buttons send to its session.
 
-Not supported: commands with parameters to fill in, commands of one host only, syncing the
-commands, and a shortcut per command.
+Saved commands and groups, including their order, are included in [Sync](#sync).
+
+Not supported: commands with parameters to fill in, commands of one host only, and a shortcut per command.
 
 ### Command editor
 
@@ -2329,6 +2330,20 @@ What is synced:
   it is one every copy has (Material, Seti or minimal). Pane sizes, the
   download folder, the background image itself and icon themes installed
   from a VSIX stay on each computer.
+- Saved quick commands and groups: names, command text, group membership,
+  the Enter option, and group and button order. Commands are merged by ID
+  independently, so edits to different commands on two computers survive.
+  New commands keep their position next to surviving neighbors when the
+  other computer adds or deletes commands. A local file that cannot be
+  read is left out of the upload, rather than treated as deleting every
+  command. After a successful save or repair from sync, it participates
+  again; dismissing its error banner does not erase remote commands.
+  If received commands cannot be saved, sync reports the error and keeps
+  the previous merge base, so retrying after fixing the file does not
+  overwrite remote edits with the old local file.
+  Unsaved local changes and repaired command IDs are saved before
+  uploading; a write failure stops sync and keeps the pending edit for
+  retry, even after its warning was dismissed.
 - With "Include saved passwords" checked, off by default, the passwords and
   key passphrases of the hosts that remember theirs. A computer that has it
   off keeps the passwords already in the file as they are. Private key
@@ -2336,7 +2351,7 @@ What is synced:
 
 Each sync merges three ways: this computer's data, the file's, and the
 data both had after the last sync, kept in `sync-state.json`, still
-encrypted. Each folder, host, setting and password is merged on its own.
+encrypted. Each folder, host, quick command, command group, setting and password is merged on its own.
 What changed on one side only is kept; what was deleted on one side and
 not changed on the other is deleted; what changed on both sides keeps this
 computer's version, and the status says how many there were. The first

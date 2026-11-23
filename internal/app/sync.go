@@ -1,6 +1,6 @@
 package app
 
-// Sync: the connections, the settings that travel and, if the user
+// Sync: the connections, quick commands, the settings that travel and, if the user
 // wants, the saved passwords, kept in one file on storage the user has (a
 // GitHub gist, a WebDAV folder, an S3-compatible bucket), encrypted on
 // this device with the sync password (internal/cloudsync). The Sync page
@@ -183,7 +183,7 @@ func (a *App) keepSyncSecret(key, v string) {
 
 // localPayload is this device's payload, without secrets: its folders
 // and hosts, each without the time it last connected, which stays on this
-// device, and the settings that are synced.
+// device, the quick commands and the settings that are synced.
 func (a *App) localPayload() *cloudsync.Payload {
 	p := &cloudsync.Payload{Schema: cloudsync.PayloadSchema, Settings: config.SyncedSettings(a.settings)}
 	for _, f := range a.hosts.Folders {
@@ -197,6 +197,10 @@ func (a *App) localPayload() *cloudsync.Payload {
 		if b, err := json.Marshal(c); err == nil {
 			p.Hosts = append(p.Hosts, b)
 		}
+	}
+	quick := a.quick()
+	if !a.quickUI.noSave && !a.quickUI.loadFailed {
+		p.QuickCommands, _ = json.Marshal(quick)
 	}
 	return p
 }
@@ -253,6 +257,17 @@ func (a *App) startSync(force bool, now time.Time) {
 	st := &a.sync
 	if st.running || !a.syncReady() {
 		return
+	}
+	a.quick()
+	if a.quickUI.savePending {
+		if err := a.saveQuick(); err != nil {
+			// An upload cannot advance the merge base while its local
+			// command file still contains the version from before an
+			// unsaved edit, even when its warning was dismissed.
+			st.err, st.lastTry = err, now
+			a.redraw()
+			return
+		}
 	}
 	s := a.settings.Sync
 	remote, err := a.newRemote(s, st.credential)
@@ -354,7 +369,12 @@ func (a *App) syncDone(res *cloudsync.Result, err error, run syncRun) {
 			merged = m
 			st.nextCheck = time.Time{}
 		}
-		a.applyPayload(merged)
+		if err := a.applyPayload(merged); err != nil {
+			// Advancing the base after a failed save would make the old
+			// file look like a new local edit after restarting the app.
+			st.err, st.done = err, nil
+			return
+		}
 	}
 	if run.secrets != nil {
 		a.applySyncedSecrets(run.secrets, res.Merged.Secrets)
@@ -374,11 +394,37 @@ func (a *App) syncDone(res *cloudsync.Result, err error, run syncRun) {
 	st.synced.Secrets = nil
 }
 
-// applyPayload makes this device's folders, hosts and synced settings
+// applyPayload makes this device's folders, hosts, quick commands and synced settings
 // those of p. Hosts keep the time they last connected here, and their
 // Host values, which sessions point at. hosts.json is copied first.
-func (a *App) applyPayload(p *cloudsync.Payload) {
+func (a *App) applyPayload(p *cloudsync.Payload) error {
 	local := a.localPayload()
+	if len(p.QuickCommands) != 0 &&
+		(a.quickUI.savePending || !cloudsync.Equal(&cloudsync.Payload{QuickCommands: local.QuickCommands}, &cloudsync.Payload{QuickCommands: p.QuickCommands})) {
+		if a.quickUI.noSave {
+			if a.quickUI.loadErr != nil {
+				return a.quickUI.loadErr
+			}
+			return errors.New("sync: cannot save this computer's quick commands")
+		}
+		commands, err := config.ParseQuickCommands(p.QuickCommands)
+		if err != nil {
+			return err
+		}
+		// Persist before replacing the live store or applying the other
+		// data. A failed write keeps both the old file and merge base so
+		// that retrying can still receive the remote edit.
+		if err := config.SaveQuickCommands(commands); err != nil {
+			a.quickUI.saveErr = err
+			return err
+		}
+		a.quickUI.store = commands
+		a.quickUI.loadFailed, a.quickUI.saveErr = false, nil
+		a.quickUI.savePending = false
+		if commands.Group(a.quickUI.group) == nil {
+			a.quickUI.group = ""
+		}
+	}
 	if !sameList(local.Folders, p.Folders) || !sameList(local.Hosts, p.Hosts) {
 		config.BackupHostsBeforeSync(a.hosts)
 		var folders []*config.Folder
@@ -424,6 +470,7 @@ func (a *App) applyPayload(p *cloudsync.Payload) {
 		a.applyTerminalSettings()
 		a.applyAgentIcons()
 	}
+	return nil
 }
 
 // sameList says whether two lists hold the same objects in any order.
