@@ -918,11 +918,16 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 
 | 服务 | 要填什么 | 个人免费使用 |
 |---|---|---|
+| 本地文件夹 | 选择本机文件夹，由自己的同步工具把 `finallyshell-sync.json` 传到其他电脑。不需要服务凭据。 | 自己选择的文件夹和同步工具。 |
 | GitHub Gist | 一个带 `gist` 权限的个人访问令牌（“在 GitHub 上创建令牌”会打开已勾好权限的页面）。Gist ID 可以留空：第一次同步会找你账号下含 `finallyshell-sync.json` 的 gist，找不到就新建一个私密 gist，并记下它的 ID。 | 任何 GitHub 账号。 |
 | WebDAV | 文件夹地址、用户和密码（服务提供应用密码时用应用密码）。文件夹不存在会自动创建。 | 坚果云、Nextcloud、群晖、Box 等。 |
 | S3 兼容存储 | 端点、区域（Cloudflare R2 填 `auto`；留空为 `us-east-1`）、存储桶、文件名（留空为 `finallyshell-sync.json`）、访问密钥 ID 和私有访问密钥。请求用路径风格，并用 AWS Signature Version 4 签名。 | Cloudflare R2 和 Backblaze B2 有免费额度；MinIO 可以自己部署。 |
 
-服务上只放一个文件。内容离开电脑之前，用 AES-256-GCM 加密，密钥由 Argon2id（3 轮、64 MiB、4 路并行、随机盐）从**同步密码**派生；同步密码由你自己设定，每台电脑都要输入。服务只能看到这是一个加密的 Finallyshell 文件，以及密钥派生的参数；主机名、地址、电脑名都在密文里。同步密码无法找回。密码不对时，同步会提示，不会改动任何东西。
+选择**本地文件夹**时，各电脑分别选择自己的目录，输入相同的同步密码。所有服务的整个同步配置都留在本机，因此目录路径可以不同。可以让 OneDrive、Google Drive 或 Syncthing 传递文件，无需 Finallyshell 接入它们的 API。首次写入时会创建不存在的目录；现有合并、自动同步和替换功能同样适用。
+
+Finallyshell 在本机系统文件锁内比较内容哈希，先写临时文件再替换 `finallyshell-sync.json`。持久锁保存在当前用户的本机缓存中，位于同步目录之外。外部同步工具不参与文件锁或条件写入。到另一台电脑同步前，先等待文件传递完成；同时或离线修改可能产生需要在同步工具中处理的冲突副本。只需传递加密 JSON 文件；同步工具支持过滤时，排除 `.finallyshell-sync-*.tmp`。
+
+目的地只放一个同步文件。内容离开电脑之前，用 AES-256-GCM 加密，密钥由 Argon2id（3 轮、64 MiB、4 路并行、随机盐）从**同步密码**派生；同步密码由你自己设定，每台电脑都要输入。服务只能看到这是一个加密的 Finallyshell 文件，以及密钥派生的参数；主机名、地址、电脑名都在密文里。同步密码无法找回。密码不对时，同步会提示，不会改动任何东西。
 
 同步的内容：
 
@@ -938,7 +943,7 @@ macOS 上这一页还有“将 Option 用作 Alt（Meta）键”（默认关，�
 
 同步密码和服务的令牌、密码或私有密钥存在系统凭据存储里（见[密码存在哪里](configuration.md#密码存在哪里)）；系统没有凭据存储时只留在内存里。其他字段在 `settings.json` 的 `sync` 键里（见[同步](configuration.md#同步)）。
 
-暂不支持：Google Drive、OneDrive、用浏览器登录 GitHub 代替令牌，以及恢复文件的旧版本。
+暂不支持：直接接入 Google Drive 或 OneDrive API、用浏览器登录 GitHub 代替令牌，以及恢复文件的旧版本。Google Drive 和 OneDrive 可以通过本地文件夹方式使用。
 
 ## 快捷键
 

@@ -2305,11 +2305,28 @@ for it, and it is off until you choose a service:
 
 | Service | What you enter | Free for personal use |
 |---|---|---|
+| Local folder | Choose a folder on this computer. Your own sync tool transports `finallyshell-sync.json` to the other computers. No service credential is needed. | Any folder and sync tool you choose. |
 | GitHub Gist | A personal access token with the `gist` scope ("Create a token on GitHub" opens the page with the scope chosen). The Gist ID can stay empty: the first sync finds a gist of yours holding `finallyshell-sync.json`, or creates a secret one, and keeps its ID. | Any GitHub account. |
 | WebDAV | The folder's URL, a user and a password (an app password where the service has them). A missing folder is created. | Jianguoyun (坚果云), Nextcloud, Synology, Box and others. |
 | S3-compatible storage | The endpoint, region (`auto` for Cloudflare R2; `us-east-1` when empty), bucket, file name (`finallyshell-sync.json` when empty), access key ID and secret access key. Requests are path-style and signed with AWS Signature Version 4. | Cloudflare R2 and Backblaze B2 have free tiers; MinIO runs anywhere. |
 
-The service keeps one file. Before it leaves the computer, its content is
+With **Local folder**, choose each computer's folder separately and use
+the same sync password on all computers. The entire sync configuration
+stays local for every provider, so folder paths may differ. For example,
+OneDrive, Google Drive or Syncthing can transfer the file without an API
+integration in Finallyshell. A missing folder is created on the first
+write. Existing merging, automatic sync and replacement also apply here.
+
+Finallyshell compares content hashes under a local OS file lock and writes
+via a temporary file before replacing `finallyshell-sync.json`. The persistent
+lock stays in this user's local cache, outside the transported folder. External
+sync tools do not participate in that lock or conditional write. Wait for
+file propagation before syncing another computer; simultaneous or offline
+writes may produce conflict copies that your tool must resolve. Only the
+encrypted JSON file needs to travel; exclude `.finallyshell-sync-*.tmp`
+when your tool offers file filters.
+
+The destination keeps one sync file. Before it leaves the computer, its content is
 encrypted with AES-256-GCM, with a key derived by Argon2id (3 passes,
 64 MiB, 4 lanes, a random salt) from the **sync password**, which you
 choose and enter on each computer. The service sees only that the file is
@@ -2370,8 +2387,10 @@ in the system's credential store (see
 in memory only when the system has none. The other fields are the `sync`
 key of `settings.json` (see [Sync](configuration.md#sync)).
 
-Not supported yet: Google Drive, OneDrive, signing in to GitHub in the
-browser instead of a token, and restoring older versions of the file.
+Not supported yet: direct Google Drive or OneDrive API integration,
+signing in to GitHub in the browser instead of a token, and restoring
+older versions of the file. Google Drive and OneDrive can transport a
+Local folder's file.
 
 ## Keyboard shortcuts
 

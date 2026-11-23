@@ -192,13 +192,16 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 | 键 | 含义 | 默认值（没有这个键时） |
 |---|---|---|
-| `provider` | `gist`、`webdav` 或 `s3`。 | 不同步。 |
+| `provider` | `local`、`gist`、`webdav` 或 `s3`。 | 不同步。 |
+| `localDir` | 本机存放 `finallyshell-sync.json` 的文件夹，由用户自己的同步工具传递文件。 | 没有。 |
 | `gistId` | 存放文件的 gist，第一次同步时找到或创建。 | 自动查找或创建。 |
 | `webdavUrl`、`webdavUser` | WebDAV 文件夹和用户。 | 无。 |
 | `s3Endpoint`、`s3Region`、`s3Bucket`、`s3Key`、`s3AccessKeyId` | S3 兼容的存储桶、文件在其中的键和访问密钥 ID。 | 区域 `us-east-1`，键 `finallyshell-sync.json`。 |
 | `passwords` | `true` 时包括已保存的密码。 | 不包括。 |
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
+
+所有服务的整个 `sync` 对象都留在本机，包括目的地、自动同步选项和 `localDir`，不会放进加密同步数据。各电脑可以使用不同的本地文件夹路径，无需新增机器标识。本地文件夹只需要同步密码，不需要服务凭据。
 
 `settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 

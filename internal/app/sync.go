@@ -102,6 +102,8 @@ func syncRemote(s config.SyncSettings, credential string) (cloudsync.Remote, err
 			Endpoint: s.S3Endpoint, Region: s.S3Region, Bucket: s.S3Bucket, Key: s.S3Key,
 			AccessKeyID: s.S3AccessKeyID, SecretAccessKey: credential,
 		}, nil
+	case config.SyncLocal:
+		return &cloudsync.LocalFolder{Dir: s.LocalDir}, nil
 	}
 	return nil, errors.New("sync is off")
 }
@@ -110,7 +112,13 @@ func syncRemote(s config.SyncSettings, credential string) (cloudsync.Remote, err
 // the sync password and credential included.
 func (a *App) syncReady() bool {
 	s, st := a.settings.Sync, &a.sync
-	if st.password == "" || st.credential == "" || st.credFor != s.Provider {
+	if st.password == "" {
+		return false
+	}
+	if s.Provider == config.SyncLocal {
+		return strings.TrimSpace(s.LocalDir) != ""
+	}
+	if st.credential == "" || st.credFor != s.Provider {
 		return false
 	}
 	switch s.Provider {
@@ -148,6 +156,11 @@ func (a *App) loadSyncSecrets() {
 		})
 	} else {
 		pending--
+	}
+	if p == config.SyncLocal {
+		st.credential, st.credFor = "", p
+		done()
+		return
 	}
 	a.secret(syncCredentialKey(p), func(v string, ok bool) {
 		if st.credFor != p {

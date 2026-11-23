@@ -17,6 +17,7 @@ const (
 	SyncGist   SyncProvider = "gist"   // a secret GitHub gist
 	SyncWebDAV SyncProvider = "webdav" // a WebDAV folder
 	SyncS3     SyncProvider = "s3"     // an S3-compatible bucket
+	SyncLocal  SyncProvider = "local"  // a folder transported by the user's sync tool
 )
 
 // SyncSettings are the Sync page's settings. The provider's credential
@@ -24,6 +25,9 @@ const (
 // here: the app keeps them in the system's credential store.
 type SyncSettings struct {
 	Provider SyncProvider `json:"provider,omitempty"`
+	// LocalDir is this computer's folder containing the encrypted sync
+	// file. Like every other provider option, it is never synced.
+	LocalDir string `json:"localDir,omitempty"`
 
 	// GistID is the gist the file is in: "" to find it, by its file name,
 	// or create it, and keep its ID here.
@@ -74,6 +78,12 @@ func (s SyncSettings) Remote() string {
 		return "webdav " + s.WebDAVUser + " " + s.WebDAVURL
 	case SyncS3:
 		return "s3 " + s.S3Endpoint + " " + s.S3Bucket + " " + s.S3Key
+	case SyncLocal:
+		dir, err := filepath.Abs(s.LocalDir)
+		if err != nil {
+			dir = filepath.Clean(s.LocalDir)
+		}
+		return "local " + dir
 	}
 	return ""
 }
