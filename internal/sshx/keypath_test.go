@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"finallyshell/internal/config"
@@ -13,10 +14,29 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+func TestResolveKeyPathDirectoryVariableCase(t *testing.T) {
+	dir := t.TempDir()
+	envDir := filepath.Join(dir, "environment")
+	localDir := filepath.Join(dir, "configured")
+	t.Setenv("ssh_keys", envDir)
+	for _, path := range []string{"%ssh_keys%/key.pem", "${ssh_keys}/key.pem", "$ssh_keys/key.pem"} {
+		want := envDir + "/key.pem"
+		if runtime.GOOS == "windows" {
+			// Windows environment names are case insensitive. Configured
+			// SSH_KEYS must therefore override a differently cased spelling.
+			want = localDir + "/key.pem"
+		}
+		if got := ResolveKeyPath(path, localDir); got != want {
+			t.Errorf("ResolveKeyPath(%q) = %q, want %q", path, got, want)
+		}
+	}
+}
+
 func TestExpandKeyPath(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("FINALLYSHELL_TEST_KEYS", dir)
 	t.Setenv("FINALLYSHELL_TEST_LITERAL", "$UNEXPANDED")
+	t.Setenv("FINALLYSHELL_TEST_KEYS(x86)", dir)
 	home, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
@@ -25,6 +45,7 @@ func TestExpandKeyPath(t *testing.T) {
 		{"%FINALLYSHELL_TEST_KEYS%/key.pem", filepath.ToSlash(dir) + "/key.pem"},
 		{"$FINALLYSHELL_TEST_KEYS/key.pem", filepath.ToSlash(dir) + "/key.pem"},
 		{"${FINALLYSHELL_TEST_KEYS}/key.pem", filepath.ToSlash(dir) + "/key.pem"},
+		{"%FINALLYSHELL_TEST_KEYS(x86)%/key.pem", filepath.ToSlash(dir) + "/key.pem"},
 		{"~/key.pem", filepath.Join(home, "key.pem")},
 		{"~", home},
 		{"~someone/key.pem", "~someone/key.pem"},

@@ -97,6 +97,8 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 
 - `auth` 是主机的登录方式：`password`（密码）、`key`（私钥，私钥文件在 `keyPath`）或 `agent`：用 [settings.json](#settingsjson) 里 `sshAgent` 地址上的 SSH Agent 里的私钥登录，不保存密码或私钥密码。不支持 SSH Agent 的旧版本把 `agent` 当作 `password`：同步到旧版本的主机在那里会要求输入密码，在那里保存后就变成密码主机。
 - `keyPath` 按输入的原样保存和同步，读取私钥或浏览所在目录时才展开 `~`、`%VAR%`、`$VAR`、`${VAR}`。未定义的变量保留原样。目录不同时，在每台电脑的“选项 › 同步 › 本机私钥目录”选择自己的目录，连接统一填写 `%SSH_KEYS%/XXX.pem`。应用内目录设置优先于 `SSH_KEYS` 环境变量，留空时使用环境变量。目录设置、环境变量和私钥文件留在本机。
+  百分号语法接受 `%ProgramFiles(x86)%` 这样的 Windows 环境变量名；美元符号语法使用 shell 变量名规则。输入或选择目录时保留路径中的空格。
+  环境变量名（包括应用内配置的 `SSH_KEYS`）在 Windows 上不分大小写，在 macOS 和 Linux 上区分大小写。
   本机私钥目录位于同步页最下方，关闭同步时也可使用。`%USERPROFILE%` 按 Windows 环境变量展开；“文档”目录单独迁移时，请通过本机私钥目录选择实际位置。
 - `folder` 是主机所在文件夹的 ID，空表示顶层。文件夹用 `parent` 嵌套。
 - 有 `deletedAt`（删除时间）的主机是已删除的，只在连接管理器勾选“显示已删除”时列出。

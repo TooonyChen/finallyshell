@@ -1,6 +1,7 @@
 package app
 
 import (
+	"path/filepath"
 	"testing"
 
 	"finallyshell/internal/config"
@@ -8,6 +9,25 @@ import (
 
 	"github.com/egoist/mygo/ui"
 )
+
+func TestLocalKeyDirectoryTypingSpaces(t *testing.T) {
+	a, p := testApp(t)
+	a.openOptions()
+	a.optionsNav.Page = pageSync
+	tt := p.show(t, WindowOptions)
+	prefix := filepath.Join(t.TempDir(), "My")
+	typeInto(t, tt, locales.LocalKeyDirectory(), prefix)
+	// Separate input events and frames match typing a space and then
+	// continuing, rather than pasting a complete path in one event.
+	tt.Type(" ")
+	tt.Frame()
+	tt.Type("keys")
+	tt.Frame()
+	want := prefix + " keys"
+	if a.settings.SSHKeyDir != want || config.LoadSettings().SSHKeyDir != want {
+		t.Fatalf("typing a directory with spaces saved %q, want %q", a.settings.SSHKeyDir, want)
+	}
+}
 
 func TestLocalKeyDirectoryOption(t *testing.T) {
 	for _, lang := range []string{"en", "zh-Hans"} {

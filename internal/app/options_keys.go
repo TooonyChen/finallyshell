@@ -1,8 +1,6 @@
 package app
 
 import (
-	"strings"
-
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo/ui"
@@ -16,7 +14,7 @@ func (a *App) keyDirectoryOption(c *ui.Context) {
 		ui.Row(c).Gap(8).Children(func() {
 			dir := a.settings.SSHKeyDir
 			if ui.TextInput(c, &dir).Label(locales.LocalKeyDirectory()).Placeholder(locales.LocalKeyDirectoryPlaceholder()).Grow(1).MinWidth(0).Changed() {
-				a.changeSettings(func() { a.settings.SSHKeyDir = strings.TrimSpace(dir) })
+				a.changeSettings(func() { a.settings.SSHKeyDir = dir })
 			}
 			if ui.Button(c, locales.ChooseKeyDirectory()).Clicked() {
 				a.browseKeyDirectory()

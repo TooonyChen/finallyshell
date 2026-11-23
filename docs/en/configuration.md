@@ -122,11 +122,16 @@ credential store (see [Where passwords are stored](#where-passwords-are-stored))
   there makes it a password host.
 - `keyPath` is saved and synced as entered. `~`, `%VAR%`, `$VAR` and
   `${VAR}` expand when reading the private key or choosing its folder.
+  Percent syntax accepts Windows environment names such as
+  `%ProgramFiles(x86)%`; dollar syntax uses shell identifier names.
+  Environment names, including the configured `SSH_KEYS`, are case
+  insensitive on Windows and case sensitive on macOS and Linux.
   Unknown variables remain literal. For different key directories, choose
   **Options › Sync › Local private key directory** on each computer and
   save `%SSH_KEYS%/XXX.pem`. This setting takes precedence over the
   `SSH_KEYS` environment variable; empty uses the environment instead.
   Directory settings, environment variables and key files stay local.
+  Directory paths retain spaces when typed or selected.
   The local directory option is at the bottom of the Sync page, even with
   sync off. `%USERPROFILE%` uses the Windows environment variable; a
   redirected Documents folder may be elsewhere, so choose its actual

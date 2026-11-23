@@ -3,9 +3,13 @@ package sshx
 import (
 	"os"
 	"regexp"
+	"runtime"
+	"strings"
 )
 
-var keyPathVariable = regexp.MustCompile(`%([A-Za-z_][A-Za-z0-9_]*)%|\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)`)
+// Percent syntax follows Windows environment names (for example
+// ProgramFiles(x86)); dollar syntax follows shell identifier names.
+var keyPathVariable = regexp.MustCompile(`%([^%]+)%|\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)`)
 
 // ExpandKeyPath resolves a key's portable path on this computer. The
 // saved path stays unchanged, so each computer uses its own environment.
@@ -21,7 +25,7 @@ func ResolveKeyPath(path, keyDir string) string {
 		parts := keyPathVariable.FindStringSubmatch(variable)
 		for _, name := range parts[1:] {
 			if name != "" {
-				if name == "SSH_KEYS" && keyDir != "" {
+				if keyDir != "" && (name == "SSH_KEYS" || runtime.GOOS == "windows" && strings.EqualFold(name, "SSH_KEYS")) {
 					return ExpandKeyPath(keyDir)
 				}
 				if value, ok := os.LookupEnv(name); ok {
