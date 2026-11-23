@@ -497,7 +497,13 @@ a range. Right-click a selected row and choose "Connect Selected", or
 press Enter, to open only the selected, visible connections in tree order.
 Selected folders do not include their contents automatically; deleted
 connections are skipped. More than 10 connections asks first. Other row
-menu actions still apply to the row the menu was opened on.
+menu actions still apply to the row the menu was opened on. Enter uses
+the visible selection even when the keyboard cursor is on a different,
+unselected row. F2 and Delete act on the keyboard cursor only while its
+row is selected.
+
+Dragging several selected rows moves them together. If a selected folder
+also contains selected descendants, those descendants stay inside it.
 
 Dragging a connection or folder onto a folder row moves it into that
 folder. Dropping it on a connection row moves it into the folder of that

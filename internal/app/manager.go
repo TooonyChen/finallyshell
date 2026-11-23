@@ -435,11 +435,14 @@ func flatItems(t *managerTree) []managerItem {
 	return out
 }
 
-// connectFound connects the host chosen in m, as Enter in the search
-// does.
+// connectFound connects the visible selection, as Enter in the search
+// does. The keyboard cursor may be on a row that is no longer selected.
 func (a *App) connectFound(m *managerState) {
-	if it, ok := m.chosen(); ok && it.isHost() {
-		a.connectFrom(m, a.hosts.Host(it.host))
+	items := m.selectedItems()
+	if len(items) > 1 {
+		a.connectSelected(m)
+	} else if len(items) == 1 && items[0].isHost() {
+		a.connectFrom(m, a.hosts.Host(items[0].host))
 	}
 }
 
@@ -454,6 +457,19 @@ func (m *managerState) chosen() (managerItem, bool) {
 // isChosen tells whether it is the item of the row chosen.
 func (m *managerState) isChosen(it managerItem) bool {
 	return m.selected.Has(it)
+}
+
+// selectedItems are the selected rows still visible, in tree order.
+// Selection keeps keys of collapsed or removed rows, so its Len cannot
+// decide which actions are available for the current tree.
+func (m *managerState) selectedItems() []managerItem {
+	var items []managerItem
+	for row := range m.tree.Rows() {
+		if it := m.tree.Item(row); m.selected.Has(it) {
+			items = append(items, it)
+		}
+	}
+	return items
 }
 
 // rowOfItem is the row showing it in the last frame, -1 for none.
@@ -551,24 +567,32 @@ func (a *App) finishTree(c *ui.Context, m *managerState, tree ui.Element, choose
 	if m.focus && m.tree.List.Focus(c) {
 		m.focus = false
 	}
+	// Modified double-clicks belong to selecting rows, even when the
+	// underlying list reports them as a submission.
+	if tree.Submitted() && c.Modifiers() == 0 {
+		items := m.selectedItems()
+		if len(items) > 1 {
+			*later = append(*later, func() { a.connectSelected(m) })
+		} else if len(items) == 1 {
+			it := items[0]
+			if it.isHost() {
+				h := a.hosts.Host(it.host)
+				*later = append(*later, func() { a.connectFrom(m, h) })
+			} else if m.tree.Open.Has(it) {
+				m.tree.Open.Remove(it)
+			} else {
+				m.tree.Open.Add(it)
+			}
+		}
+		return
+	}
+	// The keyboard cursor can move without selecting its row, or stay
+	// on a row just deselected. Single-row editing must not act on it.
 	it, ok := m.chosen()
-	if !ok {
+	if !ok || !m.selected.Has(it) {
 		return
 	}
 	switch {
-	// Modified double-clicks belong to selecting rows, even when the
-	// underlying list reports them as a submission.
-	case tree.Submitted() && c.Modifiers() == 0 && m.selected.Len() > 0:
-		if m.selected.Len() > 1 {
-			*later = append(*later, func() { a.connectSelected(m) })
-		} else if it.isHost() {
-			h := a.hosts.Host(it.host)
-			*later = append(*later, func() { a.connectFrom(m, h) })
-		} else if m.tree.Open.Has(it) {
-			m.tree.Open.Remove(it)
-		} else {
-			m.tree.Open.Add(it)
-		}
 	case m.tree.List.Shortcut(c, 0, ui.KeyDelete), m.tree.List.Shortcut(c, ui.Cmd, ui.KeyBackspace):
 		*later = append(*later, func() { a.deleteItem(m, it) })
 	case m.tree.List.Shortcut(c, 0, ui.KeyF2):
@@ -700,7 +724,7 @@ func (a *App) managerTitle(it managerItem) string {
 // managerItemMenu is the context menu of a row of the tree of m.
 func (a *App) managerItemMenu(c *ui.Context, m *managerState, menu *ui.Menu, it managerItem, later *[]func()) {
 	do := func(fn func()) { *later = append(*later, fn) }
-	if m.selected.Len() > 1 && m.selected.Has(it) {
+	if len(m.selectedItems()) > 1 && m.selected.Has(it) {
 		if menu.Item(locales.ConnectSelected()).Disabled(len(a.selectedHosts(m)) == 0).Chosen() {
 			do(func() { a.connectSelected(m) })
 		}
@@ -1029,11 +1053,13 @@ func (a *App) duplicateHost(m *managerState, h *config.Host) {
 
 // moveItems moves hosts and folders into folder, "" for the top level,
 // showing them in the tree of m. A folder does not go into itself, or
-// into a folder inside it.
+// into a folder inside it. Selected descendants travel with a selected
+// parent rather than being moved out of it separately.
 func (a *App) moveItems(m *managerState, items managerDrag, folder string) {
 	if folder != "" && a.hosts.Folder(folder) == nil {
 		return
 	}
+	items = a.topLevelItems(items)
 	path := a.hosts.FolderPath(folder)
 	moved := false
 	for _, it := range items {
@@ -1059,6 +1085,37 @@ func (a *App) moveItems(m *managerState, items managerDrag, folder string) {
 		m.reveal(items[0])
 	}
 	a.saveFromTree(m)
+}
+
+// topLevelItems removes descendants of selected folders before any move
+// changes their paths, retaining the order of the independent items.
+func (a *App) topLevelItems(items managerDrag) managerDrag {
+	folders := map[string]bool{}
+	for _, it := range items {
+		if !it.isHost() && a.hosts.Folder(it.folder) != nil {
+			folders[it.folder] = true
+		}
+	}
+	var out managerDrag
+	for _, it := range items {
+		parent := ""
+		if h := a.hosts.Host(it.host); it.isHost() && h != nil {
+			parent = a.folderOf(h)
+		} else if f := a.hosts.Folder(it.folder); f != nil {
+			parent = f.Parent
+		}
+		inside := false
+		for _, f := range a.hosts.FolderPath(parent) {
+			if folders[f.ID] {
+				inside = true
+				break
+			}
+		}
+		if !inside {
+			out = append(out, it)
+		}
+	}
+	return out
 }
 
 // managerPromptView asks for a name in the window of the tree of m.

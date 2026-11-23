@@ -18,9 +18,8 @@ const connectAllAsk = 10
 // order. Selecting a folder does not implicitly select its contents.
 func (a *App) selectedHosts(m *managerState) []*config.Host {
 	var hosts []*config.Host
-	for row := range m.tree.Rows() {
-		it := m.tree.Item(row)
-		if !it.isHost() || !m.selected.Has(it) {
+	for _, it := range m.selectedItems() {
+		if !it.isHost() {
 			continue
 		}
 		if h := a.hosts.Host(it.host); h != nil && !h.Deleted() {
