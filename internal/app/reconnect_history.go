@@ -75,3 +75,17 @@ func restorePaneHistory(ctx context.Context, term, previous *terminal.Terminal) 
 	term.Feed(history)
 	return ctx.Err()
 }
+
+// disposeCanceledTerminals frees terminals awaiting a posted installation,
+// even if the UI stops draining posts as the app closes. The UI must stop
+// disposal before accepting ownership; once installed, disconnect can
+// retain the emulator without cancellation freeing its history.
+func disposeCanceledTerminals(ctx context.Context, terms []*terminal.Terminal) func() bool {
+	return context.AfterFunc(ctx, func() {
+		for _, term := range terms {
+			if term != nil {
+				term.Close()
+			}
+		}
+	})
+}

@@ -59,7 +59,16 @@ func (a *App) splitPane(s *Session, dir splitDir) {
 	client, spec, ctx := s.client, a.shellSpec(s.Host), s.ctx
 	go func() {
 		term, conn, err := a.openPaneShell(ctx, s, p, client, spec, nil)
-		a.post(func() { a.paneOpened(s, at, p, dir, client, spec, term, conn, err) })
+		stopDisposal := disposeCanceledTerminals(ctx, []*terminal.Terminal{term})
+		a.post(func() {
+			if !stopDisposal() || ctx.Err() != nil {
+				if term != nil {
+					term.Close()
+				}
+				return
+			}
+			a.paneOpened(s, at, p, dir, client, spec, term, conn, err)
+		})
 	}()
 }
 

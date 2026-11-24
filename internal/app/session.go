@@ -187,12 +187,13 @@ func (a *App) connect(s *Session, secret string) {
 			}
 			terms[i], conns[i] = term, conn
 		}
+		stopDisposal := disposeCanceledTerminals(ctx, terms)
 		ip := h.Addr
 		if addr, ok := client.RemoteAddr().(*net.TCPAddr); ok {
 			ip = addr.IP.String()
 		}
 		a.post(func() {
-			if ctx.Err() != nil {
+			if !stopDisposal() || ctx.Err() != nil {
 				for _, term := range terms {
 					if term != nil {
 						term.Close()

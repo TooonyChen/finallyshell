@@ -587,7 +587,9 @@ children; the view (`paneview.go`) lays them out with nested
   thread, `restorePaneHistory` waits for its reader to finish, exports
   MyGo's styled `History`, and feeds it to the replacement at the same
   width. `paneConn` gates incoming output until restoration and UI
-  installation are complete. `pane.end` disposes both transport and
+  installation are complete. Cancellation also disposes terminals still
+  awaiting installation; the UI stops that disposal before taking
+  ownership. `pane.end` disposes both transport and
   emulator when a pane/tab closes. Local reconnect keeps its existing
   disposal behavior.
 - A pane's terminal ends (`paneExited`): with other panes and the client

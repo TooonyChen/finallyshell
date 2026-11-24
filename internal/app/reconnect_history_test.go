@@ -281,3 +281,42 @@ func TestSSHDisconnectReconnectHistory(t *testing.T) {
 		t.Fatal("tab close left terminal allocated")
 	}
 }
+
+func TestSSHHistoryCanceledInstallation(t *testing.T) {
+	for _, installed := range []bool{false, true} {
+		t.Run(fmt.Sprint(installed), func(t *testing.T) {
+			conn := newPaneConn(&transcriptConn{Reader: bytes.NewReader(nil)})
+			term, err := terminal.New(terminal.Options{Conn: conn})
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer term.Close()
+			term.Feed([]byte("pending installation history"))
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			stopDisposal := disposeCanceledTerminals(ctx, []*terminal.Terminal{nil, term})
+			if installed && !stopDisposal() {
+				t.Fatal("disposal ran before cancellation")
+			}
+			cancel()
+			if installed {
+				// Installed panes must retain output when reconnect cancels ctx.
+				if !strings.Contains(string(term.History()), "pending installation history") {
+					t.Fatal("cancellation freed installed history")
+				}
+			} else {
+				// No UI callback is drained: cancellation itself frees the emulator
+				// and unblocks the reader waiting for installation.
+				deadline := time.After(5 * time.Second)
+				for len(term.History()) != 0 {
+					select {
+					case <-deadline:
+						t.Fatal("canceled installation retained terminal")
+					case <-time.After(time.Millisecond):
+					}
+				}
+				historyDone(t, term)
+			}
+		})
+	}
+}

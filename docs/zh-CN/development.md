@@ -316,7 +316,7 @@ var xshellReader = &Reader{
 - 每个终端自己的东西在 `pane` 上：终端、查找栏（`findState`）、跟随 shell 目录和前台程序的读取（`shellDirState`）、本地程序的标题。每个连接的东西留在 `Session` 上：客户端、SFTP、监控、隧道、命令输入框。
 - `Session.term()` 是获得焦点的分屏的终端，`Session.pane()` 是获得焦点的分屏：会话没有别的终端需要同步。命令输入框的 `sendLine`、命令页、命令编辑器和发送目标都通过它到达会话，所以都发给获得焦点的分屏，每个会话一次。
 - `connect` 在同一个连接上按树的顺序依次给树里每个分屏打开 shell：第一次是只有一个分屏的树，重新连接时是会话原来的树。`connectLocal` 对本地程序也一样。分屏（`splitPane`）在会话的客户端上再开一个 shell，不在 UI 线程上，shell 开好后才加上分屏。
-- SSH 重新连接时只结束传输（`pane.stopShell`），旧终端保持可见，直到新终端安装。`restorePaneHistory` 在 UI 线程之外等待读取结束，导出 MyGo 的带样式 `History`，按原宽度送给新终端。`paneConn` 在历史恢复和 UI 安装完成前暂缓读取服务器输出。关闭分屏或标签时，`pane.end` 同时释放传输和终端。本地终端重新连接沿用原来的释放方式。
+- SSH 重新连接时只结束传输（`pane.stopShell`），旧终端保持可见，直到新终端安装。`restorePaneHistory` 在 UI 线程之外等待读取结束，导出 MyGo 的带样式 `History`，按原宽度送给新终端。`paneConn` 在历史恢复和 UI 安装完成前暂缓读取服务器输出。取消连接时也会释放尚未安装的终端，UI 接管前先停止这个自动释放。关闭分屏或标签时，`pane.end` 同时释放传输和终端。本地终端重新连接沿用原来的释放方式。
 - 分屏的终端结束时（`paneExited`）：还有别的分屏且客户端还活着（在连接上发一个 keepalive 请求就知道），只关闭这个分屏；否则会话断开，和只有一个终端时一样，并保留分屏树给重新连接用。
 - 跟随分屏 shell 的读取用 `monitor.ShellPick` 从 `/proc` 读它：按打开的顺序（`paneTree.order`）它在连接的 shell 里排第几，也就是它们在服务器上启动时间的顺序。
 - `paneTree.remove` 和 `paneTree.insert` 把一个分屏拿出来、放到另一个分屏的前面或后面。拖动分屏松手时调用的 `paneTree.move` 就是先拿出来再放进去，并保持 `paneTree.order` 不变：挪过的分屏仍然读自己的 shell，因为它看的是 shell 打开的顺序，不是分屏的位置。`paneTree.swap`（“交换分屏”快捷键）交换两个叶子的分屏。
