@@ -53,20 +53,29 @@ func (a *App) splitPane(s *Session, dir splitDir) {
 	at, p := s.pane(), newPane()
 	if s.isLocal() {
 		term, err := a.openLocalPane(s, p)
-		a.paneOpened(s, at, p, dir, nil, shellSpec{}, term, err)
+		a.paneOpened(s, at, p, dir, nil, shellSpec{}, term, nil, err)
 		return
 	}
-	client, spec := s.client, a.shellSpec(s.Host)
+	client, spec, ctx := s.client, a.shellSpec(s.Host), s.ctx
 	go func() {
-		term, err := a.openPaneShell(s, p, client, spec)
-		a.post(func() { a.paneOpened(s, at, p, dir, client, spec, term, err) })
+		term, conn, err := a.openPaneShell(ctx, s, p, client, spec, nil)
+		stopDisposal := disposeCanceledTerminals(ctx, []*terminal.Terminal{term})
+		a.post(func() {
+			if !stopDisposal() || ctx.Err() != nil {
+				if term != nil {
+					term.Close()
+				}
+				return
+			}
+			a.paneOpened(s, at, p, dir, client, spec, term, conn, err)
+		})
 	}()
 }
 
 // paneOpened puts p beside at, as splitPane asked, now that its shell on
 // client opened (term) or failed (err). A session that closed or
 // reconnected meanwhile does not take it.
-func (a *App) paneOpened(s *Session, at, p *pane, dir splitDir, client *ssh.Client, spec shellSpec, term *terminal.Terminal, err error) {
+func (a *App) paneOpened(s *Session, at, p *pane, dir splitDir, client *ssh.Client, spec shellSpec, term *terminal.Terminal, conn *paneConn, err error) {
 	if err != nil {
 		a.notify(paneError(err))
 		return
@@ -79,11 +88,12 @@ func (a *App) paneOpened(s *Session, at, p *pane, dir splitDir, client *ssh.Clie
 		at = s.pane()
 	}
 	s.panes.insert(at, p, dir, false)
-	p.term = term
+	p.term, p.conn = term, conn
 	s.panes.focus, s.panes.zoomed, s.panes.refocus = p, false, true
 	s.panes.opened(p)
 	if !s.isLocal() {
 		a.startPane(s, p, spec)
+		conn.start()
 	}
 }
 
@@ -110,12 +120,21 @@ func (a *App) startPane(s *Session, p *pane, spec shellSpec) {
 	a.updateTerminal(p.term, spec.topts)
 }
 
-// end ends p's shell and its follower, keeping its place in the tree.
-func (p *pane) end() {
+// stopShell ends the SSH transport and follower, retaining its display.
+func (p *pane) stopShell() {
 	if p.stop != nil {
 		p.stop()
 		p.stop = nil
 	}
+	if p.conn != nil {
+		p.conn.Close()
+		p.conn = nil
+	}
+}
+
+// end disposes the terminal as well as its shell, when its pane closes.
+func (p *pane) end() {
+	p.stopShell()
 	if p.term != nil {
 		p.term.Close()
 		p.term = nil

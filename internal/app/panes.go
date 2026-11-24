@@ -56,7 +56,8 @@ var nextPaneID atomic.Int64
 // pane is one terminal of a session.
 type pane struct {
 	id    int64
-	term  *terminal.Terminal // nil until its shell opens, and once disconnected
+	term  *terminal.Terminal // retained during SSH reconnect, nil once disposed
+	conn  *paneConn          // SSH transport, which can end without freeing term
 	find  findState          // the find bar over its terminal
 	shell shellDirState      // its shell's folder and foreground program
 	title string             // the title a local terminal's program set
