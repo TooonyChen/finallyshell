@@ -582,6 +582,14 @@ children; the view (`paneview.go`) lays them out with nested
   same with the local program. A split opens one more shell on the
   session's client (`splitPane`), off the UI thread, and adds the pane
   only once it is there.
+- SSH reconnect ends the transport (`pane.stopShell`) while keeping the
+  old terminal visible until the replacement is installed. Off the UI
+  thread, `restorePaneHistory` waits for its reader to finish, exports
+  MyGo's styled `History`, and feeds it to the replacement at the same
+  width. `paneConn` gates incoming output until restoration and UI
+  installation are complete. `pane.end` disposes both transport and
+  emulator when a pane/tab closes. Local reconnect keeps its existing
+  disposal behavior.
 - A pane's terminal ends (`paneExited`): with other panes and the client
   alive, which a keepalive request on the connection tells, the pane
   closes; otherwise the session is lost, as with one terminal, and keeps

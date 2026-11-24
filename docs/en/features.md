@@ -1047,7 +1047,14 @@ script that also runs on BusyBox. When tools such as `lscpu`, `nproc` or
 ## Terminal
 
 The top right is the terminal. When a session disconnects, the last screen
-stays, and a "Reconnect" bar appears at the top.
+stays, and a "Reconnect" bar appears at the top. Reconnecting SSH keeps the
+previous output and scrollback in each pane, with the new shell's output
+appended below it. A failed reconnect retains the old output for another
+attempt. A full-screen program's alternate screen is left behind while the
+main shell history is kept. Closing the tab or application releases this
+history; it is not saved across application restarts.
+
+![SSH output retained after reconnect](../screenshots/reconnect-history-en.png)
 
 ### Find
 

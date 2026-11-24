@@ -511,7 +511,7 @@ func (a *App) reconnect(s *Session) {
 		a.askSecret(need, func() { a.reconnect(s) })
 		return
 	}
-	s.disconnect()
+	s.stopConnection(true)
 	a.connect(s, a.passwords[s.Host.ID])
 }
 

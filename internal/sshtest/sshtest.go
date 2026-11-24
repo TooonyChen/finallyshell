@@ -239,6 +239,16 @@ func (s *Server) ShellInput(i int) string {
 	return sh.in.String()
 }
 
+// WriteShell sends output from the i-th shell opened, from 0.
+func (s *Server) WriteShell(i int, p []byte) error {
+	sh := s.shell(i)
+	if sh == nil {
+		return io.ErrClosedPipe
+	}
+	_, err := sh.ch.Write(p)
+	return err
+}
+
 // EndShell ends the i-th shell opened, from 0, as a shell that exits:
 // exit status 0, then the channel's close. The connection stays.
 func (s *Server) EndShell(i int) {

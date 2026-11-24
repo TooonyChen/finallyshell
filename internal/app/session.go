@@ -137,12 +137,17 @@ func (a *App) connect(s *Session, secret string) {
 		s.panes.reset(newPane())
 	}
 	panes := s.panes.panes()
+	previous := make([]*terminal.Terminal, len(panes))
+	for i, p := range panes {
+		previous[i] = p.term
+	}
 	fail := func(err error) {
 		a.post(func() {
-			s.status, s.err = statusFailed, err
-			if ctx.Err() == nil {
-				a.loginFailed(s, err)
+			if ctx.Err() != nil {
+				return // closed, or another attempt took over
 			}
+			s.status, s.err = statusFailed, err
+			a.loginFailed(s, err)
 		})
 	}
 	go func() {
@@ -154,6 +159,9 @@ func (a *App) connect(s *Session, secret string) {
 			fail(err)
 			return
 		}
+		// Canceling an attempt must also release shells opened before the
+		// client is installed on the UI thread.
+		context.AfterFunc(ctx, func() { client.Close() })
 		a.post(func() { a.loggedIn(s.Host) })
 		if ctx.Err() != nil { // closed while connecting
 			client.Close()
@@ -165,9 +173,10 @@ func (a *App) connect(s *Session, secret string) {
 		// one the server refuses, as past its MaxSessions, leaves its pane
 		// out of the layout.
 		terms := make([]*terminal.Terminal, len(panes))
+		conns := make([]*paneConn, len(panes))
 		var refused error
 		for i, p := range panes {
-			term, err := a.openPaneShell(s, p, client, spec)
+			term, conn, err := a.openPaneShell(ctx, s, p, client, spec, previous[i])
 			if err != nil && i == 0 {
 				client.Close()
 				fail(err)
@@ -176,7 +185,7 @@ func (a *App) connect(s *Session, secret string) {
 			if err != nil && refused == nil {
 				refused = err
 			}
-			terms[i] = term
+			terms[i], conns[i] = term, conn
 		}
 		ip := h.Addr
 		if addr, ok := client.RemoteAddr().(*net.TCPAddr); ok {
@@ -196,13 +205,15 @@ func (a *App) connect(s *Session, secret string) {
 			for i, p := range panes {
 				switch {
 				case terms[i] == nil:
+					p.end()
 					s.panes.remove(p)
 					continue
 				case !s.panes.has(p): // closed while connecting
 					terms[i].Close()
 					continue
 				}
-				p.term = terms[i]
+				p.end()
+				p.term, p.conn = terms[i], conns[i]
 				s.panes.opened(p)
 				a.startPane(s, p, spec)
 			}
@@ -211,6 +222,11 @@ func (a *App) connect(s *Session, secret string) {
 				a.notify(paneError(refused))
 			}
 			s.status, s.err = statusConnected, nil
+			for i, p := range panes {
+				if p.term == terms[i] && conns[i] != nil {
+					conns[i].start()
+				}
+			}
 			a.noteConnected(s.Host)
 			a.startTunnels(s, h.Tunnels)
 		})
@@ -272,13 +288,14 @@ func (a *App) shellSpec(h *config.Host) shellSpec {
 // openPaneShell opens a shell for p on client, as spec says, and the
 // terminal that shows it. It runs on a goroutine: it blocks until the
 // server answers.
-func (a *App) openPaneShell(s *Session, p *pane, client *ssh.Client, spec shellSpec) (*terminal.Terminal, error) {
+func (a *App) openPaneShell(ctx context.Context, s *Session, p *pane, client *ssh.Client, spec shellSpec, previous *terminal.Terminal) (*terminal.Terminal, *paneConn, error) {
 	shell, err := sshx.OpenShell(client, spec.pty)
 	if err != nil {
-		return nil, &stepError{"shell", err}
+		return nil, nil, &stepError{"shell", err}
 	}
 	topts := spec.topts
-	topts.Conn = termenc.Wrap(shell, spec.enc)
+	conn := newPaneConn(termenc.Wrap(shell, spec.enc))
+	topts.Conn = conn
 	keys := keySequences(spec.bs, spec.del, func() *terminal.Terminal { return p.term })
 	topts.OnKey = func(mods ui.Modifiers, key ui.Key) bool {
 		p.shellKey(mods, key) // for the file panel to follow a cd, and the tab its agent
@@ -288,9 +305,13 @@ func (a *App) openPaneShell(s *Session, p *pane, client *ssh.Client, spec shellS
 	term, err := terminal.New(topts)
 	if err != nil {
 		shell.Close()
-		return nil, &stepError{"terminal", err}
+		return nil, nil, &stepError{"terminal", err}
 	}
-	return term, nil
+	if err := restorePaneHistory(ctx, term, previous); err != nil {
+		term.Close()
+		return nil, nil, err
+	}
+	return term, conn, nil
 }
 
 // keepAliveTimeout is the longest a keepalive waits for its answer
@@ -352,7 +373,11 @@ func (a *App) noteConnected(h *config.Host) {
 
 // disconnect ends s's connection, keeping its tab and the layout of its
 // panes, whose shells end.
-func (s *Session) disconnect() {
+func (s *Session) disconnect() { s.stopConnection(false) }
+
+// stopConnection can retain the ended SSH display for a reconnect attempt.
+// Local programs and permanent closes always dispose their terminals.
+func (s *Session) stopConnection(keepDisplay bool) {
 	if s.cancel != nil {
 		s.cancel()
 		s.cancel = nil
@@ -367,7 +392,11 @@ func (s *Session) disconnect() {
 		s.sftp = nil
 	}
 	for _, p := range s.panes.panes() {
-		p.end()
+		if keepDisplay && !s.isLocal() {
+			p.stopShell()
+		} else {
+			p.end()
+		}
 	}
 	s.panes.order = nil
 	if s.client != nil {

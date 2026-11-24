@@ -290,7 +290,7 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		}
 		if m.Item(locales.Disconnect()).Disabled(s.status != statusConnected && s.status != statusConnecting).Chosen() {
 			a.transfers.cancelSession(s)
-			s.disconnect()
+			s.stopConnection(true)
 			s.status, s.err = statusClosed, nil
 		}
 		m.Separator()
