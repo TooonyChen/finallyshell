@@ -15,14 +15,17 @@ import (
 
 // fileState is the file panel of a session.
 type fileState struct {
-	cwd      string
-	pathEdit string
-	entries  []remotefs.Entry
-	loading  bool
-	err      error
-	table    ui.ListState
-	chosen   ui.Selection[string] // names in cwd
-	row      int
+	cwd        string
+	pathEdit   string
+	entries    []remotefs.Entry
+	loading    bool
+	err        error
+	table      ui.ListState
+	sort       ui.SortOrder
+	sortedBy   ui.SortOrder
+	sortLocale string
+	chosen     ui.Selection[string] // names in cwd
+	row        int
 
 	// reveal is a name to choose in the table once cwd is read again: a
 	// file just renamed or made.
@@ -59,6 +62,7 @@ func (f *fileState) init() {
 	f.subdirs = map[string][]string{}
 	f.treeBusy = map[string]bool{}
 	f.row = -1
+	f.sort = ui.SortOrder{Column: "name"}
 	f.treeRow = -1
 	f.tree.Open.Add("/")
 }
@@ -104,12 +108,7 @@ func (a *App) listDir(s *Session, dir string, quiet bool) {
 				return
 			}
 			f.err = nil
-			if dir != f.cwd {
-				f.chosen.Clear()
-				f.row = -1
-			}
-			f.cwd, f.pathEdit, f.entries = dir, dir, entries
-			f.subdirs[dir] = dirNames(dir, entries)
+			f.setEntries(dir, entries)
 			if i := slices.IndexFunc(entries, func(e remotefs.Entry) bool { return e.Name == f.reveal }); f.reveal != "" && i >= 0 {
 				f.chosen.Clear()
 				f.chosen.Add(f.reveal)
@@ -190,11 +189,11 @@ func entryKind(e remotefs.Entry) string {
 
 func fileColumns() []ui.TableColumn {
 	return []ui.TableColumn{
-		{ID: "name", Title: locales.ColName(), MinWidth: 160},
-		{ID: "size", Title: locales.ColSize(), Width: 90, Align: ui.End},
-		{ID: "type", Title: locales.ColType(), Width: 90},
-		{ID: "modified", Title: locales.ColModified(), Width: 140},
-		{ID: "perms", Title: locales.ColPermissions(), Width: 100},
+		{ID: "name", Title: locales.ColName(), MinWidth: 160, Sortable: true},
+		{ID: "size", Title: locales.ColSize(), Width: 90, Align: ui.End, Sortable: true},
+		{ID: "type", Title: locales.ColType(), Width: 90, Sortable: true},
+		{ID: "modified", Title: locales.ColModified(), Width: 140, Sortable: true},
+		{ID: "perms", Title: locales.ColPermissions(), Width: 120, Sortable: true},
 		{ID: "owner", Title: locales.ColOwner(), Width: 96},
 	}
 }
@@ -309,8 +308,12 @@ func (a *App) dirTree(c *ui.Context, s *Session) {
 
 func (a *App) fileTable(c *ui.Context, s *Session) {
 	f := &s.files
+	if f.needsSort() {
+		f.sortEntries()
+	}
 	entries := f.entries
 	f.table.Selected = &f.row
+	f.table.Sort = &f.sort
 	f.table.Selection = &f.chosen
 	f.table.Key = func(i int) any { return entries[i].Name }
 	f.table.Label = func(i int) string { return entries[i].Name }
