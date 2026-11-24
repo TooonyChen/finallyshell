@@ -44,14 +44,30 @@ func (f *fileState) sortEntries() {
 		f.sort.Column = "name"
 	}
 	cursor := f.cursorName()
-	var kinds map[string]string
+	// Comparisons reuse folded keys instead of allocating lowercase text
+	// repeatedly on the UI thread. Sort lightweight indices to avoid
+	// moving full entries or hashing names at every comparison.
+	order := make([]int, len(f.entries))
+	names := make([]string, len(f.entries))
+	for i, e := range f.entries {
+		order[i], names[i] = i, strings.ToLower(e.Name)
+	}
+	type kindKey struct{ label, folded string }
+	var kinds []kindKey
 	if f.sort.Column == "type" {
-		kinds = make(map[string]string, len(f.entries))
-		for _, e := range f.entries {
-			kinds[e.Name] = entryKind(e)
+		kinds = make([]kindKey, len(f.entries))
+		for i, e := range f.entries {
+			label := entryKind(e)
+			kinds[i] = kindKey{label, strings.ToLower(label)}
 		}
 	}
-	slices.SortStableFunc(f.entries, func(x, y remotefs.Entry) int {
+	nameOrder := func(x, y int) int {
+		return fileTextOrder(f.entries[x].Name, f.entries[y].Name, names[x], names[y])
+	}
+	// Complete file-name ties make the order deterministic for distinct
+	// directory entries, so an unstable sorter need not shuffle ties.
+	slices.SortFunc(order, func(xi, yi int) int {
+		x, y := &f.entries[xi], &f.entries[yi]
 		if x.IsDir() != y.IsDir() {
 			if x.IsDir() {
 				return -1
@@ -63,7 +79,7 @@ func (f *fileState) sortEntries() {
 		case "size":
 			// Folders and broken links have no displayed file size.
 			if x.IsDir() {
-				return fileNameOrder(x.Name, y.Name)
+				return nameOrder(xi, yi)
 			}
 			if x.Broken != y.Broken {
 				if x.Broken {
@@ -77,24 +93,31 @@ func (f *fileState) sortEntries() {
 		case "modified":
 			n = x.ModTime.Compare(y.ModTime)
 		case "type":
-			n = fileNameOrder(kinds[x.Name], kinds[y.Name])
+			xk, yk := kinds[xi], kinds[yi]
+			n = fileTextOrder(xk.label, yk.label, xk.folded, yk.folded)
 		case "perms":
 			n = cmp.Compare(x.Mode.Perm(), y.Mode.Perm())
 		default:
-			return sortDir(fileNameOrder(x.Name, y.Name), f.sort)
+			return sortDir(nameOrder(xi, yi), f.sort)
 		}
 		if n != 0 {
 			return sortDir(n, f.sort)
 		}
-		return fileNameOrder(x.Name, y.Name)
+		return nameOrder(xi, yi)
 	})
+	sorted := make([]remotefs.Entry, len(f.entries))
+	for i, row := range order {
+		sorted[i] = f.entries[row]
+	}
+	// listDir's reveal lookup shares this slice; retain its backing array.
+	copy(f.entries, sorted)
 	f.row = slices.IndexFunc(f.entries, func(e remotefs.Entry) bool { return cursor != "" && e.Name == cursor })
 	f.sortedBy = f.sort
 	f.sortLocale = i18n.Locale()
 }
 
-func fileNameOrder(x, y string) int {
-	if n := strings.Compare(strings.ToLower(x), strings.ToLower(y)); n != 0 {
+func fileTextOrder(x, y, foldedX, foldedY string) int {
+	if n := strings.Compare(foldedX, foldedY); n != 0 {
 		return n
 	}
 	return strings.Compare(x, y)
