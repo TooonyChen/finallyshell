@@ -376,6 +376,7 @@ internal/
     start.go         new tab: quick connect, search, clearing recent connections
     splits.go        split dividers: minimum sizes of the areas, saving and restoring sizes, a split sized from its end edge
     files.go         file panel: folder tree, file table, drop to upload
+    file_sort.go     session-local header sorting, precomputed text keys and row indices
     fileops.go       rename, delete, new folder and file: their dialog and the tree's menu
     fileicons.go     icon themes in the file panel: background loading, showing icons, installing and removing
     options_fileicons.go the File manager › File icon theme page

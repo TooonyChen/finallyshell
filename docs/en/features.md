@@ -1319,6 +1319,26 @@ The "Files" tab at the bottom right browses the server over SFTP: a folder
 tree on the left, a file table on the right (with multiple selection), and
 a path bar where a path can be typed directly.
 
+### Sorting files
+
+Click **Name**, **Size**, **Type**, **Modified** or **Permissions** in the
+file table's header to sort by that column. Clicking the active header
+reverses its order; choosing another column starts ascending. An arrow
+shows the direction. The default is Name ascending, ignoring case.
+
+- Directories remain before files in either direction. Size compares
+  bytes, with directories kept in name order and broken links without a
+  measurable size after measurable files.
+- Type compares the label displayed in the current language; changing
+  the language updates that ordering. Modified compares the full file
+  timestamp. Permissions compares the rwx value, such as `0644` or `0755`.
+- Equal values use name order so refreshes do not shuffle ties. Selected
+  files and the keyboard cursor follow their names when rows move;
+  renamed or new files are revealed at their sorted position.
+- The sort stays when refreshing or opening another directory during the
+  session. Each session has its own sort; it is not saved or synced. The
+  directory tree keeps its name order. User/group is not sortable.
+
 ### Following the terminal's folder
 
 When the shell's working directory changes, as after `cd /var/log`, the
