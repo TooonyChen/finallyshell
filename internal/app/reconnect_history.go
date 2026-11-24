@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"sync"
 
@@ -58,9 +59,12 @@ func restorePaneHistory(ctx context.Context, term, previous *terminal.Terminal) 
 		cols, rows = previous.Size()
 		history = previous.History()
 		if len(history) == 0 {
-			// An ended full-screen program may have left the alternate
-			// screen active. Recover the main shell's scrollback.
-			previous.Feed([]byte("\x1b[?1049l\x1b[?1047l\x1b[?47l"))
+			// An ended full-screen program may leave any alternate mode
+			// active. History stops at the cursor: leaving modes 47/1047
+			// can move it above the main screen's text without a saved
+			// cursor to restore. Export the whole ended main screen by
+			// positioning at its bottom in absolute coordinates.
+			previous.Feed([]byte(fmt.Sprintf("\x1b[?1049l\x1b[?1047l\x1b[?47l\x1b[?6l\x1b[%d;1H", rows)))
 			history = previous.History()
 		}
 		if width, _ := previous.Size(); width == cols {

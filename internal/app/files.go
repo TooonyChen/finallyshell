@@ -95,6 +95,9 @@ func (a *App) listDir(s *Session, dir string, quiet bool) {
 	go func() {
 		entries, err := remotefs.ReadDir(sc, dir)
 		a.post(func() {
+			if s.sftp != sc {
+				return
+			}
 			f.loading = false
 			if err != nil {
 				if !quiet {
@@ -153,6 +156,9 @@ func (a *App) loadSubdirs(s *Session, dir string) {
 	go func() {
 		entries, err := remotefs.ReadDir(sc, dir)
 		a.post(func() {
+			if s.sftp != sc {
+				return
+			}
 			delete(f.treeBusy, dir)
 			if err != nil {
 				f.subdirs[dir] = []string{}

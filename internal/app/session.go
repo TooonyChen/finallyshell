@@ -244,7 +244,11 @@ func (a *App) connect(s *Session, secret string) {
 		}
 		sc, err := remotefs.NewClient(client)
 		if err != nil {
-			a.post(func() { s.files.err = &sftpError{err} })
+			a.post(func() {
+				if ctx.Err() == nil {
+					s.files.err = &sftpError{err}
+				}
+			})
 			return
 		}
 		home, _ := sc.Getwd()
@@ -392,6 +396,8 @@ func (s *Session) stopConnection(keepDisplay bool) {
 		s.sftp.Close()
 		s.sftp = nil
 	}
+	s.files.loading = false
+	s.files.treeBusy = make(map[string]bool)
 	for _, p := range s.panes.panes() {
 		if keepDisplay && !s.isLocal() {
 			p.stopShell()

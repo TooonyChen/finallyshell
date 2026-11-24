@@ -592,6 +592,11 @@ children; the view (`paneview.go`) lays them out with nested
   ownership. `pane.end` disposes both transport and
   emulator when a pane/tab closes. Local reconnect keeps its existing
   disposal behavior.
+- Ended alternate-screen modes 47/1047/1049 recover the whole main
+  screen before history export, even if their cursor had moved above
+  retained text. File reads apply results only while their SFTP client
+  is current; canceled connection attempts cannot overwrite the new
+  panel, and ending a connection clears its loading and tree-busy flags.
 - A pane's terminal ends (`paneExited`): with other panes and the client
   alive, which a keepalive request on the connection tells, the pane
   closes; otherwise the session is lost, as with one terminal, and keeps
