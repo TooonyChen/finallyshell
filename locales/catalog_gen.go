@@ -7074,6 +7074,56 @@ func (msgs Messages) OptionsFileManager() string {
 	return Catalog.Format(msgs.locale, "optionsFileManager", nil)
 }
 
+// OptionSftpQuickDelete says "Enable Fast Delete (rm)"
+// in the language the app shows.
+func OptionSftpQuickDelete() string { return In(i18n.Locale()).OptionSftpQuickDelete() }
+
+// OptionSftpQuickDelete says "Enable Fast Delete (rm)"
+// in the language of msgs.
+func (msgs Messages) OptionSftpQuickDelete() string {
+	return Catalog.Format(msgs.locale, "optionSftpQuickDelete", nil)
+}
+
+// OptionSftpQuickDeleteNote says "Runs rm over SSH on the remote server to speed up deletion of large numbers of files and folders."
+// in the language the app shows.
+func OptionSftpQuickDeleteNote() string { return In(i18n.Locale()).OptionSftpQuickDeleteNote() }
+
+// OptionSftpQuickDeleteNote says "Runs rm over SSH on the remote server to speed up deletion of large numbers of files and folders."
+// in the language of msgs.
+func (msgs Messages) OptionSftpQuickDeleteNote() string {
+	return Catalog.Format(msgs.locale, "optionSftpQuickDeleteNote", nil)
+}
+
+// OptionConfirmSftpQuickDelete says "Confirm before fast deletion"
+// in the language the app shows.
+func OptionConfirmSftpQuickDelete() string { return In(i18n.Locale()).OptionConfirmSftpQuickDelete() }
+
+// OptionConfirmSftpQuickDelete says "Confirm before fast deletion"
+// in the language of msgs.
+func (msgs Messages) OptionConfirmSftpQuickDelete() string {
+	return Catalog.Format(msgs.locale, "optionConfirmSftpQuickDelete", nil)
+}
+
+// SftpRegularDelete says "Regular Delete"
+// in the language the app shows.
+func SftpRegularDelete() string { return In(i18n.Locale()).SftpRegularDelete() }
+
+// SftpRegularDelete says "Regular Delete"
+// in the language of msgs.
+func (msgs Messages) SftpRegularDelete() string {
+	return Catalog.Format(msgs.locale, "sftpRegularDelete", nil)
+}
+
+// SftpQuickDelete says "Fast Delete (rm)"
+// in the language the app shows.
+func SftpQuickDelete() string { return In(i18n.Locale()).SftpQuickDelete() }
+
+// SftpQuickDelete says "Fast Delete (rm)"
+// in the language of msgs.
+func (msgs Messages) SftpQuickDelete() string {
+	return Catalog.Format(msgs.locale, "sftpQuickDelete", nil)
+}
+
 // OptionsFileIcons says "File icon theme"
 // in the language the app shows.
 func OptionsFileIcons() string { return In(i18n.Locale()).OptionsFileIcons() }

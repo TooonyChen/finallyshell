@@ -88,7 +88,7 @@ var optionPages = []optionPage{
 	},
 	{
 		id: pageFiles, title: locales.OptionsFileManager,
-		view: nil,
+		view: (*App).fileManagerPage,
 	},
 	{
 		id: pageFileIcons, parent: pageFiles, title: locales.OptionsFileIcons,
@@ -188,4 +188,16 @@ func (a *App) changeSettings(fn func()) {
 	fn()
 	a.saveSettings(a.settings)
 	a.redraw()
+}
+
+func (a *App) fileManagerPage(c *ui.Context) {
+	enabled := a.settings.SFTPQuickDelete
+	if ui.Checkbox(c, &enabled, locales.OptionSftpQuickDelete()).Changed() {
+		a.changeSettings(func() { a.settings.SFTPQuickDelete = enabled })
+	}
+	widgets.Muted(c, locales.OptionSftpQuickDeleteNote()).FontSize(12).PaddingStart(18)
+	confirm := !a.settings.NoConfirmSFTPQuickDelete
+	if ui.Checkbox(c, &confirm, locales.OptionConfirmSftpQuickDelete()).Disabled(!a.settings.SFTPQuickDelete).Changed() {
+		a.changeSettings(func() { a.settings.NoConfirmSFTPQuickDelete = !confirm })
+	}
 }

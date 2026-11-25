@@ -35,14 +35,16 @@ type fileDialog struct {
 	isDir bool     // what is renamed is a folder
 	names []string // the names in dir a delete removes
 	dirs  bool     // a delete removes folders, with what they hold
+	quick bool     // delete over SSH with rm
 	name  string
 	// selectStem selects the name without its extension as the dialog
 	// opens, as Finder and Explorer do for a rename.
 	selectStem bool
 
-	busy   bool
-	err    error
-	cancel context.CancelFunc
+	skipConfirmation bool
+	busy             bool
+	err              error
+	cancel           context.CancelFunc
 }
 
 func (d *fileDialog) title() string {
@@ -53,6 +55,9 @@ func (d *fileDialog) title() string {
 		return locales.NewFolder()
 	case opCreate:
 		return locales.NewFile()
+	}
+	if d.skipConfirmation {
+		return locales.SftpQuickDelete()
 	}
 	if len(d.names) == 1 {
 		return locales.DeleteFileTitle(d.names[0])
@@ -77,17 +82,21 @@ func (a *App) askNew(s *Session, dir string, op fileOp) {
 	a.fileDlg = &fileDialog{sess: s, op: op, dir: dir}
 }
 
-// askDelete asks before deleting the names in dir; dirs tells that some
-// are folders.
-func (a *App) askDelete(s *Session, dir string, names []string, dirs bool) {
-	if s.sftp == nil || dir == "" || len(names) == 0 {
+// deleteFiles asks before deleting unless fast deletion is set to start immediately.
+func (a *App) deleteFiles(s *Session, dir string, names []string, dirs, quick bool) {
+	if s.sftp == nil || dir == "" || len(names) == 0 || quick && s.client == nil {
 		return
 	}
-	a.fileDlg = &fileDialog{sess: s, op: opDelete, dir: dir, names: names, dirs: dirs}
+	d := &fileDialog{sess: s, op: opDelete, dir: dir, names: names, dirs: dirs, quick: quick}
+	d.skipConfirmation = quick && a.settings.NoConfirmSFTPQuickDelete
+	a.fileDlg = d
+	if d.skipConfirmation {
+		a.runFileDialog(d)
+	}
 }
 
-// askDeleteChosen asks before deleting the rows chosen in the table.
-func (a *App) askDeleteChosen(s *Session) {
+// deleteChosen deletes or asks about the selected rows in the file table.
+func (a *App) deleteChosen(s *Session, quick bool) {
 	f := &s.files
 	names := f.chosenNames()
 	dirs := false
@@ -97,7 +106,7 @@ func (a *App) askDeleteChosen(s *Session) {
 			dirs = true
 		}
 	}
-	a.askDelete(s, f.cwd, names, dirs)
+	a.deleteFiles(s, f.cwd, names, dirs, quick)
 }
 
 func (a *App) closeFileDialog(d *fileDialog) {
@@ -112,7 +121,7 @@ func (a *App) closeFileDialog(d *fileDialog) {
 // runFileDialog does what d asks on the server, in a goroutine. The
 // dialog closes when it is done, or shows the error.
 func (a *App) runFileDialog(d *fileDialog) {
-	sc := d.sess.sftp
+	sc, client := d.sess.sftp, d.sess.client
 	if sc == nil || d.busy {
 		return
 	}
@@ -135,6 +144,10 @@ func (a *App) runFileDialog(d *fileDialog) {
 		case opCreate:
 			made, err = remotefs.CreateFile(sc, d.dir, name)
 		case opDelete:
+			if d.quick {
+				gone, err = remotefs.RemoveWithShell(ctx, client, sc, d.dir, d.names)
+				break
+			}
 			for _, n := range d.names {
 				p := path.Join(d.dir, n)
 				if err = remotefs.RemoveAll(ctx, sc, p); err != nil {
@@ -261,11 +274,14 @@ func (a *App) fileDialogView(c *ui.Context, d *fileDialog) {
 		submit := false
 		empty := false
 		if d.op == opDelete {
-			body := locales.DeleteFilesBody(len(d.names))
-			if d.dirs {
-				body = locales.DeleteFoldersBody(len(d.names))
+			empty = len(d.names) == 0
+			if !d.skipConfirmation {
+				body := locales.DeleteFilesBody(len(d.names))
+				if d.dirs {
+					body = locales.DeleteFoldersBody(len(d.names))
+				}
+				ui.Text(c, body)
 			}
-			ui.Text(c, body)
 		} else {
 			before := d.name
 			in := ui.TextInput(c, &d.name).Label(locales.FolderName()).AutoFocus()
@@ -293,9 +309,18 @@ func (a *App) fileDialogView(c *ui.Context, d *fileDialog) {
 			if ui.Button(c, locales.Cancel()).Clicked() {
 				a.closeFileDialog(d)
 			}
+			if d.skipConfirmation && (d.busy || empty) {
+				return
+			}
 			ok := locales.Ok()
 			if d.op == opDelete {
 				ok = locales.Delete()
+				if d.quick {
+					ok = locales.SftpQuickDelete()
+				}
+				if d.skipConfirmation {
+					ok = locales.Retry()
+				}
 			}
 			if ui.PrimaryButton(c, ok).Disabled(d.busy || empty).Clicked() {
 				submit = true
@@ -305,6 +330,31 @@ func (a *App) fileDialogView(c *ui.Context, d *fileDialog) {
 			a.runFileDialog(d)
 		}
 	})
+}
+
+// fileDeleteMenu groups the two deletion methods when Fast Delete is enabled.
+// The file table shows the Delete shortcut next to the top-level entry.
+func (a *App) fileDeleteMenu(m *ui.Menu, s *Session, selected, shortcut bool, run func(quick bool)) {
+	var item *ui.MenuItem
+	if a.settings.SFTPQuickDelete {
+		item = m.Submenu(locales.Delete(), func(m *ui.Menu) {
+			if m.Item(locales.SftpRegularDelete()).Disabled(!selected).Chosen() && selected {
+				run(false)
+			}
+			fast := selected && s.client != nil
+			if m.Item(locales.SftpQuickDelete()).Disabled(!fast).Chosen() && fast {
+				run(true)
+			}
+		}).Disabled(!selected)
+	} else {
+		item = m.Item(locales.Delete()).Disabled(!selected)
+		if item.Chosen() && selected {
+			run(false)
+		}
+	}
+	if shortcut {
+		item.Shortcut(0, ui.KeyDelete)
+	}
 }
 
 // treeMenu is the context menu of the folder dir in the folder tree: it
@@ -331,9 +381,9 @@ func (a *App) treeMenu(c *ui.Context, m *ui.Menu, s *Session, dir string) {
 		if m.Item(locales.Rename()).Chosen() {
 			a.askRename(s, dir, true)
 		}
-		if m.Item(locales.Delete()).Chosen() {
-			a.askDelete(s, path.Dir(dir), []string{path.Base(dir)}, true)
-		}
+		a.fileDeleteMenu(m, s, true, false, func(quick bool) {
+			a.deleteFiles(s, path.Dir(dir), []string{path.Base(dir)}, true, quick)
+		})
 	}
 	m.Separator()
 	if m.Item(locales.Refresh()).Chosen() {

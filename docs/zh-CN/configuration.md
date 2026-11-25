@@ -155,6 +155,8 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `termBackgroundOpacity` | 图片的不透明度（百分比），5 到 100。 | 30 |
 | `keepManagerOpen` | `true` 时连接后不关闭连接管理器。 | 关闭。 |
 | `fileIconTheme` | `minimal`、`bundled:seti` 或 `<发布者>.<名称>/<主题 ID>`。 | Material Icon Theme |
+| `sftpQuickDelete` | 在文件面板右键菜单中显示“快速删除（rm）”。仅保存在本机。 | 关闭 |
+| `noConfirmSftpQuickDelete` | 选择“快速删除（rm）”后立即开始删除。仅保存在本机。 | 关闭（先确认） |
 | `noFollowTerminalDir` | `true` 时 shell 的目录变了，文件面板也留在原处。 | 跟随。 |
 | `noAgentIcons` | `true` 时会话标签上不显示其中运行的编程智能体的图标，也不再为此读取 shell 前台的程序。 | 显示。 |
 | `noCommandBar` | `true` 时不显示终端下方的命令输入框，它的功能也都不用。 | 显示。 |
@@ -200,7 +202,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sftpQuickDelete`、`noConfirmSftpQuickDelete`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 

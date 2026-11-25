@@ -190,6 +190,8 @@ default.
 | `termBackgroundOpacity` | Image opacity in percent, 5 to 100. | 30 |
 | `keepManagerOpen` | `true` keeps the connection manager open after connecting. | It closes. |
 | `fileIconTheme` | `minimal`, `bundled:seti`, or `<publisher>.<name>/<theme ID>`. | Material Icon Theme |
+| `sftpQuickDelete` | Show Fast Delete (rm) in the file panel's context menus. Stays on this device. | off |
+| `noConfirmSftpQuickDelete` | Start Fast Delete immediately when choosing its menu item. Stays on this device. | off (ask first) |
 | `noFollowTerminalDir` | `true` keeps the file panel where it is when the shell's folder changes. | It follows. |
 | `noAgentIcons` | `true` hides the logo of the coding agent running in a session tab, and stops reading the program in the shell's foreground for it. | Shown. |
 | `noCommandBar` | `true` hides the command bar under the terminal, and all it does. | Shown. |
@@ -256,7 +258,7 @@ local: `sidebarWidth`, `monitorPercent`, `terminalPercent`, `treeWidth`,
 `monitorSide`, `rightMonitorPercent`, `commandEditorShown`,
 `commandEditorWidth`, `commandEditorPercent`, `commandEditorNoEnter`,
 `commandEditorClear`, `termBackground`, `localShell`, `sshAgent`, `downloadDir`,
-`askDownloadDir`, `sync`,
+`askDownloadDir`, `sftpQuickDelete`, `noConfirmSftpQuickDelete`, `sync`,
 `geoLocations`, `geoLocationsV6`, `geoOnline`, `leftPanelPage` and
 `connectionTreeExpanded` (the left panel's page and the folders open are
 where this computer's window was left, as the pane sizes are), and a

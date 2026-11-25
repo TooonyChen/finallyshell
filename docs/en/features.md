@@ -1441,12 +1441,20 @@ taken in the folder: a rename never replaces another file, and a new file
 never empties one that is there. Errors from the server (such as
 permission denied) show in the dialog, which stays open.
 
-Delete always asks first. A folder is deleted with everything in it. Links
+Regular Delete always asks first. A folder is deleted with everything in it. Links
 are never followed: deleting a link to a folder removes the link, not the
-folder it points to. Up to 16 files of a folder are removed at the same
-time, so large folders don't wait for each round trip. Canceling the
-dialog stops a delete that is still running; what was already removed
-stays removed.
+folder it points to. Regular Delete uses SFTP and removes up to 16 files
+of a folder at the same time. Canceling the dialog stops a delete that is
+still running; what was already removed stays removed.
+
+**Options › File manager › Enable Fast Delete (rm)** turns **Delete** in
+the file table and folder tree into a submenu with **Regular Delete** and
+**Fast Delete (rm)**. The setting is off by default. Fast Delete runs
+`rm` recursively in a single SSH command, which
+avoids per-file SFTP round trips. It requires SSH command execution and a
+server where the shell and SFTP see the same paths. **Confirm before fast
+deletion** is checked by default. Clear it to start Fast Delete as soon
+as you choose the menu item. The dialog shows any command error.
 
 After a change the folder is listed again and a renamed or new item is
 chosen in the table. When the current folder, or one it is in, is
