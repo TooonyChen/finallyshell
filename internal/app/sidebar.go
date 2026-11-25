@@ -225,19 +225,23 @@ func (a *App) sessionPanel(c *ui.Context) {
 		// A row asks to close its session, which closes once the list is
 		// built: closing it in the row would leave the rows after it to
 		// build with fewer sessions than the list was given.
-		var closing *Session
+		var closing func()
+		closeGroup := func(keep *Session) { closing = func() { a.closeSessionGroup(keep) } }
 		ui.List(c, &a.sessList, len(a.sessions), func(i int) {
-			if a.sessionRow(c, a.sessions[i], i == a.active) {
-				closing = a.sessions[i]
+			s := a.sessions[i]
+			if a.sessionRow(c, s, i == a.active, closeGroup) {
+				closing = func() { a.closeSession(s) }
 			}
-		}).Grow(1).Padding(0, 4, 4, 4).Children(func() {
+		}).Grow(1).Padding(0, 4, 4, 4).ContextMenu(func(m *ui.Menu) {
+			a.sessionGroupMenu(m, nil, closeGroup)
+		}).Children(func() {
 			if len(a.sessions) == 0 {
 				widgets.Muted(c, locales.NoSessions()).Padding(8, 10)
 			}
 		})
 		a.renameKey(c)
 		if closing != nil {
-			a.closeSession(closing)
+			closing()
 		}
 	})
 }
@@ -255,9 +259,9 @@ func (a *App) sessionCount() int {
 }
 
 // sessionRow is the tab of s. It reports whether the user closed it.
-func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
+func (a *App) sessionRow(c *ui.Context, s *Session, active bool, closeGroup func(*Session)) (closed bool) {
 	if s.isPanelTab() {
-		return a.panelRow(c, s, active)
+		return a.panelRow(c, s, active, closeGroup)
 	}
 	row := ui.Row(c).Gap(8).Padding(5, 4, 5, 8).Radius(5)
 	hovered := row.Hovered()
@@ -266,6 +270,7 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 			if m.Item(locales.Close()).Danger().Chosen() {
 				closed = true
 			}
+			a.sessionGroupMenu(m, s, closeGroup)
 		})
 		row.Children(func() {
 			// As wide as a status dot, so that the names line up.
@@ -301,6 +306,7 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		if m.Item(locales.Close()).Danger().Chosen() {
 			closed = true
 		}
+		a.sessionGroupMenu(m, s, closeGroup)
 	})
 	// RowDoubleClicked, not DoubleClicked: that makes this row clickable,
 	// and the press goes to the innermost clickable element, so the

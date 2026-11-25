@@ -142,7 +142,7 @@ func TestPanelRow(t *testing.T) {
 	if r, ok := tt.Find(locales.TabProcesses()); ok {
 		tt.RightClickAt(r.X+r.W/2, r.Y+r.H/2)
 	}
-	if got, want := tt.Menu(), []string{locales.BackToTerminal(), "-", locales.Close()}; !slices.Equal(got, want) {
+	if got, want := tt.Menu(), []string{locales.BackToTerminal(), "-", locales.Close(), locales.CloseOtherSessions(), locales.CloseAllSessions()}; !slices.Equal(got, want) {
 		t.Errorf("menu %q, want %q", got, want)
 	}
 	if err := tt.ChooseMenuItem(locales.BackToTerminal()); err != nil {
