@@ -672,6 +672,26 @@ func (msgs Messages) CloseSession() string {
 	return Catalog.Format(msgs.locale, "closeSession", nil)
 }
 
+// CloseAllSessions says "Close all"
+// in the language the app shows.
+func CloseAllSessions() string { return In(i18n.Locale()).CloseAllSessions() }
+
+// CloseAllSessions says "Close all"
+// in the language of msgs.
+func (msgs Messages) CloseAllSessions() string {
+	return Catalog.Format(msgs.locale, "closeAllSessions", nil)
+}
+
+// CloseOtherSessions says "Close others"
+// in the language the app shows.
+func CloseOtherSessions() string { return In(i18n.Locale()).CloseOtherSessions() }
+
+// CloseOtherSessions says "Close others"
+// in the language of msgs.
+func (msgs Messages) CloseOtherSessions() string {
+	return Catalog.Format(msgs.locale, "closeOtherSessions", nil)
+}
+
 // StatusConnecting says "Connecting…"
 // in the language the app shows.
 func StatusConnecting() string { return In(i18n.Locale()).StatusConnecting() }

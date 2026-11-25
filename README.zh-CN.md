@@ -27,7 +27,7 @@
   <img src="docs/screenshots/main-zh-CN.png" alt="Finallyshell 主窗口：服务器监控、会话列表、终端和文件面板">
 </p>
 
-用过 FinalShell 的话，打开就会用：左上是服务器状态，下面是会话，右边是终端，终端下面是服务器上的文件。Finallyshell 保留了这个布局，把会话标签放进左下角的竖向列表，可以滚动，也可以拖动排序。
+用过 FinalShell 的话，打开就会用：左上是服务器状态，下面是会话，右边是终端，终端下面是服务器上的文件。Finallyshell 保留了这个布局，把会话标签放进左下角的竖向列表，可以滚动，也可以拖动排序。 会话右键菜单可关闭全部或只保留右键点击的会话；右键点击会话栏空白处可关闭全部。
 
 它是用 Go 和 [MyGo](https://github.com/egoist/mygo) 界面库写的原生程序，不需要装 Java。终端用的是 [Ghostty](https://ghostty.org) 的终端引擎 libghostty-vt。密码存在系统的钥匙串里，不写进文件。
 

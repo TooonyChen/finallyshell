@@ -449,9 +449,9 @@ func TestNewTabRows(t *testing.T) {
 		}
 	}
 
-	// A new tab's menu has Close alone.
+	// A new tab has the same single and group closing actions.
 	tt.RightClickAt(rowCenter(t, tt, locales.NotConnected())) // the + button is "New tab" too
-	if items := tt.Menu(); len(items) != 1 {
+	if items := tt.Menu(); !slices.Equal(items, []string{locales.Close(), locales.CloseOtherSessions(), locales.CloseAllSessions()}) {
 		t.Errorf("menu %q", items)
 	}
 	if err := tt.ChooseMenuItem(locales.Close()); err != nil {

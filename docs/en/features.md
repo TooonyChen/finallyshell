@@ -130,7 +130,19 @@ The bottom left of the window is a vertical list of sessions, on the
 green for connected, yellow for
 connecting, red for failed. The list scrolls, and sessions can be
 reordered by dragging. The context menu of a session has Reconnect,
-Duplicate session, Disconnect, Rename and Close.
+Duplicate session, Disconnect, Rename, Close, Close others and Close all.
+
+"Close others" keeps the right-clicked session selected and closes other sessions,
+including local terminals and new tabs. Its independent panel stays with it;
+invoking the action on a panel also retains its owning connection. "Close all"
+closes every session and new tab, leaving the application open. Right-clicking
+blank space in the session list offers only "Close all". It is disabled when the
+list is empty; "Close others" is disabled when only the target connection and
+its panel remain. Closing cancels the affected transfers and pending connections,
+using the same cleanup as closing a single session.
+
+![Session close menu](../screenshots/sessions-close-row-en.png)
+![Blank-area close menu](../screenshots/sessions-close-blank-en.png)
 
 A session tab can have a name of its own for this run, to tell apart
 several tabs open to the same server. "Rename" in its context menu, or F2

@@ -62,6 +62,8 @@
   "disconnect": "断开",
   "close": "关闭",
   "closeSession": "关闭会话",
+  "closeAllSessions": "关闭全部",
+  "closeOtherSessions": "关闭其他",
   "statusConnecting": "正在连接…",
   "statusFailed": "连接失败",
   "statusDisconnected": "已断开",

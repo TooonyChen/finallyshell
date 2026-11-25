@@ -109,6 +109,8 @@
   "disconnect": "Disconnect",
   "close": "Close",
   "closeSession": "Close session",
+  "closeAllSessions": "Close all",
+  "closeOtherSessions": "Close others",
   "statusConnecting": "Connecting…",
   "statusFailed": "Connection failed",
   "statusDisconnected": "Disconnected",
