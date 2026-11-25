@@ -283,12 +283,17 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		if m.Item(locales.DuplicateSession()).Chosen() {
 			// In a tab of its own, though a new tab is selected.
 			if s.isLocal() {
-				a.openLocal(nil)
+				if s.localElevated {
+					a.openAdminLocal(nil)
+				} else {
+					a.openLocal(nil)
+				}
 			} else {
 				a.openSessionIn(nil, s.Host)
 			}
 		}
 		if m.Item(locales.Disconnect()).Disabled(s.status != statusConnected && s.status != statusConnecting).Chosen() {
+			a.cancelAdminLaunch(s, false)
 			a.transfers.cancelSession(s)
 			s.disconnect()
 			s.status, s.err = statusClosed, nil
@@ -324,6 +329,12 @@ func (a *App) sessionRow(c *ui.Context, s *Session, active bool) (closed bool) {
 		name := func() { a.sessionName(c, s, active) }
 		if renaming {
 			name = func() { a.renameField(c, active) }
+		}
+		if s.localElevated {
+			base := name
+			name = func() {
+				ui.Row(c).Gap(4).MinWidth(0).AlignItems(ui.Center).Children(func() { ui.Box(c).Grow(1).MinWidth(0).Shrink(1).Children(base); adminBadge(c, active) })
+			}
 		}
 		closed = rowLines(c, name, sub, active, hovered) || closed
 	})

@@ -70,6 +70,13 @@ func (s *Session) historyID() string {
 // openLocal opens a local terminal in tab, a new tab, or at the end of
 // the list for nil, selected as a new session is (Settings.NoAutoSelectTab).
 func (a *App) openLocal(tab *Session) {
+	if a.ordinaryLocalDisabled() {
+		a.notify(locales.LocalRegularUnavailable())
+		return
+	}
+	if tab != nil {
+		a.cancelAdminLaunch(tab, false)
+	}
 	if tab != nil && tab.isNewTab() && !tab.isPanelTab() && slices.Contains(a.sessions, tab) {
 		tab.local = true
 		a.active = slices.Index(a.sessions, tab)
@@ -92,6 +99,10 @@ func (a *App) openLocal(tab *Session) {
 // program that is not found fails the tab with the error; one that
 // cannot start once found writes its error in the terminal and exits.
 func (a *App) connectLocal(s *Session) {
+	if s.localElevated {
+		a.reconnectAdminLocal(s)
+		return
+	}
 	s.disconnect()
 	if s.panes.root == nil {
 		s.panes.reset(newPane())
@@ -129,7 +140,13 @@ func (a *App) openLocalPane(s *Session, p *pane) (*terminal.Terminal, error) {
 	}
 	// Not when the tab ended it itself, as it disconnects, closes or
 	// starts again: that terminal is gone from the pane already.
-	opts.OnExit = func(int) { a.post(func() { a.paneExited(s, p) }) }
+	opts.OnExit = func(int) {
+		a.post(func() {
+			if p.term == term {
+				a.paneExited(s, p)
+			}
+		})
+	}
 	term, err = terminal.New(opts)
 	if err != nil {
 		program := "shell"
@@ -145,6 +162,9 @@ func (a *App) openLocalPane(s *Session, p *pane) (*terminal.Terminal, error) {
 // beside its name: its host's user@address, or "This computer".
 func (s *Session) target() string {
 	if s.isLocal() {
+		if s.localElevated {
+			return locales.LocalThisComputer() + " · " + locales.LocalAdministrator()
+		}
 		return locales.LocalThisComputer()
 	}
 	return s.Host.Target()

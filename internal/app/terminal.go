@@ -19,6 +19,7 @@ func (a *App) terminalArea(c *ui.Context) {
 	area := ui.Column(c.Key(s.ID)).Fill().Background(colors.Background)
 	a.reconnectShortcut(area, s)
 	area.Children(func() {
+		a.localAdminHeader(c, s)
 		if s.status != statusConnected {
 			a.statusBanner(c, s)
 		}

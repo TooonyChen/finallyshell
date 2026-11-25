@@ -351,3 +351,14 @@ var xshellReader = &Reader{
 2. 运行 `go tool mygo generate`（`mygo dev` 会自动做），代码里用 `locales.Key(...)`。提交重新生成的 `locales/catalog_gen.go`。
 
 格式是 ICU MessageFormat，见 MyGo 的 [i18n 文档](https://github.com/egoist/mygo/blob/main/docs/i18n.md)。
+
+`internal/localterm` 实现 Windows 管理员启动。`main` 在 UI 初始化和单实例锁之前分派专用辅助进程模式。普通权限的 Windows PowerShell 等待进程提供 MyGo 已有的 ConPTY；经 UAC 提权的辅助进程验证控制端和等待进程身份，接入该控制台，再在控制连接断开时自动结束的作业中启动配置的 shell。终端输入输出仍走控制台；每次启动独立且限制访问的本机命名管道只传递启动与退出消息。`internal/app/local_admin.go` 在 UI 线程快照设置、在线程外等待授权、丢弃取消或过期的结果，并为重连、复制和分屏保留权限选择。
+
+在真实 Windows 主机的 PowerShell 中启用集成测试：
+
+```powershell
+$env:FINALLYSHELL_TEST_ADMIN = '1'
+go test ./internal/localterm -run TestElevatedConsoleIntegration -count=1
+```
+
+测试会请求 UAC，检查实际管理员令牌、窗口缩放、Ctrl+C 和退出码。测试可执行文件需要能找到终端的本机 DLL。不设置这个变量时，测试不会请求管理员权限。

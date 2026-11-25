@@ -979,5 +979,14 @@
   "errAgentNoAddress": "找不到 SSH Agent：没有设置 SSH_AUTH_SOCK，请在 选项 › 常规 里填写 agent 的地址",
   "errAgentNoKeys": "SSH Agent 里没有私钥（地址：{addr}）",
   "errAgentRefused": "服务器拒绝了 agent 里的所有私钥",
-  "errAgentSign": "SSH Agent 没有签名（被拒绝或出错）：{error}"
+  "errAgentSign": "SSH Agent 没有签名（被拒绝或出错）：{error}",
+  "localTerminalPrivileges": "选择本地终端权限",
+  "localRegular": "普通权限",
+  "localOpenAdministrator": "以管理员身份打开",
+  "localAdministrator": "管理员",
+  "localRegularUnavailable": "应用已以管理员身份运行，或无法检查当前权限。请正常启动 Finallyshell 后打开普通权限终端。",
+  "localAdminUnavailable": "管理员终端仅在 Windows 上提供。",
+  "localAdminWaiting": "已有管理员终端正在等待授权。",
+  "localAdminCanceled": "已取消管理员授权。",
+  "localAdminFailed": "无法打开管理员终端：{error}"
 }

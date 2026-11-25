@@ -665,3 +665,14 @@ from writing `hosts.json` and `settings.json` at the same time.
 
 The format is ICU MessageFormat; see MyGo's
 [i18n documentation](https://github.com/egoist/mygo/blob/main/docs/i18n.md).
+
+`internal/localterm` implements Windows administrator startup. `main` dispatches its reserved helper mode before UI initialization and the single-instance lock. A normal Windows PowerShell waiter supplies MyGo's existing ConPTY; the UAC-elevated helper verifies the controller and waiter process identities, attaches to that console, and starts the configured shell in a job terminated when its control connection ends. Terminal I/O stays in the console; limited, per-launch local named pipes carry startup and exit messages only. `internal/app/local_admin.go` snapshots settings, waits off the UI thread, rejects canceled or stale launches, and preserves privilege on reconnect, duplicate and split.
+
+On a real Windows host, enable the opt-in integration test in PowerShell:
+
+```powershell
+$env:FINALLYSHELL_TEST_ADMIN = '1'
+go test ./internal/localterm -run TestElevatedConsoleIntegration -count=1
+```
+
+It requests UAC and checks the actual elevated token, resize, Ctrl+C and exit status. The terminal native DLL must be available to the test executable. Without this opt-in, no tests request administrator privileges.

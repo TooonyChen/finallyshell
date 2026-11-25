@@ -37,12 +37,13 @@ var nextSessionID atomic.Int64
 // start page (see start.go). A local terminal has none either: it runs a
 // program on this computer (local.go).
 type Session struct {
-	ID     int64
-	Host   *config.Host // nil for a new tab and a local terminal
-	local  bool         // a local terminal (local.go)
-	status sessionStatus
-	err    error // why it failed or closed; nil when the user disconnected
-	ip     string
+	localElevated bool // administrator privilege of a local terminal; never saved
+	ID            int64
+	Host          *config.Host // nil for a new tab and a local terminal
+	local         bool         // a local terminal (local.go)
+	status        sessionStatus
+	err           error // why it failed or closed; nil when the user disconnected
+	ip            string
 
 	client *ssh.Client
 	panes  paneTree // its terminals (panes.go)
@@ -111,6 +112,7 @@ func (s *Session) label() string {
 // credential store when the app has not read it yet. A password the
 // server refuses opens the prompt (loginFailed).
 func (a *App) connect(s *Session, secret string) {
+	a.cancelAdminLaunch(s, false)
 	if s.cancel != nil {
 		s.cancel()
 	}

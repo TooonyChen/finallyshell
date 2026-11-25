@@ -219,6 +219,8 @@ default.
 | `connectionTreeExpanded` | IDs of the folders open on the Connections page, such as `["f1730000000000000000"]`; `[]` for none. By ID, so a renamed or moved folder stays open. | Every folder open. |
 | `sync` | The Sync page's settings (see [Sync](#sync)). | Sync is off. |
 
+Windows local-terminal privileges are chosen per launch, never written to settings.json or synced. Standard terminals remain the default; a terminal's Reconnect, Duplicate and Split retain its administrator choice for this run. Administrator credentials are handled by Windows UAC and are never collected by Finallyshell.
+
 Details of each option are in [features.md](features.md): see
 [General](features.md#general), [Transfers](features.md#transfers),
 [Terminal](features.md#terminal-defaults),
