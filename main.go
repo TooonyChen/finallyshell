@@ -10,6 +10,7 @@ import (
 
 	"finallyshell/internal/app"
 	"finallyshell/internal/config"
+	"finallyshell/internal/localterm"
 	"finallyshell/locales"
 
 	"github.com/egoist/mygo"
@@ -254,6 +255,9 @@ func (p *platform) SetFullScreen(on bool) { p.win.SetFullScreen(on) }
 func (p *platform) IsFullScreen() bool    { return p.win.IsFullScreen() }
 
 func main() {
+	if handled, code := localterm.RunHelper(os.Args); handled {
+		os.Exit(code)
+	}
 	// Before the first window: MyGo reads MYGO_GPU when it makes one.
 	useMemoryRendering()
 	// One instance at a time: launching the app again brings the running

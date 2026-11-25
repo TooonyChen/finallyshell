@@ -1651,5 +1651,15 @@
   "errAgentNoAddress": "No SSH agent: SSH_AUTH_SOCK is not set. Enter the agent's address in Options › General.",
   "errAgentNoKeys": "The SSH agent at {addr} has no keys",
   "errAgentRefused": "The server refused every key in the SSH agent",
-  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}"
+  "errAgentSign": "The SSH agent did not sign the login (denied, or it failed): {error}",
+  "localTerminalPrivileges": "Choose local terminal privileges",
+  "localRegular": "Standard privileges",
+  "localOpenAdministrator": "Open as administrator",
+  "localAdministrator": "Administrator",
+  "localPrivilegeCheckFailed": "Unable to check the application privileges. Local terminal launch is disabled; restart Finallyshell and try again.",
+  "localRegularUnavailable": "Finallyshell is running as administrator. Close it and start it normally to open a standard terminal.",
+  "localAdminUnavailable": "Administrator terminals are available on Windows only.",
+  "localAdminWaiting": "An administrator terminal is already waiting for authorization.",
+  "localAdminCanceled": "Administrator authorization was canceled.",
+  "localAdminFailed": "Could not open administrator terminal: {error}"
 }

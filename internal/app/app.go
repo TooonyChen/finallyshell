@@ -133,8 +133,9 @@ type Platform interface {
 
 // App is the state of the window.
 type App struct {
-	plat     Platform
-	settings config.Settings
+	localAdmin localAdminState
+	plat       Platform
+	settings   config.Settings
 
 	hosts     *config.Store     // deleted hosts included: lists show hosts.Live()
 	passwords map[string]string // by host ID: what the host logs in with, this run
@@ -518,6 +519,7 @@ func (a *App) reconnect(s *Session) {
 // closeSession closes the row of s: its session, with its panel row, or
 // a panel row alone, which ends nothing.
 func (a *App) closeSession(s *Session) {
+	a.cancelAdminLaunch(s, false)
 	i := slices.Index(a.sessions, s)
 	if i < 0 {
 		return
@@ -543,6 +545,7 @@ func (a *App) closeSession(s *Session) {
 // secondary windows, and saves the pane sizes the user changed and the
 // command editor's text.
 func (a *App) CloseAll() {
+	a.cancelAdminLaunch(nil, true)
 	a.fe.discard = true // the editor's changes go with the app
 	a.closeWindows()
 	if a.layoutDirty {

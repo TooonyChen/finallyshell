@@ -52,6 +52,10 @@ func (a *App) splitPane(s *Session, dir splitDir) {
 	}
 	at, p := s.pane(), newPane()
 	if s.isLocal() {
+		if s.localElevated {
+			a.splitAdminLocal(s, at, p, dir)
+			return
+		}
 		term, err := a.openLocalPane(s, p)
 		a.paneOpened(s, at, p, dir, nil, shellSpec{}, term, err)
 		return

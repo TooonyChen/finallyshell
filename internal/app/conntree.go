@@ -151,7 +151,7 @@ func (a *App) leftPanelHeader(c *ui.Context) {
 			}
 			return
 		}
-		if headerButton(c, "square-terminal", locales.LocalTerminal()).Clicked() {
+		if a.localLaunchButton(c, nil, true) {
 			a.openLocal(nil)
 		}
 		if headerButton(c, "plus", locales.NewTab()).Clicked() {

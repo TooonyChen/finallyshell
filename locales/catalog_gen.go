@@ -9931,3 +9931,103 @@ func ErrAgentSign(error string) string { return In(i18n.Locale()).ErrAgentSign(e
 func (msgs Messages) ErrAgentSign(error string) string {
 	return Catalog.Format(msgs.locale, "errAgentSign", map[string]any{"error": error})
 }
+
+// LocalTerminalPrivileges says "Choose local terminal privileges"
+// in the language the app shows.
+func LocalTerminalPrivileges() string { return In(i18n.Locale()).LocalTerminalPrivileges() }
+
+// LocalTerminalPrivileges says "Choose local terminal privileges"
+// in the language of msgs.
+func (msgs Messages) LocalTerminalPrivileges() string {
+	return Catalog.Format(msgs.locale, "localTerminalPrivileges", nil)
+}
+
+// LocalRegular says "Standard privileges"
+// in the language the app shows.
+func LocalRegular() string { return In(i18n.Locale()).LocalRegular() }
+
+// LocalRegular says "Standard privileges"
+// in the language of msgs.
+func (msgs Messages) LocalRegular() string {
+	return Catalog.Format(msgs.locale, "localRegular", nil)
+}
+
+// LocalOpenAdministrator says "Open as administrator"
+// in the language the app shows.
+func LocalOpenAdministrator() string { return In(i18n.Locale()).LocalOpenAdministrator() }
+
+// LocalOpenAdministrator says "Open as administrator"
+// in the language of msgs.
+func (msgs Messages) LocalOpenAdministrator() string {
+	return Catalog.Format(msgs.locale, "localOpenAdministrator", nil)
+}
+
+// LocalAdministrator says "Administrator"
+// in the language the app shows.
+func LocalAdministrator() string { return In(i18n.Locale()).LocalAdministrator() }
+
+// LocalAdministrator says "Administrator"
+// in the language of msgs.
+func (msgs Messages) LocalAdministrator() string {
+	return Catalog.Format(msgs.locale, "localAdministrator", nil)
+}
+
+// LocalPrivilegeCheckFailed says "Unable to check the application privileges. Local terminal launch is disabled; restart Finallyshell and try again."
+// in the language the app shows.
+func LocalPrivilegeCheckFailed() string { return In(i18n.Locale()).LocalPrivilegeCheckFailed() }
+
+// LocalPrivilegeCheckFailed says "Unable to check the application privileges. Local terminal launch is disabled; restart Finallyshell and try again."
+// in the language of msgs.
+func (msgs Messages) LocalPrivilegeCheckFailed() string {
+	return Catalog.Format(msgs.locale, "localPrivilegeCheckFailed", nil)
+}
+
+// LocalRegularUnavailable says "Finallyshell is running as administrator. Close it and start it normally to open a standard terminal."
+// in the language the app shows.
+func LocalRegularUnavailable() string { return In(i18n.Locale()).LocalRegularUnavailable() }
+
+// LocalRegularUnavailable says "Finallyshell is running as administrator. Close it and start it normally to open a standard terminal."
+// in the language of msgs.
+func (msgs Messages) LocalRegularUnavailable() string {
+	return Catalog.Format(msgs.locale, "localRegularUnavailable", nil)
+}
+
+// LocalAdminUnavailable says "Administrator terminals are available on Windows only."
+// in the language the app shows.
+func LocalAdminUnavailable() string { return In(i18n.Locale()).LocalAdminUnavailable() }
+
+// LocalAdminUnavailable says "Administrator terminals are available on Windows only."
+// in the language of msgs.
+func (msgs Messages) LocalAdminUnavailable() string {
+	return Catalog.Format(msgs.locale, "localAdminUnavailable", nil)
+}
+
+// LocalAdminWaiting says "An administrator terminal is already waiting for authorization."
+// in the language the app shows.
+func LocalAdminWaiting() string { return In(i18n.Locale()).LocalAdminWaiting() }
+
+// LocalAdminWaiting says "An administrator terminal is already waiting for authorization."
+// in the language of msgs.
+func (msgs Messages) LocalAdminWaiting() string {
+	return Catalog.Format(msgs.locale, "localAdminWaiting", nil)
+}
+
+// LocalAdminCanceled says "Administrator authorization was canceled."
+// in the language the app shows.
+func LocalAdminCanceled() string { return In(i18n.Locale()).LocalAdminCanceled() }
+
+// LocalAdminCanceled says "Administrator authorization was canceled."
+// in the language of msgs.
+func (msgs Messages) LocalAdminCanceled() string {
+	return Catalog.Format(msgs.locale, "localAdminCanceled", nil)
+}
+
+// LocalAdminFailed says "Could not open administrator terminal: {error}"
+// in the language the app shows.
+func LocalAdminFailed(error string) string { return In(i18n.Locale()).LocalAdminFailed(error) }
+
+// LocalAdminFailed says "Could not open administrator terminal: {error}"
+// in the language of msgs.
+func (msgs Messages) LocalAdminFailed(error string) string {
+	return Catalog.Format(msgs.locale, "localAdminFailed", map[string]any{"error": error})
+}

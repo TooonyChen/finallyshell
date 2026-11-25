@@ -419,9 +419,30 @@ opens one in that tab. There is no default shortcut.
 - Nothing of a local terminal is saved or synced: local terminals do not
   come back after a restart.
 
-There are no split panes in the terminal area, so there is nothing to
-split for a local terminal either. Monitoring this computer, a local file
-browser and saving local terminals across restarts are not done.
+Monitoring this computer, a local file browser and saving local terminals
+across restarts are not done.
+
+On Windows, the arrow beside **Local terminal** offers **Standard privileges**
+and **Open as administrator**. Clicking the button itself always opens a standard
+terminal. Windows UAC handles administrator approval or credentials; canceling
+keeps the current tab and existing terminals. The elevated shell stays in the
+same terminal layout, with an **Administrator** shield on its session row and
+above its terminal, including after a rename.
+
+Reconnect, Duplicate session and Split preserve the terminal's privilege level;
+new administrator processes request authorization as needed. Ordinary and
+administrator terminals can coexist. The choice is never saved or synced and
+never becomes the default for new terminals. If Finallyshell itself was started
+as administrator, the standard entry is disabled: start the application normally
+to open a standard terminal. Hover over the disabled button or Standard privileges
+menu item to see why it is unavailable. If checking the application privileges
+fails, both launch entries are disabled with a restart-and-retry explanation. Windows process elevation does not select
+a Linux root user inside WSL. Other platforms retain their existing local entry.
+Windows PowerShell must be installed for the console attachment; the actual
+shell still comes from the Local terminal program setting.
+
+![Administrator terminal](../screenshots/local-admin-en.png)
+![Local terminal privileges](../screenshots/local-admin-menu-en.png)
 
 ## Connection manager
 

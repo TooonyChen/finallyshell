@@ -184,6 +184,8 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `connectionTreeExpanded` | “连接”页里展开的文件夹的 ID，如 `["f1730000000000000000"]`；`[]` 表示全部收起。按 ID 记，文件夹改名或移动后仍保持展开。 | 全部展开。 |
 | `sync` | “同步”页的设置（见[同步](#同步)）。 | 不同步。 |
 
+Windows 本地终端的权限按每次启动选择，不写入 settings.json，也不同步。新终端默认普通权限；管理员终端本次运行中的重连、复制和分屏保留权限选择。管理员凭据由 Windows UAC 处理，Finallyshell 不收集这些凭据。
+
 每个选项的详细说明在 [features.md](features.md)：见[常规](features.md#常规)、[传输](features.md#传输)、[终端](features.md#terminal-defaults)、[终端 › 鼠标](features.md#终端--鼠标)、[终端 › 快捷键](features.md#终端--快捷键)、[终端 › 命令输入框](features.md#终端--命令输入框)、[网络监控](features.md#网络监控)、[外观](features.md#外观字体配色背景图片)、[文件图标主题](features.md#文件图标主题)、[连接管理器](features.md#连接管理器)、[“连接”页](features.md#连接页)、[命令编辑器](features.md#命令编辑器)和[布局和分隔条](features.md#布局和分隔条)。
 
 ## 同步

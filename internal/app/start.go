@@ -191,7 +191,7 @@ func (a *App) startEmpty(c *ui.Context, tab *Session) {
 			if ui.Button(c, locales.ConnectionManager()).Clicked() {
 				a.showManager(false)
 			}
-			if localButton(c).Clicked() {
+			if a.localLaunchButton(c, tab, false) {
 				a.openLocal(tab)
 			}
 		})
@@ -311,7 +311,7 @@ func (a *App) quickConnect(c *ui.Context, tab *Session, st *startState) {
 			a.clearRecents()
 		}
 		widgets.Muted(c, locales.WelcomeHint(a.shortcutLabel(scManager))).FontSize(12).Grow(1).TextAlign(ui.End)
-		local = localButton(c).Clicked()
+		local = a.localLaunchButton(c, tab, false)
 		if ui.Button(c, locales.ConnectionManager()).Clicked() {
 			a.openManager()
 		}
