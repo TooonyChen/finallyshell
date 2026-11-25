@@ -11,7 +11,6 @@ import (
 	"finallyshell/internal/widgets"
 	"finallyshell/locales"
 
-	"github.com/egoist/mygo"
 	"github.com/egoist/mygo/plugins/terminal"
 	"github.com/egoist/mygo/ui"
 )
@@ -21,7 +20,6 @@ type localAdminState struct {
 	err                              error
 	start                            localterm.Starter
 	pending                          *adminLaunch
-	icon                             *mygo.MenuIcon
 }
 
 type adminLaunch struct {
@@ -44,43 +42,101 @@ func (a *App) ordinaryLocalDisabled() bool {
 	return a.localAdmin.supported && (a.localAdmin.elevated || a.localAdmin.err != nil)
 }
 
+// ordinaryLocalUnavailable explains the exact reason the standard entry is
+// blocked. The UI and direct-launch guard share it.
+func (a *App) ordinaryLocalUnavailable() string {
+	if !a.ordinaryLocalDisabled() {
+		return ""
+	}
+	if a.localAdmin.err != nil {
+		return locales.LocalPrivilegeCheckFailed()
+	}
+	return locales.LocalRegularUnavailable()
+}
+
 // localLaunchButton keeps the existing one-click ordinary launch. Only Windows
 // gets the adjacent arrow, with the same menu in the sidebar and start page.
 func (a *App) localLaunchButton(c *ui.Context, tab *Session, compact bool) bool {
 	a.initLocalAdmin()
+	reason := a.ordinaryLocalUnavailable()
 	clicked := false
-	ui.Row(c.Key("local-launch")).Gap(0).AlignItems(ui.Stretch).Shrink(0).Children(func() {
-		var b ui.Element
-		if compact {
-			b = headerButton(c, "square-terminal", locales.LocalTerminal())
-		} else {
-			b = localButton(c)
-		}
-		b.Disabled(a.ordinaryLocalDisabled())
-		if a.ordinaryLocalDisabled() {
-			b.Tooltip(locales.LocalRegularUnavailable())
-		}
-		clicked = b.Clicked()
+	group := ui.Row(c.Key("local-launch")).Gap(0).AlignItems(ui.Stretch).Shrink(0)
+	group.Children(func() {
+		// MyGo does not show tooltips on Disabled elements. An enabled wrapper
+		// supplies hover only; the real button remains disabled and unfocusable.
+		ui.Row(c.Key("ordinary")).Gap(0).Shrink(0).Tooltip(reason).Children(func() {
+			var b ui.Element
+			if compact {
+				b = headerButton(c, "square-terminal", locales.LocalTerminal())
+			} else {
+				b = localButton(c)
+			}
+			b.Disabled(reason != "").Description(reason)
+			if reason != "" {
+				b.Tooltip("")
+			}
+			clicked = b.Clicked()
+		})
 		if !a.localAdmin.supported {
 			return
 		}
-		arrow := widgets.IconButton(c, "chevron-down", locales.LocalTerminalPrivileges()).Width(20).Shrink(0)
-		if compact {
-			arrow.Width(12)
-		}
-		arrow.PopoverMenuButton(func(m *ui.Menu) {
-			if m.Item(locales.LocalRegular()).Disabled(a.ordinaryLocalDisabled()).Chosen() {
-				a.openLocal(tab)
-			}
-			if a.localAdmin.icon == nil {
-				a.localAdmin.icon, _ = mygo.NewMenuIconSVG(icons.Get("shield"), true)
-			}
-			if m.Item(locales.LocalOpenAdministrator()).Icon(a.localAdmin.icon).Disabled(a.localAdmin.pending != nil || a.localAdmin.err != nil).Chosen() {
-				a.openAdminLocal(tab)
-			}
-		}, ui.PopoverMenuButtonOptions{At: ui.AnchorTopEnd, Self: ui.AnchorBottomEnd})
+		open := ui.Local(group, "privilege-menu", func() bool { return false })
+		a.localPrivilegeMenu(c, tab, compact, open, reason)
 	})
 	return clicked
+}
+
+// A menu built with MyGo's existing parts lets each disabled item keep a
+// non-interactive hover wrapper, while Disabled still controls keys and clicks.
+func (a *App) localPrivilegeMenu(c *ui.Context, tab *Session, compact bool, open *bool, reason string) {
+	t := c.Theme()
+	m := ui.MenuBase(c.Key("privilege-menu"), open)
+	arrow := m.Trigger.Size(20, 24).Center().Radius(5).Shrink(0).
+		Label(locales.LocalTerminalPrivileges()).Tooltip(locales.LocalTerminalPrivileges())
+	if compact {
+		arrow.Width(12)
+	}
+	if arrow.Hovered() {
+		arrow.Background(t.Text.Alpha(0.07))
+	}
+	arrow.Children(func() { ui.Icon(c, icons.Get("chevron-down")).FontSize(15).TextColor(t.TextMuted) })
+	m.Popup(func(panel ui.Element) {
+		panel.AttachTo(arrow, ui.AnchorTopEnd, ui.AnchorBottomEnd).
+			MinWidth(t.Space(45)).Padding(t.Space(1)).Radius(t.Radius+2).
+			Background(t.Background).Border(1, t.Border).
+			Shadow(0, 6, 20, 0, ui.RGBA(0, 0, 0, 0.18))
+		item := func(label, icon, explanation string, launch func()) {
+			ui.Column(c.Key(label)).Gap(0).Tooltip(explanation).Children(func() {
+				row := m.Item().Label(label).Description(explanation).Disabled(explanation != "").
+					AlignItems(ui.Center).Gap(t.Space(2)).Padding(t.Space(1.5), t.Space(2)).Radius(t.Radius).Shrink(0)
+				color := t.Text
+				if explanation != "" {
+					color = t.TextMuted
+				} else if row.Highlighted() {
+					row.Background(t.Accent)
+					color = t.AccentText
+				}
+				row.TextColor(color).Children(func() {
+					mark := ui.Box(c).Size(t.Space(4), t.Space(4)).Shrink(0)
+					if icon != "" {
+						mark.Center().Children(func() { ui.Icon(c, icons.Get(icon)).FontSize(t.Space(4)) })
+					}
+					ui.Text(c, label).SingleLine()
+				})
+				if row.Clicked() {
+					launch()
+				}
+			})
+		}
+		item(locales.LocalRegular(), "", reason, func() { a.openLocal(tab) })
+		adminReason := ""
+		if a.localAdmin.err != nil {
+			adminReason = locales.LocalPrivilegeCheckFailed()
+		} else if a.localAdmin.pending != nil {
+			adminReason = locales.LocalAdminWaiting()
+		}
+		item(locales.LocalOpenAdministrator(), "shield", adminReason, func() { a.openAdminLocal(tab) })
+	})
 }
 
 func (a *App) cancelAdminLaunch(s *Session, all bool) {

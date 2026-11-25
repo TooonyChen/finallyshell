@@ -71,7 +71,7 @@ func (s *Session) historyID() string {
 // the list for nil, selected as a new session is (Settings.NoAutoSelectTab).
 func (a *App) openLocal(tab *Session) {
 	if a.ordinaryLocalDisabled() {
-		a.notify(locales.LocalRegularUnavailable())
+		a.notify(a.ordinaryLocalUnavailable())
 		return
 	}
 	if tab != nil {

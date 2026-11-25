@@ -434,7 +434,9 @@ new administrator processes request authorization as needed. Ordinary and
 administrator terminals can coexist. The choice is never saved or synced and
 never becomes the default for new terminals. If Finallyshell itself was started
 as administrator, the standard entry is disabled: start the application normally
-to open a genuinely standard terminal. Windows process elevation does not select
+to open a standard terminal. Hover over the disabled button or Standard privileges
+menu item to see why it is unavailable. If checking the application privileges
+fails, both launch entries are disabled with a restart-and-retry explanation. Windows process elevation does not select
 a Linux root user inside WSL. Other platforms retain their existing local entry.
 Windows PowerShell must be installed for the console attachment; the actual
 shell still comes from the Local terminal program setting.

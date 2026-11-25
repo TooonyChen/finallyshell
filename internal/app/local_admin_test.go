@@ -8,6 +8,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"finallyshell/internal/config"
 	"finallyshell/internal/localterm"
@@ -332,5 +333,100 @@ func TestAdminLocalSplitStartupFailureKeepsOtherPane(t *testing.T) {
 	p.until(t, "split startup failure", func() bool { return s.status == statusFailed || s.panes.count() == 1 })
 	if s.status != statusConnected || s.panes.count() != 1 || s.term() != original {
 		t.Fatalf("startup failure disabled original pane: status %v, panes %d", s.status, s.panes.count())
+	}
+}
+
+// TestAdminLocalDisabledHover checks the actual disabled controls, including
+// the icon-only sidebar entry, rather than just their tooltip metadata.
+func TestAdminLocalDisabledHover(t *testing.T) {
+	for _, lang := range []string{"en", "zh-Hans"} {
+		for _, compact := range []bool{false, true} {
+			for _, failure := range []bool{false, true} {
+				name := lang
+				if compact {
+					name += "/sidebar"
+				} else {
+					name += "/start"
+				}
+				if failure {
+					name += "/check-failed"
+				} else {
+					name += "/elevated"
+				}
+				t.Run(name, func(t *testing.T) {
+					a, p, _, closed := adminApp(t)
+					a.localAdmin.elevated = !failure
+					if failure {
+						a.localAdmin.err = errors.New("token check failed")
+					}
+					// Render the same shared control in isolation, with a nearby ordinary
+					// button to verify the explanation does not cover unrelated controls.
+					tt := ui.NewTester(func(c *ui.Context) {
+						ui.Column(c).Padding(40).AlignItems(ui.Start).Children(func() {
+							if a.localLaunchButton(c, nil, compact) {
+								a.openLocal(nil)
+							}
+							ui.Button(c, "unrelated")
+						})
+					}, 760, 400)
+					p.tt = tt
+					p.SetLocale(lang)
+					tt.Frame()
+					want := locales.LocalRegularUnavailable()
+					// Check the actual reason, not tooltip metadata.
+					if failure {
+						want = locales.LocalPrivilegeCheckFailed()
+					}
+					b, ok := tt.AccessByRole(ui.RoleButton, locales.LocalTerminal())
+					if !ok || !b.Disabled {
+						t.Fatal("ordinary entry must remain disabled")
+					}
+					tt.Move(b.Bounds.X+b.Bounds.W/2, b.Bounds.Y+b.Bounds.H/2)
+					tt.Advance(time.Second)
+					tt.Frame()
+					if !tt.HasText(want) {
+						t.Errorf("no disabled button explanation: %q", tt.Texts())
+					}
+					saveShot(t, tt, "local-disabled-button-"+strings.ReplaceAll(name, "/", "-")+".png")
+					tt.ClickAt(b.Bounds.X+b.Bounds.W/2, b.Bounds.Y+b.Bounds.H/2)
+					if len(a.sessions) != 1 || !a.current().isNewTab() || a.localAdmin.pending != nil {
+						t.Fatal("disabled button launched")
+					}
+					if err := tt.Click(locales.LocalTerminalPrivileges()); err != nil {
+						t.Fatal(err)
+					}
+					item, ok := tt.AccessByRole(ui.RoleMenuItem, locales.LocalRegular())
+					if !ok || !item.Disabled {
+						t.Fatal("ordinary menu item must remain disabled")
+					}
+					tt.Move(item.Bounds.X+item.Bounds.W/2, item.Bounds.Y+item.Bounds.H/2)
+					tt.Advance(time.Second)
+					tt.Frame()
+					if !tt.HasText(want) {
+						t.Errorf("no disabled menu explanation: %q", tt.Texts())
+					}
+					saveShot(t, tt, "local-disabled-menu-"+strings.ReplaceAll(name, "/", "-")+".png")
+					tt.ClickAt(item.Bounds.X+item.Bounds.W/2, item.Bounds.Y+item.Bounds.H/2)
+					if len(a.sessions) != 1 || !a.current().isNewTab() || a.localAdmin.pending != nil || closed.Load() != 0 {
+						t.Fatal("disabled item launched")
+					}
+					// Keyboard navigation must skip the disabled ordinary action.
+					tt.Key(0, ui.KeyHome)
+					if !failure {
+						admin, ok := tt.AccessByRole(ui.RoleMenuItem, locales.LocalOpenAdministrator())
+						if !ok || admin.Disabled || !admin.Focused {
+							t.Fatal("keyboard did not skip disabled ordinary item")
+						}
+					}
+					tt.Key(0, ui.KeyEscape)
+					tt.Move(rowCenter(t, tt, "unrelated"))
+					tt.Advance(time.Second)
+					tt.Frame()
+					if tt.HasText(want) {
+						t.Fatal("explanation remained over unrelated control")
+					}
+				})
+			}
+		}
 	}
 }

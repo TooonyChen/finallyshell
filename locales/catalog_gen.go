@@ -9972,11 +9972,21 @@ func (msgs Messages) LocalAdministrator() string {
 	return Catalog.Format(msgs.locale, "localAdministrator", nil)
 }
 
-// LocalRegularUnavailable says "This application is running as administrator, or its privileges could not be checked. Start Finallyshell normally to …"
+// LocalPrivilegeCheckFailed says "Unable to check the application privileges. Local terminal launch is disabled; restart Finallyshell and try again."
+// in the language the app shows.
+func LocalPrivilegeCheckFailed() string { return In(i18n.Locale()).LocalPrivilegeCheckFailed() }
+
+// LocalPrivilegeCheckFailed says "Unable to check the application privileges. Local terminal launch is disabled; restart Finallyshell and try again."
+// in the language of msgs.
+func (msgs Messages) LocalPrivilegeCheckFailed() string {
+	return Catalog.Format(msgs.locale, "localPrivilegeCheckFailed", nil)
+}
+
+// LocalRegularUnavailable says "Finallyshell is running as administrator. Close it and start it normally to open a standard terminal."
 // in the language the app shows.
 func LocalRegularUnavailable() string { return In(i18n.Locale()).LocalRegularUnavailable() }
 
-// LocalRegularUnavailable says "This application is running as administrator, or its privileges could not be checked. Start Finallyshell normally to …"
+// LocalRegularUnavailable says "Finallyshell is running as administrator. Close it and start it normally to open a standard terminal."
 // in the language of msgs.
 func (msgs Messages) LocalRegularUnavailable() string {
 	return Catalog.Format(msgs.locale, "localRegularUnavailable", nil)
