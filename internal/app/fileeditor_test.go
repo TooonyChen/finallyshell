@@ -119,6 +119,53 @@ func (f *editorFixture) read(t *testing.T, name string) string {
 	return string(data)
 }
 
+func TestFileEditorWindowPlacement(t *testing.T) {
+	f := newEditorFixture(t)
+	a, p := f.a, f.p
+	path := filepath.Join(f.dir, "deploy.sh")
+	a.openRemoteFile(f.s, path)
+	original := p.windows[WindowFileEditor]
+	if original.spec.Independent || original.spec.Modal {
+		t.Fatalf("default editor spec %+v", original.spec)
+	}
+	tab := f.tab(t, "deploy.sh")
+	w := f.window(t)
+	w.Type("# draft\n")
+	draft := tab.code.Buffer.String()
+
+	a.openOptions()
+	if err := p.show(t, WindowOptions).Click(locales.OptionKeepFileEditorInFront()); err != nil {
+		t.Fatal(err)
+	}
+	a.openRemoteFile(f.s, path)
+	if p.windows[WindowFileEditor] != original || a.fe.current() != tab || !tab.modified() || tab.code.Buffer.String() != draft {
+		t.Fatal("changing the option or reopening the file altered the open editor")
+	}
+	if p.userClose(WindowFileEditor) || !a.fe.askWindow {
+		t.Fatal("closing an edited file without asking")
+	}
+	w.Frame()
+	if err := w.Click(locales.DontSave()); err != nil {
+		t.Fatal(err)
+	}
+	a.openRemoteFile(f.s, path)
+	independent := p.windows[WindowFileEditor]
+	if independent == original || !independent.spec.Independent || independent.spec.Modal || p.windows[WindowOptions].spec.Independent {
+		t.Fatalf("editor spec %+v, options spec %+v", independent.spec, p.windows[WindowOptions].spec)
+	}
+	f.tab(t, "deploy.sh")
+	w = f.window(t)
+	w.Type("# independent draft\n")
+	a.settings.MinimizeToTray = true
+	if a.unsavedFiles() != 1 || a.CloseRequested() || !p.inTray || p.windows[WindowFileEditor] != independent {
+		t.Fatal("hiding to the tray should preserve an independent editor with changes")
+	}
+	a.CloseAll()
+	if a.windowOpen(WindowFileEditor) || p.windows[WindowFileEditor] != nil {
+		t.Fatal("the app closed without releasing the independent editor")
+	}
+}
+
 func TestFileEditorOpenEditSave(t *testing.T) {
 	f := newEditorFixture(t)
 	a, p, tt := f.a, f.p, f.tt

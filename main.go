@@ -57,23 +57,9 @@ func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), clo
 	if w := p.windows[spec.Parent]; spec.Parent != "" && w != nil {
 		parent = w.win
 	}
-	// Centered over the parent, as dialogs are, rather than on the
-	// screen. A sheet (Modal on macOS) and Wayland place it themselves.
-	b := parent.Bounds()
-	win := mygo.NewWindow(mygo.WindowOptions{
-		Title:           spec.Title(),
-		Width:           spec.Width,
-		Height:          spec.Height,
-		UseContentSize:  true,
-		MinWidth:        spec.MinWidth,
-		MinHeight:       spec.MinHeight,
-		X:               b.X + (b.Width-spec.Width)/2,
-		Y:               b.Y + (b.Height-spec.Height)/2,
-		Parent:          parent,
-		Modal:           spec.Modal,
-		DisableMinimize: true,
-		Content:         ui.View(view),
-	})
+	opts := secondaryWindowOptions(spec, parent, parent.Bounds())
+	opts.Content = ui.View(view)
+	win := mygo.NewWindow(opts)
 	child := &childWindow{win: win, title: spec.Title}
 	p.windows[spec.Kind] = child
 	// The window may ask first, as the editor does with unsaved changes,
@@ -91,6 +77,26 @@ func (p *platform) OpenWindow(spec app.WindowSpec, view func(c *ui.Context), clo
 	})
 }
 
+func secondaryWindowOptions(spec app.WindowSpec, parent *mygo.Window, bounds mygo.Rectangle) mygo.WindowOptions {
+	// Center over the parent. A sheet on macOS and Wayland place themselves.
+	opts := mygo.WindowOptions{
+		Title:          spec.Title(),
+		Width:          spec.Width,
+		Height:         spec.Height,
+		UseContentSize: true,
+		MinWidth:       spec.MinWidth,
+		MinHeight:      spec.MinHeight,
+		X:              bounds.X + (bounds.Width-spec.Width)/2,
+		Y:              bounds.Y + (bounds.Height-spec.Height)/2,
+	}
+	if !spec.Independent {
+		opts.Parent = parent
+		opts.Modal = spec.Modal
+		opts.DisableMinimize = true
+	}
+	return opts
+}
+
 func (p *platform) RetitleWindow(kind app.WindowKind) {
 	if w := p.windows[kind]; w != nil {
 		w.win.SetTitle(w.title())
@@ -103,7 +109,10 @@ func (p *platform) FocusWindow(kind app.WindowKind) {
 		return
 	}
 	if w := p.windows[kind]; w != nil {
-		w.win.Focus() // restores it too, and makes it the key window
+		if w.win.IsMinimized() {
+			w.win.Restore()
+		}
+		w.win.Focus()
 	}
 }
 
@@ -300,7 +309,7 @@ func main() {
 				e.PreventDefault()
 			}
 		})
-		// Its children close with it, before this runs.
+		// MyGo closes owned windows first. CloseAll also closes an independent editor.
 		plat.win.OnClosed(func() {
 			if plat.tray != nil {
 				plat.tray.Destroy()

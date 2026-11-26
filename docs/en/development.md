@@ -433,10 +433,10 @@ other.
 As in FinalShell, settings-type dialogs are separate windows (MyGo child
 windows, `WindowOptions.Parent`), not overlays inside the main window. They
 are currently the Options window, the connection manager, the connection
-editor, the "Import connections" window and the file editor. All are
-child windows of the main window, except the connection editor and the
-import window when opened from the connection manager: those are modal
-child windows of the connection manager, as in FinalShell. As a result:
+editor, the "Import connections" window and the file editor. By default
+the main window owns them. The connection editor and import window opened
+from the connection manager are modal children of the connection manager.
+The file editor can also open independently when the General option is off.
 
 - On macOS the editor is a sheet of the connection manager. It covers the
   connection manager and does not block the main window. A sheet has no
@@ -462,11 +462,13 @@ How child windows work:
   `a.openWindow(spec, view)` brings it to the front if it is already open.
   `WindowSpec` gives the title (a function from locales, fetched again when
   the language changes), the content size, the minimum size, the parent
-  window (the main window by default) and whether it is modal.
+  window (the main window by default) and whether it is modal. An
+  `Independent` window uses that parent for its initial position only.
 - Esc in a window (and Cmd+W on macOS), or `a.closeWindow(kind)`, closes
   it. Closing a parent window closes its child windows; closing the main
-  window closes all child windows. `WindowSpec.OwnKeys` leaves Esc and
-  Cmd+W to the window itself (the file editor uses Cmd+W to close a tab).
+  window also closes the independent editor through `App.CloseAll`.
+  `WindowSpec.OwnKeys` leaves Esc and Cmd+W to the window itself (the file
+  editor uses Cmd+W to close a tab).
   `CloseRequested` asks the window first when the user clicks the close
   button, and the window stays open if it returns false (the editor asks
   about unsaved changes); the app closing a window itself does not ask.

@@ -150,6 +150,7 @@ func TestAgentOption(t *testing.T) {
 			t.Errorf("no %q; texts %q", s, tt.Texts())
 		}
 	}
+	tt.Scroll(500, 300, 0, 120) // bring the agent address into view
 	typeInto(t, tt, locales.OptionSSHAgent(), ag.Addr)
 	if a.settings.SSHAgent != ag.Addr || config.LoadSettings().SSHAgent != ag.Addr {
 		t.Fatalf("address %q, saved %q", a.settings.SSHAgent, config.LoadSettings().SSHAgent)
@@ -182,6 +183,7 @@ func TestAgentOption(t *testing.T) {
 		t.Errorf("address %q; texts %q", a.settings.SSHAgent, tt.Texts())
 	}
 	tt.SetSize(760, 1060) // the whole page, for the screenshots
+	tt.Scroll(500, 300, 0, -1000)
 	tt.Frame()
 	saveShot(t, tt, "options-agent-en.png")
 	p.SetLocale("zh-Hans")

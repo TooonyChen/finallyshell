@@ -555,6 +555,8 @@
   "optionMinimizeToTray": "Minimize to tray when closed",
   "optionConfirmClose": "Confirm before closing the window",
   "optionConfirmCloseNote": "Asks only while sessions are connected or connecting.",
+  "optionKeepFileEditorInFront": "Keep the file editor in front of the main window",
+  "optionKeepFileEditorInFrontNote": "Turn off to minimize the editor and switch between windows. Applies the next time you open the editor window.",
   "optionsConnections": "Connections",
   "optionKeepAliveBefore": "Send a keepalive every",
   "optionKeepAliveAfter": "seconds",

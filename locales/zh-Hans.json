@@ -405,6 +405,8 @@
   "optionMinimizeToTray": "关闭时最小化到托盘",
   "optionConfirmClose": "关闭窗口前确认",
   "optionConfirmCloseNote": "只在有会话已连接或正在连接时询问。",
+  "optionKeepFileEditorInFront": "文件编辑器保持在主窗口前方",
+  "optionKeepFileEditorInFrontNote": "关闭后可单独最小化编辑器，并在两个窗口之间切换。下次打开编辑器窗口时生效。",
   "optionsConnections": "连接",
   "optionKeepAliveBefore": "每隔",
   "optionKeepAliveAfter": "秒发送一次保活消息",
