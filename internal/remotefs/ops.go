@@ -58,6 +58,32 @@ func Rename(c *sftp.Client, p, name string) (string, error) {
 	return np, c.Rename(p, np)
 }
 
+// ErrSymlinkPermissions reports that SFTP cannot edit a link's own
+// permissions with Chmod.
+var ErrSymlinkPermissions = errors.New("cannot change a symbolic link's permissions")
+
+// FilePermissions reads the permissions of the entry itself.
+func FilePermissions(c *sftp.Client, p string) (fs.FileMode, error) {
+	fi, err := c.Lstat(p)
+	if err != nil {
+		return 0, err
+	}
+	if fi.Mode()&fs.ModeSymlink != 0 {
+		return 0, ErrSymlinkPermissions
+	}
+	return fi.Mode() & (fs.ModePerm | specialBits), nil
+}
+
+// Chmod changes the read, write and execute bits and keeps the current
+// set-ID and sticky bits.
+func Chmod(c *sftp.Client, p string, mode fs.FileMode) error {
+	current, err := FilePermissions(c, p)
+	if err != nil {
+		return err
+	}
+	return c.Chmod(p, current&specialBits|mode.Perm())
+}
+
 // Mkdir creates the folder name in dir, and returns its path.
 func Mkdir(c *sftp.Client, dir, name string) (string, error) {
 	if err := free(c, dir, name); err != nil {

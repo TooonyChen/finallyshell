@@ -1422,17 +1422,18 @@ written, relative or absolute, not resolved.
 
 ### File operations
 
-Files and folders can be renamed, deleted and created from the context
-menus of the file table and of the folder tree:
+The context menus of the file table and folder tree offer operations on
+remote files and folders:
 
 - The file table's menu has New folder, New file, Rename (one item
-  chosen) and Delete (one or more chosen). With the table focused, F2
+  chosen), Change permissions (one file or folder chosen), and Delete
+  (one or more chosen). With the table focused, F2
   renames the chosen item and Delete (or Cmd+Backspace on macOS) deletes
   the chosen items.
 - The folder tree's menu acts on the folder right-clicked, without
   opening it: Open, Upload files, Upload folder (into that folder), New
-  folder, New file, Rename, Delete, Refresh and Copy path. `/` has no
-  Rename or Delete.
+  folder, New file, Rename, Change permissions, Delete, Refresh and
+  Copy path. `/` has no Rename, Change permissions or Delete.
 
 Rename, New folder and New file ask for a name. Rename starts with the
 name chosen up to its extension, as Finder and Explorer do. A name that is
@@ -1440,6 +1441,11 @@ empty, `.`, `..` or has a `/` in it is refused, and so is a name already
 taken in the folder: a rename never replaces another file, and a new file
 never empties one that is there. Errors from the server (such as
 permission denied) show in the dialog, which stays open.
+
+Change permissions reads the current permissions from the server. Tick
+Read, Write and Execute for the owner, group and others, then choose OK
+to save over SFTP. The dialog edits one file or folder at a time, keeps
+special mode bits, and leaves symbolic links and folder contents alone.
 
 Delete always asks first. A folder is deleted with everything in it. Links
 are never followed: deleting a link to a folder removes the link, not the

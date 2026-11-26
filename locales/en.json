@@ -1175,6 +1175,15 @@
   "fileIconsThemes": "Themes",
   "newFile": "New file",
   "openFolder": "Open",
+  "changePermissions": "Change permissions…",
+  "changePermissionsTitle": "Change permissions",
+  "permissionOwner": "Owner",
+  "permissionGroup": "Group",
+  "permissionOthers": "Others",
+  "permissionRead": "Read",
+  "permissionWrite": "Write",
+  "permissionExecute": "Execute",
+  "symlinkPermissions": "Permissions cannot be changed on a symbolic link.",
   "renameFileTitle": "Rename “{name}”",
   "@renameFileTitle": {
     "placeholders": {

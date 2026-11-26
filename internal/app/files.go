@@ -396,6 +396,10 @@ func (a *App) fileTable(c *ui.Context, s *Session) {
 			if m.Item(locales.Rename()).Shortcut(0, ui.KeyF2).Disabled(!one).Chosen() && one {
 				a.askRename(s, path.Join(f.cwd, e.Name), e.IsDir())
 			}
+			canChmod := one && !e.Link
+			if m.Item(locales.ChangePermissions()).Disabled(!canChmod).Chosen() && canChmod {
+				a.askFilePermissions(s, path.Join(f.cwd, e.Name))
+			}
 			if m.Item(locales.Delete()).Shortcut(0, ui.KeyDelete).Disabled(len(names) == 0).Chosen() && len(names) > 0 {
 				a.askDeleteChosen(s)
 			}

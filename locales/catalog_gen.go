@@ -7314,6 +7314,96 @@ func (msgs Messages) OpenFolder() string {
 	return Catalog.Format(msgs.locale, "openFolder", nil)
 }
 
+// ChangePermissions says "Change permissions…"
+// in the language the app shows.
+func ChangePermissions() string { return In(i18n.Locale()).ChangePermissions() }
+
+// ChangePermissions says "Change permissions…"
+// in the language of msgs.
+func (msgs Messages) ChangePermissions() string {
+	return Catalog.Format(msgs.locale, "changePermissions", nil)
+}
+
+// ChangePermissionsTitle says "Change permissions"
+// in the language the app shows.
+func ChangePermissionsTitle() string { return In(i18n.Locale()).ChangePermissionsTitle() }
+
+// ChangePermissionsTitle says "Change permissions"
+// in the language of msgs.
+func (msgs Messages) ChangePermissionsTitle() string {
+	return Catalog.Format(msgs.locale, "changePermissionsTitle", nil)
+}
+
+// PermissionOwner says "Owner"
+// in the language the app shows.
+func PermissionOwner() string { return In(i18n.Locale()).PermissionOwner() }
+
+// PermissionOwner says "Owner"
+// in the language of msgs.
+func (msgs Messages) PermissionOwner() string {
+	return Catalog.Format(msgs.locale, "permissionOwner", nil)
+}
+
+// PermissionGroup says "Group"
+// in the language the app shows.
+func PermissionGroup() string { return In(i18n.Locale()).PermissionGroup() }
+
+// PermissionGroup says "Group"
+// in the language of msgs.
+func (msgs Messages) PermissionGroup() string {
+	return Catalog.Format(msgs.locale, "permissionGroup", nil)
+}
+
+// PermissionOthers says "Others"
+// in the language the app shows.
+func PermissionOthers() string { return In(i18n.Locale()).PermissionOthers() }
+
+// PermissionOthers says "Others"
+// in the language of msgs.
+func (msgs Messages) PermissionOthers() string {
+	return Catalog.Format(msgs.locale, "permissionOthers", nil)
+}
+
+// PermissionRead says "Read"
+// in the language the app shows.
+func PermissionRead() string { return In(i18n.Locale()).PermissionRead() }
+
+// PermissionRead says "Read"
+// in the language of msgs.
+func (msgs Messages) PermissionRead() string {
+	return Catalog.Format(msgs.locale, "permissionRead", nil)
+}
+
+// PermissionWrite says "Write"
+// in the language the app shows.
+func PermissionWrite() string { return In(i18n.Locale()).PermissionWrite() }
+
+// PermissionWrite says "Write"
+// in the language of msgs.
+func (msgs Messages) PermissionWrite() string {
+	return Catalog.Format(msgs.locale, "permissionWrite", nil)
+}
+
+// PermissionExecute says "Execute"
+// in the language the app shows.
+func PermissionExecute() string { return In(i18n.Locale()).PermissionExecute() }
+
+// PermissionExecute says "Execute"
+// in the language of msgs.
+func (msgs Messages) PermissionExecute() string {
+	return Catalog.Format(msgs.locale, "permissionExecute", nil)
+}
+
+// SymlinkPermissions says "Permissions cannot be changed on a symbolic link."
+// in the language the app shows.
+func SymlinkPermissions() string { return In(i18n.Locale()).SymlinkPermissions() }
+
+// SymlinkPermissions says "Permissions cannot be changed on a symbolic link."
+// in the language of msgs.
+func (msgs Messages) SymlinkPermissions() string {
+	return Catalog.Format(msgs.locale, "symlinkPermissions", nil)
+}
+
 // RenameFileTitle says "Rename “{name}”"
 // in the language the app shows.
 func RenameFileTitle(name string) string { return In(i18n.Locale()).RenameFileTitle(name) }

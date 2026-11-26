@@ -23,10 +23,10 @@ const (
 	opMkdir
 	opCreate
 	opDelete
+	opChmod
 )
 
-// fileDialog asks for the name of a rename, a new folder or a new file,
-// or whether to delete, in the file panel of sess, and shows how it went.
+// fileDialog prompts for an operation in the file panel and shows errors.
 type fileDialog struct {
 	sess  *Session
 	op    fileOp
@@ -39,6 +39,7 @@ type fileDialog struct {
 	// selectStem selects the name without its extension as the dialog
 	// opens, as Finder and Explorer do for a rename.
 	selectStem bool
+	perms      filePermissions
 
 	busy   bool
 	err    error
@@ -117,12 +118,13 @@ func (a *App) runFileDialog(d *fileDialog) {
 		return
 	}
 	name := strings.TrimSpace(d.name)
-	if d.op != opDelete && !remotefs.ValidName(name) {
+	if d.op != opDelete && d.op != opChmod && !remotefs.ValidName(name) {
 		d.err = remotefs.ErrBadName
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	d.busy, d.err, d.cancel = true, nil, cancel
+	mode := d.perms.mode
 	go func() {
 		var made string   // the new path of a rename, a folder or a file
 		var gone []string // the paths a delete removed
@@ -134,6 +136,8 @@ func (a *App) runFileDialog(d *fileDialog) {
 			made, err = remotefs.Mkdir(sc, d.dir, name)
 		case opCreate:
 			made, err = remotefs.CreateFile(sc, d.dir, name)
+		case opChmod:
+			err = remotefs.Chmod(sc, path.Join(d.dir, d.old), mode)
 		case opDelete:
 			for _, n := range d.names {
 				p := path.Join(d.dir, n)
@@ -202,6 +206,11 @@ func (a *App) filesChanged(d *fileDialog, made string, gone []string, err error)
 		}
 	}
 	switch d.op {
+	case opChmod:
+		if err == nil && cwd == d.dir {
+			a.openDir(s, cwd)
+		}
+		return
 	case opRename:
 		if err != nil {
 			break
@@ -241,6 +250,8 @@ func fileOpErrorText(err error) string {
 		return locales.BadFileName()
 	case errors.As(err, &taken):
 		return locales.FileNameTaken(taken.Name)
+	case errors.Is(err, remotefs.ErrSymlinkPermissions):
+		return locales.SymlinkPermissions()
 	}
 	return err.Error()
 }
@@ -256,6 +267,10 @@ func stemLength(name string, dir bool) int {
 
 // fileDialogView draws the file dialog, as a modal of the main window.
 func (a *App) fileDialogView(c *ui.Context, d *fileDialog) {
+	if d.op == opChmod {
+		a.filePermissionsView(c, d)
+		return
+	}
 	ui.Column(c).Width(400).Gap(12).Children(func() {
 		ui.Text(c, d.title()).FontSize(16).Bold()
 		submit := false
@@ -330,6 +345,9 @@ func (a *App) treeMenu(c *ui.Context, m *ui.Menu, s *Session, dir string) {
 		m.Separator()
 		if m.Item(locales.Rename()).Chosen() {
 			a.askRename(s, dir, true)
+		}
+		if m.Item(locales.ChangePermissions()).Chosen() {
+			a.askFilePermissions(s, dir)
 		}
 		if m.Item(locales.Delete()).Chosen() {
 			a.askDelete(s, path.Dir(dir), []string{path.Base(dir)}, true)
