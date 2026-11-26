@@ -23,11 +23,11 @@ func TestSettingsSyncDecided(t *testing.T) {
 func TestSyncedSettingsRoundTrip(t *testing.T) {
 	s := Settings{
 		Language: "zh-Hans", TermFontSize: 15, TermTheme: "Nord", SidebarWidth: 300,
-		DownloadDir: "/home/me/dl", TermBackground: "bg.png",
+		DownloadDir: "/home/me/dl", TermBackground: "bg.png", IndependentFileEditor: true,
 		Sync: SyncSettings{Provider: SyncGist},
 	}
 	m := SyncedSettings(s)
-	for _, k := range []string{"sidebarWidth", "downloadDir", "termBackground", "sync"} {
+	for _, k := range []string{"sidebarWidth", "downloadDir", "termBackground", "sync", "independentFileEditor"} {
 		if _, ok := m[k]; ok {
 			t.Errorf("%s is synced", k)
 		}
@@ -42,7 +42,7 @@ func TestSyncedSettingsRoundTrip(t *testing.T) {
 	if got.TermTheme != "Dracula" || got.TermFontSize != 0 {
 		t.Errorf("synced settings not applied: %+v", got)
 	}
-	if got.SidebarWidth != 300 || got.DownloadDir != "/home/me/dl" || got.TermBackground != "bg.png" || got.Sync.Provider != SyncGist {
+	if got.SidebarWidth != 300 || got.DownloadDir != "/home/me/dl" || got.TermBackground != "bg.png" || got.Sync.Provider != SyncGist || !got.IndependentFileEditor {
 		t.Errorf("local settings changed: %+v", got)
 	}
 }

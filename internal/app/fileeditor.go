@@ -183,7 +183,8 @@ func (a *App) fileEditorSpec() WindowSpec {
 	return WindowSpec{
 		Kind: WindowFileEditor, Title: a.fileEditorTitle,
 		Width: 1000, Height: 700, MinWidth: 560, MinHeight: 360,
-		OwnKeys: true, CloseRequested: a.closeFileEditorRequested, Closed: a.fileEditorClosed,
+		Independent: a.settings.IndependentFileEditor,
+		OwnKeys:     true, CloseRequested: a.closeFileEditorRequested, Closed: a.fileEditorClosed,
 	}
 }
 

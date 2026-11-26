@@ -4126,6 +4126,28 @@ func (msgs Messages) OptionConfirmCloseNote() string {
 	return Catalog.Format(msgs.locale, "optionConfirmCloseNote", nil)
 }
 
+// OptionKeepFileEditorInFront says "Keep the file editor in front of the main window"
+// in the language the app shows.
+func OptionKeepFileEditorInFront() string { return In(i18n.Locale()).OptionKeepFileEditorInFront() }
+
+// OptionKeepFileEditorInFront says "Keep the file editor in front of the main window"
+// in the language of msgs.
+func (msgs Messages) OptionKeepFileEditorInFront() string {
+	return Catalog.Format(msgs.locale, "optionKeepFileEditorInFront", nil)
+}
+
+// OptionKeepFileEditorInFrontNote says "Turn off to minimize the editor and switch between windows. Applies the next time you open the editor window."
+// in the language the app shows.
+func OptionKeepFileEditorInFrontNote() string {
+	return In(i18n.Locale()).OptionKeepFileEditorInFrontNote()
+}
+
+// OptionKeepFileEditorInFrontNote says "Turn off to minimize the editor and switch between windows. Applies the next time you open the editor window."
+// in the language of msgs.
+func (msgs Messages) OptionKeepFileEditorInFrontNote() string {
+	return Catalog.Format(msgs.locale, "optionKeepFileEditorInFrontNote", nil)
+}
+
 // OptionsConnections says "Connections"
 // in the language the app shows.
 func OptionsConnections() string { return In(i18n.Locale()).OptionsConnections() }

@@ -101,6 +101,9 @@ type Settings struct {
 	// NoConfirmClose quits without asking while sessions are open; by
 	// default closing the window, or quitting, asks first.
 	NoConfirmClose bool `json:"noConfirmClose,omitempty"`
+	// IndependentFileEditor opens the file editor as a minimizable window
+	// that can go behind the main window. By default it stays above it.
+	IndependentFileEditor bool `json:"independentFileEditor,omitempty"`
 	// KeepAliveSeconds is the seconds between the keepalives sent on
 	// each connection: 0, as a file without it reads, for
 	// DefaultKeepAliveSeconds, and KeepAliveOff (any negative number)

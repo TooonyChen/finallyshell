@@ -1584,9 +1584,12 @@ treated as TOML by MyGo.
 
 ### Window
 
-There is one editor window (a child window of the main window, 1000×700,
-resizable), with a tab for each file. Each tab remembers the session it
-came from. The window title is `host:path` of the selected tab, and a tab
+There is one resizable editor window (1000×700), with a tab for each file.
+It stays in front of the main window by default. Turn off "Keep the file
+editor in front of the main window" in Options › General › Tabs and window
+to open it as a separate, minimizable window. Close and reopen the editor
+window to apply the change. Each tab remembers its session. The window
+title is `host:path` of the selected tab, and a tab
 with unsaved changes shows a dot. Opening a file that is already open
 switches to its tab.
 
@@ -2040,9 +2043,10 @@ commands, and opening the editor in a window of its own.
 The gear button next to the "Sessions" title at the bottom left opens the
 Options window. As in FinalShell, it has a tree of pages on the left and
 the page on the right. Every option is saved to `settings.json` as soon as
-it changes, and takes effect at once, except for the two Mouse options
-noted below and the keepalive interval and SSH agent address, which
-apply to connections made after the change.
+it changes. Most options apply at once. The file editor's window option
+applies when the editor window next opens. The two Mouse options noted
+below, the keepalive interval and the SSH agent address apply to new
+connections.
 
 The terminal appearance pages are described under
 [Appearance](#appearance-font-color-scheme-background-image), and the
@@ -2071,6 +2075,9 @@ file icon theme page under [File icon themes](#file-icon-themes).
   menu, Cmd+Q on macOS) asks once first, with the system's message box.
   With the tray option also on, the close button hides the window without
   asking, and only "Quit" asks.
+- Keep the file editor in front of the main window (on by default). Turn
+  it off to minimize the editor separately and switch between windows.
+  Applies the next time the editor window opens.
 - Connections: "Send a keepalive every N seconds", 30 by default, 0 to
   turn keepalives off, up to 3600. See
   [Sessions and tabs](#sessions-and-tabs). Saved as `keepAliveSeconds`.

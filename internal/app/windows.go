@@ -32,14 +32,17 @@ type WindowSpec struct {
 	// least size.
 	Width, Height       int
 	MinWidth, MinHeight int
-	// Parent is the window this one belongs to: it stays above it and
-	// closes with it. "" is the main window, as is a kind that is not
-	// open.
+	// Parent is the window this one belongs to: an owned window stays
+	// above it and closes with it. "" is the main window, as is a kind
+	// that is not open.
 	Parent WindowKind
 	// Modal blocks the parent until this window closes. On macOS the
 	// window is then a sheet of its parent, which has no title bar: the
 	// view shows Title as a heading instead.
 	Modal bool
+	// Independent opens this as a minimizable window with no native owner.
+	// The parent still supplies its initial position.
+	Independent bool
 	// OwnKeys leaves Escape and Cmd+W to the view, which closes the
 	// window itself, as the file editor closes a tab with Cmd+W.
 	OwnKeys bool

@@ -130,6 +130,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `noAutoSelectTab` | `true` 时新会话在后台打开。 | 选中新会话。 |
 | `minimizeToTray` | `true` 时关闭主窗口会把它隐藏到托盘。 | 关闭就退出。 |
 | `noConfirmClose` | `true` 时有会话打开也不问，直接关闭、退出。 | 先问。 |
+| `independentFileEditor` | `true` 时下次打开的文件编辑器是独立窗口，可以单独最小化，也可以切到主窗口后方。仅保存在本机。 | 文件编辑器保持在主窗口前方。 |
 | `keepAliveSeconds` | 每个连接发送 SSH 保活消息的间隔秒数，1 到 3600（更大按 3600）；`-1`（任何负数）关闭保活，选项里显示为 0。对新建的连接生效。 | 30（`0` 也是） |
 | `sshAgent` | `"auth": "agent"` 的主机用的 SSH Agent：Unix socket 的路径（`~` 表示主目录），比如 `~/.bitwarden-ssh-agent.sock`，Windows 上也可以是命名管道 `\\.\pipe\<名字>`。这台电脑自己的，不同步。对新建的连接生效。 | `SSH_AUTH_SOCK`；Windows 上是 `\\.\pipe\openssh-ssh-agent`。 |
 | `downloadDir` | 下载存到的文件夹。 | 系统的下载文件夹。 |
@@ -200,7 +201,7 @@ Finallyshell 把主机和设置存在普通的 JSON 文件里。密码从不写�
 | `auto` | `true` 时自动同步。 | 关闭。 |
 | `interval` | 自动同步的间隔分钟数：5、15、30 或 60。 | 15 |
 
-`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
+`settings.json` 的每个键要么同步，要么留在各自的电脑上，两个列表是 `internal/config/sync.go` 里的 `syncedSettings` 和 `localSettings`。留在本机的有：`sidebarWidth`、`monitorPercent`、`terminalPercent`、`treeWidth`、`procListPercent`、`procFieldsPercent`、`netListPercent`、`monitorHidden`、`bottomPanelHidden`、`bottomPanelSide`、`rightPanelWidth`、`monitorSide`、`rightMonitorPercent`、`commandEditorShown`、`commandEditorWidth`、`commandEditorPercent`、`commandEditorNoEnter`、`commandEditorClear`、`independentFileEditor`、`termBackground`、`localShell`、`sshAgent`、`downloadDir`、`askDownloadDir`、`sync`、`geoLocations`、`geoLocationsV6`、`geoOnline`、`leftPanelPage` 和 `connectionTreeExpanded`（左侧面板显示哪一页、展开了哪些文件夹，是这台电脑上窗口留下的样子，和窗格大小一样），以及从 VSIX 安装或在编辑器扩展里找到的 `fileIconTheme`。
 
 另有两个文件属于同步，和 `hosts.json` 放在一起：
 

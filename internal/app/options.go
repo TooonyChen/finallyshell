@@ -163,6 +163,11 @@ func (a *App) generalPage(c *ui.Context) {
 			a.changeSettings(func() { a.settings.NoConfirmClose = !confirm })
 		}
 		widgets.Muted(c, locales.OptionConfirmCloseNote()).FontSize(12).PaddingStart(18)
+		keepEditorInFront := !a.settings.IndependentFileEditor
+		if ui.Checkbox(c, &keepEditorInFront, locales.OptionKeepFileEditorInFront()).Changed() {
+			a.changeSettings(func() { a.settings.IndependentFileEditor = !keepEditorInFront })
+		}
+		widgets.Muted(c, locales.OptionKeepFileEditorInFrontNote()).FontSize(12).PaddingStart(18)
 	})
 
 	ui.Column(c).Gap(8).Padding(8, 0, 0, 0).Children(func() {

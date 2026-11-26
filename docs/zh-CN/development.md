@@ -253,7 +253,7 @@ internal/
 
 ## 子窗口
 
-和 FinalShell 一样，设置这类对话框是独立的窗口（MyGo 的子窗口，`WindowOptions.Parent`），不是主窗口里的浮层。目前有选项窗口、连接管理器、连接编辑器、“导入连接”窗口和文件编辑器，都是主窗口的子窗口，例外是从连接管理器打开的连接编辑器和导入窗口：它们是连接管理器的模态子窗口，和 FinalShell 一样。这样做的结果：
+和 FinalShell 一样，设置这类对话框使用单独的窗口。选项窗口、连接管理器、连接编辑器、“导入连接”窗口和文件编辑器默认由主窗口拥有。从连接管理器打开的连接编辑器和导入窗口是连接管理器的模态子窗口。常规选项关闭后，文件编辑器也可以作为独立窗口打开。
 
 - macOS 上编辑器是连接管理器的 sheet，盖在连接管理器上，不挡主窗口。sheet 没有标题栏，所以模态窗口在 macOS 上把标题（“编辑连接”或“新建连接”）显示在窗口顶部（`windows.go` 的 `sheets`）。连接管理器默认 900×640，比编辑器大，sheet 放得下。
 - Windows 上只禁用连接管理器，主窗口照常可用。
@@ -262,8 +262,8 @@ internal/
 
 子窗口是这样工作的：
 
-- 每种窗口（`WindowKind`）同时只开一个：`a.openWindow(spec, view)` 在已经打开时只把它提到前面。`WindowSpec` 写标题（locales 里的函数，切换语言时重新取）、内容区大小、最小尺寸、父窗口（默认主窗口）和是否模态。
-- 窗口里按 Esc（macOS 上还有 Cmd+W）或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口；关闭主窗口会关闭所有子窗口。`WindowSpec.OwnKeys` 把 Esc 和 Cmd+W 留给窗口自己（文件编辑器用 Cmd+W 关闭标签）。`CloseRequested` 在用户点关闭按钮时先问窗口，返回 false 就不关（编辑器有没保存的修改时先问），程序自己关窗口不问。`Closed` 在窗口关掉后调用。标题变了（编辑器换了标签）调用 `Platform.RetitleWindow`。
+- 每种窗口（`WindowKind`）同时只开一个。`a.openWindow(spec, view)` 在已经打开时把它提到前面。`WindowSpec` 写标题（locales 里的函数，切换语言时重新取）、内容区大小、最小尺寸、父窗口（默认主窗口）和是否模态。`Independent` 窗口只用父窗口确定初始位置。
+- 窗口里按 Esc（macOS 上还有 Cmd+W）或调用 `a.closeWindow(kind)` 关闭。关闭父窗口会一起关闭它的子窗口，关闭主窗口还会通过 `App.CloseAll` 关闭独立的文件编辑器。`WindowSpec.OwnKeys` 把 Esc 和 Cmd+W 留给窗口自己（文件编辑器用 Cmd+W 关闭标签）。`CloseRequested` 在用户点关闭按钮时先问窗口，返回 false 就不关（编辑器有没保存的修改时先问），程序自己关窗口不问。`Closed` 在窗口关掉后调用。标题变了（编辑器换了标签）调用 `Platform.RetitleWindow`。
 - 所有窗口共用一个 `App`，都在 UI 线程上。一个窗口只会在自己的输入之后重绘。改了别的窗口也显示的状态（保存的主机、设置）之后调用 `a.redraw()`，重绘所有窗口。`App.post` 投递的工作做完也会重绘所有窗口。
 - 测试里 `fakePlatform` 记下打开的窗口，`p.show(t, kind)` 用一个单独的 `ui.Tester` 画出它的内容。
 
