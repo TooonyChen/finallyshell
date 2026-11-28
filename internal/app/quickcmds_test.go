@@ -83,7 +83,7 @@ func TestQuickCommandsSend(t *testing.T) {
 	a, p, s, conn, tt := barTerm(t)
 	demoQuick(a, false)
 	quickTab(t, tt)
-	if !tt.HasText("Disk") || !tt.HasText("Common") || !tt.HasText(locales.QuickLines(3)) || !tt.HasText("df -h") {
+	if !tt.HasText("Disk") || !tt.HasText("Common") || !tt.HasText("docker ps -a") || tt.HasText("df -h") {
 		t.Fatalf("tab: %q", tt.Texts())
 	}
 	saveShot(t, tt, "quick-commands-en.png")
@@ -136,7 +136,7 @@ func TestQuickCommandsSend(t *testing.T) {
 	}
 	p.SetLocale("zh-Hans")
 	tt.Frame()
-	if !tt.HasText("命令") || !tt.HasText(locales.QuickLines(3)) {
+	if !tt.HasText("命令") || !tt.HasText("搜索命令") {
 		t.Errorf("Chinese: %q", tt.Texts())
 	}
 	p.SetLocale("en")
@@ -179,6 +179,95 @@ func TestQuickCommandsDisabled(t *testing.T) {
 	}
 	saveShot(t, tt, "quick-commands-disabled-en.png")
 	_ = p
+}
+
+func TestQuickCommandsSingleLineInRightPanel(t *testing.T) {
+	for _, tc := range []struct{ lang, name string }{
+		{"en", "ProductionApplicationLogArchiveForAllBackendServicesAndScheduledWorkers"},
+		{"zh-Hans", "生产环境所有后端服务和定时任务的日志归档与清理（每晚执行）"},
+	} {
+		t.Run(tc.lang, func(t *testing.T) {
+			a, p, s, _, tt := barTerm(t)
+			p.SetLocale(tc.lang)
+			tt.SetLocale(tc.lang)
+			s.status = statusClosed
+			a.setPanelOnRight(true)
+			store := a.quick()
+			const namedScript = "du -sh /var/log\nls -lh /var/log"
+			const firstLine = "journalctl --unit=backend.service --unit=worker.service --since=yesterday"
+			const unnamedScript = "\n" + firstLine + "\nprintf 'done'"
+			store.AddCommand(&config.QuickCommand{Name: "Logs", Text: namedScript}, "")
+			store.AddCommand(&config.QuickCommand{Name: tc.name, Text: namedScript}, "")
+			store.AddCommand(&config.QuickCommand{Text: unnamedScript}, "")
+			a.bottomTab = tabCommands
+			tt.Frame()
+			short, ok := tt.AccessByRole(ui.RoleButton, "Logs")
+			if !ok || tt.HasText("du -sh /var/log") || tt.HasText("printf 'done'") {
+				t.Fatalf("commands should show only their button labels: %q", tt.Texts())
+			}
+			saveShot(t, tt, "quick-commands-single-line-"+tc.lang+".png")
+			for _, cmd := range []struct{ label, tip string }{
+				{tc.name, tc.name + "\n" + namedScript},
+				{firstLine, unnamedScript},
+			} {
+				button, ok := tt.AccessByRole(ui.RoleButton, cmd.label)
+				b := button.Bounds
+				if !ok || !button.Disabled || b.H != short.Bounds.H || b.X+b.W > winW {
+					t.Fatalf("%q should fit on one line in the right panel: %+v", cmd.label, button)
+				}
+				tt.Move(b.X+b.W/2, b.Y+b.H/2)
+				tt.Advance(time.Second)
+				if !tt.HasText(cmd.tip) {
+					t.Errorf("tooltip for %q should show the full command: %q", cmd.label, tt.Texts())
+				}
+			}
+		})
+	}
+}
+
+func TestQuickCommandsOversizedTooltip(t *testing.T) {
+	a, p, _, _, tt := barTerm(t)
+	for _, lang := range []string{"en", "zh-Hans"} {
+		t.Run(lang, func(t *testing.T) {
+			p.SetLocale(lang)
+			tt.SetLocale(lang)
+			a.setPanelOnRight(true)
+			a.bottomTab = tabCommands
+			a.quickUI.store = config.NewQuickCommands()
+			const name = "Full script"
+			script := strings.Repeat("printf 'preview line'\n", 80) + "printf 'script ending'"
+			a.quick().AddCommand(&config.QuickCommand{Name: name, Text: script}, "")
+			tt.SetSize(winW, 500)
+			tt.Move(0, 0)
+			tt.Frame()
+			button, ok := tt.AccessByRole(ui.RoleButton, name)
+			if !ok {
+				t.Fatalf("missing command: %q", tt.Texts())
+			}
+			b := button.Bounds
+			tt.Move(b.X+b.W/2, b.Y+b.H/2)
+			tt.Advance(time.Second)
+			hint := "Right-click and choose Edit… to see the full command."
+			if lang == "zh-Hans" {
+				hint = "右键单击并选择“编辑…”，查看完整命令。"
+			}
+			r, ok := tt.Find(hint)
+			if !ok || r.Y < 0 || r.Y+r.H > 500 {
+				t.Fatalf("full-command hint at %+v (%v) in the tooltip", r, ok)
+			}
+			saveShot(t, tt, "quick-commands-oversized-tooltip-"+lang+".png")
+			if err := tt.RightClick(name); err != nil {
+				t.Fatal(err)
+			}
+			if err := tt.ChooseMenuItem(locales.QuickEdit()); err != nil {
+				t.Fatal(err)
+			}
+			if ed := a.quickUI.ed; ed == nil || ed.text != script {
+				t.Fatal("the editor should show the complete script")
+			}
+			a.closeWindow(WindowQuickCommand)
+		})
+	}
 }
 
 // New command opens the editor, which adds the command to the group

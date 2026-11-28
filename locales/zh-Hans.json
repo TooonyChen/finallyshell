@@ -866,7 +866,7 @@
   "quickGroupName": "分组名称",
   "quickSearch": "搜索命令",
   "quickSearchShort": "搜索",
-  "quickLines": "{count, plural, other {# 行}}",
+  "quickTooltipMore": "右键单击并选择“编辑…”，查看完整命令。",
   "quickSend": "发送",
   "quickPutInBar": "放进命令输入框",
   "quickEdit": "编辑…",

@@ -130,7 +130,7 @@ func TestReadmeScreenshots(t *testing.T) {
 				tt.Frame()
 				setCmdText(a, tt, cmdDemo[lang])
 				selectLines(a, tt, 2, 3)
-				if !tt.HasText(locales.QuickNewCommand()) || !tt.HasText("df -h") || !tt.HasText(locales.CmdEditorSendSelection()) {
+				if !tt.HasText(locales.QuickNewCommand()) || !tt.HasText("docker ps -a") || !tt.HasText(locales.CmdEditorSendSelection()) {
 					t.Errorf("no quick commands; texts %q", tt.Texts())
 				}
 				saveShot(t, tt, "readme-quick-commands-"+lang+".png")
