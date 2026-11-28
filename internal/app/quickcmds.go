@@ -465,14 +465,16 @@ func (a *App) quickButtons(c *ui.Context, store *config.QuickCommands, s *Sessio
 	}
 }
 
-// quickButton is cmd's button: its name and, in gray, its one line, or
-// how many lines it has. A click sends it; it drags, and takes a command
-// dropped on it; its context menu has the rest.
+// quickButton shows the command's name or first nonblank line. A click
+// sends it; it drags, and takes a command dropped on it.
 func (a *App) quickButton(c *ui.Context, store *config.QuickCommands, s *Session, live bool, cmd *config.QuickCommand, act *func()) {
-	lines := config.QuickCommandLines(cmd.Text)
 	title := cmd.Title()
-	btn := ui.Button(c.Key(cmd.ID), "").Label(title).Tooltip(cmd.Text).AccessDisabled(!live).
-		MaxWidth(420).MinWidth(0).Border(1, theme.Border).Drag(quickDrag{cmd.ID})
+	tip := cmd.Text
+	if strings.TrimSpace(cmd.Name) != "" {
+		tip = title + "\n" + tip
+	}
+	btn := ui.Button(c.Key(cmd.ID), "").Label(title).Description(cmd.Text).AccessDisabled(!live).
+		MaxWidth(420).MaxWidthPercent(100).MinWidth(0).Padding(4, 8).Border(1, theme.Border).Drag(quickDrag{cmd.ID})
 	switch {
 	case btn.Dragging():
 		btn.Opacity(0.4)
@@ -483,16 +485,9 @@ func (a *App) quickButton(c *ui.Context, store *config.QuickCommands, s *Session
 		btn.Border(1, theme.Accent)
 	}
 	btn.Children(func() {
-		ui.Text(c, title).SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
-		switch {
-		case len(lines) > 1:
-			ui.Text(c, locales.QuickLines(len(lines))).FontSize(11).TextColor(theme.TextMuted).
-				Padding(0, 4).Border(1, theme.Border).Radius(3).SingleLine().Shrink(0)
-		case len(lines) == 1 && strings.TrimSpace(cmd.Name) != "":
-			ui.Text(c, strings.TrimSpace(lines[0])).Font("monospace").FontSize(12).TextColor(theme.TextMuted).
-				SingleLine().Ellipsis("…").MinWidth(0).Shrink(1)
-		}
+		ui.Text(c, title).SingleLine().MinWidth(0).Shrink(1)
 	})
+	quickCommandTooltip(c, btn, tip)
 	btn.ContextMenu(func(m *ui.Menu) {
 		if m.Item(locales.QuickSend()).Disabled(!live).Chosen() {
 			*act = func() { a.sendQuick(c, s, cmd) }
@@ -548,4 +543,40 @@ func (a *App) quickButton(c *ui.Context, store *config.QuickCommands, s *Session
 	if btn.Clicked() && live {
 		*act = func() { a.sendQuick(c, s, cmd) }
 	}
+}
+
+// quickCommandTooltip leaves room for the command editor hint when the
+// command would extend past the window.
+func quickCommandTooltip(c *ui.Context, button ui.Element, text string) {
+	if text == "" {
+		return
+	}
+	ui.TooltipBase(c, button, func(tip ui.Element) {
+		t := c.Theme()
+		const edge = 4
+		padX, padY, gap := t.Space(2), t.Space(1.25), t.Space(1.5)
+		width, height := c.Size()
+		maxWidth := min(t.Space(120), width-2*edge)
+		font := ui.Font{Family: t.Font, Size: t.FontSize - 1, LineHeight: 1.5}
+		lineHeight := font.Size * font.LineHeight
+		box := button.Bounds()
+		room := max(box.Y, height-box.Y-box.H) - edge - gap - 2*padY
+		maxLines := max(1, int(room/lineHeight))
+		_, textHeight := ui.ShapeText(text, font, maxWidth-2*padX).Size()
+		more := textHeight > float32(maxLines)*lineHeight
+		if more {
+			maxLines = max(1, maxLines-1)
+		}
+
+		tip.MaxWidth(maxWidth).Padding(padY, padX).Radius(t.Space(1.25)).
+			Background(t.Text).TextColor(t.Background).FontSize(font.Size).
+			Shadow(0, 2, 8, 0, ui.RGBA(0, 0, 0, 0.2)).
+			AttachTo(button, ui.AnchorTop, ui.AnchorBottom).AttachEdgeMargin(edge).Margin(0, 0, gap, 0).
+			Children(func() {
+				ui.Text(c, text).FixedLineHeight(lineHeight).MaxLines(maxLines)
+				if more {
+					ui.Text(c, locales.QuickTooltipMore()).FixedLineHeight(lineHeight).SingleLine()
+				}
+			})
+	})
 }

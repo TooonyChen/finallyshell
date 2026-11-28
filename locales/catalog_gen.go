@@ -8784,14 +8784,14 @@ func (msgs Messages) QuickSearchShort() string {
 	return Catalog.Format(msgs.locale, "quickSearchShort", nil)
 }
 
-// QuickLines says "{count, plural, one {# line} other {# lines}}"
+// QuickTooltipMore says "Right-click and choose Edit… to see the full command."
 // in the language the app shows.
-func QuickLines(count int) string { return In(i18n.Locale()).QuickLines(count) }
+func QuickTooltipMore() string { return In(i18n.Locale()).QuickTooltipMore() }
 
-// QuickLines says "{count, plural, one {# line} other {# lines}}"
+// QuickTooltipMore says "Right-click and choose Edit… to see the full command."
 // in the language of msgs.
-func (msgs Messages) QuickLines(count int) string {
-	return Catalog.Format(msgs.locale, "quickLines", map[string]any{"count": count})
+func (msgs Messages) QuickTooltipMore() string {
+	return Catalog.Format(msgs.locale, "quickTooltipMore", nil)
 }
 
 // QuickSend says "Send"

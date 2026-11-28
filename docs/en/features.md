@@ -1919,10 +1919,12 @@ and kept in `quickcommands.json` (see
   Esc gives it up). A group's context menu renames it or deletes it,
   after asking; its commands are kept, in no group, under "All".
 - The commands of the group chosen are buttons on the right, in rows
-  that wrap. A button shows the command's name and, in gray, the command
-  when it is one line, or how many lines it has; its tooltip is the
-  whole command. The search box above them filters by name and by
-  command, ignoring case.
+  that wrap. Each button displays the name on one line, or the first
+  nonblank command line if the name is empty. Long labels end in an
+  ellipsis. Hover over a button to see the command and its name, if it
+  has one. If the tooltip is too short to show the whole command, right-click
+  the button and choose Edit… to see it. The search box above filters by
+  name and by command, ignoring case.
 - A click sends the command to the session, through the same path as
   the command bar's Enter: in the session's encoding, the file panel
   following the shell's folder as it does after Enter, and each line that
@@ -1964,9 +1966,8 @@ and kept in `quickcommands.json` (see
   into that group.
 - "New command" opens the editor in a window of its own: the name, the
   group (the one shown, for a new command), the command, which can have
-  several lines, and "Press Enter after each line" (on by default). An
-  empty name shows the command's first line instead. Save keeps it; Esc
-  or Cancel gives up the changes.
+  several lines, and "Press Enter after each line" (on by default).
+  Save keeps it; Esc or Cancel gives up the changes.
 - The Commands tab can open in a tab of its own (see
   [above](#bottom-panel-in-a-tab-of-its-own)), for a board of commands
   as high as the window; its buttons send to its session.

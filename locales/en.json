@@ -1426,14 +1426,7 @@
   "quickGroupName": "Group name",
   "quickSearch": "Search commands",
   "quickSearchShort": "Search",
-  "quickLines": "{count, plural, one {# line} other {# lines}}",
-  "@quickLines": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "quickTooltipMore": "Right-click and choose Edit… to see the full command.",
   "quickSend": "Send",
   "quickPutInBar": "Put in the command bar",
   "quickEdit": "Edit…",
